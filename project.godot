@@ -28,7 +28,6 @@ Notice="*res://scripts/traits/notice.gd"
 Sheet="*res://scripts/traits/sheet.gd"
 Run="*res://scripts/traits/run_manager.gd"
 Water="*res://scripts/water.gd"
-Ripples="*res://addons/sim_water/scripts/ripple_field.gd"
 CombatDirector="*res://scripts/combat_director.gd"
 
 [editor_plugins]
@@ -196,12 +195,4 @@ interior_half={
 interior_active={
 "type": "float",
 "value": 0.0
-}
-water_swe_tex={
-"type": "sampler2D",
-"value": ""
-}
-water_swe_rect={
-"type": "vec4",
-"value": Vector4(0, 0, 64, 0)
 }
