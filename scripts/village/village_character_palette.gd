@@ -71,7 +71,7 @@ func _skin(who: Node, palette: Dictionary, hero: bool) -> void:
 	if hero:                     # the hero's own key light travels with the hero, and only the hero
 		var beam := SpotLight3D.new()
 		beam.name = "VillageBeam"
-		beam.set_script(load("res://scripts/dev/test_pixelart/village_beam.gd"))
+		beam.set_script(load("res://scripts/village/village_beam.gd"))
 		who.get_node("Visuals").add_child(beam)
 	who.set_meta("hearth_warden_applied",true)
 
@@ -80,3 +80,4 @@ func _color(label: String, palette: Dictionary) -> Color:
 	for key in palette:
 		if key != "" and key in label: return palette[key]
 	return palette[""]
+
