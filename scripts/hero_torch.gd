@@ -52,7 +52,7 @@ func _ready() -> void:
 	# is not parented under a DungeonRoom — true by accident of scene layout, and it would gutter
 	# the player's own torch to 6% the moment somebody reparented the player into the room they are
 	# standing in (which is a reasonable thing to want to do). Say it out loud instead.
-	set_meta(DungeonRoom.IGNORE_ROOM_DIM, true)
+	set_meta("ignore_room_dim", true)
 
 
 func _process(delta: float) -> void:
