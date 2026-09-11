@@ -1,8 +1,0 @@
-stagger — 0.95 s. A refined clip must KEEP this length: the damage timings
-and beats below do not stretch with the curves. First and last frame must sit
-on the carry stance (see ogre_carry_reference_baked.glb in this folder).
-Blender setup: Scene fps 60; set the timeline end to 57.
-
-  0.000  start (carry stance)
-  0.950  recover
-  0.950  end (back at carry stance)

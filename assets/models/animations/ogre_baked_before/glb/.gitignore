@@ -1,4 +1,0 @@
-# Derived Blender working files: big, and reproducible with one command
-#   --fixed-fps 60 ... -- --demo=bake --action=all --out=res://assets/models/animations/ogre_baked_before
-# The .beats.txt and README.txt guides stay tracked; the heavy .glb payloads do not.
-*.glb
