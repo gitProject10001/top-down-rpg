@@ -15,7 +15,6 @@ class_name ToonSkin
 ##   * the ink outline attached as next_pass
 ##   * putting characters on their own render layer (see CHARACTER_LAYER)
 ##   * the hit-flash, driven through the stock `albedo` tint — no custom uniform needed.
-##     enemy.gd routes its white/blue flashes through here when present.
 
 const TEMPLATE := preload("res://assets/materials/toon_character.tres")
 const OUTLINE := preload("res://shaders/toon_outline.gdshader")

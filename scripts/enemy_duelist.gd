@@ -5,12 +5,10 @@ extends Player
 ## attack and directional guard. The only difference between the two fighters is which
 ## FighterIntent child is filling in the decisions.
 ##
-## WHY NOT enemy.gd. That script is an excellent enemy and the wrong shape for this one. It chases
-## on a distance check, telegraphs on a tween, and its damage window is a Call Method track keyed
-## into a clip — none of which knows what a swing DIRECTION is, and all of which would have to
-## learn. Worse, it would be a second implementation of the mechanic, and the whole point of a
-## duel is that both sides are bound by one set of rules. Every other enemy in the project keeps
-## using enemy.gd; this one is the player, with a brain.
+## WHY NOT A SEPARATE ENEMY SCRIPT. A classic enemy chases on a distance check, telegraphs on a
+## tween, and keys its damage window into a clip — none of which knows what a swing DIRECTION is.
+## Worse, it would be a second implementation of the mechanic, and the whole point of a duel is
+## that both sides are bound by one set of rules. So this one is the player, with a brain.
 ##
 ## WHAT HAS TO CHANGE, and it is only four things, all of them identity rather than behaviour: the
 ## groups it answers to, the physics layers its hurtbox and hitbox use, and who it is looking for.

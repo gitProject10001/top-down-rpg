@@ -9,7 +9,6 @@
 [ext_resource type="Script" uid="uid://bh8e78ivuvs6l" path="res://scripts/states/hurt.gd" id="7_hurt"]
 [ext_resource type="Script" uid="uid://s7vc1e3sewvu" path="res://scripts/states/dead.gd" id="8_dead"]
 [ext_resource type="Script" path="res://scripts/states/jump.gd" id="30_jump"]
-[ext_resource type="Script" path="res://scripts/states/block.gd" id="31_block"]
 [ext_resource type="Script" path="res://scripts/states/guard.gd" id="32_guard"]
 [ext_resource type="Script" path="res://scripts/states/dir_attack.gd" id="33_diratk"]
 [ext_resource type="Script" uid="uid://qnas6r4specb" path="res://scripts/components/health.gd" id="9_health"]
@@ -206,9 +205,9 @@ script = ExtResource("30_jump")
 
 ; THE DIRECTIONAL GUARD, which replaces Block on this body rather than sitting beside it. It is a
 ; strict superset: a hit that carries a swing direction is answered only by a matching guard, and
-; a hit that carries none (a bolt, a mace, anything still running enemy.gd) falls through to
-; exactly the omni-guard behaviour Block had — including the robot fight's colour contract, where
-; orange bolts are parried back and purple ones ignore the guard entirely. Same "block" clip
+; a hit that carries none (a bolt, a thrown rock, anything that never picked a direction) falls
+; through to plain omni-guard behaviour — including the colour contract, where orange bolts are
+; parried back and purple ones ignore the guard entirely. Same "block" clip
 ; underneath; the four directions are rotated out of it by a skeleton modifier (guard_pose.gd).
 [node name="Guard" type="Node" parent="StateMachine"]
 script = ExtResource("32_guard")

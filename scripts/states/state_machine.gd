@@ -55,8 +55,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 ## Does this body have that state at all? Loadouts differ — the sword bodies (player3/4) carry no
-## bow so they have no Shoot, and in exchange a DashAttack the others don't; they DO carry Block
-## now (a shieldless sword-parry pose — see block.gd), added for the projectile colour contract.
+## bow so they have no Shoot, and in exchange a DashAttack the others don't.
 ## transition_to() silently no-ops on an unknown name, which is right for "offer it and let it
 ## fall through", but wrong when there is a FALLBACK to run instead (dash+attack must still
 ## plain-dash on a body with no lunge). Ask first in that case.

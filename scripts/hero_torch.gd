@@ -48,10 +48,10 @@ func _ready() -> void:
 	_base_pos = position
 	_noise.noise_type = FastNoiseLite.TYPE_PERLIN
 	_noise.frequency = 1.0
-	# EXEMPT FROM ROOM DIMMING. Today the torch escapes DungeonRoom.set_lit only because the player
-	# is not parented under a DungeonRoom — true by accident of scene layout, and it would gutter
-	# the player's own torch to 6% the moment somebody reparented the player into the room they are
-	# standing in (which is a reasonable thing to want to do). Say it out loud instead.
+	# EXEMPT FROM ROOM DIMMING. The village has no room-dimming pass today, but any future one must
+	# skip the carried torch: dimming it along with the room it stands in would gutter the player's
+	# own light the moment somebody reparented the player under that room. Say it out loud now,
+	# rather than relying on scene layout to keep them apart.
 	set_meta("ignore_room_dim", true)
 
 

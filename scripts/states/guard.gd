@@ -6,10 +6,9 @@ extends State
 ## from. Get it wrong and the blow lands in full: there is no partial credit, because a guard that
 ## half-works is a guard you do not have to aim.
 ##
-## WHY THIS IS NOT block.gd. That state is the omni-guard the shield bodies still use — any
-## frontal hit inside a 75-degree cone, no direction to it. Both survive, and which one a body has
-## is decided by which node its scene carries. player/player2/player4 keep Block; player3 and the
-## duelist built from it carry this. Nothing that already works had to change to make room.
+## WHY THIS REPLACED THE OMNI-GUARD. The older guard answered any frontal hit inside a 75-degree
+## cone with no direction to it. This one is a strict superset: a directionless hit still falls
+## through to that same behaviour, so nothing that already worked had to change to make room.
 ##
 ## HEAVY, ON PURPOSE. Guarding costs you the ground: move_scale drops you to a walk, and the body
 ## locks its facing onto whatever it has acquired instead of tracking the cursor. Between the two,

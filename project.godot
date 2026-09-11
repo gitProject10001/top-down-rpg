@@ -28,7 +28,6 @@ Notice="*res://scripts/traits/notice.gd"
 Sheet="*res://scripts/traits/sheet.gd"
 Run="*res://scripts/traits/run_manager.gd"
 Water="*res://scripts/water.gd"
-CombatDirector="*res://scripts/combat_director.gd"
 
 [editor_plugins]
 
@@ -122,12 +121,6 @@ pause={
 , Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"button_index":6,"pressure":0.0,"pressed":false,"script":null)
 ]
 }
-map={
-"deadzone": 0.5,
-"events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":77,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
-, Object(InputEventJoypadButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"button_index":4,"pressure":0.0,"pressed":false,"script":null)
-]
-}
 tool_use={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":81,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null)
@@ -174,25 +167,3 @@ anti_aliasing/quality/use_taa=true
 occlusion_culling/use_occlusion_culling=true
 lights_and_shadows/positional_shadow/atlas_size=8192
 
-[shader_globals]
-
-see_through_target={
-"type": "vec3",
-"value": Vector3(0, 0, 0)
-}
-see_through_radius={
-"type": "float",
-"value": 0.0
-}
-interior_center={
-"type": "vec3",
-"value": Vector3(0, 0, 0)
-}
-interior_half={
-"type": "vec3",
-"value": Vector3(0, 0, 0)
-}
-interior_active={
-"type": "float",
-"value": 0.0
-}

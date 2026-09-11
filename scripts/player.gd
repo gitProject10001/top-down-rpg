@@ -363,7 +363,7 @@ func _setup_weapon_sockets() -> void:
 	_calibrate_grips()                        # async: solves the grips once the pose settles
 
 
-## The retargeted clips live in player_anims.tres, assigned to the AnimationTree in the editor
+## The retargeted clips live in player3_anims.tres, assigned to the AnimationTree in the editor
 ## (extracted from the FBXs at import via "Save to File" — so the editor sees them too, not just
 ## the game). Here we only sanitize what import options can't express, then switch the tree on.
 ## The model's AnimationPlayer is found by SEARCH (the imported tree rebuilds on reimport, so a
@@ -562,8 +562,8 @@ func _process(delta: float) -> void:
 			# fighter used to snap back into a run pose the instant they shuffled.
 			pass
 		elif state_name == "Block" and shield == null:
-			# The SHIELDLESS guard (player3/4): Block plays the sword-parry pose on the Slash
-			# node (block.gd) and the branches below would stomp it within a frame — the exact
+			# The SHIELDLESS guard: Block plays the sword-parry pose on the Slash node and the
+			# branches below would stomp it within a frame — the exact
 			# fight documented above. Shield bodies fall through on purpose: they keep their
 			# locomotion while guarding, because their guard visual is the shield itself.
 			pass
@@ -1043,8 +1043,8 @@ func on_incoming_hit(damage: int, source: Node) -> int:
 	# mechanic — a guard that half-works is a guard you never have to aim.
 	#
 	# Everything WITHOUT a direction falls through to the omni-guard below: projectiles, the
-	# ogre's mace, area attacks, and every enemy still running enemy.gd. So no existing fight
-	# changes, and the strict rule applies exactly where both sides can play by it.
+	# thrown rock, any blow whose attacker never picked a direction. So a fight only tightens where
+	# both sides can play by the strict rule.
 	var incoming: int = int(source.get_meta("swing_dir", SwingDir.NONE)) if source else SwingDir.NONE
 	if st != null and st.has_method("blocks") and incoming != SwingDir.NONE:
 		if "--trace-combat" in OS.get_cmdline_user_args(): print("GUARD_CONTACT ",name," incoming=",incoming," guard=",st.guard_dir()," frontal=",_is_frontal_hit(source)," valid=",st.blocks(incoming)," stamina=",stamina)
