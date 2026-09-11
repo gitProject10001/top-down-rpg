@@ -147,7 +147,11 @@ Chi può colpire chi è deciso interamente dai layer fisici. Nessuna riga di cod
 
 ## Camera
 
-`scripts/village/iso_cam.gd` è l'unica camera. È ortografica e ricostruisce la propria trasformata da zero ogni frame da `pitch`, `yaw`, `distance` e un punto di fuoco smorzato sul giocatore. Non c'è rig, né orbita, né zoom, né ricentraggio: pitch e yaw sono export fissati nella scena a 48 gradi e `ortho_size` 17.5.
+`scripts/village/iso_cam.gd` è l'unica camera. È ortografica e ricostruisce la propria trasformata da zero ogni frame da `pitch`, `yaw`, `distance` e un punto di fuoco smorzato sul giocatore. Non c'è rig e non c'è zoom: il pitch è fisso a 48 gradi ed è la parte da cui dipende davvero la lettura assonometrica.
+
+La **rotazione libera** gira attorno alla verticale finché non c'è un bersaglio agganciato. `yaw_deg` è l'angolo da cui la camera parte, non uno a cui è inchiodata: `camera_left` e `camera_right` portano lo sguardo dove vogliono e ce lo lasciano. L'angolo si avvolge invece di finire contro un fermo, quindi il giro è un 360 vero. Tre cose che avrebbero potuto rompersi non si rompono: il movimento è già ricalcolato ogni frame sulla resa di questa camera (`player_intent.gd:20-23`), lo snap ai pixel arrotonda lungo gli assi della camera e non del mondo, e il campo è geometria vera e non cartoncini rivolti da una parte sola.
+
+La rotazione è rifiutata in tre casi: mentre un bersaglio è agganciato, mentre una conversazione è aperta, e mentre il giocatore è in `DirAttack` o in `Guard`. L'ultimo è il motivo meno ovvio: levetta destra e mouse scelgono la direzione del colpo in spazio **schermo**, quindi girare la vista a metà di una parata o di una carica sposterebbe il bersaglio che il giocatore sta già mirando.
 
 Il **lock-on** appartiene alla camera, non al giocatore. Polla `lock_on` e `lock_cycle` in `_physics_process` invece di gestire l'input, perché sta dentro il `SubViewport`. Il giocatore legge poi il bersaglio dalla camera in `Player.combat_lock_target` (`scripts/player.gd:765`).
 
@@ -191,6 +195,7 @@ Il quadrante di guardia è quattro `ColorRect` attorno a un vuoto: oro per la di
 | `aim_up/down/left/right` | — | levetta dx | `player_intent.gd:40` |
 | `lock_on` | tasto centrale | L3 | `iso_cam.gd:80` |
 | `lock_cycle` | tasto laterale | R3 | `iso_cam.gd:83` |
+| `camera_left` / `camera_right` | frecce sinistra e destra | levetta dx | `iso_cam.gd` |
 | `toggle_light` | L | — | `hero_torch.gd:38`, `village_beam.gd:19` |
 | `pause` | Esc | Select | `sheet.gd:403` |
 | `shoot` | Q | RT | `idle.gd:31`, `move.gd:35` — porta a uno stato inesistente |

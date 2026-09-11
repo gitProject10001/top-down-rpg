@@ -27,6 +27,7 @@ Vertical slice minimale del villaggio giocabile, portata da `rpg-3d`. Questo rep
 | `Shift` | dash |
 | `Spazio` | salto |
 | `L` | torcia |
+| frecce sinistra e destra, levetta destra | ruota la camera, 360 gradi, quando non sei agganciato |
 | tasto centrale del mouse | lock-on |
 | `F3` / `F8` | volumi di debug |
 

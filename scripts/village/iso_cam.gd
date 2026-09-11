@@ -52,6 +52,21 @@ extends Camera3D
 ## Lead the camera toward where the target is heading. Small, or the frame swims.
 @export_range(0.0, 4.0, 0.05) var look_ahead := 0.0
 
+@export_group("Free look")
+## TURN THE WORLD WHEN NOBODY HAS YOUR ATTENTION. yaw_deg is the angle the camera STARTS at, not
+## one it is pinned to: with nothing locked, camera_left/camera_right walk the yaw around and it
+## stays wherever it is left. There is no limit and no recentre, so the turn is a real 360 — the
+## angle wraps rather than running into a stop.
+##
+## WHY IT IS SAFE TO SPIN A FIXED-ANGLE LOOK. The three things that could have broken do not:
+## movement is already re-based every frame off this camera's own yaw (player_intent.gd:20-23), the
+## pixel snap rounds along the camera's axes rather than the world's, and the camp is real geometry
+## rather than cards facing one direction. Only the pitch is fixed, and that is the part the
+## axonometric read actually depends on.
+@export var free_rotate := true
+## Degrees per second at full deflection.
+@export_range(15.0, 360.0, 5.0) var rotate_speed_deg := 110.0
+
 @export_group("Pixels")
 @export var pixel_snap := true
 ## Set from the scene driver when it knows the real render height; falls back to the viewport's.
@@ -68,9 +83,27 @@ var _lock_marker: Label3D
 @export_range(.7,1.0,.01) var lock_zoom_ratio := .86
 var _view_yaw := 0.0
 var _lock_mix := 0.0
+## Where free look has left the camera. Seeded from yaw_deg, then owned by the player — and kept in
+## step with _view_yaw while a lock is on, so dropping the lock does not whip the world back to the
+## angle it started the session at.
+var _free_yaw := 0.0
 
 func locked() -> Node3D:
 	return _lock_target if is_instance_valid(_lock_target) else null
+
+
+## THE ONE CASE WHERE TURNING THE CAMERA IS WRONG. Both the right stick and the mouse pick a swing
+## direction in SCREEN space, so rotating the view mid-guard or mid-wind-up moves the target the
+## player is already aiming at. The lock path refuses to rotate under a released strike for exactly
+## this reason; free look refuses for the whole of both directional states.
+func _rotation_allowed() -> bool:
+	if not free_rotate or locked() != null or Dialogue.active:
+		return false
+	if _target != null and _target.has_method("state_name"):
+		var state: String = _target.state_name()
+		if state == "DirAttack" or state == "Guard":
+			return false
+	return true
 
 func _physics_process(_delta: float) -> void:
 	# Poll the action here: this camera lives inside the pixel SubViewport,
@@ -116,6 +149,7 @@ func _select_lock(cycle := false) -> void:
 func _ready() -> void:
 	projection = PROJECTION_ORTHOGONAL
 	_view_yaw = deg_to_rad(yaw_deg)
+	_free_yaw = _view_yaw
 	size = ortho_size
 	# Orthographic near/far are a slab, not a cone: everything between them is drawn at full size,
 	# so the slab has to be deep enough to hold the whole camp from this distance.
@@ -134,7 +168,15 @@ func _apply(instant: bool, delta := 0.0) -> void:
 	var opponent := locked()
 	var in_combat := opponent != null and is_instance_valid(_target)
 	_lock_mix = move_toward(_lock_mix,1.0 if in_combat else 0.0,delta*2.0)
-	var yaw_goal := deg_to_rad(yaw_deg)
+
+	# Free look, polled rather than handled: this camera lives inside the pixel SubViewport, where
+	# an unhandled event can be eaten before it arrives. Wrapped, so the turn never hits a stop.
+	if _rotation_allowed() and delta > 0.0:
+		var turn := Input.get_axis("camera_left","camera_right")
+		if absf(turn) > 0.0:
+			_free_yaw = wrapf(_free_yaw+turn*deg_to_rad(rotate_speed_deg)*delta,-PI,PI)
+
+	var yaw_goal := _free_yaw
 	if in_combat:
 		var bearing := opponent.global_position-_target.global_position
 		if Vector2(bearing.x,bearing.z).length() > .4:
@@ -147,9 +189,19 @@ func _apply(instant: bool, delta := 0.0) -> void:
 			yaw_goal = _view_yaw
 	if instant:
 		_view_yaw = yaw_goal
-	else:
+	elif in_combat:
 		var error := wrapf(yaw_goal-_view_yaw,-PI,PI)
 		_view_yaw = wrapf(_view_yaw+clampf(error*(1.0-exp(-5.0*delta)),-deg_to_rad(lock_turn_speed_deg)*delta,deg_to_rad(lock_turn_speed_deg)*delta),-PI,PI)
+	else:
+		# Free look needs no smoothing of its own — the axis is already the rate — and running it
+		# through the lock's easing would put a lag between the stick and the world, then cap the
+		# turn at lock_turn_speed_deg, which is the speed for swinging a camera around a duel and
+		# not for looking about.
+		_view_yaw = yaw_goal
+	# Hand the lock's angle back to free look, so letting go of a target leaves the camera where the
+	# fight left it instead of snapping to wherever the session started.
+	if in_combat:
+		_free_yaw = _view_yaw
 
 	var basis_want := Basis.from_euler(
 			Vector3(deg_to_rad(-pitch_deg), _view_yaw, 0.0))

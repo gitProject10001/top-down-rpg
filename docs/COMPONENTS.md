@@ -89,7 +89,7 @@ Undici, nell'ordine di `project.godot:18-30`. L'ordine è una dipendenza reale: 
 | file | ruolo | agganciato da |
 |---|---|---|
 | `scripts/village/terrain.gd` | Una sola manopola per quanto è grande il mondo: ridimensiona insieme il quad del terreno e il suo collisore. | Nodo `Pixel/View/Ground`. Vedi [TERRAIN.md](TERRAIN.md). |
-| `scripts/village/iso_cam.gd` (209 righe) | L'unica camera: ortografica, ricostruisce la trasformata ogni frame, possiede il lock-on. | Nodo `IsoCam`, gruppo `camera_rig`. |
+| `scripts/village/iso_cam.gd` | L'unica camera: ortografica, ricostruisce la trasformata ogni frame, possiede il lock-on e la rotazione libera a 360 gradi. | Nodo `IsoCam`, gruppo `camera_rig`. |
 | `scripts/village/pixel_snap.gd` | Quantizza i due combattenti sullo stesso reticolo della camera. Scrive `global_position` fuori dalla fisica. | Nodo `PixelSnap`, `process_priority = 100`. |
 | `scripts/village/village_character_palette.gd` | All'avvio trapianta la mesh del warden su entrambi i corpi e ricolora ogni superficie. | Nodo fratello di Player e Duelist; `apply` differita. |
 | `scripts/village/village_beam.gd` | Il faro dell'eroe: si configura interamente in `_ready`. Vero proprietario del tasto `L`. | **Non esiste in nessuna scena**: creato da `village_character_palette.gd:72-75`. |
