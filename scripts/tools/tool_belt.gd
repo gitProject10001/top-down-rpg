@@ -3,6 +3,12 @@ extends Node3D
 
 signal changed
 
+func active_tool() -> Node:
+	return null
+
+func carried() -> Array:
+	return []
+
 func use() -> void:
 	changed.emit()
 
