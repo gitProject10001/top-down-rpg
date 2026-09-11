@@ -6,6 +6,7 @@ Vertical slice minimale del villaggio giocabile, portata da `rpg-3d`. Questo rep
 
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — come gira il gioco, meccanica per meccanica, con i file in cui ogni cosa succede.
 - [docs/COMPONENTS.md](docs/COMPONENTS.md) — ogni file di codice, cosa fa e come entra nel gioco.
+- [docs/TERRAIN.md](docs/TERRAIN.md) — il materiale del terreno, come si estende senza ripetersi e come si aggiungono strade ed erba.
 
 ## Stato attuale
 

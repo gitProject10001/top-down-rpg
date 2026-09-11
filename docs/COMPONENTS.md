@@ -88,6 +88,7 @@ Undici, nell'ordine di `project.godot:18-30`. L'ordine è una dipendenza reale: 
 
 | file | ruolo | agganciato da |
 |---|---|---|
+| `scripts/village/terrain.gd` | Una sola manopola per quanto è grande il mondo: ridimensiona insieme il quad del terreno e il suo collisore. | Nodo `Pixel/View/Ground`. Vedi [TERRAIN.md](TERRAIN.md). |
 | `scripts/village/iso_cam.gd` (209 righe) | L'unica camera: ortografica, ricostruisce la trasformata ogni frame, possiede il lock-on. | Nodo `IsoCam`, gruppo `camera_rig`. |
 | `scripts/village/pixel_snap.gd` | Quantizza i due combattenti sullo stesso reticolo della camera. Scrive `global_position` fuori dalla fisica. | Nodo `PixelSnap`, `process_priority = 100`. |
 | `scripts/village/village_character_palette.gd` | All'avvio trapianta la mesh del warden su entrambi i corpi e ricolora ogni superficie. | Nodo fratello di Player e Duelist; `apply` differita. |
@@ -134,7 +135,7 @@ Nessuna di queste ha un nodo su `player3.tscn`. `player.gd` le dichiara come tip
 | `shaders/pixelart/painted_foliage.gdshader` | Ciuffi di foglie da un mip forzato, così leggono come masse dipinte. | 10 |
 | `shaders/pixelart/pixel_surface.gdshader` (366 righe) | Lo shader d'ambiente generale: triplanare o UV, parallasse, displacement, AO, de-tiling, bagnato. | 2 |
 | `shaders/pixelart/painted_canopy.gdshader` | Chiome ad albero su griglia dura 256x256, ricolorabili. | 2 |
-| `shaders/pixelart/ground_clear.gdshader` | Una sola immagine dipinta stesa sul piano 44x44, in un riferimento ruotato di 45 gradi. | 1 |
+| `shaders/pixelart/ground_clear.gdshader` | Il terreno: la pittura del villaggio stampata al centro, e fuori un atlante dipinto steso all'infinito con tiling stocastico a varianza conservata, più strade e prati da una mappa di controllo. | 1 |
 | `shaders/pixelart/painted_npc.gdshader` | Figure di folla colorate per altezza: stivali, stoffa, maglia, elmo. | 1 |
 | `shaders/pixelart/hearth_flame.gdshader` | Fiamma procedurale su un quad. L'unica geometria animata del villaggio. | 1 |
 | `shaders/pixelart/ivy_leaf_geometry.gdshader` | Edera vera in un verde oliva fisso, variata dal colore dei vertici. Nessun uniform. | 1 |
@@ -156,6 +157,9 @@ Nessuna di queste ha un nodo su `player3.tscn`. `player.gd` le dichiara come tip
 | `assets/models/camp/hearth_warden.glb` | Il corpo vestito che entrambi indossano in gioco. Caricato per stringa, mai da una scena. |
 | `assets/models/camp/hearth_baked/*.res` | Nove mesh del campo troppo grandi o troppo riusate per stare inline nella scena. `geometry_021.res` porta con sé due PNG che nessuna ricerca testuale trova. |
 | `assets/models/char_a_Image_0.png`, `_1.png` | Le due texture di cui sopra. Cancellarle rompe il caricamento della scena. |
+
+| `assets/textures/hearth_painted/terrain_layers.png` | L'atlante dipinto del terreno: tre colonne, erba, terra e pietrisco. Ogni colonna è alta tre volte la sua larghezza. |
+| `assets/textures/hearth_painted/terrain_roads.svg` | La mappa di controllo di strade ed erba: R terra battuta, G pietrisco, B erba rigogliosa. Dato lineare, mai albedo. Importata senza perdita. |
 
 ## Terze parti
 

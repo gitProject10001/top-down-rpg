@@ -1,7 +1,12 @@
 # Godot generated data
 .godot/
-*.import
 *.uid
+
+# .import files are NOT generated data, whatever the name suggests: they hold the per-asset import
+# SETTINGS, and losing them silently re-imports every asset on defaults. That is not theoretical
+# here — the terrain control map has to import lossless, because VRAM compression bleeds its three
+# channels into each other, and both character GLBs import through a humanoid BoneMap without which
+# neither rig is retargeted. Godot's own template does not ignore them either.
 
 # Local/editor settings
 .idea/

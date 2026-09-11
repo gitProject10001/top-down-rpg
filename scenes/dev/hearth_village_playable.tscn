@@ -3,6 +3,8 @@
 [ext_resource type="Shader" path="res://shaders/pixelart/ground_clear.gdshader" id="1_rarxl"]
 [ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/ground_painting.png" id="2_51y26"]
 [ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/terrain_roads.svg" id="62_terrain_roads"]
+[ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/terrain_layers.png" id="63_terrain_layers"]
+[ext_resource type="Script" path="res://scripts/village/terrain.gd" id="64_terrain"]
 [ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/architecture_clear_v2.png" id="4_2nuwu"]
 [ext_resource type="Shader" path="res://shaders/pixelart/painted_architecture.gdshader" id="4_mb2wt"]
 [ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/building_brushwork.png" id="5_vokbf"]
@@ -76,6 +78,7 @@ subdivide_depth = 0
 render_priority = 0
 shader = ExtResource("1_rarxl")
 shader_parameter/painting = ExtResource("2_51y26")
+shader_parameter/layers = ExtResource("63_terrain_layers")
 shader_parameter/road_mask = ExtResource("62_terrain_roads")
 shader_parameter/use_road_mask = false
 
@@ -2448,6 +2451,9 @@ omni_attenuation = 1.6
 [node name="Ground" type="MeshInstance3D" parent="Pixel/View" unique_id=260662482]
 mesh = SubResource("ground_mesh")
 surface_material_override/0 = SubResource("ShaderMaterial_iqd5e")
+script = ExtResource("64_terrain")
+extent = 100.0
+floor_thickness = 1.0
 
 [node name="Collision" type="StaticBody3D" parent="Pixel/View/Ground" unique_id=2070794440]
 

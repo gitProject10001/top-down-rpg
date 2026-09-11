@@ -1,9 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 100 100">
-  <!-- Control map, not albedo. R: dirt road, G: gravel. One unit = one metre
-       with road_mask_size=(100,100); top-left corresponds to world (-50,-50).
-       Disabled by default: enable use_road_mask on the Ground material to preview. -->
+  <!-- CONTROL MAP, NOT ALBEDO. Three independent channels, read by ground_clear.gdshader:
+         R = dirt road      G = gravel      B = lush grass
+       Nothing here is a colour you will see. Black leaves the ground alone; each channel fades
+       its own surface in over 0.05..0.95, and the shader ravels the edges with noise so a drawn
+       curve does not read as a drawn curve.
+
+       One unit is one metre while road_mask_size is (100,100), and the top-left corner is world
+       (-50,-50), so (50,50) is the origin the village stands on. Widen the mask and the same
+       drawing covers more ground: the mask's extent and the road texture's scale are separate.
+
+       SOFT EDGES ARE DRAWN, NOT FILTERED: each path is stroked three times, widest and dimmest
+       first, so the channel ramps down toward the verge instead of ending on a hard line.
+
+       Disabled by default — switch on use_road_mask on the Ground material to preview. -->
   <rect width="100" height="100" fill="black"/>
-  <path d="M 50,70 C 50,78 66,82 64,100" fill="none" stroke="#400000" stroke-width="4.4"/>
-  <path d="M 50,70 C 50,78 66,82 64,100" fill="none" stroke="#900000" stroke-width="3.6"/>
-  <path d="M 50,70 C 50,78 66,82 64,100" fill="none" stroke="#ff0000" stroke-width="2.8"/>
+
+  <!-- The cart road south out of the village. -->
+  <g fill="none">
+    <path d="M 50,70 C 50,78 66,82 64,100" stroke="#400000" stroke-width="4.4"/>
+    <path d="M 50,70 C 50,78 66,82 64,100" stroke="#900000" stroke-width="3.6"/>
+    <path d="M 50,70 C 50,78 66,82 64,100" stroke="#ff0000" stroke-width="2.8"/>
+  </g>
+
+  <!-- A gravel spur off it, toward the east edge. -->
+  <g fill="none">
+    <path d="M 57,79 C 68,77 78,72 92,74" stroke="#004000" stroke-width="3.4"/>
+    <path d="M 57,79 C 68,77 78,72 92,74" stroke="#009000" stroke-width="2.6"/>
+    <path d="M 57,79 C 68,77 78,72 92,74" stroke="#00ff00" stroke-width="1.9"/>
+  </g>
+
+  <!-- Wet meadow in the north-west hollow: greener grass, no road surface at all. -->
+  <g>
+    <ellipse cx="30" cy="30" rx="19" ry="13" fill="#000040"/>
+    <ellipse cx="30" cy="30" rx="15" ry="10" fill="#000090"/>
+    <ellipse cx="30" cy="30" rx="11" ry="7" fill="#0000ff"/>
+  </g>
 </svg>
