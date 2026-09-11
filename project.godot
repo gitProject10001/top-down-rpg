@@ -166,4 +166,3 @@ lightmapping/bake_performance/region_size=256
 anti_aliasing/quality/use_taa=true
 occlusion_culling/use_occlusion_culling=true
 lights_and_shadows/positional_shadow/atlas_size=8192
-
