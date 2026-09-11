@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 100 100">
+  <!-- Control map, not albedo. R: dirt road, G: gravel. One unit = one metre
+       with road_mask_size=(100,100); top-left corresponds to world (-50,-50).
+       Disabled by default: enable use_road_mask on the Ground material to preview. -->
+  <rect width="100" height="100" fill="black"/>
+  <path d="M 50,70 C 50,78 66,82 64,100" fill="none" stroke="#400000" stroke-width="4.4"/>
+  <path d="M 50,70 C 50,78 66,82 64,100" fill="none" stroke="#900000" stroke-width="3.6"/>
+  <path d="M 50,70 C 50,78 66,82 64,100" fill="none" stroke="#ff0000" stroke-width="2.8"/>
+</svg>

@@ -2,6 +2,7 @@
 
 [ext_resource type="Shader" path="res://shaders/pixelart/ground_clear.gdshader" id="1_rarxl"]
 [ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/ground_painting.png" id="2_51y26"]
+[ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/terrain_roads.svg" id="62_terrain_roads"]
 [ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/architecture_clear_v2.png" id="4_2nuwu"]
 [ext_resource type="Shader" path="res://shaders/pixelart/painted_architecture.gdshader" id="4_mb2wt"]
 [ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/building_brushwork.png" id="5_vokbf"]
@@ -67,17 +68,19 @@ sdfgi_use_occlusion = true
 sdfgi_energy = 0.8
 
 [sub_resource type="PlaneMesh" id="ground_mesh"]
-size = Vector2(44, 44)
-subdivide_width = 383
-subdivide_depth = 383
+size = Vector2(100, 100)
+subdivide_width = 0
+subdivide_depth = 0
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_iqd5e"]
 render_priority = 0
 shader = ExtResource("1_rarxl")
 shader_parameter/painting = ExtResource("2_51y26")
+shader_parameter/road_mask = ExtResource("62_terrain_roads")
+shader_parameter/use_road_mask = false
 
 [sub_resource type="BoxShape3D" id="ground_shape"]
-size = Vector3(44, 1, 44)
+size = Vector3(100, 1, 100)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_c6v1q"]
 render_priority = 0
