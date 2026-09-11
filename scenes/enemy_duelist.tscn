@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=3]
+
+; THE MIRROR ENEMY, and it is an INHERITED SCENE for the reason the whole feature exists: a duel is
+; only a duel if both fighters are bound by one set of rules. Inheriting player3.tscn means the
+; same rig, the same sword, the same nine states, the same measured attack envelope and the same
+; directional Guard/DirAttack — there is no second implementation of the mechanic to drift.
+;
+; Everything that makes it an enemy rather than a player is four lines in enemy_duelist.gd
+; (groups, two physics layers, and which group it swings at), and the swap below of the intent
+; child. See scripts/combat/fighter_intent.gd for why that swap is all it takes.
+
+[ext_resource type="PackedScene" path="res://scenes/player/player3.tscn" id="1_body"]
+[ext_resource type="Script" path="res://scripts/enemy_duelist.gd" id="2_duelist"]
+[ext_resource type="Script" path="res://scripts/combat/duel_brain.gd" id="3_brain"]
+
+[node name="EnemyDuelist" instance=ExtResource("1_body")]
+script = ExtResource("2_duelist")
+
+; THE ONLY REAL DIFFERENCE BETWEEN THE TWO FIGHTERS. Player._setup_intent takes the FighterIntent
+; child a scene brought and only builds a PlayerIntent when there is none — so putting this here
+; is what decides that a brain, rather than a person, fills in the decisions.
+[node name="DuelBrain" type="Node" parent="."]
+script = ExtResource("3_brain")

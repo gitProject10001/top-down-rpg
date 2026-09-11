@@ -1,0 +1,30 @@
+[gd_resource type="BoneMap" load_steps=2 format=3]
+
+[sub_resource type="SkeletonProfileHumanoid" id="prof"]
+
+[resource]
+profile = SubResource("prof")
+bone_map/Hips = &"Hips"
+bone_map/Spine = &"Spine"
+bone_map/Chest = &"Spine1"
+bone_map/UpperChest = &"Spine3"
+bone_map/Neck = &"Neck"
+bone_map/Head = &"Head"
+bone_map/LeftShoulder = &"LeftShoulder"
+bone_map/LeftUpperArm = &"LeftArm"
+bone_map/LeftLowerArm = &"LeftForeArm"
+bone_map/LeftHand = &"LeftHand"
+bone_map/LeftThumbMetacarpal = &"LeftHandThumb1"
+bone_map/RightShoulder = &"RightShoulder"
+bone_map/RightUpperArm = &"RightArm"
+bone_map/RightLowerArm = &"RightForeArm"
+bone_map/RightHand = &"RightHand"
+bone_map/RightThumbMetacarpal = &"RightHandThumb1"
+bone_map/LeftUpperLeg = &"LeftUpLeg"
+bone_map/LeftLowerLeg = &"LeftLeg"
+bone_map/LeftFoot = &"LeftFoot"
+bone_map/LeftToes = &"LeftToeBase"
+bone_map/RightUpperLeg = &"RightUpLeg"
+bone_map/RightLowerLeg = &"RightLeg"
+bone_map/RightFoot = &"RightFoot"
+bone_map/RightToes = &"RightToeBase"

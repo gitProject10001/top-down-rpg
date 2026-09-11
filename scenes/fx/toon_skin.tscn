@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=3]
+
+; Reusable cel-shader applier — instance under any character (player, enemies). Self-configuring:
+; swaps each mesh surface to a toon material + ink outline, and owns the hit-flash. See
+; scripts/toon_skin.gd.
+
+[ext_resource type="Script" path="res://scripts/toon_skin.gd" id="1_toon"]
+
+[node name="ToonSkin" type="Node"]
+script = ExtResource("1_toon")

@@ -1,0 +1,26 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://cdhgruae2wdar"]
+
+[ext_resource type="Texture2D" uid="uid://lcxya8rqt7ml" path="res://assets/textures/whinbek/rubble_color.png" id="1_col"]
+[ext_resource type="Texture2D" uid="uid://bcpw48lc1fnwt" path="res://assets/textures/whinbek/rubble_normal.png" id="2_nrm"]
+[ext_resource type="Texture2D" uid="uid://1ksd3qs1svkj" path="res://assets/textures/whinbek/rubble_rough.png" id="3_rgh"]
+[ext_resource type="Texture2D" uid="uid://l2n20bk7g84r" path="res://assets/textures/whinbek/rubble_height.png" id="4_hgt"]
+[ext_resource type="Texture2D" uid="uid://cc0bouk3mi66i" path="res://assets/textures/whinbek/rubble_ao.png" id="5_ao"]
+
+[resource]
+resource_name = "WhinbekRubble"
+albedo_texture = ExtResource("1_col")
+roughness_texture = ExtResource("3_rgh")
+roughness_texture_channel = 4
+normal_enabled = true
+normal_texture = ExtResource("2_nrm")
+ao_enabled = true
+ao_light_affect = 0.35
+ao_texture = ExtResource("5_ao")
+heightmap_enabled = true
+heightmap_scale = 13.467
+heightmap_deep_parallax = true
+heightmap_min_layers = 27
+heightmap_max_layers = 64
+heightmap_texture = ExtResource("4_hgt")
+uv1_triplanar_sharpness = 0.25881553
+texture_filter = 5

@@ -1,0 +1,55 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://wlc1xhhicjhf"]
+
+[ext_resource type="Shader" uid="uid://0lpw3i4b3jfw" path="res://shaders/pixelart/pixel_surface.gdshader" id="1_shader"]
+[ext_resource type="Texture2D" uid="uid://dd7i3tfim3xix" path="res://assets/textures/whinbek/slate_color.png" id="2_col"]
+[ext_resource type="Texture2D" uid="uid://b161mam461u1y" path="res://assets/textures/whinbek/slate_normal.png" id="3_nrm"]
+[ext_resource type="Texture2D" uid="uid://iw36hrvu5nte" path="res://assets/textures/whinbek/slate_height.png" id="4_hgt"]
+[ext_resource type="Texture2D" uid="uid://whomkvxdfb71" path="res://assets/textures/whinbek/slate_ao.png" id="5_ao"]
+[ext_resource type="Material" path="res://assets/materials/pixelart/outline_small.tres" id="90_outline"]
+
+[resource]
+next_pass = ExtResource("90_outline")
+render_priority = 0
+shader = ExtResource("1_shader")
+shader_parameter/albedo_color = Color(0.4, 0.4, 0.44, 1)
+shader_parameter/albedo_texture = ExtResource("2_col")
+shader_parameter/use_vertex_color = false
+shader_parameter/texture_desaturate = 0.0
+shader_parameter/alpha_cut = 0.0
+shader_parameter/uv1_scale = Vector2(1, 1)
+shader_parameter/uv1_offset = Vector2(0, 0)
+shader_parameter/triplanar = true
+shader_parameter/triplanar_scale = 6.0
+shader_parameter/triplanar_sharpness = 8.0
+shader_parameter/texel_metres = 0.0
+shader_parameter/texel_uv = 0.0
+shader_parameter/use_normal_map = true
+shader_parameter/normal_texture = ExtResource("3_nrm")
+shader_parameter/normal_strength = 0.8
+shader_parameter/height_texture = ExtResource("4_hgt")
+shader_parameter/use_parallax = false
+shader_parameter/parallax_depth = 0.03
+shader_parameter/parallax_steps = 20
+shader_parameter/displace = 0.0
+shader_parameter/displace_mid = 0.5
+shader_parameter/displace_tiling = 1.0
+shader_parameter/use_ao_map = true
+shader_parameter/ao_texture = ExtResource("5_ao")
+shader_parameter/ao_strength = 0.7
+shader_parameter/detile = 0.2
+shader_parameter/detile_scale = 0.4
+shader_parameter/wet_amount = 0.35
+shader_parameter/wet_level = 1.0
+shader_parameter/wet_softness = 0.5
+shader_parameter/wet_tint = Color(0.5, 0.52, 0.58, 1)
+shader_parameter/wet_darken = 0.15
+shader_parameter/wet_specular = 0.5
+shader_parameter/wrap = 0.28
+shader_parameter/bands = 4.0
+shader_parameter/band_softness = 0.05
+shader_parameter/shade_tint = Color(0.4, 0.42, 0.55, 1)
+shader_parameter/shade_strength = 0.42
+shader_parameter/shade_saturation = 1.2
+shader_parameter/shade_occlusion = 1.0
+shader_parameter/light_tint = Color(1, 0.95, 0.84, 1)
+shader_parameter/light_tint_amount = 0.5

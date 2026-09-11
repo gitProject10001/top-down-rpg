@@ -1,0 +1,176 @@
+[gd_resource type="AnimationLibrary" format=3]
+
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_a.res" id="1_kk2h4"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_a_rec.res" id="2_nmsfp"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_b.res" id="3_tyh1j"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_b_rec.res" id="4_cqqhf"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_c.res" id="5_sfobi"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_combo.res" id="6_oc3s6"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_cross.res" id="7_r63pq"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_dash.res" id="8_1vdge"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_heavy_combo.res" id="9_6o535"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_hook.res" id="10_gqdck"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_hook_rec.res" id="11_i2tx7"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_jab.res" id="12_o5w4q"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/atk_swing.res" id="13_a1i0v"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/block.res" id="14_7yhrw"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/chop.res" id="15_o7klq"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/climb_1m.res" id="16_yysir"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/crouch_fwd.res" id="17_3fljj"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/crouch_idle.res" id="18_xl7qj"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/death.res" id="19_yo2uf"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/drive.res" id="20_ex0n5"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/emote_dance.res" id="21_f7ju2"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/emote_no.res" id="22_7x6uf"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/emote_yes.res" id="23_hnopc"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/farm_harvest.res" id="24_4ju74"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/farm_plant.res" id="25_728p6"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/farm_water.res" id="26_6ad8o"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/getup.res" id="27_axjkf"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/hurt_chest.res" id="28_an31q"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/hurt_head.res" id="29_ogcpo"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/hurt_knockback.res" id="30_br8es"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/idle.res" id="31_bo5bf"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/idle_arms.res" id="32_yb4of"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/idle_lantern.res" id="33_1mk28"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/idle_phone.res" id="34_o5guv"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/idle_rail.res" id="35_e0c2h"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/idle_rail_call.res" id="36_8udti"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/idle_sword.res" id="37_e21yp"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/idle_talk.res" id="38_2d3ha"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/idle_torch.res" id="39_erri8"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/interact.res" id="40_r8gly"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/jog.res" id="41_1eb1o"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/jump_air.res" id="42_hy0um"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/jump_land.res" id="43_7v8me"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/jump_ninja_air.res" id="44_7et17"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/jump_ninja_land.res" id="45_or8as"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/jump_ninja_start.res" id="46_sfsyc"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/jump_start.res" id="47_lvxw2"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/pickup.res" id="48_pl7h0"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/pistol_aim_down.res" id="49_gil6w"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/pistol_aim_mid.res" id="50_ua0u7"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/pistol_aim_up.res" id="51_u36xt"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/pistol_idle.res" id="52_kinr6"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/pistol_reload.res" id="53_bw51r"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/pistol_shoot.res" id="54_f5n6y"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/push.res" id="55_ufpq1"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/repair_kneel.res" id="56_ka364"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/roll.res" id="57_eoiar"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/shield_break.res" id="58_3x0a7"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/shield_dash.res" id="59_ugm6c"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/shield_idle.res" id="60_pe1uv"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/shield_oneshot.res" id="61_xhiok"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/sit_enter.res" id="62_t2ffo"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/sit_exit.res" id="63_ryrmt"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/sit_idle.res" id="64_okgg1"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/sit_talk.res" id="65_p264u"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/slide.res" id="66_y21oh"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/slide_exit.res" id="67_lkjkq"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/slide_start.res" id="68_u8yaa"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/spell_cast.res" id="69_nari0"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/spell_enter.res" id="70_tf75b"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/spell_exit.res" id="71_5kyp7"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/spell_idle.res" id="72_nr1h3"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/sprint.res" id="73_snmni"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/swim_fwd.res" id="74_p0rnu"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/swim_idle.res" id="75_kb2u3"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/throw.res" id="76_35q0g"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/tpose.res" id="77_ru7r2"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/use_chest.res" id="78_oefnm"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/use_consume.res" id="79_culku"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/walk.res" id="80_prfbs"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/walk_carry.res" id="81_b7x7s"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/walk_formal.res" id="82_rgqe7"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/zombie_idle.res" id="83_ibt3f"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/zombie_scratch.res" id="84_fqrib"]
+[ext_resource type="Animation" path="res://assets/models/animations/quaternius/zombie_walk.res" id="85_vua21"]
+
+[resource]
+_data = {
+&"atk_a": ExtResource("1_kk2h4"),
+&"atk_a_rec": ExtResource("2_nmsfp"),
+&"atk_b": ExtResource("3_tyh1j"),
+&"atk_b_rec": ExtResource("4_cqqhf"),
+&"atk_c": ExtResource("5_sfobi"),
+&"atk_combo": ExtResource("6_oc3s6"),
+&"atk_cross": ExtResource("7_r63pq"),
+&"atk_dash": ExtResource("8_1vdge"),
+&"atk_heavy_combo": ExtResource("9_6o535"),
+&"atk_hook": ExtResource("10_gqdck"),
+&"atk_hook_rec": ExtResource("11_i2tx7"),
+&"atk_jab": ExtResource("12_o5w4q"),
+&"atk_swing": ExtResource("13_a1i0v"),
+&"block": ExtResource("14_7yhrw"),
+&"chop": ExtResource("15_o7klq"),
+&"climb_1m": ExtResource("16_yysir"),
+&"crouch_fwd": ExtResource("17_3fljj"),
+&"crouch_idle": ExtResource("18_xl7qj"),
+&"death": ExtResource("19_yo2uf"),
+&"drive": ExtResource("20_ex0n5"),
+&"emote_dance": ExtResource("21_f7ju2"),
+&"emote_no": ExtResource("22_7x6uf"),
+&"emote_yes": ExtResource("23_hnopc"),
+&"farm_harvest": ExtResource("24_4ju74"),
+&"farm_plant": ExtResource("25_728p6"),
+&"farm_water": ExtResource("26_6ad8o"),
+&"getup": ExtResource("27_axjkf"),
+&"hurt_chest": ExtResource("28_an31q"),
+&"hurt_head": ExtResource("29_ogcpo"),
+&"hurt_knockback": ExtResource("30_br8es"),
+&"idle": ExtResource("31_bo5bf"),
+&"idle_arms": ExtResource("32_yb4of"),
+&"idle_lantern": ExtResource("33_1mk28"),
+&"idle_phone": ExtResource("34_o5guv"),
+&"idle_rail": ExtResource("35_e0c2h"),
+&"idle_rail_call": ExtResource("36_8udti"),
+&"idle_sword": ExtResource("37_e21yp"),
+&"idle_talk": ExtResource("38_2d3ha"),
+&"idle_torch": ExtResource("39_erri8"),
+&"interact": ExtResource("40_r8gly"),
+&"jog": ExtResource("41_1eb1o"),
+&"jump_air": ExtResource("42_hy0um"),
+&"jump_land": ExtResource("43_7v8me"),
+&"jump_ninja_air": ExtResource("44_7et17"),
+&"jump_ninja_land": ExtResource("45_or8as"),
+&"jump_ninja_start": ExtResource("46_sfsyc"),
+&"jump_start": ExtResource("47_lvxw2"),
+&"pickup": ExtResource("48_pl7h0"),
+&"pistol_aim_down": ExtResource("49_gil6w"),
+&"pistol_aim_mid": ExtResource("50_ua0u7"),
+&"pistol_aim_up": ExtResource("51_u36xt"),
+&"pistol_idle": ExtResource("52_kinr6"),
+&"pistol_reload": ExtResource("53_bw51r"),
+&"pistol_shoot": ExtResource("54_f5n6y"),
+&"push": ExtResource("55_ufpq1"),
+&"repair_kneel": ExtResource("56_ka364"),
+&"roll": ExtResource("57_eoiar"),
+&"shield_break": ExtResource("58_3x0a7"),
+&"shield_dash": ExtResource("59_ugm6c"),
+&"shield_idle": ExtResource("60_pe1uv"),
+&"shield_oneshot": ExtResource("61_xhiok"),
+&"sit_enter": ExtResource("62_t2ffo"),
+&"sit_exit": ExtResource("63_ryrmt"),
+&"sit_idle": ExtResource("64_okgg1"),
+&"sit_talk": ExtResource("65_p264u"),
+&"slide": ExtResource("66_y21oh"),
+&"slide_exit": ExtResource("67_lkjkq"),
+&"slide_start": ExtResource("68_u8yaa"),
+&"spell_cast": ExtResource("69_nari0"),
+&"spell_enter": ExtResource("70_tf75b"),
+&"spell_exit": ExtResource("71_5kyp7"),
+&"spell_idle": ExtResource("72_nr1h3"),
+&"sprint": ExtResource("73_snmni"),
+&"swim_fwd": ExtResource("74_p0rnu"),
+&"swim_idle": ExtResource("75_kb2u3"),
+&"throw": ExtResource("76_35q0g"),
+&"tpose": ExtResource("77_ru7r2"),
+&"use_chest": ExtResource("78_oefnm"),
+&"use_consume": ExtResource("79_culku"),
+&"walk": ExtResource("80_prfbs"),
+&"walk_carry": ExtResource("81_b7x7s"),
+&"walk_formal": ExtResource("82_rgqe7"),
+&"zombie_idle": ExtResource("83_ibt3f"),
+&"zombie_scratch": ExtResource("84_fqrib"),
+&"zombie_walk": ExtResource("85_vua21")
+}

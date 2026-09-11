@@ -1,0 +1,30 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+; Grass and ivy: short, whippy, fast.
+;
+; Same shader as painted_env.tres. It exists separately ONLY because wind_height must match the
+; plant's actual height for wind_strength to stay in metres -- a grass tuft and a tree cannot
+; share one value, and MultiMesh gives no per-instance place to put it.
+
+[ext_resource type="Shader" path="res://shaders/painted_env.gdshader" id="1_painted"]
+
+[resource]
+shader = ExtResource("1_painted")
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/use_vertex_color = true
+shader_parameter/wrap = 0.55
+shader_parameter/bands = 0.0
+shader_parameter/band_softness = 0.35
+; Warm-violet shadow at a HIGH strength: the reference is a high-key image where almost nothing
+; sits below ~0.35 value. Colour the shadow, do not darken it.
+shader_parameter/shade_tint = Color(0.58, 0.46, 0.6, 1)
+shader_parameter/shade_strength = 0.62
+shader_parameter/shade_saturation = 1.3
+shader_parameter/shade_occlusion = 1.0
+shader_parameter/light_tint = Color(1, 0.94, 0.82, 1)
+shader_parameter/light_tint_amount = 0.35
+shader_parameter/wind_strength = 0.09
+shader_parameter/wind_height = 0.45
+shader_parameter/wind_speed = 2.1
+shader_parameter/wind_direction = Vector2(1, 0.35)
+shader_parameter/wind_wavelength = 0.11

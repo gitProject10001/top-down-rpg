@@ -1,0 +1,14 @@
+slam — 1.63 s. A refined clip must KEEP this length: the damage timings
+and beats below do not stretch with the curves. First and last frame must sit
+on the carry stance (see ogre_carry_reference_baked.glb in this folder).
+Blender setup: Scene fps 60; set the timeline end to 98.
+
+  0.000  start (carry stance)
+  0.000  slam_telegraph
+  0.417  telegraph
+  0.733  strike
+  0.733  slam_impact
+  0.733  hit_open
+  0.883  hit_close
+  0.950  recover
+  1.633  end (back at carry stance)

@@ -1,0 +1,24 @@
+[gd_resource type="StandardMaterial3D" load_steps=4 format=3]
+
+; Pixel-art variant of cyber_wall.tres: the same PolyHaven set downsampled to 96 px and sampled NEAREST (chunky texels that stay crisp under an orbiting camera), StandardMaterial3D's own TOON diffuse/specular steps, no normal map. Used only by scenes/dev/cyber/cyber_floor_pixel.tscn.
+[ext_resource type="Texture2D" path="res://assets/textures/cyber_pixel/metal_plate_Diffuse.png" id="1_diff"]
+[ext_resource type="Texture2D" path="res://assets/textures/cyber_pixel/metal_plate_nor_gl.png" id="2_nrm"]
+[ext_resource type="Texture2D" path="res://assets/textures/cyber_pixel/metal_plate_Displacement.png" id="3_disp"]
+
+[resource]
+resource_name = "CyberPixelWall"
+diffuse_mode = 2
+specular_mode = 2
+albedo_color = Color(0.55, 0.5, 0.75, 1)
+albedo_texture = ExtResource("1_diff")
+roughness = 0.9
+uv1_scale = Vector3(0.5, 0.5, 1)
+texture_filter = 0
+normal_enabled = true
+normal_texture = ExtResource("2_nrm")
+heightmap_enabled = true
+heightmap_scale = 3.0
+heightmap_deep_parallax = true
+heightmap_min_layers = 8
+heightmap_max_layers = 24
+heightmap_texture = ExtResource("3_disp")

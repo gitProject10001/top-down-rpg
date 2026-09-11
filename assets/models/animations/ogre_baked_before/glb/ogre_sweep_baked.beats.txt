@@ -1,0 +1,12 @@
+sweep — 1.32 s. A refined clip must KEEP this length: the damage timings
+and beats below do not stretch with the curves. First and last frame must sit
+on the carry stance (see ogre_carry_reference_baked.glb in this folder).
+Blender setup: Scene fps 60; set the timeline end to 79.
+
+  0.000  start (carry stance)
+  0.283  telegraph
+  0.533  strike
+  0.533  hit_open
+  0.683  hit_close
+  0.733  recover
+  1.317  end (back at carry stance)

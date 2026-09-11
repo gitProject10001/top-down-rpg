@@ -1,0 +1,20 @@
+# Godot generated data
+.godot/
+*.import
+*.uid
+
+# Local/editor settings
+.idea/
+.vscode/
+
+# Generated renders, captures and local test output
+renders/
+captures/
+logs/
+user://
+*.log
+
+# OS files
+Thumbs.db
+Desktop.ini
+

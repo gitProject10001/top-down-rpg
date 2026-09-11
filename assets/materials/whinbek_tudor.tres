@@ -1,0 +1,27 @@
+[gd_resource type="StandardMaterial3D" format=3 uid="uid://d0e067ipxoiog"]
+
+[ext_resource type="Texture2D" uid="uid://dxms8g8axyavy" path="res://assets/textures/whinbek/tudor_color.png" id="1_col"]
+[ext_resource type="Texture2D" uid="uid://d3u6xscjtsua7" path="res://assets/textures/whinbek/tudor_normal.png" id="2_nrm"]
+[ext_resource type="Texture2D" uid="uid://dhnl6ffj2q7bp" path="res://assets/textures/whinbek/tudor_rough.png" id="3_rgh"]
+[ext_resource type="Texture2D" uid="uid://ttoh35x0p713" path="res://assets/textures/whinbek/tudor_height.png" id="4_hgt"]
+[ext_resource type="Texture2D" uid="uid://cxoseecqsyi28" path="res://assets/textures/whinbek/tudor_ao.png" id="5_ao"]
+
+[resource]
+resource_name = "WhinbekTudor"
+albedo_texture = ExtResource("1_col")
+roughness_texture = ExtResource("3_rgh")
+roughness_texture_channel = 4
+emission_energy_multiplier = 2.82
+normal_enabled = true
+normal_texture = ExtResource("2_nrm")
+ao_enabled = true
+ao_light_affect = 0.35
+ao_texture = ExtResource("5_ao")
+heightmap_enabled = true
+heightmap_scale = 16.0
+heightmap_deep_parallax = true
+heightmap_min_layers = 49
+heightmap_max_layers = 64
+heightmap_texture = ExtResource("4_hgt")
+uv1_scale = Vector3(0.667, 0.667, 0.667)
+texture_filter = 5

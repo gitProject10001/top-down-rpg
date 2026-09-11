@@ -1,0 +1,48 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://scripts/projectile.gd" id="1_proj"]
+[ext_resource type="PackedScene" path="res://scenes/fx/hit_spark.tscn" id="2_spark"]
+[ext_resource type="Script" path="res://scripts/components/blade_trail.gd" id="3_trail"]
+
+[sub_resource type="SphereShape3D" id="shape_bolt"]
+radius = 0.18
+
+[sub_resource type="SphereMesh" id="mesh_bolt"]
+radius = 0.11
+height = 0.22
+radial_segments = 16
+rings = 8
+
+[sub_resource type="StandardMaterial3D" id="mat_bolt"]
+albedo_color = Color(1, 0.92, 0.75, 1)
+emission_enabled = true
+emission = Color(1, 0.6, 0.25, 1)
+emission_energy_multiplier = 1.2
+
+; An energy bolt for machines: the same Projectile contract as the arrow (Model + Shape + Trail),
+; but the model is a bare emissive orb — nothing about it says "fletching", so one scene reads
+; right fired flat (the NEAR-band fan) or lobbed (the aimed ballistic). projectile.gd's team tint
+; layers OVER this material exactly as it does over the arrow's, so the base colour here is only
+; what an untinted bolt would wear.
+[node name="Bolt" type="Area3D"]
+collision_layer = 0
+collision_mask = 2
+monitorable = false
+script = ExtResource("1_proj")
+speed = 12.0
+trail_width = 0.18
+impact_vfx = ExtResource("2_spark")
+
+[node name="Model" type="MeshInstance3D" parent="."]
+mesh = SubResource("mesh_bolt")
+surface_material_override/0 = SubResource("mat_bolt")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+shape = SubResource("shape_bolt")
+
+; Flight streak — child of the Area root (NOT of Model) so the stick-and-shrink tween on Model
+; cannot scale it away. Same reasoning as arrow.tscn, same fallback colour role.
+[node name="Trail" type="GPUParticles3D" parent="."]
+script = ExtResource("3_trail")
+seconds = 0.18
+head_alpha = 0.7

@@ -1,0 +1,9 @@
+roar — 1.38 s. A refined clip must KEEP this length: the damage timings
+and beats below do not stretch with the curves. First and last frame must sit
+on the carry stance (see ogre_carry_reference_baked.glb in this folder).
+Blender setup: Scene fps 60; set the timeline end to 83.
+
+  0.000  start (carry stance)
+  0.350  telegraph
+  1.383  recover
+  1.383  end (back at carry stance)

@@ -1,0 +1,44 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+; LEAF CARDS -- the bushes and the ivy. assets/models/veg_leaf_*.glb are quads with UVs and NO
+; material of their own, because they were always meant to be skinned by whatever scene uses them.
+;
+; WHY THESE AND NOT veg_bush.glb. The solid vertex-coloured bushes are one closed lump of geometry:
+; from a 55 degree camera they read as a green blob with a line round the outside, and the reference
+; plainly does not do that -- its scrub is drawn as separate leaves with gaps between them and sky
+; showing through. A card carrying an alpha-cut leaf mask gives that silhouette for free, and the
+; outline pass then traces every leaf cluster instead of one lump.
+;
+; SCISSOR, NOT BLEND, and it is structural rather than taste. The pixel-art resolve pass in
+; pixel_post.gdshader draws in the transparent pass; anything else transparent can sort in front of
+; it and land on the finished frame unpixelated and unpalettised. A scissored surface stays opaque
+; and stays upstream of the resolve. alpha_cut is high (0.5) for the same reason the edges elsewhere
+; are step() and not smoothstep(): a soft leaf edge at this resolution is a grey fringe.
+
+[ext_resource type="Shader" path="res://shaders/pixelart/pixel_surface.gdshader" id="1_shader"]
+[ext_resource type="Texture2D" path="res://assets/models/textures/leaf_cluster.png" id="2_leaf"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/albedo_color = Color(0.56, 0.62, 0.32, 1)
+shader_parameter/albedo_texture = ExtResource("2_leaf")
+shader_parameter/use_vertex_color = false
+shader_parameter/alpha_cut = 0.32
+shader_parameter/uv1_scale = Vector2(1, 1)
+shader_parameter/uv1_offset = Vector2(0, 0)
+shader_parameter/triplanar = false
+shader_parameter/use_normal_map = false
+shader_parameter/use_parallax = false
+shader_parameter/displace = 0.0
+shader_parameter/use_ao_map = false
+shader_parameter/detile = 0.0
+shader_parameter/wet_amount = 0.0
+shader_parameter/wrap = 0.66
+shader_parameter/bands = 3.0
+shader_parameter/band_softness = 0.09
+shader_parameter/shade_tint = Color(0.4, 0.5, 0.32, 1)
+shader_parameter/shade_strength = 0.5
+shader_parameter/shade_saturation = 1.4
+shader_parameter/shade_occlusion = 1.0
+shader_parameter/light_tint = Color(1, 0.96, 0.72, 1)
+shader_parameter/light_tint_amount = 0.45

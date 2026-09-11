@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Shader" path="res://shaders/painterly_grade.gdshader" id="1_shader"]
+
+[sub_resource type="ShaderMaterial" id="mat_grade"]
+shader = ExtResource("1_shader")
+; TURNED BACK ON, AT A THIRD OF THE AUTHORED SPLIT. Commit ab54533 disabled this pass because it
+; "fights the crisp cel read" -- but it was never tried turned DOWN: the scene overrode nothing, so
+; what got judged was the shader's raw defaults (split 0.14). At 0.08 the tone survives without
+; competing with the terminator, and the vignette goes UP, because a diorama is a framed object and
+; a frame is exactly what a vignette draws.
+;
+; shadow_tint is left alone on purpose: at hue ~0.63 it already agrees with painted_env.gdshader's
+; shade_tint, which is the condition docs/anime-look-todo.md sec A3 says the two passes must meet or
+; the grade spends its strength undoing the shading.
+shader_parameter/split_strength = 0.08
+shader_parameter/vignette_strength = 0.28
+
+[node name="PainterlyGrade" type="CanvasLayer"]
+layer = 10
+
+[node name="Rect" type="ColorRect" parent="."]
+material = SubResource("mat_grade")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2

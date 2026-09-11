@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3]
+
+; Reusable contact shadow — instance under any CharacterBody3D (player, enemies). Self-configuring:
+; the script builds its texture and raycasts to the floor. See scripts/blob_shadow.gd.
+
+[ext_resource type="Script" path="res://scripts/blob_shadow.gd" id="1_blob"]
+
+[node name="BlobShadow" type="Decal"]
+script = ExtResource("1_blob")

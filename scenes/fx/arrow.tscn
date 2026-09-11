@@ -1,0 +1,31 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scripts/projectile.gd" id="1_proj"]
+[ext_resource type="PackedScene" path="res://assets/models/arrow.glb" id="2_model"]
+[ext_resource type="PackedScene" path="res://scenes/fx/hit_spark.tscn" id="3_spark"]
+[ext_resource type="Script" path="res://scripts/components/blade_trail.gd" id="4_trail"]
+
+[sub_resource type="SphereShape3D" id="shape_arrow"]
+radius = 0.18
+
+[node name="Arrow" type="Area3D"]
+collision_layer = 0
+collision_mask = 4
+monitorable = false
+script = ExtResource("1_proj")
+impact_vfx = ExtResource("3_spark")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+transform = Transform3D(0.2, 0, 0, 0, 0, 0.2, 0, -0.2, 0, 0, 0, 0)
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+shape = SubResource("shape_arrow")
+
+; Flight streak. Child of the Area root (NOT of Model) so the stick-and-shrink tween on Model
+; cannot scale it away. projectile.gd lays it flat across local X, which look_at() keeps horizontal
+; and square to the flight — broadside to the fixed overhead camera. `color` here is only a
+; fallback; setup() retints it to the team colour of whoever fired it.
+[node name="Trail" type="GPUParticles3D" parent="."]
+script = ExtResource("4_trail")
+seconds = 0.18
+head_alpha = 0.7

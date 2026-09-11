@@ -1,0 +1,63 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://scripts/sword.gd" id="1_sword"]
+[ext_resource type="Script" path="res://scripts/components/hitbox.gd" id="2_hitbox"]
+[ext_resource type="PackedScene" path="res://scenes/fx/hit_spark.tscn" id="3_spark"]
+[ext_resource type="Script" path="res://scripts/components/blade_trail.gd" id="4_trail"]
+
+[sub_resource type="BoxMesh" id="blade"]
+size = Vector3(0.0547, 0.0547, 0.8594)
+[sub_resource type="BoxMesh" id="guard"]
+size = Vector3(0.2500, 0.0469, 0.0625)
+[sub_resource type="StandardMaterial3D" id="steel"]
+albedo_color = Color(0.6, 0.62, 0.66, 1)
+metallic = 0.7
+roughness = 0.3
+; Tall enough to reach the FLOOR. Player root is capsule-centred, so this spans from the feet to
+; head height. It once started 0.92 m up and swung straight over short enemies - swarmlings were
+; literally unhittable (measured 26 cm of clear air), so the floor-reaching part is load-bearing.
+;
+; Every number in this scene was divided by 1.28 along with the player, who had been scaled up to
+; 2.43 m by mistake. The RATIOS are what matter here, not the absolute sizes.
+[sub_resource type="BoxShape3D" id="hit"]
+size = Vector3(1.5625, 1.6406, 1.4062)
+
+[node name="Sword" type="Node3D"]
+script = ExtResource("1_sword")
+
+[node name="Blade" type="Node3D" parent="."]
+
+[node name="BladeMesh" type="MeshInstance3D" parent="Blade"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2734, 0.0781, -0.5859)
+mesh = SubResource("blade")
+surface_material_override/0 = SubResource("steel")
+
+[node name="Guard" type="MeshInstance3D" parent="Blade"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2734, 0.0781, -0.1719)
+mesh = SubResource("guard")
+surface_material_override/0 = SubResource("steel")
+
+; The swing streak. Child of Blade so it rides the hand socket with the visual blade.
+;
+; NO transform here on purpose: sword.gd MEASURES BladeMesh's AABB at _ready and spans the ribbon
+; across it, so a different blade mesh (longer sword, dagger) gets a correctly sized trail with no
+; numbers to update. Likewise none of the ADDON's own properties are stored here — that keeps its
+; setters from running before its _ready() has built draw_pass_1, and guarantees every instance
+; owns its material instead of sharing one. seconds/color below are BladeTrail's own, and safe.
+[node name="Trail" type="GPUParticles3D" parent="Blade"]
+script = ExtResource("4_trail")
+seconds = 0.24
+color = Color(0.7, 0.85, 1, 1)
+
+[node name="HitBox" type="Area3D" parent="."]
+script = ExtResource("2_hitbox")
+collision_layer = 0
+collision_mask = 4
+monitoring = false
+monitorable = false
+damage = 1
+hit_vfx = ExtResource("3_spark")
+
+[node name="Shape" type="CollisionShape3D" parent="HitBox"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1172, -0.7812)
+shape = SubResource("hit")

@@ -1,0 +1,13 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+; THE STANDARD LINE, for everything standing in the mud: barrels, crates, the well, tents, the
+; cart. Two thirds the weight of a building, which is enough to separate a prop from the ground
+; without competing with the buildings for attention.
+
+[ext_resource type="Shader" path="res://shaders/pixelart/pixel_outline.gdshader" id="1_shader"]
+
+[resource]
+shader = ExtResource("1_shader")
+shader_parameter/outline_width = 0.03
+shader_parameter/outline_color = Color(0.05, 0.042, 0.036, 1)
+shader_parameter/use_baked_normal = true

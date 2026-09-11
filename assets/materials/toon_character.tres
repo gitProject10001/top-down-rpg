@@ -1,0 +1,31 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+; THE tunable toon material — single source of truth for character shading.
+; The shader lab (scenes/dev/shader_lab.tscn) assigns this directly to its primitives, and
+; toon_skin.gd DUPLICATES it per character surface. Tuning it here in the Inspector changes both
+; the sandbox and the game, and persists to disk.
+;
+; The knobs that matter most:
+;   steps               how many flat light bands
+;   step_smoothness     0 = razor-hard terminator, higher = softer
+;   shadow_tint(_amount) the colour and depth of the shadow side
+;   specular / use_rim  both OFF: on cloth and skin they read as glass
+
+[ext_resource type="Shader" path="res://shaders/toon_lit.gdshader" id="1_toon"]
+
+[resource]
+shader = ExtResource("1_toon")
+shader_parameter/albedo_color = Color(1, 1, 1, 1)
+shader_parameter/albedo_affect = 1.0
+shader_parameter/use_stepped = true
+shader_parameter/steps = 3.0
+shader_parameter/step_smoothness = 0.08
+shader_parameter/shadow_tint = Color(0.24, 0.27, 0.38, 1)
+shader_parameter/shadow_tint_amount = 0.4
+shader_parameter/specular = 0.0
+shader_parameter/use_rim = false
+shader_parameter/rim_color = Color(1, 1, 1, 1)
+shader_parameter/rim_amount = 2.0
+shader_parameter/rim_smoothness = 0.2
+shader_parameter/rim_mask_shadow = 1.0
+shader_parameter/rim_blend = 1.0

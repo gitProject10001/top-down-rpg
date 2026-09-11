@@ -1,0 +1,12 @@
+charge — 2.45 s. A refined clip must KEEP this length: the damage timings
+and beats below do not stretch with the curves. First and last frame must sit
+on the carry stance (see ogre_carry_reference_baked.glb in this folder).
+Blender setup: Scene fps 60; set the timeline end to 147.
+
+  0.000  start (carry stance)
+  0.517  telegraph
+  0.517  hit_open
+  1.133  hit_close
+  1.317  strike
+  1.633  recover
+  2.450  end (back at carry stance)

@@ -1,0 +1,54 @@
+[gd_resource type="ShaderMaterial" load_steps=4 format=3]
+
+; TRUNKS -- the CampBark slot. Drawn plates rather than a photograph, on pixel_drawn like the rest
+; of the architecture, with a block that is TALL AND NARROW (0.14 wide, 0.55 high). That aspect is
+; the whole difference between bark and brickwork: run the courses the other way and an oak looks
+; like a chimney.
+;
+; row_jitter is at maximum and width_jitter high, because bark has no coursing at all -- the plates
+; should never line up into anything a viewer can read as a row.
+
+[ext_resource type="Shader" path="res://shaders/pixelart/pixel_drawn.gdshader" id="1_shader"]
+[ext_resource type="Texture2D" path="res://assets/textures/whinbek/boards_color.png" id="2_col"]
+[ext_resource type="Material" path="res://assets/materials/pixelart/outline_prop.tres" id="90_outline"]
+
+[resource]
+next_pass = ExtResource("90_outline")
+shader = ExtResource("1_shader")
+shader_parameter/pattern = 0
+shader_parameter/block_size = Vector2(0.14, 0.55)
+shader_parameter/row_offset = 0.37
+shader_parameter/row_jitter = 0.9
+shader_parameter/grid_warp = 0.04
+shader_parameter/grid_warp_metres = 1.2
+shader_parameter/width_jitter = 0.55
+shader_parameter/ragged = 0.6
+shader_parameter/dark_block_chance = 0.18
+shader_parameter/dark_block_amount = 0.32
+shader_parameter/mortar = 0.018
+shader_parameter/mortar_color = Color(0.1, 0.08, 0.06, 1)
+shader_parameter/mortar_strength = 0.8
+shader_parameter/bevel = 0.022
+shader_parameter/bevel_light = 0.26
+shader_parameter/bevel_dark = 0.24
+shader_parameter/albedo_color = Color(0.42, 0.34, 0.27, 1)
+shader_parameter/albedo_texture = ExtResource("2_col")
+shader_parameter/grain = 0.4
+shader_parameter/grain_metres = 0.5
+shader_parameter/tone_jitter = 0.14
+shader_parameter/use_normal_map = false
+shader_parameter/use_ao_map = false
+shader_parameter/grime_amount = 0.3
+shader_parameter/grime_height = 0.8
+shader_parameter/grime_color = Color(0.2, 0.17, 0.13, 1)
+shader_parameter/weather_amount = 0.25
+shader_parameter/weather_metres = 1.1
+shader_parameter/wrap = 0.36
+shader_parameter/bands = 3.0
+shader_parameter/band_softness = 0.06
+shader_parameter/shade_tint = Color(0.5, 0.42, 0.4, 1)
+shader_parameter/shade_strength = 0.48
+shader_parameter/shade_saturation = 1.25
+shader_parameter/shade_occlusion = 1.0
+shader_parameter/light_tint = Color(1, 0.93, 0.78, 1)
+shader_parameter/light_tint_amount = 0.4

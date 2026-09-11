@@ -1,0 +1,62 @@
+[gd_resource type="AnimationLibrary" format=3]
+
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/ardy_kick.res" id="1_xd343"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/backstep.res" id="2_muork"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/charge.res" id="3_m1r8a"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/flinch.res" id="4_1463n"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_atk01.res" id="5_iram5"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_atk02.res" id="6_onpp6"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_atk03.res" id="7_mmto5"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_die.res" id="8_d5bxj"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_dmg_b.res" id="9_vfwdp"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_dmg_f.res" id="10_gvu13"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_down.res" id="11_semqb"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_down_loop.res" id="12_82x2q"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_firing.res" id="13_5hits"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_getup.res" id="14_740hl"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_idle.res" id="15_8kbt8"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_pose01.res" id="16_od5su"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_pose02.res" id="17_suysk"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_run.res" id="18_6rbfb"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_skill01.res" id="19_chrw5"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/hunter_walk.res" id="20_5hs3f"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/kick.res" id="21_ge46g"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/pound.res" id="22_j8eot"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/roar.res" id="23_lwc6o"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/rock_lift.res" id="24_kfu74"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/rock_throw.res" id="25_l3ev7"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/slam.res" id="26_35rqm"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/stagger.res" id="27_uqatp"]
+[ext_resource type="Animation" path="res://assets/models/animations/ogre_clips/sweep.res" id="28_eq31t"]
+
+[resource]
+_data = {
+&"ardy_kick": ExtResource("1_xd343"),
+&"backstep": ExtResource("2_muork"),
+&"charge": ExtResource("3_m1r8a"),
+&"flinch": ExtResource("4_1463n"),
+&"hunter_atk01": ExtResource("5_iram5"),
+&"hunter_atk02": ExtResource("6_onpp6"),
+&"hunter_atk03": ExtResource("7_mmto5"),
+&"hunter_die": ExtResource("8_d5bxj"),
+&"hunter_dmg_b": ExtResource("9_vfwdp"),
+&"hunter_dmg_f": ExtResource("10_gvu13"),
+&"hunter_down": ExtResource("11_semqb"),
+&"hunter_down_loop": ExtResource("12_82x2q"),
+&"hunter_firing": ExtResource("13_5hits"),
+&"hunter_getup": ExtResource("14_740hl"),
+&"hunter_idle": ExtResource("15_8kbt8"),
+&"hunter_pose01": ExtResource("16_od5su"),
+&"hunter_pose02": ExtResource("17_suysk"),
+&"hunter_run": ExtResource("18_6rbfb"),
+&"hunter_skill01": ExtResource("19_chrw5"),
+&"hunter_walk": ExtResource("20_5hs3f"),
+&"kick": ExtResource("21_ge46g"),
+&"pound": ExtResource("22_j8eot"),
+&"roar": ExtResource("23_lwc6o"),
+&"rock_lift": ExtResource("24_kfu74"),
+&"rock_throw": ExtResource("25_l3ev7"),
+&"slam": ExtResource("26_35rqm"),
+&"stagger": ExtResource("27_uqatp"),
+&"sweep": ExtResource("28_eq31t")
+}

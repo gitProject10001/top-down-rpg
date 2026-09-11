@@ -1,0 +1,31 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ground_wave.gd" id="1_wave"]
+
+[sub_resource type="TorusMesh" id="wave_ring"]
+inner_radius = 0.02
+outer_radius = 0.3
+rings = 48
+ring_segments = 12
+
+[sub_resource type="StandardMaterial3D" id="wave_mat"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.8, 0.3, 1, 0.6)
+emission_enabled = true
+emission = Color(0.8, 0.3, 1, 1)
+emission_energy_multiplier = 3.0
+cull_mode = 2
+depth_draw_mode = 1
+
+; The propagating surface attack — see scripts/ground_wave.gd. The script duplicates both the
+; mesh (it animates the radii) and the material (it fades the front), so these are templates.
+[node name="GroundWave" type="Node3D"]
+script = ExtResource("1_wave")
+
+; mesh BEFORE the surface override: .tscn properties apply in file order, and an override
+; assigned to a still-meshless MeshInstance3D is silently dropped (surface 0 does not exist yet).
+[node name="Ring" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.07, 0)
+mesh = SubResource("wave_ring")
+surface_material_override/0 = SubResource("wave_mat")

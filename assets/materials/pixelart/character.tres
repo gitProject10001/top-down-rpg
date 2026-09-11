@@ -1,0 +1,34 @@
+[gd_resource type="ShaderMaterial" load_steps=2 format=3]
+
+; THE STANDING FIGURES. Painted by body zone, not textured -- see shaders/pixelart/pixel_char.gdshader
+; for why the baked texture page on char_a.glb had to be abandoned. Short version: a thirty-pixel
+; figure averages its whole texture down to mush, and mush on a mud ramp standing on mud is invisible.
+;
+; The surcoat colour is chosen per figure by hashing the instance position, so six copies of one mesh
+; arrive as six distinguishable people. Red and blue are deliberately far from anything else in the
+; camp: they are the only saturated colours in a frame of browns, which is exactly the job the
+; reference gives them.
+
+[ext_resource type="Shader" path="res://shaders/pixelart/pixel_char.gdshader" id="1_shader"]
+[ext_resource type="Material" path="res://assets/materials/pixelart/outline_char.tres" id="90_outline"]
+
+[resource]
+next_pass = ExtResource("90_outline")
+shader = ExtResource("1_shader")
+shader_parameter/hem = 0.3
+shader_parameter/chest = 0.62
+shader_parameter/collar = 0.79
+shader_parameter/boots = Color(0.26, 0.2, 0.15, 1)
+shader_parameter/mail = Color(0.38, 0.38, 0.43, 1)
+shader_parameter/helmet = Color(0.5, 0.5, 0.55, 1)
+shader_parameter/cloth_a = Color(0.7, 0.2, 0.14, 1)
+shader_parameter/cloth_b = Color(0.24, 0.32, 0.58, 1)
+shader_parameter/cloth_c = Color(0.5, 0.42, 0.26, 1)
+shader_parameter/wrap = 0.3
+shader_parameter/bands = 2.0
+shader_parameter/band_softness = 0.04
+shader_parameter/shade_tint = Color(0.42, 0.38, 0.52, 1)
+shader_parameter/shade_strength = 0.58
+shader_parameter/shade_saturation = 1.3
+shader_parameter/light_tint = Color(1, 0.93, 0.78, 1)
+shader_parameter/light_tint_amount = 0.4

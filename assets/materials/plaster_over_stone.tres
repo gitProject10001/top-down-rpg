@@ -1,0 +1,64 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bgj6bem8i1rox"]
+
+[ext_resource type="Shader" uid="uid://bhailrpfyd7v3" path="res://shaders/layered_plaster.gdshader" id="1_sh"]
+[ext_resource type="Texture2D" uid="uid://dmoja24tmkyd6" path="res://assets/textures/whinbek/plaster_color.png" id="2_pc"]
+[ext_resource type="Texture2D" uid="uid://c4ifd61vhyer5" path="res://assets/textures/whinbek/plaster_normal.png" id="3_pn"]
+[ext_resource type="Texture2D" uid="uid://bwm26p2i6pyoi" path="res://assets/textures/whinbek/plaster_rough.png" id="4_pr"]
+[ext_resource type="Texture2D" uid="uid://lcxya8rqt7ml" path="res://assets/textures/whinbek/rubble_color.png" id="5_rc"]
+[ext_resource type="Texture2D" uid="uid://bcpw48lc1fnwt" path="res://assets/textures/whinbek/rubble_normal.png" id="6_rn"]
+[ext_resource type="Texture2D" uid="uid://1ksd3qs1svkj" path="res://assets/textures/whinbek/rubble_rough.png" id="7_rr"]
+[ext_resource type="Texture2D" uid="uid://cc0bouk3mi66i" path="res://assets/textures/whinbek/rubble_ao.png" id="8_ra"]
+[ext_resource type="Texture2D" uid="uid://l2n20bk7g84r" path="res://assets/textures/whinbek/rubble_height.png" id="9_rh"]
+
+[sub_resource type="FastNoiseLite" id="noise"]
+noise_type = 0
+frequency = 0.03
+fractal_octaves = 4
+fractal_gain = 0.55
+
+[sub_resource type="NoiseTexture2D" id="ntex"]
+width = 256
+height = 256
+noise = SubResource("noise")
+seamless = true
+seamless_blend_skirt = 0.0
+
+[resource]
+resource_name = "PlasterOverStone"
+render_priority = 0
+shader = ExtResource("1_sh")
+shader_parameter/albedo = Color(1, 0.99, 0.95, 1)
+shader_parameter/texture_albedo = ExtResource("2_pc")
+shader_parameter/roughness = 1.0
+shader_parameter/texture_roughness = ExtResource("4_pr")
+shader_parameter/specular = 0.3
+shader_parameter/metallic = 0.0
+shader_parameter/texture_normal = ExtResource("3_pn")
+shader_parameter/normal_scale = 1.0
+shader_parameter/ao_light_affect = 0.35
+shader_parameter/heightmap_scale = 8.0
+shader_parameter/heightmap_min_layers = 8
+shader_parameter/heightmap_max_layers = 32
+shader_parameter/heightmap_flip = Vector2(1, 1)
+shader_parameter/uv1_scale = Vector3(0.4, 0.4, 0.4)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/under_albedo = ExtResource("5_rc")
+shader_parameter/under_normal = ExtResource("6_rn")
+shader_parameter/under_normal_scale = 1.0
+shader_parameter/under_roughness = ExtResource("7_rr")
+shader_parameter/under_ao = ExtResource("8_ra")
+shader_parameter/under_heightmap = ExtResource("9_rh")
+shader_parameter/under_uv_scale = Vector2(0.4, 0.4)
+shader_parameter/mask_noise = SubResource("ntex")
+shader_parameter/noise_scale_m = 7.20200033883512
+shader_parameter/noise_amount = 0.630000029925
+shader_parameter/break_edge = 0.62
+shader_parameter/break_soft = 0.15200000722
+shader_parameter/use_vertex_color = 0.0930000044175
+shader_parameter/plaster_thickness = 0.20000000298023
+shader_parameter/edge_relief = 0.270000012825
+shader_parameter/rim_ao = 0.6070000288325
+shader_parameter/edge_fade_m = 0.15
+shader_parameter/relief_shadow = 0.7
+shader_parameter/relief_shadow_layers = 8
+shader_parameter/relief_shadow_soft = 0.05

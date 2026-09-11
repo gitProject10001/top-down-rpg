@@ -1,0 +1,49 @@
+[gd_resource type="ShaderMaterial" format=3]
+
+[ext_resource type="Shader" path="res://shaders/layered_plaster.gdshader" id="1_sh"]
+[ext_resource type="Texture2D" path="res://assets/textures/whinbek/rubble_color.png" id="5_rc"]
+[ext_resource type="Texture2D" path="res://assets/textures/whinbek/rubble_normal.png" id="6_rn"]
+[ext_resource type="Texture2D" path="res://assets/textures/whinbek/rubble_rough.png" id="7_rr"]
+[ext_resource type="Texture2D" path="res://assets/textures/whinbek/rubble_ao.png" id="8_ra"]
+[ext_resource type="Texture2D" path="res://assets/textures/whinbek/rubble_height.png" id="9_rh"]
+
+[resource]
+resource_name = "RubbleRelief"
+render_priority = 0
+shader = ExtResource("1_sh")
+shader_parameter/albedo = Color(1, 1, 1, 1)
+shader_parameter/texture_albedo = ExtResource("5_rc")
+shader_parameter/roughness = 1.0
+shader_parameter/texture_roughness = ExtResource("7_rr")
+shader_parameter/specular = 0.3
+shader_parameter/metallic = 0.0
+shader_parameter/texture_normal = ExtResource("6_rn")
+shader_parameter/normal_scale = 1.0
+shader_parameter/texture_ambient_occlusion = ExtResource("8_ra")
+shader_parameter/ao_light_affect = 0.35
+shader_parameter/texture_heightmap = ExtResource("9_rh")
+shader_parameter/heightmap_scale = 13.467
+shader_parameter/heightmap_min_layers = 16
+shader_parameter/heightmap_max_layers = 48
+shader_parameter/heightmap_flip = Vector2(1, 1)
+shader_parameter/uv1_scale = Vector3(0.4, 0.4, 0.4)
+shader_parameter/uv1_offset = Vector3(0, 0, 0)
+shader_parameter/under_albedo = ExtResource("5_rc")
+shader_parameter/under_normal = ExtResource("6_rn")
+shader_parameter/under_normal_scale = 1.0
+shader_parameter/under_roughness = ExtResource("7_rr")
+shader_parameter/under_ao = ExtResource("8_ra")
+shader_parameter/under_heightmap = ExtResource("9_rh")
+shader_parameter/under_uv_scale = Vector2(0.4, 0.4)
+shader_parameter/noise_scale_m = 3.0
+shader_parameter/noise_amount = 0.0
+shader_parameter/break_edge = 1.0
+shader_parameter/break_soft = 0.001
+shader_parameter/use_vertex_color = 0.0
+shader_parameter/plaster_thickness = 0.0
+shader_parameter/edge_relief = 0.0
+shader_parameter/rim_ao = 0.0
+shader_parameter/edge_fade_m = 0.15
+shader_parameter/relief_shadow = 0.8
+shader_parameter/relief_shadow_layers = 10
+shader_parameter/relief_shadow_soft = 0.04

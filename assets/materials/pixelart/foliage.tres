@@ -1,0 +1,39 @@
+[gd_resource type="ShaderMaterial" load_steps=3 format=3]
+
+; TREE CANOPIES -- the CampLeaf slot.
+;
+; NO TEXTURE AT ALL, AND use_vertex_color IS THE WHOLE MATERIAL. A canopy in the reference is eight
+; or ten overlapping leaf masses, each a slightly different value, and the darker ones read as the
+; ones behind. That variation is baked per cluster in the model (see _blob in
+; tools/blender/camp_props.py, which writes a tone into COLOR_0), so all this material has to do is
+; multiply it in. A tiling leaf photograph here would fight it and lose: at this camera a cluster is
+; twenty pixels across, and twenty pixels cannot hold a leaf pattern AND a cluster boundary.
+;
+; Three bands, not four. A canopy is a stack of near-spheres; a fourth tonal plate lands as a thin
+; ring around each blob and reads as a contour line in the wrong place.
+
+[ext_resource type="Shader" path="res://shaders/pixelart/pixel_surface.gdshader" id="1_shader"]
+[ext_resource type="Material" path="res://assets/materials/pixelart/outline_prop.tres" id="90_outline"]
+
+[resource]
+next_pass = ExtResource("90_outline")
+shader = ExtResource("1_shader")
+shader_parameter/albedo_color = Color(0.28, 0.34, 0.17, 1)
+shader_parameter/use_vertex_color = true
+shader_parameter/alpha_cut = 0.0
+shader_parameter/triplanar = false
+shader_parameter/use_normal_map = false
+shader_parameter/use_parallax = false
+shader_parameter/displace = 0.0
+shader_parameter/use_ao_map = false
+shader_parameter/detile = 0.0
+shader_parameter/wet_amount = 0.0
+shader_parameter/wrap = 0.3
+shader_parameter/bands = 3.0
+shader_parameter/band_softness = 0.04
+shader_parameter/shade_tint = Color(0.36, 0.46, 0.34, 1)
+shader_parameter/shade_strength = 0.5
+shader_parameter/shade_saturation = 1.35
+shader_parameter/shade_occlusion = 1.0
+shader_parameter/light_tint = Color(1, 0.97, 0.7, 1)
+shader_parameter/light_tint_amount = 0.35

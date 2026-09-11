@@ -1,0 +1,98 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://bvi7fr46lw2b7"]
+
+[ext_resource type="Shader" uid="uid://d0rt7jekxse64" path="res://shaders/dungeon_stone.gdshader" id="1_shader"]
+
+[sub_resource type="FastNoiseLite" id="noise_bump"]
+noise_type = 0
+frequency = 0.06
+fractal_octaves = 1
+
+[sub_resource type="NoiseTexture2D" id="tex_bump"]
+noise = SubResource("noise_bump")
+seamless = true
+as_normal_map = true
+bump_strength = 4.0
+
+[sub_resource type="FastNoiseLite" id="noise_grunge"]
+noise_type = 0
+frequency = 0.008
+fractal_octaves = 2
+
+[sub_resource type="NoiseTexture2D" id="tex_grunge"]
+noise = SubResource("noise_grunge")
+seamless = true
+
+[sub_resource type="FastNoiseLite" id="noise_moss"]
+noise_type = 2
+frequency = 0.012
+fractal_octaves = 2
+cellular_return_type = 4
+
+[sub_resource type="NoiseTexture2D" id="tex_moss"]
+noise = SubResource("noise_moss")
+seamless = true
+
+[sub_resource type="FastNoiseLite" id="noise_mottle"]
+noise_type = 2
+frequency = 0.035
+fractal_type = 0
+cellular_return_type = 0
+
+[sub_resource type="NoiseTexture2D" id="tex_mottle"]
+noise = SubResource("noise_mottle")
+seamless = true
+
+[resource]
+resource_name = "CryptStone"
+render_priority = 0
+shader = ExtResource("1_shader")
+shader_parameter/stone_dark = Color(0.18359375, 0.17355348, 0.16853333, 1)
+shader_parameter/stone_mid = Color(0.35546875, 0.32802448, 0.29714966, 1)
+shader_parameter/stone_light = Color(0.44140625, 0.41076776, 0.36898804, 1)
+shader_parameter/var_black = 0.255
+shader_parameter/var_white = 0.595
+shader_parameter/var_contrast = 0.85
+shader_parameter/chroma_keep = 0.0
+shader_parameter/stone_rough = 0.8
+shader_parameter/tri_sharpness = 11.0
+shader_parameter/mottle_tex = SubResource("tex_mottle")
+shader_parameter/mottle_scale = 0.12
+shader_parameter/mottle_amount = 0.07
+shader_parameter/grunge_tex = SubResource("tex_grunge")
+shader_parameter/grunge_scale = 0.47
+shader_parameter/grime_color = Color(0.1484375, 0.13748509, 0.10900879, 1)
+shader_parameter/grime_amount = 0.33
+shader_parameter/grime_height = 1.1
+shader_parameter/bump_tex = SubResource("tex_bump")
+shader_parameter/bump_scale = 0.01
+shader_parameter/bump_amount = 0.0
+shader_parameter/bump_green_sign = -1.0
+shader_parameter/moss_tex = SubResource("tex_moss")
+shader_parameter/moss_color = Color(0.1764706, 0.26666668, 0.09803922, 0.20784314)
+shader_parameter/moss_scale = 0.25
+shader_parameter/moss_amount = 0.62
+shader_parameter/moss_threshold = 0.18
+shader_parameter/moss_soft = 0.14
+shader_parameter/moss_up_power = 0.8
+shader_parameter/moss_height = 1.2
+shader_parameter/moss_gravity = 0.0
+shader_parameter/moss_in_mortar = 0.35
+shader_parameter/moss_bump = 0.45
+shader_parameter/moss_piece_spread = 0.3
+shader_parameter/moss_streak = 7.0
+shader_parameter/moss_drip_top = 6.5
+shader_parameter/moss_drip_len = 6.6
+shader_parameter/moss_drip_taper = 0.62
+shader_parameter/moss_drip_bite = 0.36
+shader_parameter/moss_wall_amount = 0.6
+shader_parameter/tint_jitter = 0.02
+shader_parameter/seed_spread = 0.0
+shader_parameter/wrap = 0.44
+shader_parameter/bands = 7.0
+shader_parameter/band_softness = 0.27
+shader_parameter/shade_tint = Color(0.4444173, 0.38757324, 0.49609375, 1)
+shader_parameter/shade_strength = 0.31
+shader_parameter/shade_saturation = 1.15
+shader_parameter/shade_occlusion = 0.95
+shader_parameter/light_tint = Color(0.31640625, 0.28316313, 0.23606873, 1)
+shader_parameter/light_tint_amount = 0.1
