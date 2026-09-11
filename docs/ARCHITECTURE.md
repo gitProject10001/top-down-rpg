@@ -1,37 +1,44 @@
-# Architettura del progetto
+# Architettura runtime
 
-## Flusso runtime
+## Ingresso
+
+`project.godot` avvia `scenes/dev/hearth_village_playable.tscn`, che compone ambiente, luci, camera, player, duellante e servizi globali. Esiste una sola scena runtime del villaggio.
+
+## Autoload
+
+`EventBus` gestisce segnali; `Fx` effetti; `Traits`, `Run`, `Notice` e `Sheet` progressione e stato; `Dialogue` dialoghi; `Hud` interfaccia; `Dbg` debug; `CombatFeedback` feedback d’impatto; `Water` API leggera; `CombatDirector` turni degli attaccanti.
+
+## Player
+
+`Player` coordina visuali, risorse, macchina a stati e componenti opzionali. `Sword` gestisce il melee, `Bow` le frecce, `Shield` la visuale difensiva, `ArmGuard` il braccio procedurale e `ToolBelt` una API minima compatibile con l’HUD. L’assenza di un’arma opzionale non deve impedire l’avvio.
+
+## Input e attacco direzionale
+
+`PlayerIntent` legge WASD, stick, mouse e pulsanti. `FighterIntent` mantiene `move`, `guard`, `attack_held`, `attack_dir` e l’evento di rilascio. La direzione si sceglie durante la pressione: stick o mouse relativo risolvono in una delle quattro direzioni di `SwingDir`.
+
+`DirAttack` consuma quei dati, avvia l’animazione e abilita la `HitBox` solo durante l’impatto. Il difensore confronta lo stesso vocabolario; il mirror sinistra/destra viene applicato una sola volta.
+
+## Danno e feedback
 
 ```text
-project.godot
-  -> scenes/dev/hearth_village_playable.tscn
-      -> mondo 3D e SubViewport pixel-art
-      -> player/player3.tscn
-      -> enemy_duelist.tscn
-      -> autoload globali
+HitBox.dealt_hit -> HurtBox/Health -> CombatFeedback -> FX, parata, knockback
 ```
 
-## Confine tra porting e laboratorio
+Il feedback di contatto esiste solo quando il danno è applicato; i beat dell’animazione sono separati.
 
-Il progetto contiene due tipi di codice:
+## Nemici
 
-1. **Runtime**: player, nemici, combattimento, HUD, dialoghi, mondo e progressione.
-2. **Development**: generatori, probe, shot, lab e script di verifica sotto `scripts/dev/`.
+`Enemy` gestisce movimento, distanza, attacchi melee/ranged e recupero. `CombatDirector` coordina i turni per evitare attacchi simultanei. I prefab area attack, freccia, roccia e marker sono dipendenze runtime conservate perché referenziate dal nemico.
 
-Gli strumenti development possono produrre scene e risorse runtime, ma non devono diventare dipendenze obbligatorie del gioco finale senza una decisione esplicita.
+## Esclusioni intenzionali
 
-Nota attuale: la scena del villaggio usa ancora tre script sotto `scripts/dev/test_pixelart/` per camera pixel, pixel snapping e palette dei personaggi. Sono dipendenze runtime da spostare in una cartella di gameplay del villaggio nel prossimo passaggio; non vanno cancellati durante la pulizia.
+Sono esclusi simulazione acqua avanzata, laboratori, suite di test, generatori dungeon, materiali cyberpunk e asset non raggiungibili dalla scena. Il progetto deve rimanere piccolo: nuove funzionalità arrivano da `rpg-3d` solo dopo essere state rifinite e verificate.
 
-## Villaggio
+## Verifica
 
-La scena runtime unica è `scenes/dev/hearth_village_playable.tscn`, configurata come `run/main_scene` in `project.godot`. La copia duplicata nella cartella `scenes/` è stata rimossa perché non era referenziata e puntava a una variante diversa del player.
+```powershell
+& 'C:\Users\jonny\Desktop\game\godot\Godot_v4.6.3-stable_win64.exe' --headless --path . --editor --import --quit
+& 'C:\Users\jonny\Desktop\game\godot\Godot_v4.6.3-stable_win64.exe' --headless --path . --quit-after 8
+```
 
-La scena del villaggio è soprattutto un contenitore di geometria, materiali e luci. Il prossimo refactoring sicuro è dividerla in sottoscene per terreno, edifici, decorazioni, vegetazione e gameplay, mantenendo invariata la scena principale come composizione.
-
-## Priorità tecniche
-
-1. Eliminare la duplicazione tra scene del villaggio dopo aver scelto una sola variante del player.
-2. Estrarre la geometria statica del villaggio in sottoscene.
-3. Ridurre gli autoload ai servizi realmente globali.
-4. Spostare gli strumenti non runtime in un’area `tools/` o mantenerli marcati chiaramente come development.
-5. Aggiungere test headless per scena principale, combattimento e ciclo della run.
+Poi va eseguita la prova grafica: movimento, attacco direzionale, parata, dash e interazione.
