@@ -91,7 +91,7 @@ func apply(world: Node) -> void:
 	add_grass(camp,rng)
 	var character_style := Node.new()
 	character_style.name = "VillageCharacterPalette"
-	character_style.set_script(load("res://scripts/dev/test_pixelart/village_character_palette.gd"))
+	character_style.set_script(load("res://scripts/village/village_character_palette.gd"))
 	world.add_child(character_style)
 	character_style.call("apply")
 

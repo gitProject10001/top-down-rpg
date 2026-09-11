@@ -30,11 +30,11 @@
 [ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/birch_painting.png" id="47_0u4ps"]
 [ext_resource type="ArrayMesh" path="res://assets/models/camp/hearth_baked/geometry_027.res" id="48_7q0wr"]
 [ext_resource type="ArrayMesh" path="res://assets/models/camp/hearth_baked/geometry_028.res" id="50_iwhl5"]
-[ext_resource type="Script" path="res://scripts/dev/test_pixelart/iso_cam.gd" id="51_lhfmf"]
+[ext_resource type="Script" path="res://scripts/village/iso_cam.gd" id="51_lhfmf"]
 [ext_resource type="Shader" path="res://shaders/pixelart/pixel_post.gdshader" id="52_qupwp"]
 [ext_resource type="Texture2D" path="res://assets/textures/pixelart/palette_camp.png" id="53_5uj1u"]
-[ext_resource type="Script" path="res://scripts/dev/test_pixelart/pixel_snap.gd" id="54_qb1ts"]
-[ext_resource type="Script" path="res://scripts/dev/test_pixelart/village_character_palette.gd" id="55_nepsq"]
+[ext_resource type="Script" path="res://scripts/village/pixel_snap.gd" id="54_qb1ts"]
+[ext_resource type="Script" path="res://scripts/village/village_character_palette.gd" id="55_nepsq"]
 [ext_resource type="PackedScene" path="res://scenes/player/player3.tscn" id="56_mdxk0"]
 [ext_resource type="PackedScene" path="res://scenes/enemy_duelist.tscn" id="60_duelist"]
 
@@ -3330,3 +3330,4 @@ loop_clips = PackedStringArray()
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2743363, 0.8718131, -3.2)
 locomotion_clips = PackedStringArray("idle", "run_fwd", "run_back", "strafe_left", "strafe_right", "aim_idle", "aim_fwd", "aim_back", "aim_left", "aim_right", "atk_h", "atk_b", "atk_d", "atk_combo")
 loop_clips = PackedStringArray()
+
