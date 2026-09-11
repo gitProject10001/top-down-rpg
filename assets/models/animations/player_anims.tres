@@ -1,0 +1,34 @@
+[gd_resource type="AnimationLibrary" format=3]
+
+[ext_resource type="Animation" path="res://assets/models/animations/aim_back.res" id="1_0u4un"]
+[ext_resource type="Animation" path="res://assets/models/animations/aim_fwd.res" id="2_w3ckv"]
+[ext_resource type="Animation" path="res://assets/models/animations/aim_idle.res" id="3_k6gxn"]
+[ext_resource type="Animation" path="res://assets/models/animations/aim_left.res" id="4_nixop"]
+[ext_resource type="Animation" path="res://assets/models/animations/aim_right.res" id="5_dvckl"]
+[ext_resource type="Animation" path="res://assets/models/animations/atk_b.res" id="6_ykwy6"]
+[ext_resource type="Animation" path="res://assets/models/animations/atk_combo.res" id="7_l7vua"]
+[ext_resource type="Animation" path="res://assets/models/animations/atk_d.res" id="8_8ffk8"]
+[ext_resource type="Animation" path="res://assets/models/animations/atk_h.res" id="9_vhvg4"]
+[ext_resource type="Animation" path="res://assets/models/animations/idle.res" id="10_ps8w0"]
+[ext_resource type="Animation" path="res://assets/models/animations/run_back.res" id="11_6vu0t"]
+[ext_resource type="Animation" path="res://assets/models/animations/run_fwd.res" id="12_7ioen"]
+[ext_resource type="Animation" path="res://assets/models/animations/strafe_left.res" id="13_i2afs"]
+[ext_resource type="Animation" path="res://assets/models/animations/strafe_right.res" id="14_t7xg6"]
+
+[resource]
+_data = {
+&"aim_back": ExtResource("1_0u4un"),
+&"aim_fwd": ExtResource("2_w3ckv"),
+&"aim_idle": ExtResource("3_k6gxn"),
+&"aim_left": ExtResource("4_nixop"),
+&"aim_right": ExtResource("5_dvckl"),
+&"atk_b": ExtResource("6_ykwy6"),
+&"atk_combo": ExtResource("7_l7vua"),
+&"atk_d": ExtResource("8_8ffk8"),
+&"atk_h": ExtResource("9_vhvg4"),
+&"idle": ExtResource("10_ps8w0"),
+&"run_back": ExtResource("11_6vu0t"),
+&"run_fwd": ExtResource("12_7ioen"),
+&"strafe_left": ExtResource("13_i2afs"),
+&"strafe_right": ExtResource("14_t7xg6")
+}
