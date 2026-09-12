@@ -61,13 +61,15 @@ func run() -> void:
 	assert(Generator.walkability(furniture.filter(func(r): return r.kind==0),furniture).is_empty())
 	plan.apply_records(0,furniture)
 	var prop: Node3D
-	for e in level.get_children():
+	for e in plan.level_elements(level):
 		if e.kind==3: prop=e; break
+	var parent_room := prop.get_parent()
+	assert(parent_room.kind==0,"Furniture must belong to its room")
 	prop.position.x+=0.03
 	var pose: Vector3=prop.position
 	plan.apply_records(0,plan.propose_furniture(0))
-	assert(prop.position==pose,"Moved furniture lost")
+	assert(prop.position.is_equal_approx(pose),"Moved furniture lost")
 	plan.apply_records(0,plan.propose_furniture(0,"",true))
-	assert(prop.get_parent()==level,"Cleanup removed edited furniture")
+	assert(prop.get_parent()==parent_room,"Cleanup removed edited furniture")
 	print("HOUSE_PLAN_FURNITURE_SEED_CLEARANCE_PROTECTION_OK count=",props.size())
 	house.free(); quit()

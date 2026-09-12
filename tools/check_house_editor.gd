@@ -163,6 +163,7 @@ func run(plugin: EditorPlugin) -> void:
 	var example=load("res://scenes/dev/house_authoring_example.tscn").instantiate()
 	scene.add_child(example); plugin._owned(example,scene)
 	var example_plan=example.get_node("InteriorPlan")
+	example_plan.organize_furniture()
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(example)
 	var furnished: Array=example_plan.level_records(0)
 	plugin._plan_action("Rimuovi arredo generato")

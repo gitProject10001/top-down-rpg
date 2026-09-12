@@ -55,7 +55,12 @@ func refresh_room_name() -> void:
 		candidate=title.validate_node_name()+"_%d"%suffix; suffix+=1
 	name=candidate; automatic_name=str(name)
 func record() -> Dictionary:
-	return {"kind":kind,"dimensions":dimensions,"room_type":room_type,"position":position,"rotation":rotation,"has_door":has_door,"door_offset":door_offset,"door_width":door_width,"prop_type":prop_type,"asset":asset.resource_path if asset else "","room_ids":room_ids}
+	var pose := transform
+	var room=get_parent()
+	var ids := room_ids
+	if kind==3 and room!=null and room.get_script()==get_script() and room.kind==0:
+		pose=room.transform*transform; ids=PackedStringArray([room.stable_id])
+	return {"kind":kind,"dimensions":dimensions,"room_type":room_type,"position":pose.origin,"rotation":pose.basis.get_euler(),"has_door":has_door,"door_offset":door_offset,"door_width":door_width,"prop_type":prop_type,"asset":asset.resource_path if asset else "","room_ids":ids}
 func protected_edit() -> bool:
 	if locked or not generated: return true
 	if baseline.is_empty(): return false
@@ -74,7 +79,11 @@ func protected_edit() -> bool:
 	return false
 func accept_baseline() -> void: baseline=record().duplicate(true)
 func plan() -> Node:
-	return get_parent().get_parent() if get_parent()!=null else null
+	var ancestor := get_parent()
+	while ancestor!=null:
+		if ancestor.has_method("level_records"): return ancestor
+		ancestor=ancestor.get_parent()
+	return null
 func material(wood: bool) -> Material:
 	var p=plan()
 	if p and p.has_method("wood_material"): return p.wood_material() if wood else p.wall_material()

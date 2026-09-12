@@ -36,11 +36,31 @@ func levels() -> Array[Node3D]:
 	return list
 func elements() -> Array[Node3D]:
 	var result: Array[Node3D]=[]
-	for level in levels():
-		for child in level.get_children():
-			if child is Element: result.append(child)
+	for level in levels(): result.append_array(level_elements(level))
 	return result
-func _ready() -> void: _pending=true
+func level_elements(level: Node) -> Array[Node3D]:
+	var result: Array[Node3D]=[]
+	for child in level.get_children():
+		if child is Element:
+			result.append(child)
+			if child.kind==0: result.append_array(level_elements(child))
+	return result
+func organize_furniture() -> void:
+	for level in levels():
+		var rooms: Dictionary={}
+		for e in level.get_children():
+			if e is Element and e.kind==0: rooms[e.stable_id]=e
+		for e in level.get_children():
+			if not e is Element or e.kind!=3 or e.room_ids.is_empty(): continue
+			var room: Node3D=rooms.get(e.room_ids[0])
+			if room==null: continue
+			var saved_owner := e.owner
+			e.reparent(room,true); e.owner=saved_owner
+			if str(e.name).begins_with("Oggetto_furniture_"):
+				e.name=["Tavolo","Sedia","Letto","Cassapanca","Scaffale"][e.prop_type]+"_"+str(e.stable_id).get_slice("_",str(e.stable_id).get_slice_count("_")-1)
+func _ready() -> void:
+	_pending=true
+	organize_furniture.call_deferred()
 func _process(_dt: float) -> void:
 	if Engine.is_editor_hint(): observe_deletions()
 	var signature := str(house().dimensions(),house().wing_settings(),floor_height,levels().size())
@@ -97,13 +117,18 @@ func doors() -> Array[Node3D]:
 	return result
 func level_records(index: int) -> Array:
 	var result: Array=[]
-	for e in levels()[index].get_children():
+	for e in level_elements(levels()[index]):
 		if e is Element:
 			var r: Dictionary=e.record(); r.merge({"id":e.stable_id,"generated":e.generated,"locked":e.locked,"baseline":e.baseline.duplicate(true)})
 			result.append(r)
 	return result
 func apply_records(index: int,records: Array) -> void:
 	var level := levels()[index]
+	# Work in floor coordinates, then restore the authored room hierarchy.
+	for e in level_elements(level):
+		if e.kind==3 and e.get_parent()!=level:
+			var saved_owner := e.owner
+			e.reparent(level,true); e.owner=saved_owner
 	var wanted: Dictionary={}
 	for record in records: wanted[record.id]=record
 	var existing: Dictionary={}
@@ -129,6 +154,7 @@ func apply_records(index: int,records: Array) -> void:
 		if e.baseline.is_empty() and e.generated: e.accept_baseline()
 		if e.kind==0: e.refresh_room_name()
 	known_generated[str(index)]=records.filter(func(r): return r.get("generated",true)).map(func(r): return str(r.id))
+	organize_furniture()
 	_pending=true
 func propose_rooms(index: int) -> Array:
 	generation_failed=true
@@ -136,7 +162,7 @@ func propose_rooms(index: int) -> Array:
 	var current := level_records(index)
 	var fixed: Array=[]
 	var preserved: Array=[]
-	for e in levels()[index].get_children():
+	for e in level_elements(levels()[index]):
 		if not e is Element: continue
 		var r: Dictionary=e.record(); r.merge({"id":e.stable_id,"generated":e.generated,"locked":e.locked,"baseline":e.baseline.duplicate(true)})
 		if e.kind==0 and e.protected_edit(): fixed.append(r)
@@ -167,7 +193,7 @@ func propose_rooms(index: int) -> Array:
 func observe_deletions() -> void:
 	for index in levels().size():
 		var present: Dictionary={}
-		for e in levels()[index].get_children():
+		for e in level_elements(levels()[index]):
 			if e is Element:
 				present[e.stable_id]=true; deleted_ids.erase("%d/%s"%[index,e.stable_id])
 		for id in known_generated.get(str(index),[]):
@@ -178,7 +204,7 @@ func propose_walls(index: int) -> Array:
 	var current := level_records(index)
 	var rooms: Array=current.filter(func(r): return r.kind==0)
 	var result: Array=[]; var protected: Dictionary={}
-	for e in levels()[index].get_children():
+	for e in level_elements(levels()[index]):
 		if e is Element and (e.kind!=1 or e.protected_edit()): protected[e.stable_id]=true
 	for r in current:
 		if protected.has(r.id): result.append(r)
@@ -195,7 +221,7 @@ func propose_insert_room(index: int,id: String) -> Array:
 	observe_deletions()
 	var current := level_records(index)
 	var selected: Dictionary={}; var protected: Dictionary={}
-	for e in levels()[index].get_children():
+	for e in level_elements(levels()[index]):
 		if e is Element and e.protected_edit(): protected[e.stable_id]=true
 	for r in current:
 		if r.id==id and r.kind==0: selected=r
@@ -250,7 +276,7 @@ func propose_furniture(index: int,scope: String="",remove_only: bool=false) -> A
 	observe_deletions()
 	var keep: Array=[]
 	var protected: Dictionary={}
-	for e in levels()[index].get_children():
+	for e in level_elements(levels()[index]):
 		if e is Element and e.protected_edit(): protected[e.stable_id]=true
 	for r in level_records(index):
 		if r.kind!=3 or protected.has(r.id) or (scope!="" and scope not in r.get("room_ids",[])): keep.append(r)

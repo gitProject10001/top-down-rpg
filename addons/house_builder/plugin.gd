@@ -174,8 +174,10 @@ func _plan_action(label: String) -> void:
 		_add_authored(plan,floor_node,"Aggiungi piano"); plan.active_floor=plan.levels().size()-1; return
 	var level: Node3D=plan.levels()[clampi(plan.active_floor,0,plan.levels().size()-1)]
 	for e in EditorInterface.get_selection().get_selected_nodes():
-		if e is Element and e.get_parent() in plan.levels():
-			level=e.get_parent(); plan.active_floor=plan.levels().find(level); break
+		var ancestor: Node=e
+		while ancestor is Node3D and ancestor!=plan and ancestor not in plan.levels(): ancestor=ancestor.get_parent()
+		if ancestor is Node3D and ancestor in plan.levels():
+			level=ancestor; plan.active_floor=plan.levels().find(level); break
 	if label in ["Genera stanze (piano attivo)","Rigenera muri dalle stanze","Integra stanza e genera muri","Arreda piano","Arreda stanza selezionata","Rimuovi arredo generato"]:
 		var index: int=clampi(plan.active_floor,0,plan.levels().size()-1)
 		plan.observe_deletions()
@@ -207,7 +209,14 @@ func _plan_action(label: String) -> void:
 	element.name=["Stanza","Muro","Scala","Dettaglio"][element.kind]
 	element.stable_id="manual_%s"%str(Time.get_ticks_usec())
 	element.dimensions=[Vector3(3,plan.floor_height,3),Vector3(3,plan.floor_height,0.18),Vector3(1.2,plan.floor_height,4.2),Vector3(1,0.8,0.7)][element.kind]
-	_add_authored(level,element,label)
+	var parent: Node=level
+	if element.kind==3:
+		for e in EditorInterface.get_selection().get_selected_nodes():
+			var candidate: Node=e
+			if candidate is Element and candidate.kind==3: candidate=candidate.get_parent()
+			if candidate is Element and candidate.kind==0:
+				parent=candidate; element.room_ids=PackedStringArray([candidate.stable_id]); break
+	_add_authored(parent,element,label)
 	if element.kind==0: status.text="Posiziona e dimensiona la stanza, poi premi Integra stanza e genera muri. Room Type sceglie la funzione; Display Name il nome."
 func _play_selected() -> void:
 	var selected := _selected_house()

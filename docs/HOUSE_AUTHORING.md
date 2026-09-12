@@ -76,6 +76,13 @@ Il kit iniziale usa geometria semplice e materiali ruvidi; è una base di layout
 non l'arredo artistico definitivo. La scena assegnata deve avere origine al centro
 della base e collisioni proprie; `dimensions` deve descriverne l'ingombro reale.
 
+La gerarchia è **Piano → Stanza → Mobili**. Le vecchie scene vengono raggruppate
+all'apertura usando l'associazione alla stanza, senza cambiare la posizione dei
+mobili. Salva la scena per conservare la nuova gerarchia. Spostare una stanza
+sposta anche il suo arredo; muri condivisi e scale restano sotto il piano.
+**Aggiungi dettaglio**, con una stanza o un suo mobile selezionato, crea il nuovo
+oggetto sotto quella stanza. Gli oggetti senza stanza assegnata restano sul piano.
+
 Il posizionamento prova candidati lungo le pareti, evita l'area di apertura delle
 porte, gli sbarchi delle scale e gli altri mobili, poi verifica la percorribilità.
 Quando manca spazio omette un mobile. Non forza il numero richiesto a costo di
