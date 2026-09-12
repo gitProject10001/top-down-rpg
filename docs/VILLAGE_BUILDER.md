@@ -10,12 +10,14 @@ Apri `scenes/dev/village_builder_playground.tscn`: contiene due strade, un perim
 due zone e undici case. È una scena separata dal tuo laboratorio delle case.
 La camera della dimostrazione usa la direzione isometrica fissa del gioco.
 
-Il pannello **Villaggio** ha quattro schede:
+Il pannello **Villaggio** ha cinque schede:
 
 - **Area**: crea il villaggio e disegna il suo perimetro.
 - **Strade**: disegna percorsi a segmenti e regola la larghezza.
 - **Vincoli**: disegna aree non edificabili per piazze e spazi liberi. I quartieri
   opzionali cambiano tipo di casa e piani.
+- **Gruppi**: attiva la disposizione per corti, disegna corti, blocca un gruppo
+  e attiva il suolo automatico.
 - **Densità**: scegli raggio e percentuale, attiva il pennello e trascina nella vista
   3D. Rosso indica 0%, verde 100%. Poi usa **Genera / aggiorna lotti e case**.
 
@@ -102,7 +104,7 @@ undo/redo; le revisioni sostituite sono conservate fino alla chiusura del villag
   di zone sovrapposte prevale la prima nell'albero della scena.
 - I percorsi verso le porte sono proposte semplici, non un algoritmo di ricerca
   del percorso su terreno. L'occupazione impossibile viene scartata.
-- Niente castelli, mura, piazze generate, simulazione economica, GI o lightmap in
+- Niente castelli, mura, arredo delle piazze, simulazione economica, GI o lightmap in
   questo passaggio. Le risorse restano estendibili per le fasi successive.
 
 ## Verifiche
@@ -121,3 +123,68 @@ Non eseguirlo su un esempio personalizzato senza salvarne prima una copia.
 
 Per l'apertura contestuale dei pannelli viene usata l'API
 [EditorDock di Godot 4.6](https://docs.godotengine.org/en/4.6/classes/class_editordock.html).
+
+
+## Villaggio organico: esempio modificabile
+
+Apri `scenes/dev/village_organic_example.tscn`. È generato dal Village Builder:
+20 edifici di dimensioni diverse, otto corti e due strade principali a segmenti.
+L’House Builder costruisce ogni edificio; materiali e dettaglio delle case restano
+quelli esistenti. La composizione riprende gruppi e spazi aperti del riferimento,
+non è una copia geometrica della mappa.
+
+Seleziona Villaggio, apri **Gruppi** e usa **Usa disposizione per gruppi**. Disegna
+il poligono dello spazio libero della corte; il generatore propone edifici lungo
+il suo esterno, con distanze e dimensioni variabili. Le corti devono avere un centro
+interno libero (preferisci poligoni convessi); gruppi troppo vicini o al confine
+possono produrre meno case. Seleziona una corte e spostala, poi rigenera: i suoi
+ID restano stabili. `Building Type` e `Storeys` sulla corte definiscono il gruppo;
+i quartieri di tipo possono prevalere. **Blocca / sblocca gruppo selezionato**
+conserva tutte le case di quella corte, oltre alla protezione delle modifiche manuali.
+Spostare una corte bloccata non sposta le case bloccate: sblocca prima di rigenerare.
+
+La generazione colloca prima le case, poi cerca percorsi dalle porte alla corte
+e alle strade evitando gli edifici. Usa una griglia di lavoro con margine e
+semplifica i segmenti visibili. Non è una simulazione storica della crescita:
+le strade principali e le corti restano decisioni dell’utente. Le proposte senza
+un percorso valido vengono scartate. Il collegamento tra tutte le strade principali
+non è ancora validato. Le case sono nodi Lotto con `group_id`, non figli trasformati
+della corte: la trasformazione del gruppo viene applicata con la rigenerazione.
+
+## Suolo e guide
+
+**Attiva / disattiva suolo automatico** usa le texture dipinte già presenti nel
+progetto: erba come base, terra e ghiaia su corti, strade e collegamenti alle porte.
+**Genera / aggiorna** ricostruisce la maschera del suolo insieme al layout. La
+maschera (256×256) e il materiale sono salvati nella scena; nessuna generazione
+pesante viene eseguita durante il Play. Il suolo è un piano locale: per adesso
+non scolpisce pendenze e non sostituisce un Terrain3D. La densità delle case e la
+maschera dei materiali sono dati separati.
+
+**Mostra / nascondi zone** controlla le guide dell’editor. Non nasconde erba o
+strade del gioco. In Play, **Mostra zone / F8** attiva la vista di debug:
+verde=perimetro, giallo=strade, blu=quartieri, rosso=esclusioni, arancio=corti.
+
+## Play villaggio
+
+Seleziona il villaggio e premi **▶ Play villaggio selezionato**: viene salvata
+una copia temporanea del nodo corrente, comprese le modifiche non ancora salvate
+nella scena. La prova usa il giocatore esistente e camera isometrica fissa del gioco.
+WASD/stick per muoversi, F7 per allargare la vista, F8 per le zone. Il terreno con
+collisione si adatta all’estensione del villaggio selezionato. Questa prova riguarda
+gli esterni; l’interazione completa con gli interni resta nel Play casa.
+
+La scena `village_organic_playable.tscn` riutilizza l’ultima copia selezionata;
+per forzare l’esempio dal terminale passa `-- --organic-example`.
+
+Verifiche aggiuntive:
+
+```text
+--headless --path . --script res://tools/check_organic_village.gd
+--headless --path . res://scenes/dev/village_organic_playable.tscn -- --village-play-test --organic-example
+```
+
+Coprono salvataggio, seed, gruppi bloccati, corti libere, percorsi senza attraversare
+case, maschera del suolo, copia per Play, movimento reale e toggle debug. Per
+ricreare solo l’esempio: `--script res://tools/preview_organic_village.gd` (sovrascrive
+la scena di esempio; non usarlo dopo averla personalizzata senza salvarne una copia).

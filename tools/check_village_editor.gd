@@ -36,7 +36,7 @@ func run(plugin: EditorPlugin) -> void:
 		history.undo(); assert(village.guides(kind).is_empty()); history.redo(); assert(village.guides(kind).size()==1)
 	print("VILLAGE_EDITOR_DRAW_UNDO_OK")
 	plugin.tabs.current_tab=3
-	plugin._begin_paint(); assert(plugin.mode==4)
+	plugin._begin_paint(); assert(plugin.mode==5)
 	var down := InputEventMouseButton.new(); down.button_index=MOUSE_BUTTON_LEFT; down.pressed=true; down.position=camera.unproject_position(village.to_global(Vector3.ZERO))
 	plugin._forward_3d_gui_input(camera,down)
 	var up := InputEventMouseButton.new(); up.button_index=MOUSE_BUTTON_LEFT; up.pressed=false; up.position=down.position
@@ -45,7 +45,13 @@ func run(plugin: EditorPlugin) -> void:
 	history.undo(); assert(village.density_at(Vector2.ZERO)==1.0); history.redo(); assert(is_equal_approx(village.density_at(Vector2.ZERO),painted))
 	plugin._reset_density(1); assert(village.density_at(Vector2.ZERO)==1.0)
 	plugin._draw(3); assert(plugin.mode==3 and plugin.draft.kind==3); plugin._cancel()
-	print("VILLAGE_EDITOR_PAINT_UNDO_EXCLUSION_MODE_OK")
+	plugin._draw(4)
+	for p in [Vector3(-4,0,-4),Vector3(4,0,-4),Vector3(4,0,4),Vector3(-4,0,4)]:
+		var click := InputEventMouseButton.new(); click.button_index=MOUSE_BUTTON_LEFT; click.pressed=true; click.position=camera.unproject_position(village.to_global(p)); plugin._forward_3d_gui_input(camera,click)
+	plugin._finish_drawing(); plugin._selection(); assert(village.guides(4).size()==1,"Court not created"); assert(plugin.tabs.current_tab==4,"Court context tab incorrect")
+	history.undo(); assert(village.guides(4).is_empty())
+	plugin._organic_mode(); assert(village.layout_mode==1); history.undo(); assert(village.layout_mode==0)
+	print("VILLAGE_EDITOR_PAINT_UNDO_EXCLUSION_COURT_MODE_OK")
 
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(village.guides(1)[0]); plugin._selection()
 	assert(plugin.tabs.current_tab==1 and plugin.gizmos.focus==village.guides(1)[0])
@@ -56,7 +62,9 @@ func run(plugin: EditorPlugin) -> void:
 	var count: int=village.lots().size(); var first=village.lots()[0]
 	history.undo(); assert(village.lots().is_empty()); history.redo(); assert(village.lots().size()==count and village.lots()[0]==first)
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(first); plugin._lock(); assert(first.locked); history.undo(); assert(not first.locked)
-	print("VILLAGE_EDITOR_CONTEXT_POINTS_GENERATE_LOCK_UNDO_OK")
+	var packed: PackedScene=plugin._snapshot_village(village); assert(packed!=null)
+	var preview=packed.instantiate(); assert(preview.lots().size()==village.lots().size()); preview.free()
+	print("VILLAGE_EDITOR_CONTEXT_POINTS_GENERATE_LOCK_PLAY_SNAPSHOT_UNDO_OK")
 	var parent: Node=village.get_parent()
 	var undo := plugin.get_undo_redo(); undo.create_action("Test elimina villaggio",UndoRedo.MERGE_DISABLE,scene)
 	undo.add_do_method(parent,"remove_child",village); undo.add_undo_method(parent,"add_child",village); undo.commit_action()

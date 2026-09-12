@@ -27,7 +27,7 @@ var paint_village: Node3D
 var painting := false
 func _enter_tree() -> void:
 	gizmos=preload("res://addons/village_builder/gizmo.gd").new(); gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(gizmos)
-	panel=ScrollContainer.new(); panel.name="Villaggio"; panel.custom_minimum_size.x=280; panel.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
+	panel=ScrollContainer.new(); panel.name="Villaggio"; panel.custom_minimum_size.x=360; panel.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	var column := VBoxContainer.new(); column.size_flags_horizontal=Control.SIZE_EXPAND_FILL; panel.add_child(column)
 	var create := Button.new(); create.text="Crea villaggio"; create.pressed.connect(_create); column.add_child(create)
 	status=Label.new(); status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; status.text="Crea un villaggio, poi disegna perimetro e strade. Tutta l’area è edificabile."; column.add_child(status)
@@ -59,6 +59,14 @@ func _enter_tree() -> void:
 	var stop := Button.new(); stop.text="Termina pennello"; stop.pressed.connect(_cancel); density_page.add_child(stop)
 	for value in [0.0,1.0]:
 		var reset := Button.new(); reset.text="Tutto vuoto" if value==0 else "Densità massima ovunque"; reset.pressed.connect(_reset_density.bind(value)); density_page.add_child(reset)
+	var group_page := VBoxContainer.new(); group_page.name="Gruppi"; tabs.add_child(group_page)
+	var group_help := Label.new(); group_help.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; group_help.text="Disegna lo spazio libero della corte: il builder dispone edifici di dimensioni diverse intorno ai suoi lati e collega le porte alle strade. Sposta la corte e rigenera per spostare il gruppo. Tipo e piani sono nell’Inspector della corte."; group_page.add_child(group_help)
+	var organic := Button.new(); organic.text="Usa disposizione per gruppi"; organic.pressed.connect(_organic_mode); group_page.add_child(organic)
+	var court := Button.new(); court.text="Disegna corte"; court.pressed.connect(_draw.bind(4)); group_page.add_child(court)
+	var group_lock := Button.new(); group_lock.text="Blocca / sblocca gruppo selezionato"; group_lock.pressed.connect(_lock_group); group_page.add_child(group_lock)
+	var surface := Button.new(); surface.text="Attiva / disattiva suolo automatico"; surface.pressed.connect(_toggle_surface); group_page.add_child(surface)
+	var zones := Button.new(); zones.text="Mostra / nascondi zone"; zones.pressed.connect(_toggle_zones); column.add_child(zones)
+	var play := Button.new(); play.text="▶ Play villaggio selezionato"; play.pressed.connect(_play_selected); column.add_child(play)
 	var lock := Button.new(); lock.text="Blocca / sblocca lotto selezionato"; lock.pressed.connect(_lock); tabs.get_child(2).add_child(lock)
 	var tip := Label.new(); tip.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; tip.text="Disegno: clic per aggiungere punti · Invio per confermare · Esc per annullare.\nSolo la guida selezionata mostra le maniglie.\nPrima versione: layout su terreno piano."; column.add_child(tip)
 	dialog=AcceptDialog.new(); dialog.title="Villaggio · operazione non eseguita"; dialog.get_label().autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; dialog.get_label().custom_minimum_size.x=440; EditorInterface.get_base_control().add_child(dialog)
@@ -99,7 +107,7 @@ func _selection() -> void:
 		if not _in_current_scene(node): continue
 		if node is Village or node is Guide or node is Lot: _show_context_dock.call_deferred()
 		if node is Guide:
-			gizmos.focus=node; tabs.current_tab=mini(node.kind,2); status.text="Guida: "+str(node.name)
+			gizmos.focus=node; tabs.current_tab=(4 if node.kind==4 else mini(node.kind,2)); status.text="Guida: "+str(node.name)
 			road_width.set_block_signals(true); road_width.value=node.road_width; road_width.set_block_signals(false)
 			zone_type.select(node.building_type); floors.set_block_signals(true); floors.value=node.storeys; floors.set_block_signals(false)
 	road_width.editable=is_instance_valid(gizmos.focus) and gizmos.focus.kind==1
@@ -121,7 +129,7 @@ func _guide_property(key: String,value: Variant) -> void:
 	undo.add_do_property(node,key,value); undo.add_undo_property(node,key,node.get(key)); undo.commit_action()
 func _tab_changed(index: int) -> void:
 	_cancel()
-	if is_instance_valid(gizmos.focus) and mini(gizmos.focus.kind,2)!=index:
+	if is_instance_valid(gizmos.focus) and (4 if gizmos.focus.kind==4 else mini(gizmos.focus.kind,2))!=index:
 		var old=gizmos.focus; gizmos.focus=null; old.update_gizmos()
 func _error(message: String) -> void:
 	status.text=message; dialog.dialog_text=message; dialog.popup_centered(Vector2i(500,200))
@@ -145,7 +153,7 @@ func _draw(kind: int) -> void:
 		if other==self or other.get_script()==null: continue
 		if other.get_script().resource_path=="res://addons/house_builder/plugin.gd": other._set_mode(0)
 		if other.get_script().resource_path=="res://addons/world_editor/plugin.gd" and is_instance_valid(other.mode): other.mode.select(0)
-	mode=kind; draft=Guide.new(); draft.kind=kind; draft.points=PackedVector2Array(); draft.name=["Perimetro","Strada","Quartiere","AreaLibera"][kind]; draft.stable_id="guide_%d"%Time.get_ticks_usec(); village.add_child(draft)
+	mode=kind; draft=Guide.new(); draft.kind=kind; draft.points=PackedVector2Array(); draft.name=["Perimetro","Strada","Quartiere","AreaLibera","Corte"][kind]; draft.stable_id="guide_%d"%Time.get_ticks_usec(); village.add_child(draft)
 	gizmos.focus=draft; status.text="Clicca i vertici sul terreno. Invio conferma; Esc annulla."
 	drawing_actions.show(); cursor_visible=false; update_overlays()
 func _finish_drawing() -> void:
@@ -170,7 +178,7 @@ func _cancel() -> void:
 func _forward_3d_gui_input(camera: Camera3D,event: InputEvent) -> int:
 	drawing_camera=camera
 	if tabs.current_tab==3: update_overlays()
-	if mode==4: return _paint_input(camera,event)
+	if mode==5: return _paint_input(camera,event)
 	if mode<0: return AFTER_GUI_INPUT_PASS
 	if not _in_current_scene(draft): _cancel(); return AFTER_GUI_INPUT_PASS
 	if event is InputEventKey and event.pressed:
@@ -197,12 +205,12 @@ func _forward_3d_gui_input(camera: Camera3D,event: InputEvent) -> int:
 	return AFTER_GUI_INPUT_PASS
 func _forward_3d_draw_over_viewport(overlay: Control) -> void:
 	if tabs.current_tab==3 and is_instance_valid(drawing_camera): _draw_density(overlay)
-	if mode==4: return
+	if mode==5: return
 	if mode<0 or not _in_current_scene(draft) or not is_instance_valid(drawing_camera): return
 	preview_draw_count+=1
 	var points := PackedVector2Array()
 	for p in draft.points: points.append(drawing_camera.unproject_position(draft.to_global(Vector3(p.x,0,p.y))))
-	var color: Color=[Color(0.35,1,0.5),Color(1,0.8,0.25),Color(0.35,0.75,1),Color(1,0.3,0.15)][mode]
+	var color: Color=[Color(0.35,1,0.5),Color(1,0.8,0.25),Color(0.35,0.75,1),Color(1,0.3,0.15),Color(1,0.8,0.4)][mode]
 	var outline := points.duplicate()
 	var cursor := drawing_camera.unproject_position(draft.to_global(cursor_point))
 	if cursor_visible and (outline.is_empty() or outline[-1].distance_to(cursor)>1): outline.append(cursor)
@@ -257,7 +265,7 @@ func _begin_paint() -> void:
 		if other==self or other.get_script()==null: continue
 		if other.get_script().resource_path=="res://addons/house_builder/plugin.gd": other._set_mode(0)
 		if other.get_script().resource_path=="res://addons/world_editor/plugin.gd" and is_instance_valid(other.mode): other.mode.select(0)
-	mode=4; status.text="Trascina con il tasto sinistro. Esc termina; annulla la pennellata in corso. Poi Genera / aggiorna."
+	mode=5; status.text="Trascina con il tasto sinistro. Esc termina; annulla la pennellata in corso. Poi Genera / aggiorna."
 	update_overlays()
 func _density_action(node: Node,before: Dictionary,after: Dictionary) -> void:
 	var undo := get_undo_redo(); undo.create_action("Dipingi densità",UndoRedo.MERGE_DISABLE,node)
@@ -305,9 +313,47 @@ func _draw_density(overlay: Control) -> void:
 				var p: Vector2=(Vector2(x,y)+corner)*cell
 				quad.append(drawing_camera.unproject_position(node.to_global(Vector3(p.x,0,p.y))))
 			overlay.draw_colored_polygon(quad,Color(0.8,0.15,0.08,0.24).lerp(Color(0.15,0.9,0.3,0.24),node.density_at(center)))
-	if mode==4 and cursor_visible:
+	if mode==5 and cursor_visible:
 		var ring := PackedVector2Array()
 		for i in 33:
 			var angle := TAU*i/32.0
 			ring.append(drawing_camera.unproject_position(node.to_global(cursor_point+Vector3(cos(angle),0,sin(angle))*brush_radius.value)))
 		overlay.draw_polyline(ring,Color.WHITE,2,true)
+
+func _organic_mode() -> void:
+	var node := _village()
+	if node==null: _error("Seleziona un villaggio."); return
+	var undo := get_undo_redo(); undo.create_action("Disposizione per gruppi",UndoRedo.MERGE_DISABLE,node)
+	undo.add_do_property(node,"layout_mode",1); undo.add_undo_property(node,"layout_mode",node.layout_mode); undo.commit_action()
+	status.text="Modalità gruppi attiva. Disegna le corti, poi Genera / aggiorna."
+func _play_selected() -> void:
+	var village := _village()
+	if village==null or village.lots().is_empty(): _error("Seleziona un villaggio con case generate."); return
+	var packed := _snapshot_village(village)
+	var error := ResourceSaver.save(packed,"user://village_builder_playtest.tscn") if packed else ERR_CANT_CREATE
+	if error!=OK: _error("Impossibile preparare il villaggio per Play: "+error_string(error)); return
+	EditorInterface.play_custom_scene("res://scenes/dev/village_organic_playable.tscn")
+func _snapshot_village(village: Node3D) -> PackedScene:
+	var copy := village.duplicate(); copy.transform=Transform3D.IDENTITY
+	_set_preview_owner(copy,copy)
+	var packed := PackedScene.new(); var error := packed.pack(copy); copy.free()
+	return packed if error==OK else null
+func _set_preview_owner(node: Node,root: Node) -> void:
+	if node!=root: node.owner=root
+	for child in node.get_children(): _set_preview_owner(child,root)
+
+func _lock_group() -> void:
+	if not is_instance_valid(gizmos.focus) or gizmos.focus.kind!=4: _error("Seleziona una corte per bloccare il gruppo."); return
+	_guide_property("locked",not gizmos.focus.locked)
+	status.text="Gruppo bloccato: le sue case saranno conservate." if gizmos.focus.locked else "Gruppo sbloccato."
+
+func _toggle_surface() -> void:
+	var node := _village()
+	if node==null: _error("Seleziona un villaggio."); return
+	var undo := get_undo_redo(); undo.create_action("Suolo automatico",UndoRedo.MERGE_DISABLE,node)
+	undo.add_do_property(node,"auto_surface",not node.auto_surface); undo.add_undo_property(node,"auto_surface",node.auto_surface)
+	undo.add_do_method(node,"refresh_surface"); undo.commit_action()
+	status.text="Suolo automatico attivo. Genera / aggiorna riallinea erba, corti e strade." if node.auto_surface else "Suolo automatico disattivato."
+func _toggle_zones() -> void:
+	var node := _village()
+	if node: node.show_zones=not node.show_zones; update_overlays()

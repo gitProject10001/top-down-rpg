@@ -6,17 +6,20 @@ var focus: Node3D
 func _init() -> void:
 	create_handle_material("handles")
 	create_material("boundary",Color(0.4,0.85,0.5)); create_material("road",Color(1,0.75,0.3)); create_material("zone",Color(0.4,0.7,1))
+	create_material("court",Color(1,0.8,0.4))
 	create_material("excluded",Color(1,0.35,0.2))
 func _has_gizmo(node: Node3D) -> bool: return node is Guide
 func _get_gizmo_name() -> String: return "Village guides"
 func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	gizmo.clear()
-	var node=gizmo.get_node_3d(); var lines := PackedVector3Array(); var handles := PackedVector3Array(); var ids := PackedInt32Array()
+	var node=gizmo.get_node_3d()
+	if node.get_parent()!=null and node.get_parent().get("show_zones")==false: return
+	var lines := PackedVector3Array(); var handles := PackedVector3Array(); var ids := PackedInt32Array()
 	for i in node.points.size():
 		var p: Vector2=node.points[i]; handles.append(Vector3(p.x,0.1,p.y)); ids.append(i)
 		if i>0: lines.append(handles[i-1]); lines.append(handles[i])
 	if node.kind!=1 and handles.size()>2: lines.append(handles[-1]); lines.append(handles[0])
-	gizmo.add_lines(lines,get_material(["boundary","road","zone","excluded"][node.kind],gizmo)); gizmo.add_collision_segments(lines)
+	gizmo.add_lines(lines,get_material(["boundary","road","zone","excluded","court"][node.kind],gizmo)); gizmo.add_collision_segments(lines)
 	if node==focus: gizmo.add_handles(handles,get_material("handles",gizmo),ids)
 func _get_handle_name(_g: EditorNode3DGizmo,id: int,_s: bool) -> String: return "Punto %d"%(id+1)
 func _get_handle_value(g: EditorNode3DGizmo,_id: int,_s: bool) -> Variant: return g.get_node_3d().points.duplicate()

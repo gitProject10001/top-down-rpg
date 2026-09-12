@@ -79,6 +79,8 @@ uniform float gravel_amount : hint_range(0.0, 1.0) = 0.55;
 // R = dirt road, G = gravel, B = lush grass. Linear data, never albedo.
 uniform sampler2D road_mask : filter_linear, repeat_disable;
 uniform bool use_road_mask = false;
+uniform bool builder_layout = false;
+uniform mat4 builder_inverse;
 uniform vec2 road_mask_center = vec2(0.0);
 uniform vec2 road_mask_size = vec2(100.0);
 uniform float road_edge_noise : hint_range(0.0, 0.3) = 0.08;
@@ -249,7 +251,7 @@ void vertex() {
 
 
 void fragment() {
-	vec2 pos = world_position.xz;
+	vec2 pos = builder_layout ? (builder_inverse * vec4(world_position, 1.0)).xz : world_position.xz;
 	vec2 ddx = dFdx(pos);
 	vec2 ddy = dFdy(pos);
 
@@ -289,14 +291,14 @@ void fragment() {
 	float edge = min(min(uv.x, uv.y), min(1.0 - uv.x, 1.0 - uv.y));
 	// The border wobbles, so the stamp does not end on four straight lines.
 	float wobble = (fbm(pos * 0.35) - 0.5) * 0.06;
-	float stamp = smoothstep(0.0, border_blend, edge + wobble);
+	float stamp = builder_layout ? 0.0 : smoothstep(0.0, border_blend, edge + wobble);
 	vec3 painted = texture(painting, clamp(uv, vec2(0.0), vec2(1.0))).rgb * vec3(0.62, 0.59, 0.55);
 	ALBEDO = mix(ground, painted, stamp);
 	// Match world_stream.gd: the same corridors exclude vegetation.
 	float trail_x = 18.0*sin(pos.y/95.0) + 9.0*sin(pos.y/37.0);
 	float distance_to_trail = min(abs(pos.x-trail_x), abs(pos.y-0.35*pos.x-90.0));
 	float trail = (1.0-smoothstep(1.7,3.5,distance_to_trail+(fbm(pos*1.3)-0.5)*1.2)) * (1.0-stamp);
-	if (trail > 0.002) {
+	if (!builder_layout && trail > 0.002) {
 		vec3 soil = stochastic_layer(pos, ddx, ddy, road_metres, 1.0, DIRT_MEAN)*dirt_grade;
 		ALBEDO = mix(ALBEDO,soil,trail);
 	}

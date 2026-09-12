@@ -1,6 +1,7 @@
 @tool
 extends Node3D
 const Request=preload("res://addons/house_builder/building_request.gd")
+@export_storage var group_id := ""
 @export var stable_id := ""
 @export var request: Request
 @export var locked := false
@@ -17,9 +18,11 @@ func rebuild_access() -> void:
 	for i in range(access_path.size()-1):
 		var a := access_path[i]; var b := access_path[i+1]; var n := (b-a).normalized().cross(Vector3.UP)*0.6
 		var corners := [a+n,b+n,b-n,a-n]
-		for corner in [0,1,2,0,2,3]: surface.set_normal(Vector3.UP); surface.add_vertex(corners[corner]+Vector3.UP*0.03)
-	_access=MeshInstance3D.new(); _access.mesh=surface.commit(); add_child(_access,false,Node.INTERNAL_MODE_BACK)
+		for corner in [0,2,1,0,3,2]: surface.set_normal(Vector3.UP); surface.add_vertex(corners[corner]+Vector3.UP*0.03)
+	_access=MeshInstance3D.new(); _access.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; _access.mesh=surface.commit(); add_child(_access,false,Node.INTERNAL_MODE_BACK)
 func _ready() -> void: rebuild_access()
+func _process(_dt: float) -> void:
+	if is_instance_valid(_access): _access.visible=get_parent()==null or get_parent().get("auto_surface")!=true
 func house_state() -> Dictionary:
 	var h := get_node_or_null("Edificio")
 	if h==null: return {}
