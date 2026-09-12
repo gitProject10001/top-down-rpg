@@ -22,6 +22,11 @@ guida per trascinare i suoi punti. Puoi aggiungere un punto sul lato più lungo 
 rimuovere l'ultimo. Le maniglie compaiono soltanto sulla guida selezionata nella
 scheda attiva. Disegno, punti, parametri, generazione e blocchi supportano undo/redo.
 
+Eliminando il villaggio, il pannello abbandona anche il relativo contesto: i nodi
+conservati in memoria per undo non vengono considerati parte della scena. Per
+ripartire usa **Crea villaggio → Area → Disegna perimetro**; undo della cancellazione
+rende nuovamente selezionabile il villaggio precedente.
+
 Il pannello della casa è separato e contiene **Casa / Aperture / Interni / Arredo**.
 La selezione porta al pannello pertinente. In **Aperture** scegli una porta o
 finestra dall'elenco: vengono mostrate soltanto le sue tre maniglie, senza quelle

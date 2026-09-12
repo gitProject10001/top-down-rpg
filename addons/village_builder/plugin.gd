@@ -43,24 +43,38 @@ func _enter_tree() -> void:
 	add_control_to_dock(DOCK_SLOT_RIGHT_UL,panel)
 	EditorInterface.get_selection().selection_changed.connect(_selection)
 	tabs.tab_changed.connect(_tab_changed); set_input_event_forwarding_always_enabled()
+	scene_changed.connect(_scene_changed)
+	set_process(true)
 	if "--village-editor-test" in OS.get_cmdline_user_args():
 		_test_runner=load("res://tools/check_village_editor.gd").new(); _test_runner.call_deferred("run",self)
 func _exit_tree() -> void:
 	_cancel(); EditorInterface.get_selection().selection_changed.disconnect(_selection)
 	remove_node_3d_gizmo_plugin(gizmos); remove_control_from_docks(panel); panel.queue_free(); dialog.queue_free()
 func _handles(object: Object) -> bool: return object is Village or object is Guide or object is Lot or mode>=0
+func _in_current_scene(node: Node) -> bool:
+	if not is_instance_valid(node) or not node.is_inside_tree() or node.is_queued_for_deletion(): return false
+	var root := EditorInterface.get_edited_scene_root()
+	return root!=null and (node==root or root.is_ancestor_of(node))
+func _scene_changed(_root: Node) -> void:
+	_cancel(); selected=null; _selection()
+func _process(_dt: float) -> void:
+	if (selected!=null and not _in_current_scene(selected)) or (draft!=null and not _in_current_scene(draft)):
+		_cancel(); selected=null; _selection()
 func _village() -> Node3D:
 	for node in EditorInterface.get_selection().get_selected_nodes():
+		if not _in_current_scene(node): continue
 		var ancestor: Node=node
 		while ancestor!=null:
-			if ancestor is Village: return ancestor
+			if ancestor is Village and _in_current_scene(ancestor): return ancestor
 			ancestor=ancestor.get_parent()
-	return selected if is_instance_valid(selected) else null
+	return selected if _in_current_scene(selected) else null
 func _selection() -> void:
 	gizmos.focus=null
 	var village := _village()
-	if village: selected=village
+	selected=village
+	if village==null: status.text="Nessun villaggio attivo. Premi Crea villaggio, poi Disegna perimetro."
 	for node in EditorInterface.get_selection().get_selected_nodes():
+		if not _in_current_scene(node): continue
 		if node is Village or node is Guide or node is Lot: _show_context_dock.call_deferred()
 		if node is Guide:
 			gizmos.focus=node; tabs.current_tab=node.kind; status.text="Guida: "+str(node.name)
@@ -113,10 +127,14 @@ func _draw(kind: int) -> void:
 	gizmos.focus=draft; status.text="Clicca i vertici sul terreno. Invio conferma; Esc annulla."
 func _cancel() -> void:
 	mode=-1
-	if is_instance_valid(draft): draft.queue_free()
+	if is_instance_valid(draft):
+		if gizmos.focus==draft: gizmos.focus=null
+		if draft.get_parent()!=null: draft.get_parent().remove_child(draft)
+		draft.queue_free()
 	draft=null
 func _forward_3d_gui_input(camera: Camera3D,event: InputEvent) -> int:
 	if mode<0: return AFTER_GUI_INPUT_PASS
+	if not _in_current_scene(draft): _cancel(); return AFTER_GUI_INPUT_PASS
 	if event is InputEventKey and event.pressed:
 		if event.keycode==KEY_ESCAPE: _cancel(); return AFTER_GUI_INPUT_STOP
 		if event.keycode==KEY_ENTER or event.keycode==KEY_KP_ENTER:
