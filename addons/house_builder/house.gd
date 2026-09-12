@@ -248,6 +248,9 @@ func rebuild() -> void:
 	_generated.add_child(roof)
 	if wing_enabled: _join_wing(body,roof)
 	if not _is_wing_part: _finish_openings(body,materials)
+	var plan := get_node_or_null("InteriorPlan")
+	if plan and plan.has_method("editor_view"):
+		plan._pending=true
 	update_gizmos()
 	if Engine.is_editor_hint(): update_configuration_warnings()
 

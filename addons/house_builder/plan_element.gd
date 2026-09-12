@@ -1,0 +1,111 @@
+@tool
+extends Node3D
+## Authored data lives on this node. Only _Visual is disposable.
+const Door=preload("res://addons/house_builder/door.gd")
+@export_enum("Stanza","Muro","Scala","Oggetto") var kind := 0:
+	set(v): kind=v; dirty()
+@export var dimensions := Vector3(3,2.6,3):
+	set(v): dimensions=Vector3(maxf(v.x,0.12),maxf(v.y,0.12),maxf(v.z,0.12)); dirty()
+@export var room_type := "camera":
+	set(v): room_type=v; dirty()
+@export var has_door := true:
+	set(v): has_door=v; dirty()
+@export_range(-0.85,0.85,0.01) var door_offset := 0.0:
+	set(v): door_offset=v; dirty()
+@export_range(0.7,2.0,0.05) var door_width := 1.2:
+	set(v): door_width=v; dirty()
+@export var asset: PackedScene:
+	set(v): asset=v; dirty()
+@export_enum("Tavolo","Sedia","Letto","Cassapanca","Scaffale") var prop_type := 0:
+	set(v): prop_type=v; dirty()
+@export_group("Generazione")
+@export var stable_id := ""
+@export var generated := false
+@export var locked := false
+@export_storage var baseline: Dictionary={}
+@export_storage var room_ids: PackedStringArray=[]
+var _pending := true
+var _visual: Node3D
+var _pose := Transform3D.IDENTITY
+var _cut := false
+func _ready() -> void:
+	_pose=transform; dirty()
+func dirty() -> void:
+	_pending=true
+	if is_inside_tree(): update_gizmos()
+func _process(_dt: float) -> void:
+	if transform!=_pose:
+		_pose=transform
+		if is_inside_tree(): update_gizmos()
+	if _pending: rebuild()
+func record() -> Dictionary:
+	return {"kind":kind,"dimensions":dimensions,"room_type":room_type,"position":position,"rotation":rotation,"has_door":has_door,"door_offset":door_offset,"door_width":door_width,"prop_type":prop_type,"asset":asset.resource_path if asset else "","room_ids":room_ids}
+func protected_edit() -> bool: return locked or not generated or (not baseline.is_empty() and record()!=baseline)
+func accept_baseline() -> void: baseline=record().duplicate(true)
+func plan() -> Node:
+	return get_parent().get_parent() if get_parent()!=null else null
+func material(wood: bool) -> Material:
+	var p=plan()
+	if p and p.has_method("wood_material"): return p.wood_material() if wood else p.wall_material()
+	var m := StandardMaterial3D.new(); m.albedo_color=Color(0.35,0.23,0.13) if wood else Color(0.62,0.44,0.25); return m
+func box(p: Vector3,size: Vector3,mat: Material,solid: bool=true) -> MeshInstance3D:
+	if size.x<0.001 or size.y<0.001 or size.z<0.001: return null
+	var mesh := MeshInstance3D.new(); var cube := BoxMesh.new(); cube.size=size
+	mesh.mesh=cube; mesh.material_override=mat; mesh.position=p; _visual.add_child(mesh)
+	mesh.set_meta("height",size.y); mesh.set_meta("bottom",p.y-size.y*0.5)
+	if solid:
+		var body := StaticBody3D.new(); var shape := CollisionShape3D.new(); var primitive := BoxShape3D.new()
+		primitive.size=size; shape.shape=primitive; body.position=p; body.add_child(shape); _visual.add_child(body)
+	return mesh
+func rebuild() -> void:
+	if not is_inside_tree(): return
+	_pending=false
+	if is_instance_valid(_visual): _visual.free()
+	_visual=Node3D.new(); _visual.name="_Visual"; add_child(_visual,false,Node.INTERNAL_MODE_BACK)
+	var wood := material(true)
+	match kind:
+		0: pass
+		1:
+			var length := dimensions.x; var h := dimensions.y; var t := dimensions.z
+			var w := minf(door_width,length-0.3)
+			if not has_door or w<0.7:
+				box(Vector3(0,h*0.5,0),dimensions,material(false))
+			else:
+				var center := clampf(door_offset*length*0.5,-length*0.5+w*0.5+0.12,length*0.5-w*0.5-0.12)
+				var left := center-w*0.5+length*0.5; var right := length*0.5-center-w*0.5
+				var dh := minf(2.3,h-0.18)
+				box(Vector3(-length*0.5+left*0.5,h*0.5,0),Vector3(left,h,t),material(false))
+				box(Vector3(length*0.5-right*0.5,h*0.5,0),Vector3(right,h,t),material(false))
+				box(Vector3(center,dh+(h-dh)*0.5,0),Vector3(w,h-dh,t),material(false))
+				for sign_value in [-1,1]: box(Vector3(center+sign_value*(w*0.5+0.04),dh*0.5,0),Vector3(0.08,dh,t+0.06),wood,false)
+				box(Vector3(center,0.04,0),Vector3(w,0.04,t+0.25),wood,false)
+				var door := Door.new(); _visual.add_child(door)
+				door.configure(Transform3D(Basis.IDENTITY,Vector3(center-w*0.5,0,0)),w,dh,wood)
+		2:
+			for i in 18:
+				var rise := (i+1)*dimensions.y/18.0
+				box(Vector3(0,rise*0.5,dimensions.z*0.5-(i+0.5)*dimensions.z/18.0),Vector3(dimensions.x,rise,dimensions.z/18.0),wood,false)
+			var hull := ConvexPolygonShape3D.new(); var points := PackedVector3Array()
+			for x in [-dimensions.x*0.5,dimensions.x*0.5]:
+				points.append(Vector3(x,0,dimensions.z*0.5)); points.append(Vector3(x,0,-dimensions.z*0.5)); points.append(Vector3(x,dimensions.y+0.05,-dimensions.z*0.5))
+			hull.points=points
+			var body := StaticBody3D.new(); var shape := CollisionShape3D.new(); shape.shape=hull; body.add_child(shape); _visual.add_child(body)
+		3:
+			if asset: _visual.add_child(asset.instantiate())
+			else: build_prop(wood)
+	update_gizmos()
+func build_prop(wood: Material) -> void:
+	# Placeholder until the furnishing step supplies the reusable kit.
+	box(Vector3(0,dimensions.y*0.5,0),dimensions,wood)
+func runtime_view(inside: bool,actor: Vector3,camera: Vector3) -> void:
+	if kind!=1 or not is_instance_valid(_visual): return
+	var a := to_local(actor); var c := to_local(camera)
+	var cut := inside and (a.z*c.z<0 or (absf(a.z)<1.6 and absf(a.x-door_offset*dimensions.x*0.5)<1.5)) and a.y>-0.1 and a.y<dimensions.y+0.1
+	if cut==_cut: return
+	_cut=cut
+	for child in _visual.get_children():
+		if child is MeshInstance3D:
+			var h: float=child.get_meta("height"); var bottom: float=child.get_meta("bottom")
+			var shown := minf(h,maxf(0.8-bottom,0)) if cut else h
+			child.visible=shown>0.001; child.scale.y=maxf(0.001,shown/h); child.position.y=bottom+shown*0.5
+		elif child is Door: child.set_cutaway(cut)

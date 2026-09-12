@@ -1,0 +1,25 @@
+extends SceneTree
+const House=preload("res://addons/house_builder/house.gd")
+const Plan=preload("res://addons/house_builder/plan.gd")
+const Element=preload("res://addons/house_builder/plan_element.gd")
+func _initialize() -> void: call_deferred("run")
+func own(node: Node,scene: Node) -> void:
+	if node!=scene: node.owner=scene
+	for child in node.get_children(): own(child,scene)
+func run() -> void:
+	var house := House.new(); house.width=7; house.depth=10; house.name="TestHouse"; root.add_child(house)
+	var plan := Plan.new(); plan.name="InteriorPlan"; house.add_child(plan)
+	var level := Node3D.new(); level.name="Piano_1"; plan.add_child(level)
+	var wall := Element.new(); wall.kind=1; wall.dimensions=Vector3(5,2.6,0.18); wall.name="MuroManuale"; level.add_child(wall)
+	var detail := Node3D.new(); detail.name="DettaglioUtente"; detail.position=Vector3(1,0.2,2); level.add_child(detail)
+	plan.rebuild(); wall.rebuild(); house.rebuild()
+	assert(detail.get_parent()==level and plan.levels().size()==1)
+	assert(wall._visual.get_child_count()>0)
+	own(house,house)
+	var packed := PackedScene.new(); assert(packed.pack(house)==OK)
+	assert(ResourceSaver.save(packed,"user://house_plan_roundtrip.tscn")==OK)
+	var loaded=load("user://house_plan_roundtrip.tscn").instantiate(); root.add_child(loaded)
+	assert(loaded.get_node("InteriorPlan/Piano_1/DettaglioUtente").position==detail.position)
+	assert(loaded.get_node("InteriorPlan/Piano_1/MuroManuale").dimensions==wall.dimensions)
+	print("HOUSE_PLAN_AUTHORED_ROUNDTRIP_OK")
+	loaded.free(); house.free(); quit()

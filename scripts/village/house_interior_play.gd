@@ -14,6 +14,7 @@ const Door=preload("res://addons/house_builder/door.gd")
 @export_range(0.12,0.35,0.01) var partition_thickness := 0.18
 var house: House
 var interior: Interior
+var authored_plan: Node3D
 var player: CharacterBody3D
 var camera: Camera3D
 var view: SubViewport
@@ -50,14 +51,21 @@ func _ready() -> void:
 	ground_material=StandardMaterial3D.new(); ground_material.albedo_color=Color(0.27,0.25,0.17); ground_material.roughness=1.0
 	interior=Interior.new()
 	interior.box(world,Vector3(0,-0.14,0),Vector3(30,0.2,30),ground_material)
-	house=House.new(); house.name="Casa"; house.width=house_width; house.depth=house_depth
-	house.wall_height=storey_height*storeys; house.roof_height=2.1
-	var divider := lerpf(-house_width*0.5+1.8,house_width*0.5-2.2,room_split_x)
-	entry_x=(divider+house_width*0.5-1.55)*0.5
-	house.openings=[{"kind":"door","wall":0,"u":entry_x/(house_width*0.5),"width":1.5,"height":2.3},{"kind":"window","wall":1,"u":-0.45,"y":1.5},{"kind":"window","wall":2,"u":-0.6,"y":1.5}]
+	if FileAccess.file_exists("user://house_builder_playtest.tscn") and not "--house-play-test" in OS.get_cmdline_user_args():
+		house=load("user://house_builder_playtest.tscn").instantiate()
+		authored_plan=house.get_node_or_null("InteriorPlan")
+		house_width=house.width; house_depth=house.depth
+		storeys=maxi(1,authored_plan.levels().size()) if authored_plan else 1
+		storey_height=authored_plan.floor_height if authored_plan else house.wall_height
+	else:
+		house=House.new(); house.name="Casa"; house.width=house_width; house.depth=house_depth
+		house.wall_height=storey_height*storeys; house.roof_height=2.1
+		var divider := lerpf(-house_width*0.5+1.8,house_width*0.5-2.2,room_split_x)
+		entry_x=(divider+house_width*0.5-1.55)*0.5
+		house.openings=[{"kind":"door","wall":0,"u":entry_x/(house_width*0.5),"width":1.5,"height":2.3},{"kind":"window","wall":1,"u":-0.45,"y":1.5},{"kind":"window","wall":2,"u":-0.6,"y":1.5}]
 	world.add_child(house)
 	world.add_child(interior)
-	interior.build(house_width,house_depth,storey_height,storeys,room_split_x,room_split_z,partition_thickness,house._material(Vector2(0.5,0),Color(0.60,0.53,0.46)),house._plaster_material())
+	if not authored_plan: interior.build(house_width,house_depth,storey_height,storeys,room_split_x,room_split_z,partition_thickness,house._material(Vector2(0.5,0),Color(0.60,0.53,0.46)),house._plaster_material())
 	for floor_index in storeys:
 		for point in [Vector3(-2,2.0,-2.5),Vector3(-2,2.0,2.5),Vector3(1.8,2.0,0)]:
 			var light := OmniLight3D.new(); light.position=point+Vector3.UP*floor_index*storey_height
@@ -70,6 +78,11 @@ func _ready() -> void:
 	world.add_child(entrance_light)
 	player=load("res://scenes/player/player3.tscn").instantiate(); player.name="Player"
 	player.position=Vector3(entry_x,0.15,house_depth*0.5+2.0); world.add_child(player)
+	if authored_plan:
+		for record in house.openings:
+			var opening: Dictionary=house.resolved_opening(record)
+			if opening.door and house.wall_exposed(opening.wall,opening.along):
+				player.position=house.wall_point(opening.wall,opening.along,0.15,1.5); break
 	camera=Camera3D.new(); camera.set_script(load("res://scripts/village/iso_cam.gd")); camera.name="IsoCam"
 	camera.target_path=NodePath("../Player"); camera.pitch_deg=48; camera.ortho_size=17.5
 	camera.focus_height=4.0; camera.pixel_rows=450; camera.add_to_group("camera_rig"); world.add_child(camera)
@@ -86,6 +99,7 @@ func nearest_door() -> Node3D:
 	for child in house._generated.get_children():
 		if child is Door: all.append(child)
 	all.append_array(interior.doors)
+	if authored_plan: all.append_array(authored_plan.doors())
 	for door in all:
 		var center: Vector3=(door.get_parent() as Node3D).to_global(door.closed_frame*Vector3(door.door_width*0.5,0,0))
 		var delta := player.global_position-center
@@ -98,6 +112,9 @@ func _process(delta: float) -> void:
 	var p := player.position
 	var margin := -0.12 if inside else 0.12
 	var entered := absf(p.x)<house_width*0.5-margin and absf(p.z)<house_depth*0.5-margin and p.y>-0.5
+	if house.wing_enabled:
+		var q: Vector3=house.wing_transform().affine_inverse()*p
+		entered=entered or (absf(q.x)<house.wing_span()*0.5-margin and absf(q.z)<(house.width*0.5+house.wing_length)*0.5-margin and p.y>-0.5)
 	var collision: CollisionShape3D=player.get_node("Collision")
 	var feet_y: float=p.y+collision.position.y-collision.shape.height*0.5
 	active_floor=clampi(floori((feet_y+0.2)/storey_height),0,storeys-1)
@@ -106,6 +123,7 @@ func _process(delta: float) -> void:
 		house.set_cutaway(inside,active_floor*storey_height,storey_height)
 	interior.show_level(active_floor,inside)
 	if inside: interior.reveal_room(player.global_position,camera.global_position)
+	if authored_plan: authored_plan.runtime_view(inside,active_floor,player.global_position,camera.global_position)
 	blend=move_toward(blend,1.0 if inside else 0.0,delta*4)
 	sun.light_energy=lerpf(1.15,0.025,blend)
 	environment.ambient_light_energy=lerpf(0.408,0.10,blend)

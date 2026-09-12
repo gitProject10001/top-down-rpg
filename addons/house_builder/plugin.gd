@@ -2,6 +2,9 @@
 extends EditorPlugin
 const House=preload("res://addons/house_builder/house.gd")
 const Gizmo=preload("res://addons/house_builder/gizmo.gd")
+const Plan=preload("res://addons/house_builder/plan.gd")
+const Element=preload("res://addons/house_builder/plan_element.gd")
+var plan_gizmos: EditorNode3DGizmoPlugin
 var gizmos: EditorNode3DGizmoPlugin
 var dock: VBoxContainer
 var scroll: ScrollContainer
@@ -23,6 +26,8 @@ func _enter_tree() -> void:
 	gizmos=Gizmo.new()
 	gizmos.undo=get_undo_redo()
 	add_node_3d_gizmo_plugin(gizmos)
+	plan_gizmos=preload("res://addons/house_builder/plan_gizmo.gd").new()
+	plan_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(plan_gizmos)
 	dock=VBoxContainer.new()
 	scroll=ScrollContainer.new()
 	scroll.name="Hearth Case"
@@ -63,9 +68,11 @@ func _enter_tree() -> void:
 	opening_help.text="Aperture: maniglia centrale per spostare; laterale per larghezza; superiore per altezza. Le porte restano a terra."
 	opening_help.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	dock.add_child(opening_help)
+	for label in ["Interni: crea / mostra", "Vista esterna", "Aggiungi piano", "Piano successivo", "Aggiungi stanza", "Aggiungi muro", "Aggiungi scala", "Aggiungi dettaglio"]:
+		var action := Button.new(); action.text=label; action.pressed.connect(_plan_action.bind(label)); dock.add_child(action)
 	var play := Button.new()
-	play.text="▶ Prova interni (Play)"
-	play.pressed.connect(func(): EditorInterface.play_custom_scene("res://scenes/dev/house_interior_playable.tscn"))
+	play.text="▶ Play casa selezionata"
+	play.pressed.connect(_play_selected)
 	dock.add_child(play)
 	add_control_to_dock(DOCK_SLOT_RIGHT_UL,scroll)
 	set_input_event_forwarding_always_enabled()
@@ -77,6 +84,7 @@ func _enter_tree() -> void:
 func _exit_tree() -> void:
 	_cancel()
 	remove_node_3d_gizmo_plugin(gizmos)
+	remove_node_3d_gizmo_plugin(plan_gizmos)
 	remove_custom_type("HearthHouse")
 	remove_control_from_docks(scroll)
 	scroll.queue_free()
@@ -103,7 +111,64 @@ func _process(_delta: float) -> void:
 	var root := EditorInterface.get_edited_scene_root()
 	if root!=last_root:
 		_cancel(); last_root=root
-func _handles(object: Object) -> bool: return object is House or mode!=0
+func _handles(object: Object) -> bool: return object is House or object is Plan or object is Element or mode!=0
+
+func _selected_house() -> Node3D:
+	for selected in EditorInterface.get_selection().get_selected_nodes():
+		var node: Node=selected
+		while node!=null:
+			if node is House: return node
+			node=node.get_parent()
+	return null
+func _owned(node: Node,root: Node) -> void:
+	if node!=root: node.owner=root
+	for child in node.get_children(): _owned(child,root)
+func _attach(parent: Node,node: Node,root: Node) -> void:
+	parent.add_child(node,true); _owned(node,root)
+	if parent is Plan: parent._pending=true
+	elif parent.get_parent() is Plan: parent.get_parent()._pending=true
+func _add_authored(parent: Node,node: Node,label: String) -> void:
+	var undo := get_undo_redo(); undo.create_action(label,UndoRedo.MERGE_DISABLE,parent)
+	undo.add_do_method(self,"_attach",parent,node,EditorInterface.get_edited_scene_root())
+	undo.add_undo_method(parent,"remove_child",node); undo.add_do_reference(node); undo.commit_action()
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(node); EditorInterface.edit_node(node)
+func _plan_action(label: String) -> void:
+	var selected := _selected_house()
+	if selected==null: status.text="Seleziona una casa o uno dei suoi elementi."; return
+	var plan=selected.get_node_or_null("InteriorPlan")
+	if plan==null:
+		plan=Plan.new(); plan.name="InteriorPlan"
+		var floor_node := Node3D.new(); floor_node.name="Piano_1"; plan.add_child(floor_node)
+		_add_authored(selected,plan,"Crea interni modificabili")
+	if label=="Vista esterna": plan.preview_inside=false; return
+	plan.preview_inside=true
+	if label=="Interni: crea / mostra": EditorInterface.edit_node(plan); return
+	if label=="Piano successivo": plan.active_floor=(plan.active_floor+1)%maxi(1,plan.levels().size()); return
+	if label=="Aggiungi piano":
+		if plan.levels().size()>=3: status.text="Massimo tre piani in questa versione."; return
+		var floor_node := Node3D.new(); floor_node.name="Piano_%d"%(plan.levels().size()+1)
+		_add_authored(plan,floor_node,"Aggiungi piano"); plan.active_floor=plan.levels().size()-1; return
+	var level: Node3D=plan.levels()[clampi(plan.active_floor,0,plan.levels().size()-1)]
+	var element := Element.new()
+	element.kind={"Aggiungi stanza":0,"Aggiungi muro":1,"Aggiungi scala":2,"Aggiungi dettaglio":3}.get(label,0)
+	element.name=["Stanza","Muro","Scala","Dettaglio"][element.kind]
+	element.stable_id="manual_%s"%str(Time.get_ticks_usec())
+	element.dimensions=[Vector3(3,plan.floor_height,3),Vector3(3,plan.floor_height,0.18),Vector3(1.2,plan.floor_height,4.2),Vector3(1,0.8,0.7)][element.kind]
+	_add_authored(level,element,label)
+func _play_selected() -> void:
+	var selected := _selected_house()
+	if selected==null: status.text="Seleziona la casa da provare."; return
+	var packed := _snapshot(selected)
+	var error := ResourceSaver.save(packed,"user://house_builder_playtest.tscn") if packed else ERR_CANT_CREATE
+	if error!=OK: status.text="Impossibile preparare la prova: %d"%error; return
+	EditorInterface.play_custom_scene("res://scenes/dev/house_interior_playable.tscn")
+func _snapshot(selected: Node3D) -> PackedScene:
+	selected.rebuild()
+	var clone: Node3D=selected.duplicate()
+	clone.transform=Transform3D.IDENTITY; clone.owner=null; _owned(clone,clone)
+	var packed := PackedScene.new(); var error := packed.pack(clone)
+	clone.free()
+	return packed if error==OK else null
 func _set_mode(value: int) -> void:
 	_cancel(); mode=value
 	# The terrain brush and house placement must not consume the same stroke.
