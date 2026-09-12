@@ -68,7 +68,7 @@ func _enter_tree() -> void:
 	opening_help.text="Aperture: maniglia centrale per spostare; laterale per larghezza; superiore per altezza. Le porte restano a terra."
 	opening_help.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	dock.add_child(opening_help)
-	for label in ["Interni: crea / mostra", "Vista esterna", "Aggiungi piano", "Piano successivo", "Aggiungi stanza", "Aggiungi muro", "Aggiungi scala", "Aggiungi dettaglio"]:
+	for label in ["Interni: crea / mostra", "Vista esterna", "Aggiungi piano", "Piano successivo", "Aggiungi stanza", "Aggiungi muro", "Aggiungi scala", "Aggiungi dettaglio", "Genera stanze (piano attivo)"]:
 		var action := Button.new(); action.text=label; action.pressed.connect(_plan_action.bind(label)); dock.add_child(action)
 	var play := Button.new()
 	play.text="▶ Play casa selezionata"
@@ -149,6 +149,13 @@ func _plan_action(label: String) -> void:
 		var floor_node := Node3D.new(); floor_node.name="Piano_%d"%(plan.levels().size()+1)
 		_add_authored(plan,floor_node,"Aggiungi piano"); plan.active_floor=plan.levels().size()-1; return
 	var level: Node3D=plan.levels()[clampi(plan.active_floor,0,plan.levels().size()-1)]
+	if label=="Genera stanze (piano attivo)":
+		var index: int=clampi(plan.active_floor,0,plan.levels().size()-1)
+		var before: Array=plan.level_records(index); var after: Array=plan.propose_rooms(index)
+		var undo := get_undo_redo(); undo.create_action("Genera stanze",UndoRedo.MERGE_DISABLE,plan)
+		undo.add_do_method(plan,"apply_records",index,after); undo.add_undo_method(plan,"apply_records",index,before); undo.commit_action()
+		status.text=plan.generation_report
+		return
 	var element := Element.new()
 	element.kind={"Aggiungi stanza":0,"Aggiungi muro":1,"Aggiungi scala":2,"Aggiungi dettaglio":3}.get(label,0)
 	element.name=["Stanza","Muro","Scala","Dettaglio"][element.kind]

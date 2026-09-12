@@ -2,6 +2,8 @@
 extends Node3D
 const Element=preload("res://addons/house_builder/plan_element.gd")
 const Door=preload("res://addons/house_builder/door.gd")
+const Generator=preload("res://addons/house_builder/plan_generator.gd")
+var generation_report := ""
 const MeshJoin=preload("res://addons/house_builder/mesh_join.gd")
 @export_range(2.4,3.5,0.1) var floor_height := 2.6:
 	set(v): floor_height=v; _pending=true
@@ -85,4 +87,64 @@ func doors() -> Array[Node3D]:
 		if is_instance_valid(e._visual):
 			for child in e._visual.get_children():
 				if child is Door: result.append(child)
+	return result
+func level_records(index: int) -> Array:
+	var result: Array=[]
+	for e in levels()[index].get_children():
+		if e is Element:
+			var r: Dictionary=e.record(); r.merge({"id":e.stable_id,"generated":e.generated,"locked":e.locked,"baseline":e.baseline.duplicate(true)})
+			result.append(r)
+	return result
+func apply_records(index: int,records: Array) -> void:
+	var level := levels()[index]
+	var wanted: Dictionary={}
+	for record in records: wanted[record.id]=record
+	var existing: Dictionary={}
+	for e in level.get_children():
+		if e is Element:
+			if not wanted.has(e.stable_id): e.free()
+			else: existing[e.stable_id]=e
+	for record in records:
+		var e: Node3D=existing.get(record.id)
+		if e==null:
+			e=Element.new(); e.name=["Stanza_","Muro_","Scala_","Oggetto_"][record.kind]+str(record.id)
+			level.add_child(e,true); e.owner=owner
+		e.stable_id=record.id
+		for key in ["kind","position","rotation","dimensions","room_type","has_door","door_offset","door_width","prop_type","room_ids"]:
+			if record.has(key): e.set(key,record[key])
+		e.asset=load(record.asset) if record.get("asset","")!="" else null
+		e.generated=record.get("generated",true); e.locked=record.get("locked",false)
+		e.baseline=record.get("baseline",{}).duplicate(true)
+		if e.baseline.is_empty() and e.generated: e.accept_baseline()
+	_pending=true
+func propose_rooms(index: int) -> Array:
+	var current := level_records(index)
+	var fixed: Array=[]
+	var preserved: Array=[]
+	for e in levels()[index].get_children():
+		if not e is Element: continue
+		var r: Dictionary=e.record(); r.merge({"id":e.stable_id,"generated":e.generated,"locked":e.locked,"baseline":e.baseline.duplicate(true)})
+		if e.kind==0 and e.protected_edit(): fixed.append(r)
+		elif e.kind!=0 and (e.kind!=1 or e.protected_edit()): preserved.append(r)
+	var rooms := Generator.rooms(self,index,fixed)
+	var walls := Generator.walls(rooms,floor_height)
+	var obstacles: Array=[]
+	for r in preserved:
+		if r.kind==2: obstacles.append(r)
+	if index<levels().size()-1 and obstacles.is_empty():
+		var stairs := Generator.stair(self,rooms)
+		if stairs.is_empty(): generation_report="Spazio insufficiente per scala e passaggio: allarga la casa o posiziona una scala manuale."; return current
+		preserved.append(stairs); obstacles.append(stairs)
+	if index>0:
+		for r in level_records(index-1):
+			if r.kind==2: obstacles.append(r)
+	var errors := Generator.validate(rooms,walls)
+	if not Generator.clear_doors(walls,obstacles): errors.append("Una scala impedisce il passaggio di una porta")
+	generation_report="; ".join(errors) if not errors.is_empty() else "%d stanze collegate"%rooms.size()
+	if not errors.is_empty(): return current
+	var ids: Dictionary={}
+	for r in preserved: ids[r.id]=true
+	var result: Array=rooms+preserved
+	for r in walls:
+		if not ids.has(r.id): result.append(r)
 	return result

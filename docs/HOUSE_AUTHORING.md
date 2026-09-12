@@ -16,8 +16,22 @@ gli elementi dell'utente. **Play casa selezionata** prepara una copia temporanea
 in `user://house_builder_playtest.tscn` e avvia gli stessi dati nel banco di prova.
 La scena sorgente non viene modificata dal gameplay.
 
+## Passaggio 2: planimetria iniziale
+
+**Genera stanze (piano attivo)** usa `seed_value` e `requested_rooms` del piano.
+Il metodo riserva un ingresso longitudinale, suddivide i rettangoli residui,
+costruisce il grafo delle adiacenze e apre un insieme di porte che collega le stanze.
+Per case a L viene aggiunta la stanza nell'ala. I piani multipli riservano una
+scala con corridoio laterale e un foro nel solaio; gli accessi delle stanze evitano
+l'ingombro della scala. Per questa configurazione automatica servono almeno
+6 m di larghezza e circa 6 m di profondità; altrimenti il comando spiega il limite
+e mantiene la planimetria precedente. Si possono comunque disegnare soluzioni manuali.
+
+La geometria viene verificata prima di applicarla: stanze troppo strette,
+sovrapposizioni e stanze scollegate impediscono la sostituzione. Seed uguale e
+parametri uguali producono lo stesso risultato. Undo ripristina la proposta precedente.
+
 ## Passaggi successivi
 
-2. Generazione delle stanze e dei collegamenti con seed e controlli geometrici.
 3. Rigenerazione selettiva e protezione di blocchi/modifiche dell'utente.
 4. Arredamento opzionale con kit riutilizzabile e spazi di accesso liberi.
