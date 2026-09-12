@@ -21,6 +21,9 @@ var opening_index := -1
 var restore_openings: Array[Dictionary]=[]
 var last_root: Node
 var _test_runner: RefCounted
+var tabs: TabContainer
+var opening_choice: OptionButton
+var context_label: Label
 
 func _enter_tree() -> void:
 	error_dialog=AcceptDialog.new()
@@ -41,7 +44,7 @@ func _enter_tree() -> void:
 	scroll.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.follow_focus=true
 	dock.size_flags_horizontal=Control.SIZE_EXPAND_FILL
-	dock.custom_minimum_size.x=230
+	dock.custom_minimum_size.x=300
 	scroll.add_child(dock)
 	var title := Label.new()
 	title.text="Case · tetto a due falde"
@@ -81,14 +84,17 @@ func _enter_tree() -> void:
 	play.text="▶ Play casa selezionata"
 	play.pressed.connect(_play_selected)
 	dock.add_child(play)
+	_build_context_tabs()
 	add_control_to_dock(DOCK_SLOT_RIGHT_UL,scroll)
 	set_input_event_forwarding_always_enabled()
 	scene_changed.connect(_scene_changed)
+	EditorInterface.get_selection().selection_changed.connect(_selection_context)
 	set_process(true)
 	if "--house-editor-test" in OS.get_cmdline_user_args():
 		_test_runner=load("res://tools/check_house_editor.gd").new()
 		_test_runner.call_deferred("run",self)
 func _exit_tree() -> void:
+	EditorInterface.get_selection().selection_changed.disconnect(_selection_context)
 	error_dialog.queue_free()
 	_cancel()
 	remove_node_3d_gizmo_plugin(gizmos)
@@ -97,6 +103,68 @@ func _exit_tree() -> void:
 	remove_control_from_docks(scroll)
 	scroll.queue_free()
 func _scene_changed(_root: Node) -> void: _cancel()
+func _build_context_tabs() -> void:
+	context_label=Label.new(); context_label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	dock.add_child(context_label); dock.move_child(context_label,1)
+	tabs=TabContainer.new(); tabs.size_flags_horizontal=Control.SIZE_EXPAND_FILL
+	dock.add_child(tabs); dock.move_child(tabs,2)
+	for title in ["Casa","Aperture","Interni","Arredo"]:
+		var page := VBoxContainer.new(); page.name=title; tabs.add_child(page)
+	var exterior := ["Seleziona / gizmo","Disegna casa","Aggiungi ala a L","Rimuovi ala","Vista esterna"]
+	var openings := ["Posiziona finestra","Posiziona porta","Sposta apertura","Rimuovi apertura"]
+	var furniture := ["Aggiungi dettaglio","Arreda piano","Arreda stanza selezionata","Rimuovi arredo generato"]
+	for child in dock.get_children():
+		if child is Button:
+			if child.text.begins_with("▶"): continue
+			var index := 0 if child.text in exterior else (1 if child.text in openings else (3 if child.text in furniture else 2))
+			child.reparent(tabs.get_child(index))
+		elif child is Label and child not in [context_label,status] and child!=dock.get_child(0):
+			child.queue_free()
+	opening_choice=OptionButton.new(); opening_choice.item_selected.connect(_choose_opening)
+	tabs.get_child(1).add_child(opening_choice); tabs.get_child(1).move_child(opening_choice,0)
+	var furniture_lock := Button.new(); furniture_lock.text="Blocca / sblocca mobile"
+	furniture_lock.pressed.connect(_plan_action.bind("Blocca / sblocca elemento")); tabs.get_child(3).add_child(furniture_lock)
+	tabs.tab_changed.connect(_context_changed)
+	_selection_context()
+func _choose_opening(index: int) -> void:
+	gizmos.active_opening=index; _refresh_context_gizmos()
+func _selection_context() -> void:
+	if tabs==null: return
+	var selected := EditorInterface.get_selection().get_selected_nodes()
+	var node: Node=selected[0] if not selected.is_empty() else null
+	context_label.text="Selezione: "+str(node.name) if node else "Seleziona una casa o disegnane una."
+	if node is Element: tabs.current_tab=3 if node.kind==3 else 2
+	elif node is Plan: tabs.current_tab=2
+	elif node is House and tabs.current_tab>1: tabs.current_tab=0
+	if node is House or node is Plan or node is Element: _show_context_dock.call_deferred()
+	opening_choice.clear()
+	var house := _selected_house()
+	if house:
+		for i in house.openings.size(): opening_choice.add_item(("Porta" if house.resolved_opening(house.openings[i]).door else "Finestra")+" %d"%(i+1))
+		if opening_choice.item_count>0: opening_choice.select(clampi(gizmos.active_opening,0,opening_choice.item_count-1)); gizmos.active_opening=opening_choice.selected
+	_refresh_context_gizmos()
+func _show_context_dock() -> void:
+	var ancestor: Node=scroll.get_parent()
+	while ancestor!=null:
+		if ancestor is EditorDock: ancestor.make_visible(); return
+		ancestor=ancestor.get_parent()
+func _context_changed(_index: int) -> void:
+	_set_mode(0)
+	buttons[0].button_pressed=true
+	_refresh_context_gizmos()
+func _refresh_context_gizmos() -> void:
+	var house := _selected_house()
+	gizmos.focus=house; gizmos.context=mini(tabs.current_tab,2)
+	plan_gizmos.focus=null
+	for node in EditorInterface.get_selection().get_selected_nodes():
+		if node is Element and ((tabs.current_tab==3 and node.kind==3) or (tabs.current_tab==2 and node.kind!=3)): plan_gizmos.focus=node
+	var root := EditorInterface.get_edited_scene_root()
+	if root:
+		for h in _houses(root):
+			h.update_gizmos()
+			var plan=h.get_node_or_null("InteriorPlan")
+			if plan:
+				for e in plan.elements(): e.update_gizmos()
 func _toggle_wing(enabled: bool) -> void:
 	for selected in EditorInterface.get_selection().get_selected_nodes():
 		if not selected is House: continue

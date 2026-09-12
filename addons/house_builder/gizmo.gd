@@ -3,6 +3,9 @@ extends EditorNode3DGizmoPlugin
 const House=preload("res://addons/house_builder/house.gd")
 var undo: EditorUndoRedoManager
 var redraw_count := 0
+var focus: Node3D
+var context := 0 # 0 exterior, 1 openings, 2 hidden
+var active_opening := 0
 func _init() -> void:
 	create_handle_material("handles")
 	create_material("outline",Color(1.0,0.67,0.18))
@@ -30,7 +33,12 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		points.append(n.wall_point(o.wall,o.along+o.width*0.5,o.y,0.12))
 		points.append(n.wall_point(o.wall,o.along,o.y+o.height*0.5,0.12))
 		ids.append(10000+i*2); ids.append(10001+i*2)
-	gizmo.add_handles(points,get_material("handles",gizmo),ids)
+	var shown_points := PackedVector3Array(); var shown_ids := PackedInt32Array()
+	if n==focus:
+		for i in ids.size():
+			if (context==0 and ids[i]<100) or (context==1 and ids[i] in [100+active_opening,10000+active_opening*2,10001+active_opening*2]):
+				shown_points.append(points[i]); shown_ids.append(ids[i])
+	if not shown_points.is_empty(): gizmo.add_handles(shown_points,get_material("handles",gizmo),shown_ids)
 	var lines := PackedVector3Array()
 	var corners := [Vector3(-w,0,-d),Vector3(w,0,-d),Vector3(w,0,d),Vector3(-w,0,d)]
 	for i in 4:
@@ -44,7 +52,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		for i in 4:
 			lines.append(frame*wing_corners[i]); lines.append(frame*wing_corners[(i+1)%4])
 			lines.append(frame*wing_corners[i]); lines.append(frame*(wing_corners[i]+Vector3.UP*h))
-	gizmo.add_lines(lines,get_material("outline",gizmo))
+	if n==focus and context<2: gizmo.add_lines(lines,get_material("outline",gizmo))
 	if is_instance_valid(n._generated):
 		for child in n._generated.get_children():
 			if child is MeshInstance3D: gizmo.add_collision_triangles(child.mesh.generate_triangle_mesh())

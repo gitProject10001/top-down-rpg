@@ -2,6 +2,7 @@
 extends EditorNode3DGizmoPlugin
 const Element=preload("res://addons/house_builder/plan_element.gd")
 var undo: EditorUndoRedoManager
+var focus: Node3D
 func _init() -> void:
 	create_handle_material("handles"); create_material("outline",Color(0.35,0.8,1.0))
 func _has_gizmo(node: Node3D) -> bool: return node is Element
@@ -13,9 +14,9 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	var corners := [Vector3(-size.x*0.5,y,-size.z*0.5),Vector3(size.x*0.5,y,-size.z*0.5),Vector3(size.x*0.5,y,size.z*0.5),Vector3(-size.x*0.5,y,size.z*0.5)]
 	var lines := PackedVector3Array()
 	for i in 4: lines.append(corners[i]); lines.append(corners[(i+1)%4])
-	gizmo.add_lines(lines,get_material("outline",gizmo))
+	if n==focus: gizmo.add_lines(lines,get_material("outline",gizmo))
 	gizmo.add_collision_segments(lines)
-	gizmo.add_handles(PackedVector3Array([Vector3(size.x*0.5,y,0),Vector3(0,y,size.z*0.5)]),get_material("handles",gizmo),PackedInt32Array([0,1]))
+	if n==focus: gizmo.add_handles(PackedVector3Array([Vector3(size.x*0.5,y,0),Vector3(0,y,size.z*0.5)]),get_material("handles",gizmo),PackedInt32Array([0,1]))
 	if is_instance_valid(n._visual):
 		for child in n._visual.get_children():
 			if child is MeshInstance3D:

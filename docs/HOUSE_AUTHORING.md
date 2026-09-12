@@ -2,6 +2,12 @@
 
 Checkpoint iniziale: `e0a6b08`. GI e lightmap sono rimandati.
 
+Il pannello ora separa **Casa**, **Aperture**, **Interni** e **Arredo**. La selezione
+di una casa, stanza o mobile apre il contesto pertinente. Le maniglie dell'edificio
+sono visibili in Casa; in Aperture scegli dall'elenco la singola porta o finestra
+da modificare. Negli interni vengono mostrate solo le maniglie del nodo selezionato.
+Il [Village Builder](VILLAGE_BUILDER.md) ha un pannello separato per area, strade e lotti.
+
 ## Passaggio 1: dati dell'editor
 
 Seleziona una casa e premi **Interni: crea / mostra**. `InteriorPlan` contiene
