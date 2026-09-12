@@ -3,6 +3,8 @@ extends FighterIntent
 
 @export var stick_deadzone := 0.45
 @export var mouse_pixels := 26.0
+@export var screen_relative_directions := true
+var _mirror_screen := false
 var _mouse_travel := Vector2.ZERO
 var _screen_guard := SwingDir.UP
 var _screen_attack := SwingDir.UP
@@ -29,12 +31,29 @@ func _physics_process(_delta: float) -> void:
 	if d != SwingDir.NONE:
 		if guard: _screen_guard = d
 		if attack_held: _screen_attack = d
-	guard_dir = _screen_guard
-	attack_dir = _screen_attack
+	_update_direction_frame()
+	guard_dir = local_direction(_screen_guard)
+	attack_dir = local_direction(_screen_attack)
 	if was_held and not attack_held:
 		request_release()
 	if not (guard or attack_held):
 		_mouse_travel = Vector2.ZERO
+
+func _update_direction_frame() -> void:
+	var p := fighter()
+	var camera := get_viewport().get_camera_3d()
+	if p == null or camera == null: return
+	# Sideways poses are ambiguous: hysteresis avoids rapid left/right toggling.
+	var alignment: float = p.visuals.global_basis.x.normalized().dot(camera.global_basis.x)
+	if alignment > 0.15: _mirror_screen = false
+	elif alignment < -0.15: _mirror_screen = true
+
+func local_direction(direction: int) -> int:
+	return SwingDir.mirror(direction) if screen_relative_directions and _mirror_screen else direction
+
+## Inverse mapping for HUD. AI and hitboxes continue to speak actor-local directions.
+func screen_direction(direction: int) -> int:
+	return local_direction(direction)
 
 func _direction() -> int:
 	var stick := Input.get_vector("aim_left", "aim_right", "aim_up", "aim_down")

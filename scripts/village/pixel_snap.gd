@@ -56,6 +56,9 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if not enabled or _cam == null or _targets.is_empty():
 		return
+	# This lattice assumes constant metres per pixel; invalid in perspective.
+	if _cam.projection != Camera3D.PROJECTION_ORTHOGONAL:
+		return
 	var rows := _rows()
 	if rows <= 0:
 		return

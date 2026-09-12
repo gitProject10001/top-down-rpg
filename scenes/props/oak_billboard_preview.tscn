@@ -1,0 +1,27 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/props/painted_oak_360.tscn" id="1"]
+[ext_resource type="ArrayMesh" path="res://assets/models/camp/hearth_baked/geometry_026.res" id="2"]
+[ext_resource type="Shader" path="res://shaders/pixelart/painted_canopy.gdshader" id="3"]
+[ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/canopy_painting.png" id="4"]
+[ext_resource type="Script" path="res://scripts/village/oak_billboard_preview.gd" id="5"]
+
+[sub_resource type="ShaderMaterial" id="Canopy"]
+shader = ExtResource("3")
+shader_parameter/painting = ExtResource("4")
+shader_parameter/tint = Color(0.73,0.75,0.74,1)
+
+[node name="OakBillboardPreview" instance=ExtResource("1")]
+
+[node name="OakLeafSprays" parent="."]
+visible = false
+
+[node name="FallingLeaves" parent="."]
+emitting = false
+visible = false
+
+[node name="BillboardCrown" type="MeshInstance3D" parent="."]
+position = Vector3(0,4.2678733,0)
+mesh = ExtResource("2")
+material_override = SubResource("Canopy")
+script = ExtResource("5")

@@ -36,7 +36,7 @@ uniform float border_blend : hint_range(0.01, 0.4) = 0.16;
 // --- the painted layer atlas: one row, three columns (grass | dirt | gravel) -----------------
 uniform sampler2D layers : source_color, filter_linear_mipmap_anisotropic, repeat_enable;
 // World size of one tile of grass, and of one tile of road surface.
-uniform float grass_metres : hint_range(1.0, 40.0) = 11.0;
+uniform float grass_metres : hint_range(1.0, 40.0) = 2.5;
 uniform float road_metres : hint_range(1.0, 40.0) = 6.0;
 // THE ATLAS IS NOT THE PAINTING, and left raw it reads brighter and yellower than the village it
 // has to sit next to. Each grade maps one atlas column onto the mean of the matching part of the
@@ -47,7 +47,7 @@ uniform float road_metres : hint_range(1.0, 40.0) = 6.0;
 // NO source_color HINT ON THESE. They are multipliers, not colours: the hint would have Godot read
 // them as sRGB and convert, which cubes a 0.35 into a 0.1 and drops the whole field into shadow
 // while the stamp stays lit. That is exactly what it looked like.
-uniform vec3 grass_grade = vec3(0.35, 0.50, 0.59);
+uniform vec3 grass_grade = vec3(0.62, 0.59, 0.55);
 uniform vec3 dirt_grade = vec3(0.50, 0.70, 0.88);
 uniform vec3 gravel_grade = vec3(0.62, 0.74, 0.90);
 
@@ -71,8 +71,9 @@ uniform float macro_strength : hint_range(0.0, 1.0) = 0.35;
 uniform vec3 dry_tint : source_color = vec3(0.78, 0.74, 0.46);
 uniform vec3 lush_tint : source_color = vec3(0.46, 0.60, 0.30);
 // How much bare earth wears through the grass, and over how many metres it varies.
-uniform float wear_amount : hint_range(0.0, 1.0) = 0.35;
-uniform float wear_metres : hint_range(5.0, 200.0) = 46.0;
+uniform float wear_amount : hint_range(0.0, 1.0) = 0.85;
+uniform float wear_metres : hint_range(5.0, 200.0) = 22.0;
+uniform float gravel_amount : hint_range(0.0, 1.0) = 0.55;
 
 // --- the control map: where roads and lusher grass go ----------------------------------------
 // R = dirt road, G = gravel, B = lush grass. Linear data, never albedo.
@@ -83,6 +84,9 @@ uniform vec2 road_mask_size = vec2(100.0);
 uniform float road_edge_noise : hint_range(0.0, 0.3) = 0.08;
 
 varying vec3 world_position;
+uniform vec2 exploration_points[32];
+uniform int exploration_count = 0;
+uniform vec3 exploration_clearing = vec3(0.0);
 
 
 // --- noise ------------------------------------------------------------------------------------
@@ -162,6 +166,15 @@ vec3 tap(vec2 uv, vec2 ddx, vec2 ddy, vec3 rnd, float column) {
 	vec2 t = turn * uv + rnd.xy;
 	vec2 dx = turn * ddx;
 	vec2 dy = turn * ddy;
+	if (column < 0.5) {
+		// Sample a grass-only region of the village painting. Mirrored coordinates
+		// stay continuous at wrapping boundaries; this crop excludes the crossroads.
+		vec2 mirrored = 1.0 - abs(mod(t, 2.0) - 1.0);
+		vec2 crop_size = vec2(0.22, 0.22);
+		vec2 sign_uv = mix(vec2(1.0), vec2(-1.0), step(vec2(1.0), mod(t, 2.0)));
+		return textureGrad(painting, vec2(0.025, 0.025) + mirrored * crop_size,
+				dx * sign_uv * crop_size, dy * sign_uv * crop_size).rgb;
+	}
 	// The derivatives have to be squeezed exactly the way the coordinates were, or the mip
 	// selector picks a level for a texture the size of the whole atlas.
 	const vec2 squeeze = vec2(1.0 / COLUMNS, 1.0 / COLUMN_ASPECT);
@@ -179,9 +192,34 @@ vec3 stochastic_layer(vec2 pos, vec2 ddx, vec2 ddy, float metres, float column, 
 	vec2 v2;
 	vec2 v3;
 	triangle_grid(uv, w, v1, v2, v3);
+	if (column < 0.5) {
+		// Each vertex samples a bounded patch, with no wrapping or mirroring.
+		// Four independent meadow regions provide different painted features.
+		vec3 result = vec3(0.0);
+		vec3 weights = pow(w, vec3(3.0));
+		weights /= max(dot(weights, vec3(1.0)), 0.0001);
+		for (int i = 0; i < 3; i++) {
+			vec2 vertex = i == 0 ? v1 : (i == 1 ? v2 : v3);
+			vec3 rnd = vertex_random(vertex);
+			vec2 anchor = vec2(vertex.x + vertex.y * 0.5, vertex.y * 0.8660254);
+			float angle = rnd.z * 6.2831853;
+			mat2 rotation = mat2(vec2(cos(angle), sin(angle)), vec2(-sin(angle), cos(angle)));
+			vec2 corner = step(vec2(0.5), rnd.xy) * 0.75;
+			vec2 sample_uv = corner + vec2(0.125) + (rnd.xy - 0.5) * 0.04 + rotation * (uv - anchor) * 0.045;
+			result += textureGrad(painting, sample_uv, rotation * dx * 0.045, rotation * dy * 0.045).rgb * weights[i];
+		}
+		return result;
+	}
 	vec3 c1 = tap(uv, dx, dy, vertex_random(v1), column);
 	vec3 c2 = tap(uv, dx, dy, vertex_random(v2), column);
 	vec3 c3 = tap(uv, dx, dy, vertex_random(v3), column);
+	if (column < 0.5) {
+		// Prefer one painted sample locally, with smooth overlap at joins.
+		// No variance boost: the original brushwork already has the target contrast.
+		vec3 weights = pow(w, vec3(4.0));
+		weights /= max(weights.x + weights.y + weights.z, 0.0001);
+		return c1 * weights.x + c2 * weights.y + c3 * weights.z;
+	}
 	// Variance preserving: without the divide, the three-way blend halves the standard deviation
 	// and every triangle centre turns to flat colour.
 	//
@@ -231,10 +269,17 @@ void fragment() {
 	ground *= mix(vec3(1.0), balance(season) / balance(neutral), macro_strength);
 	ground *= 1.0 + (dryness - 0.5) * macro_strength * 0.35;
 
-	float wear = smoothstep(0.58, 0.82, fbm(pos / wear_metres + vec2(19.4, 7.7))) * wear_amount;
+	vec2 domain = pos + vec2(fbm(pos / 17.0), fbm(pos / 19.0 + 37.0)) * 12.0;
+	float edge_detail = (fbm(pos * 1.5) - 0.5) * 0.16;
+	float wear = smoothstep(0.43, 0.65, fbm(domain / wear_metres + vec2(19.4, 7.7)) + edge_detail) * wear_amount;
 	if (wear > 0.002) {
 		vec3 earth = stochastic_layer(pos, ddx, ddy, road_metres * 1.6, 1.0, DIRT_MEAN) * dirt_grade;
 		ground = mix(ground, earth, wear);
+	}
+	float stones = smoothstep(0.56, 0.73, fbm(domain / 13.0 + 81.0) + edge_detail) * gravel_amount;
+	if (stones > 0.002) {
+		vec3 stone = stochastic_layer(pos, ddx, ddy, road_metres * 0.5, 2.0, GRAVEL_MEAN) * gravel_grade;
+		ground = mix(ground, stone, stones);
 	}
 
 	// 3. The village painting, stamped in its own 45-degree frame. It is the art the rest of the
@@ -247,6 +292,14 @@ void fragment() {
 	float stamp = smoothstep(0.0, border_blend, edge + wobble);
 	vec3 painted = texture(painting, clamp(uv, vec2(0.0), vec2(1.0))).rgb * vec3(0.62, 0.59, 0.55);
 	ALBEDO = mix(ground, painted, stamp);
+	// Match world_stream.gd: the same corridors exclude vegetation.
+	float trail_x = 18.0*sin(pos.y/95.0) + 9.0*sin(pos.y/37.0);
+	float distance_to_trail = min(abs(pos.x-trail_x), abs(pos.y-0.35*pos.x-90.0));
+	float trail = (1.0-smoothstep(1.7,3.5,distance_to_trail+(fbm(pos*1.3)-0.5)*1.2)) * (1.0-stamp);
+	if (trail > 0.002) {
+		vec3 soil = stochastic_layer(pos, ddx, ddy, road_metres, 1.0, DIRT_MEAN)*dirt_grade;
+		ALBEDO = mix(ALBEDO,soil,trail);
+	}
 
 	// 4. The control map. Roads and lusher grass are painted from the same atlas, so a road is a
 	//    painted surface and not a flat brown decal sitting on one.
@@ -277,6 +330,24 @@ void fragment() {
 		}
 	}
 
+	// Same authored polyline used by decoration exclusion. No second road layout.
+	float route_distance = 100000.0;
+	for (int i = 0; i < 31; i++) {
+		if (i + 1 >= exploration_count) { break; }
+		vec2 a = exploration_points[i];
+		vec2 ab = exploration_points[i+1] - a;
+		float t = clamp(dot(pos-a,ab)/max(dot(ab,ab),0.001),0.0,1.0);
+		route_distance = min(route_distance,length(pos-a-ab*t));
+	}
+	float route_wear = 1.0-smoothstep(1.0,2.6,route_distance+(ground_noise(pos*2.0)-0.5)*0.6);
+	float clearing_wear = (1.0-smoothstep(5.0,max(6.0,exploration_clearing.z),length(pos-exploration_clearing.xy)))*0.65;
+	if (exploration_count > 1) {
+		float amount = max(route_wear,clearing_wear)*(1.0-stamp);
+		if (amount > 0.002) {
+			vec3 path_soil = stochastic_layer(pos,ddx,ddy,road_metres,1.0,DIRT_MEAN)*dirt_grade;
+			ALBEDO = mix(ALBEDO,path_soil,amount);
+		}
+	}
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;
 }

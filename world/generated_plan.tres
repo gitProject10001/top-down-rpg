@@ -1,0 +1,57 @@
+[gd_resource type="Resource" format=3]
+
+[ext_resource type="Script" path="res://scripts/village/world_plan.gd" id="1_7ln0t"]
+
+[resource]
+script = ExtResource("1_7ln0t")
+regions = Array[Dictionary]([{
+"center": Vector2(485.4839, 316.0573),
+"height": 24.180676,
+"kind": "forest",
+"radius": 197.6658
+}, {
+"center": Vector2(416.7705, -633.57996),
+"height": 13.634584,
+"kind": "forest",
+"radius": 224.35532
+}, {
+"center": Vector2(87.743774, 382.43335),
+"height": 16.429525,
+"kind": "forest",
+"radius": 163.2438
+}, {
+"center": Vector2(409.67505, -491.10165),
+"height": 14.514187,
+"kind": "forest",
+"radius": 194.64941
+}, {
+"center": Vector2(-399.40417, 219.8251),
+"height": 16.536922,
+"kind": "forest",
+"radius": 197.294
+}, {
+"center": Vector2(175.96484, -458.99612),
+"height": 13.841354,
+"kind": "forest",
+"radius": 157.21608
+}, {
+"center": Vector2(440.91995, 524.0305),
+"height": 19.199934,
+"kind": "upland",
+"radius": 201.0123
+}, {
+"center": Vector2(-616.93396, -404.73126),
+"height": 20.491856,
+"kind": "upland",
+"radius": 226.10007
+}, {
+"center": Vector2(621.38245, 525.22577),
+"height": 25.322834,
+"kind": "upland",
+"radius": 257.75354
+}, {
+"center": Vector2(-390.38126, -595.812),
+"height": 21.290905,
+"kind": "upland",
+"radius": 226.49173
+}])

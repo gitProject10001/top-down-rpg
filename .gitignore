@@ -16,6 +16,7 @@
 renders/
 captures/
 logs/
+tmp/
 user://
 *.log
 

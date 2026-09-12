@@ -1,37 +1,18 @@
 extends Camera3D
-## ORTHOGRAPHIC ISO CAMERA that keeps the world locked to the pixel grid.
-##
-## WHY NOT scenes/camera_rig.tscn. That rig is perspective (fov 42), orbits, and runs a depth-of-
-## field CameraAttributesPractical. All three are wrong here and none of them is a setting: a
-## perspective camera makes two identical barrels different sizes, which pixel art never does;
-## orbiting breaks the fixed axonometric read the whole look depends on; and DoF is a continuous
-## blur, which is exactly the thing a 64-colour palette cannot represent. camera_rig.gd is left
-## alone -- this is a separate camera for a separate contract.
-##
-## THE PIXEL SNAP, which is the only non-obvious thing here.
-##
-## Render the world at 640x360 and move the camera by an arbitrary fraction of a pixel, and every
-## static edge in the frame re-samples on a different texel boundary each frame. A wall that is not
-## moving crawls. It is the single loudest tell that a "pixel art" scene is really a filtered 3D
-## render, and no amount of shader work hides it.
-##
-## The fix is to move the camera in whole pixels. Because the projection is orthographic, one screen
-## pixel is a constant number of world metres -- size / viewport_height -- so the camera's offset
-## along its own right and up axes can simply be rounded to a multiple of that. Depth is left alone:
-## moving along the view axis changes nothing about where a texel lands under an orthographic
-## projection.
-##
-## The residue is that the camera advances in ~3 cm steps instead of continuously. At walking speed
-## that is invisible; the alternative (feeding the sub-pixel remainder back through a shifted,
-## oversized SubViewportContainer) buys smoother camera motion at the cost of a one-pixel border and
-## a lot more moving parts. If the stepping ever shows, that is the upgrade -- not turning the snap
-## off.
+## Top-down orbit camera with narrow perspective and an orthographic fallback.
+## FOV controls perspective strength; framing matching derives viewing distance
+## from the existing ortho_size span. Pixel snapping is orthographic-only.
 
 ## What to follow. Empty leaves the camera wherever it was placed, which is what the fixed hero
 ## framing and the --shot renders use.
 @export var target_path: NodePath
 
 @export_group("Framing")
+## Narrow perspective preserves the top-down composition while showing depth.
+@export var perspective_enabled := false
+@export_range(10.0, 40.0, 0.5) var perspective_fov := 20.0
+## Match ortho_size at the focus plane; distance then follows FOV and combat zoom.
+@export var match_perspective_framing := true
 ## Down-angle. The reference sits near 55 degrees -- high enough to read the ground plan, shallow
 ## enough that roofs and tent sides still show a face.
 @export_range(20.0, 89.0, 0.5) var pitch_deg := 55.0
@@ -63,7 +44,9 @@ extends Camera3D
 ## pixel snap rounds along the camera's axes rather than the world's, and the camp is real geometry
 ## rather than cards facing one direction. Only the pitch is fixed, and that is the part the
 ## axonometric read actually depends on.
-@export var free_rotate := true
+@export var free_rotate := false
+## Independent of free orbit: lock may frame the pair without rotating the view.
+@export var lock_rotate := false
 ## Degrees per second at full deflection.
 @export_range(15.0, 360.0, 5.0) var rotate_speed_deg := 110.0
 
@@ -147,7 +130,9 @@ func _select_lock(cycle := false) -> void:
 
 
 func _ready() -> void:
-	projection = PROJECTION_ORTHOGONAL
+	projection = PROJECTION_PERSPECTIVE if perspective_enabled else PROJECTION_ORTHOGONAL
+	keep_aspect = KEEP_HEIGHT
+	fov = perspective_fov
 	_view_yaw = deg_to_rad(yaw_deg)
 	_free_yaw = _view_yaw
 	size = ortho_size
@@ -177,7 +162,7 @@ func _apply(instant: bool, delta := 0.0) -> void:
 			_free_yaw = wrapf(_free_yaw+turn*deg_to_rad(rotate_speed_deg)*delta,-PI,PI)
 
 	var yaw_goal := _free_yaw
-	if in_combat:
+	if in_combat and lock_rotate:
 		var bearing := opponent.global_position-_target.global_position
 		if Vector2(bearing.x,bearing.z).length() > .4:
 			var behind := atan2(-bearing.x,-bearing.z)
@@ -235,8 +220,18 @@ func _apply(instant: bool, delta := 0.0) -> void:
 		_focus = global_position + basis_want.z * -distance
 		_have_focus = true
 
-	var pos := _focus + basis_want.z * distance
-	if pixel_snap:
+	projection = PROJECTION_PERSPECTIVE if perspective_enabled else PROJECTION_ORTHOGONAL
+	fov = perspective_fov
+	var view_distance := distance
+	if perspective_enabled:
+		if match_perspective_framing:
+			view_distance = size / (2.0*tan(deg_to_rad(perspective_fov)*0.5))
+		else:
+			view_distance = distance * size / maxf(ortho_size,0.01)
+	far = maxf(distance,view_distance)*2.0+200.0
+	var pos := _focus + basis_want.z * view_distance
+	# Orthographic snapping has no globally consistent pixel size in perspective.
+	if pixel_snap and not perspective_enabled:
 		pos = _snap(pos, basis_want)
 	global_transform = Transform3D(basis_want, pos)
 

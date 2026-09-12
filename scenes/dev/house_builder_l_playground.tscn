@@ -1,0 +1,68 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/house_builder/house.gd" id="1_8jojc"]
+
+[sub_resource type="Environment" id="Environment_jtsm6"]
+background_mode = 1
+background_color = Color(0.16, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_vjqav"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_62feo"]
+size = Vector2(50, 50)
+
+[node name="HouseWorkshop" type="Node3D" unique_id=292349498]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=1381039953]
+environment = SubResource("Environment_jtsm6")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=1110000421]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=1461756139]
+material_override = SubResource("StandardMaterial3D_vjqav")
+mesh = SubResource("PlaneMesh_62feo")
+
+[node name="CasaEsempio" type="Node3D" parent="." unique_id=522096094]
+script = ExtResource("1_8jojc")
+depth = 6.5
+openings = Array[Dictionary]([{
+"kind": "door",
+"u": -0.35,
+"wall": 0
+}, {
+"kind": "window",
+"u": 0.45,
+"wall": 0,
+"y": 1.55
+}, {
+"kind": "window",
+"u": -0.45,
+"wall": 2,
+"y": 1.55
+}, {
+"kind": "window",
+"u": 0.35,
+"wall": 2,
+"y": 1.55
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 4,
+"y": 1.5
+}])
+wing_enabled = true
+
+[node name="Camera" type="Camera3D" parent="." unique_id=1880476262]
+transform = Transform3D(0.84269625, -0.2951328, 0.45028847, 0, 0.8363622, 0.54817724, -0.5383893, -0.4619469, 0.7047993, 13, 16, 18)
+projection = 1
+current = true
+size = 15.0

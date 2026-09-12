@@ -1,5 +1,33 @@
 # Terreno: come è fatto e come cresce
 
+## Campionamento e transizioni attuali
+
+Il prato usa quattro regioni agli angoli del dipinto originale. Ogni vertice
+della griglia triangolare sceglie una regione, una rotazione e un piccolo offset.
+Le coordinate restano dentro la regione: nessuno specchiamento che duplichi i
+ciuffi in rosette. Tre campioni si fondono con pesi continui. `grass_metres`
+ora vale 2.5: controlla le celle del campionamento, non la dimensione del mondo.
+
+Un campo di noise deformato distribuisce terra e pietrisco; un dettaglio più
+fine rompe i bordi delle transizioni. `wear_amount` (0.85), `wear_metres` (22)
+e `gravel_amount` (0.55) controllano copertura e dimensione delle zone.
+`use_road_mask` è ora attivo nella scena: mostra strada e diramazione in ghiaia
+già disegnate nell'SVG. Sono percorsi di esempio, da raccordare artisticamente
+ai sentieri del villaggio. Le note precedenti sotto descrivono le iterazioni
+storiche quando divergono da questi valori.
+
+## Aggiornamento del prato
+
+Il prato esterno campiona ora una regione di sola erba del dipinto originale
+(`ground_painting.png`, UV da 0.025 a 0.245 su entrambi gli assi), invece
+della colonna erba dell'atlante descritta sotto. La distribuzione rimane
+stocastica su triangoli, con coordinate specchiate continue e pesi che
+favoriscono un campione locale senza amplificarne il contrasto.
+`grass_metres` vale 7; `grass_grade` usa lo stesso moltiplicatore del dipinto
+centrale (0.62, 0.59, 0.55). L'atlante rimane usato per terra e ghiaia.
+Il ritaglio limita la varietà delle forme vegetali disponibili; terra e ghiaia
+possono ancora richiedere una rifinitura artistica.
+
 Il terreno è un quad piatto di due triangoli con un box sotto. Tutto il dettaglio sta nel materiale, `shaders/pixelart/ground_clear.gdshader`, e il materiale lavora in coordinate mondo: non gli interessa quanto è grande il quad.
 
 ## Il problema che risolve
