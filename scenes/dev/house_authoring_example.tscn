@@ -1,0 +1,641 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/house_builder/house.gd" id="1_2ksn7"]
+[ext_resource type="Script" path="res://addons/house_builder/plan.gd" id="2_5uo1b"]
+[ext_resource type="Script" path="res://addons/house_builder/plan_element.gd" id="3_g05sh"]
+
+[node name="CasaModificabile" type="Node3D" unique_id=1443330115]
+script = ExtResource("1_2ksn7")
+width = 7.0
+depth = 10.0
+wall_height = 5.2
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": -0.45,
+"wall": 1,
+"y": 1.5
+}, {
+"kind": "window",
+"u": -0.6,
+"wall": 2,
+"y": 1.5
+}])
+
+[node name="InteriorPlan" type="Node3D" parent="." unique_id=2002668501]
+script = ExtResource("2_5uo1b")
+known_generated = {
+"0": ["hall", "room_0", "room_1", "room_2", "stairs", "wall_hall_room_0", "wall_hall_room_1", "wall_hall_room_2", "wall_room_1_room_2", "furniture_room_0_0", "furniture_room_0_1", "furniture_room_0_2", "furniture_room_1_0", "furniture_room_1_1"],
+"1": ["hall", "room_0", "room_1", "room_2", "wall_hall_room_0", "wall_hall_room_1", "wall_hall_room_2", "wall_room_1_room_2", "furniture_room_0_0", "furniture_room_0_1", "furniture_room_0_2", "furniture_room_1_0", "furniture_room_1_1"]
+}
+seed_value = 22
+
+[node name="Piano_1" type="Node3D" parent="InteriorPlan" unique_id=1399182011]
+
+[node name="Stanza_hall" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=902683497]
+script = ExtResource("3_g05sh")
+dimensions = Vector3(2.8, 2.6, 9.5)
+room_type = "ingresso"
+stable_id = "hall"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(2.8, 2.6, 9.5),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 0,
+"position": Vector3(0, 0, 0),
+"prop_type": 0,
+"room_ids": PackedStringArray(),
+"room_type": "ingresso",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray()
+
+[node name="Stanza_room_0" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=1120782767]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.325, 0, 0)
+script = ExtResource("3_g05sh")
+dimensions = Vector3(1.85, 2.6, 9.5)
+room_type = "soggiorno"
+stable_id = "room_0"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.85, 2.6, 9.5),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 0,
+"position": Vector3(2.325, 0, 0),
+"prop_type": 0,
+"room_ids": PackedStringArray(),
+"room_type": "soggiorno",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray()
+
+[node name="Stanza_room_1" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=60556293]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.325, 0, -2)
+script = ExtResource("3_g05sh")
+dimensions = Vector3(1.85, 2.6, 5.5)
+room_type = "cucina"
+stable_id = "room_1"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.85, 2.6, 5.5),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 0,
+"position": Vector3(-2.325, 0, -2),
+"prop_type": 0,
+"room_ids": PackedStringArray(),
+"room_type": "cucina",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray()
+
+[node name="Stanza_room_2" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=1284704227]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.325, 0, 2.75)
+script = ExtResource("3_g05sh")
+dimensions = Vector3(1.85, 2.6, 4)
+stable_id = "room_2"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.85, 2.6, 4),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 0,
+"position": Vector3(-2.325, 0, 2.75),
+"prop_type": 0,
+"room_ids": PackedStringArray(),
+"room_type": "camera",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray()
+
+[node name="Scala_stairs" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=563493622]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.7, 0, 0)
+script = ExtResource("3_g05sh")
+kind = 2
+dimensions = Vector3(1.2, 2.6, 4.2)
+stable_id = "stairs"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.2, 2.6, 4.2),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 2,
+"position": Vector3(0.7, 0, 0),
+"prop_type": 0,
+"room_ids": PackedStringArray(),
+"room_type": "camera",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray()
+
+[node name="Muro_wall_hall_room_0" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=750327618]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 1.4, 0, 0)
+script = ExtResource("3_g05sh")
+kind = 1
+dimensions = Vector3(9.5, 2.6, 0.18)
+door_offset = -0.8210526315789474
+stable_id = "wall_hall_room_0"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(9.5, 2.6, 0.18),
+"door_offset": -0.8210526315789474,
+"door_width": 1.2,
+"has_door": true,
+"kind": 1,
+"position": Vector3(1.4, 0, 0),
+"prop_type": 0,
+"room_ids": PackedStringArray("hall", "room_0"),
+"room_type": "camera",
+"rotation": Vector3(0, -1.5707964, 0)
+}
+room_ids = PackedStringArray("hall", "room_0")
+
+[node name="Muro_wall_hall_room_1" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=1012927766]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.4, 0, -2)
+script = ExtResource("3_g05sh")
+kind = 1
+dimensions = Vector3(5.5, 2.6, 0.18)
+stable_id = "wall_hall_room_1"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(5.5, 2.6, 0.18),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 1,
+"position": Vector3(-1.4, 0, -2),
+"prop_type": 0,
+"room_ids": PackedStringArray("hall", "room_1"),
+"room_type": "camera",
+"rotation": Vector3(0, -1.5707964, 0)
+}
+room_ids = PackedStringArray("hall", "room_1")
+
+[node name="Muro_wall_hall_room_2" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=1254398461]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.4, 0, 2.75)
+script = ExtResource("3_g05sh")
+kind = 1
+dimensions = Vector3(4, 2.6, 0.18)
+stable_id = "wall_hall_room_2"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(4, 2.6, 0.18),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 1,
+"position": Vector3(-1.4, 0, 2.75),
+"prop_type": 0,
+"room_ids": PackedStringArray("hall", "room_2"),
+"room_type": "camera",
+"rotation": Vector3(0, -1.5707964, 0)
+}
+room_ids = PackedStringArray("hall", "room_2")
+
+[node name="Muro_wall_room_1_room_2" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=35043759]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.325, 0, 0.75)
+script = ExtResource("3_g05sh")
+kind = 1
+dimensions = Vector3(1.85, 2.6, 0.18)
+has_door = false
+stable_id = "wall_room_1_room_2"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.85, 2.6, 0.18),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": false,
+"kind": 1,
+"position": Vector3(-2.325, 0, 0.75),
+"prop_type": 0,
+"room_ids": PackedStringArray("room_1", "room_2"),
+"room_type": "camera",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray("room_1", "room_2")
+
+[node name="Oggetto_furniture_room_0_0" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=1982037037]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 2.211, 0, 4.2650003)
+script = ExtResource("3_g05sh")
+kind = 3
+dimensions = Vector3(1.15, 0.8, 0.65)
+stable_id = "furniture_room_0_0"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.15, 0.8, 0.65),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 3,
+"position": Vector3(2.211, 0, 4.2650003),
+"prop_type": 0,
+"room_ids": PackedStringArray("room_0"),
+"room_type": "camera",
+"rotation": Vector3(0, 3.1415927, 0)
+}
+room_ids = PackedStringArray("room_0")
+
+[node name="Oggetto_furniture_room_0_1" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=1561352271]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 2.8400002, 0, 0)
+script = ExtResource("3_g05sh")
+kind = 3
+dimensions = Vector3(0.48, 0.9, 0.5)
+prop_type = 1
+stable_id = "furniture_room_0_1"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(0.48, 0.9, 0.5),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 3,
+"position": Vector3(2.8400002, 0, 0),
+"prop_type": 1,
+"room_ids": PackedStringArray("room_0"),
+"room_type": "camera",
+"rotation": Vector3(0, 4.712389, 0)
+}
+room_ids = PackedStringArray("room_0")
+
+[node name="Oggetto_furniture_room_0_2" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=334464635]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 2.9, 0, 2.4840002)
+script = ExtResource("3_g05sh")
+kind = 3
+dimensions = Vector3(0.9, 1.65, 0.38)
+prop_type = 4
+stable_id = "furniture_room_0_2"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(0.9, 1.65, 0.38),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 3,
+"position": Vector3(2.9, 0, 2.4840002),
+"prop_type": 4,
+"room_ids": PackedStringArray("room_0"),
+"room_type": "camera",
+"rotation": Vector3(0, 4.712389, 0)
+}
+room_ids = PackedStringArray("room_0")
+
+[node name="Oggetto_furniture_room_1_0" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=1666099721]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -2.439, 0, 0.26499963)
+script = ExtResource("3_g05sh")
+kind = 3
+dimensions = Vector3(1.15, 0.8, 0.65)
+stable_id = "furniture_room_1_0"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.15, 0.8, 0.65),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 3,
+"position": Vector3(-2.439, 0, 0.26499963),
+"prop_type": 0,
+"room_ids": PackedStringArray("room_1"),
+"room_type": "camera",
+"rotation": Vector3(0, 3.1415927, 0)
+}
+room_ids = PackedStringArray("room_1")
+
+[node name="Oggetto_furniture_room_1_1" type="Node3D" parent="InteriorPlan/Piano_1" unique_id=1813418285]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.514, 0, -4.4)
+script = ExtResource("3_g05sh")
+kind = 3
+dimensions = Vector3(0.9, 1.65, 0.38)
+prop_type = 4
+stable_id = "furniture_room_1_1"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(0.9, 1.65, 0.38),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 3,
+"position": Vector3(-2.514, 0, -4.4),
+"prop_type": 4,
+"room_ids": PackedStringArray("room_1"),
+"room_type": "camera",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray("room_1")
+
+[node name="Piano_2" type="Node3D" parent="InteriorPlan" unique_id=1378730017]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.6, 0)
+
+[node name="Stanza_hall" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=1161912601]
+script = ExtResource("3_g05sh")
+dimensions = Vector3(2.8, 2.6, 9.5)
+room_type = "ingresso"
+stable_id = "hall"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(2.8, 2.6, 9.5),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 0,
+"position": Vector3(0, 0, 0),
+"prop_type": 0,
+"room_ids": PackedStringArray(),
+"room_type": "ingresso",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray()
+
+[node name="Stanza_room_0" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=1458191040]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.325, 0, 0)
+script = ExtResource("3_g05sh")
+dimensions = Vector3(1.85, 2.6, 9.5)
+room_type = "soggiorno"
+stable_id = "room_0"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.85, 2.6, 9.5),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 0,
+"position": Vector3(2.325, 0, 0),
+"prop_type": 0,
+"room_ids": PackedStringArray(),
+"room_type": "soggiorno",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray()
+
+[node name="Stanza_room_1" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=1715213790]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.325, 0, -2.3)
+script = ExtResource("3_g05sh")
+dimensions = Vector3(1.85, 2.6, 4.9)
+room_type = "cucina"
+stable_id = "room_1"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.85, 2.6, 4.9),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 0,
+"position": Vector3(-2.325, 0, -2.3),
+"prop_type": 0,
+"room_ids": PackedStringArray(),
+"room_type": "cucina",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray()
+
+[node name="Stanza_room_2" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=230939011]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.325, 0, 2.45)
+script = ExtResource("3_g05sh")
+dimensions = Vector3(1.85, 2.6, 4.6)
+stable_id = "room_2"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.85, 2.6, 4.6),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 0,
+"position": Vector3(-2.325, 0, 2.45),
+"prop_type": 0,
+"room_ids": PackedStringArray(),
+"room_type": "camera",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray()
+
+[node name="Muro_wall_hall_room_0" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=792886840]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 1.4, 0, 0)
+script = ExtResource("3_g05sh")
+kind = 1
+dimensions = Vector3(9.5, 2.6, 0.18)
+door_offset = -0.8210526315789474
+stable_id = "wall_hall_room_0"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(9.5, 2.6, 0.18),
+"door_offset": -0.8210526315789474,
+"door_width": 1.2,
+"has_door": true,
+"kind": 1,
+"position": Vector3(1.4, 0, 0),
+"prop_type": 0,
+"room_ids": PackedStringArray("hall", "room_0"),
+"room_type": "camera",
+"rotation": Vector3(0, -1.5707964, 0)
+}
+room_ids = PackedStringArray("hall", "room_0")
+
+[node name="Muro_wall_hall_room_1" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=1802386745]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.4, 0, -2.3)
+script = ExtResource("3_g05sh")
+kind = 1
+dimensions = Vector3(4.9, 2.6, 0.18)
+stable_id = "wall_hall_room_1"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(4.9, 2.6, 0.18),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 1,
+"position": Vector3(-1.4, 0, -2.3),
+"prop_type": 0,
+"room_ids": PackedStringArray("hall", "room_1"),
+"room_type": "camera",
+"rotation": Vector3(0, -1.5707964, 0)
+}
+room_ids = PackedStringArray("hall", "room_1")
+
+[node name="Muro_wall_hall_room_2" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=1429551776]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, -1.4, 0, 2.45)
+script = ExtResource("3_g05sh")
+kind = 1
+dimensions = Vector3(4.6, 2.6, 0.18)
+stable_id = "wall_hall_room_2"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(4.6, 2.6, 0.18),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 1,
+"position": Vector3(-1.4, 0, 2.45),
+"prop_type": 0,
+"room_ids": PackedStringArray("hall", "room_2"),
+"room_type": "camera",
+"rotation": Vector3(0, -1.5707964, 0)
+}
+room_ids = PackedStringArray("hall", "room_2")
+
+[node name="Muro_wall_room_1_room_2" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=764524563]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.325, 0, 0.1500001)
+script = ExtResource("3_g05sh")
+kind = 1
+dimensions = Vector3(1.85, 2.6, 0.18)
+has_door = false
+stable_id = "wall_room_1_room_2"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.85, 2.6, 0.18),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": false,
+"kind": 1,
+"position": Vector3(-2.325, 0, 0.1500001),
+"prop_type": 0,
+"room_ids": PackedStringArray("room_1", "room_2"),
+"room_type": "camera",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray("room_1", "room_2")
+
+[node name="Oggetto_furniture_room_0_0" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=1599095028]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 2.765, 0, 0)
+script = ExtResource("3_g05sh")
+kind = 3
+dimensions = Vector3(1.15, 0.8, 0.65)
+stable_id = "furniture_room_0_0"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.15, 0.8, 0.65),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 3,
+"position": Vector3(2.765, 0, 0),
+"prop_type": 0,
+"room_ids": PackedStringArray("room_0"),
+"room_type": "camera",
+"rotation": Vector3(0, 4.712389, 0)
+}
+room_ids = PackedStringArray("room_0")
+
+[node name="Oggetto_furniture_room_0_1" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=1983648825]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 2.01, 0, 4.34)
+script = ExtResource("3_g05sh")
+kind = 3
+dimensions = Vector3(0.48, 0.9, 0.5)
+prop_type = 1
+stable_id = "furniture_room_0_1"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(0.48, 0.9, 0.5),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 3,
+"position": Vector3(2.01, 0, 4.34),
+"prop_type": 1,
+"room_ids": PackedStringArray("room_0"),
+"room_type": "camera",
+"rotation": Vector3(0, 3.1415927, 0)
+}
+room_ids = PackedStringArray("room_0")
+
+[node name="Oggetto_furniture_room_0_2" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=1472404538]
+transform = Transform3D(1.1924881e-08, 0, -1, 0, 1, 0, 1, 0, 1.1924881e-08, 2.9, 0, 2.4840002)
+script = ExtResource("3_g05sh")
+kind = 3
+dimensions = Vector3(0.9, 1.65, 0.38)
+prop_type = 4
+stable_id = "furniture_room_0_2"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(0.9, 1.65, 0.38),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 3,
+"position": Vector3(2.9, 0, 2.4840002),
+"prop_type": 4,
+"room_ids": PackedStringArray("room_0"),
+"room_type": "camera",
+"rotation": Vector3(0, 4.712389, 0)
+}
+room_ids = PackedStringArray("room_0")
+
+[node name="Oggetto_furniture_room_1_0" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=1129279087]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -2.439, 0, -0.33500028)
+script = ExtResource("3_g05sh")
+kind = 3
+dimensions = Vector3(1.15, 0.8, 0.65)
+stable_id = "furniture_room_1_0"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(1.15, 0.8, 0.65),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 3,
+"position": Vector3(-2.439, 0, -0.33500028),
+"prop_type": 0,
+"room_ids": PackedStringArray("room_1"),
+"room_type": "camera",
+"rotation": Vector3(0, 3.1415927, 0)
+}
+room_ids = PackedStringArray("room_1")
+
+[node name="Oggetto_furniture_room_1_1" type="Node3D" parent="InteriorPlan/Piano_2" unique_id=426704462]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.514, 0, -4.4)
+script = ExtResource("3_g05sh")
+kind = 3
+dimensions = Vector3(0.9, 1.65, 0.38)
+prop_type = 4
+stable_id = "furniture_room_1_1"
+generated = true
+baseline = {
+"asset": "",
+"dimensions": Vector3(0.9, 1.65, 0.38),
+"door_offset": 0.0,
+"door_width": 1.2,
+"has_door": true,
+"kind": 3,
+"position": Vector3(-2.514, 0, -4.4),
+"prop_type": 4,
+"room_ids": PackedStringArray("room_1"),
+"room_type": "camera",
+"rotation": Vector3(0, 0, 0)
+}
+room_ids = PackedStringArray("room_1")

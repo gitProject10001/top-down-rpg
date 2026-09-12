@@ -18,7 +18,11 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	gizmo.add_handles(PackedVector3Array([Vector3(size.x*0.5,y,0),Vector3(0,y,size.z*0.5)]),get_material("handles",gizmo),PackedInt32Array([0,1]))
 	if is_instance_valid(n._visual):
 		for child in n._visual.get_children():
-			if child is MeshInstance3D: gizmo.add_collision_triangles(child.mesh.generate_triangle_mesh())
+			if child is MeshInstance3D:
+				var faces: PackedVector3Array=child.mesh.get_faces()
+				for i in faces.size(): faces[i]=child.transform*faces[i]
+				var triangles := TriangleMesh.new(); triangles.create_from_faces(faces)
+				gizmo.add_collision_triangles(triangles)
 func _get_handle_name(_g: EditorNode3DGizmo,id: int,_s: bool) -> String: return "Larghezza / lunghezza" if id==0 else "Profondità / spessore"
 func _get_handle_value(g: EditorNode3DGizmo,_id: int,_s: bool) -> Variant: return g.get_node_3d().dimensions
 func _set_handle(g: EditorNode3DGizmo,id: int,_s: bool,camera: Camera3D,screen: Vector2) -> void:

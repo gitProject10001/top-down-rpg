@@ -40,7 +40,22 @@ func _process(_dt: float) -> void:
 	if _pending: rebuild()
 func record() -> Dictionary:
 	return {"kind":kind,"dimensions":dimensions,"room_type":room_type,"position":position,"rotation":rotation,"has_door":has_door,"door_offset":door_offset,"door_width":door_width,"prop_type":prop_type,"asset":asset.resource_path if asset else "","room_ids":room_ids}
-func protected_edit() -> bool: return locked or not generated or (not baseline.is_empty() and record()!=baseline)
+func protected_edit() -> bool:
+	if locked or not generated: return true
+	if baseline.is_empty(): return false
+	var current := record()
+	for key in current:
+		if not baseline.has(key): return true
+		var a=current[key]; var b=baseline[key]
+		# Transform serialization can wrap Euler angles or round floating point values.
+		if key=="rotation":
+			if not Basis.from_euler(a).is_equal_approx(Basis.from_euler(b)): return true
+		elif a is Vector3:
+			if not a.is_equal_approx(b): return true
+		elif a is float:
+			if not is_equal_approx(a,float(b)): return true
+		elif a!=b: return true
+	return false
 func accept_baseline() -> void: baseline=record().duplicate(true)
 func plan() -> Node:
 	return get_parent().get_parent() if get_parent()!=null else null
@@ -95,8 +110,37 @@ func rebuild() -> void:
 			else: build_prop(wood)
 	update_gizmos()
 func build_prop(wood: Material) -> void:
-	# Placeholder until the furnishing step supplies the reusable kit.
-	box(Vector3(0,dimensions.y*0.5,0),dimensions,wood)
+	var cloth := StandardMaterial3D.new(); cloth.albedo_color=Color(0.31,0.37,0.28); cloth.roughness=0.95
+	var linen := StandardMaterial3D.new(); linen.albedo_color=Color(0.67,0.61,0.46); linen.roughness=0.95
+	var iron := StandardMaterial3D.new(); iron.albedo_color=Color(0.13,0.12,0.10); iron.metallic=0.55; iron.roughness=0.7
+	var w := dimensions.x; var h := dimensions.y; var d := dimensions.z
+	match prop_type:
+		0,1:
+			var top := h*0.5 if prop_type==1 else h
+			box(Vector3(0,top-0.06,0),Vector3(w,0.12,d),wood,false)
+			for x in [-1,1]:
+				for z in [-1,1]: box(Vector3(x*w*0.38,top*0.45,z*d*0.38),Vector3(0.085,top*0.9,0.085),wood,false)
+			if prop_type==1:
+				for x in [-1,1]: box(Vector3(x*w*0.38,h*0.72,-d*0.38),Vector3(0.085,h*0.56,0.085),wood,false)
+				box(Vector3(0,h*0.88,-d*0.38),Vector3(w,0.18,0.08),wood,false)
+		2:
+			box(Vector3(0,h*0.28,0),Vector3(w,h*0.34,d),wood,false)
+			box(Vector3(0,h*0.54,0),Vector3(w*0.92,h*0.2,d*0.95),linen,false)
+			box(Vector3(0,h*0.67,d*0.12),Vector3(w*0.94,h*0.1,d*0.67),cloth,false)
+			box(Vector3(0,h*0.7,-d*0.33),Vector3(w*0.7,h*0.14,d*0.2),linen,false)
+			box(Vector3(0,h*0.5,-d*0.48),Vector3(w,h,0.10),wood,false)
+		3:
+			box(Vector3(0,h*0.46,0),Vector3(w,h*0.9,d),wood,false)
+			box(Vector3(0,h*0.96,0),Vector3(w*1.02,h*0.08,d*1.02),wood,false)
+			for x in [-0.32,0.32]: box(Vector3(x*w,h*0.5,d*0.505),Vector3(0.05,h,0.025),iron,false)
+			box(Vector3(0,h*0.72,d*0.52),Vector3(0.10,0.13,0.025),iron,false)
+		4:
+			for x in [-1,1]: box(Vector3(x*(w*0.5-0.045),h*0.5,0),Vector3(0.09,h,d),wood,false)
+			for y in [0.05,0.36,0.68,0.97]: box(Vector3(0,h*y,0),Vector3(w,0.07,d),wood,false)
+			box(Vector3(0,h*0.5,-d*0.47),Vector3(w,h,0.045),wood,false)
+	# One conservative collider matches the footprint used by layout validation.
+	var body := StaticBody3D.new(); var shape := CollisionShape3D.new(); var hull := BoxShape3D.new()
+	hull.size=dimensions; shape.shape=hull; body.position.y=h*0.5; body.add_child(shape); _visual.add_child(body)
 func runtime_view(inside: bool,actor: Vector3,camera: Vector3) -> void:
 	if kind!=1 or not is_instance_valid(_visual): return
 	var a := to_local(actor); var c := to_local(camera)

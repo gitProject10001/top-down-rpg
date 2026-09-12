@@ -30,6 +30,7 @@ var entrance_light: OmniLight3D
 var zoomed := false
 var _last_floor := -1
 var entry_x := 0.0
+var selected_source := false
 func _ready() -> void:
 	var container := SubViewportContainer.new()
 	container.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -51,8 +52,10 @@ func _ready() -> void:
 	ground_material=StandardMaterial3D.new(); ground_material.albedo_color=Color(0.27,0.25,0.17); ground_material.roughness=1.0
 	interior=Interior.new()
 	interior.box(world,Vector3(0,-0.14,0),Vector3(30,0.2,30),ground_material)
-	if FileAccess.file_exists("user://house_builder_playtest.tscn") and not "--house-play-test" in OS.get_cmdline_user_args():
-		house=load("user://house_builder_playtest.tscn").instantiate()
+	var authored_test := "--house-authored-test" in OS.get_cmdline_user_args()
+	if authored_test or (FileAccess.file_exists("user://house_builder_playtest.tscn") and not "--house-play-test" in OS.get_cmdline_user_args()):
+		selected_source=true
+		house=load("res://scenes/dev/house_authoring_example.tscn" if authored_test else "user://house_builder_playtest.tscn").instantiate()
 		authored_plan=house.get_node_or_null("InteriorPlan")
 		house_width=house.width; house_depth=house.depth
 		storeys=maxi(1,authored_plan.levels().size()) if authored_plan else 1
@@ -65,7 +68,7 @@ func _ready() -> void:
 		house.openings=[{"kind":"door","wall":0,"u":entry_x/(house_width*0.5),"width":1.5,"height":2.3},{"kind":"window","wall":1,"u":-0.45,"y":1.5},{"kind":"window","wall":2,"u":-0.6,"y":1.5}]
 	world.add_child(house)
 	world.add_child(interior)
-	if not authored_plan: interior.build(house_width,house_depth,storey_height,storeys,room_split_x,room_split_z,partition_thickness,house._material(Vector2(0.5,0),Color(0.60,0.53,0.46)),house._plaster_material())
+	if not selected_source: interior.build(house_width,house_depth,storey_height,storeys,room_split_x,room_split_z,partition_thickness,house._material(Vector2(0.5,0),Color(0.60,0.53,0.46)),house._plaster_material())
 	for floor_index in storeys:
 		for point in [Vector3(-2,2.0,-2.5),Vector3(-2,2.0,2.5),Vector3(1.8,2.0,0)]:
 			var light := OmniLight3D.new(); light.position=point+Vector3.UP*floor_index*storey_height
@@ -93,6 +96,7 @@ func _ready() -> void:
 	var ui := CanvasLayer.new(); add_child(ui)
 	prompt=Label.new(); prompt.position=Vector2(22,20); prompt.add_theme_font_size_override("font_size",18); ui.add_child(prompt)
 	if "--house-play-test" in OS.get_cmdline_user_args(): _test.call_deferred()
+	if authored_test: _test_authored.call_deferred()
 func nearest_door() -> Node3D:
 	var best: Node3D=null; var distance := 2.2
 	var all: Array=[]
@@ -172,6 +176,52 @@ func _test() -> void:
 	assert(door.toggle(player.global_position))
 	await _capture("exit")
 	print("HOUSE_PLAY_CLOSED_OPEN_ROOM_STAIRS_EXIT_OK player=",player.position)
+	get_tree().quit()
+func _test_authored() -> void:
+	for i in 90: await get_tree().physics_frame
+	assert(authored_plan!=null and authored_plan.levels().size()==2)
+	await _capture("authored_outside")
+	await _walk(Vector3(0,0,house_depth*0.5-0.5),90)
+	assert(not inside,"Authored entrance must block while closed")
+	var entry := nearest_door(); assert(entry!=null)
+	assert(entry.toggle(player.global_position))
+	for i in 30: await get_tree().physics_frame
+	await _walk(Vector3(0,0,3.3),180)
+	assert(inside,"Authored entrance must be passable")
+	await _capture("authored_inside")
+	var partition: Node3D
+	for e in authored_plan.levels()[0].get_children():
+		if e.kind==1 and e.has_door and "hall" in e.room_ids and e.position.x<0:
+			partition=e; break
+	assert(partition!=null)
+	var doorway: Vector3=partition.position+partition.basis.x*partition.door_offset*partition.dimensions.x*0.5
+	await _walk(Vector3(-0.7,0,3.3),150)
+	await _walk(Vector3(-0.7,0,doorway.z),200)
+	var inner: Node3D
+	for child in partition._visual.get_children():
+		if child is Door: inner=child
+	assert(inner!=null and inner.toggle(player.global_position))
+	for i in 30: await get_tree().physics_frame
+	await _walk(Vector3(doorway.x-0.65,0,doorway.z),180)
+	assert(player.position.x<doorway.x-0.4,"Authored partition opening must be passable")
+	await _capture("authored_room")
+	await _walk(Vector3(-0.7,0,doorway.z),180)
+	await _walk(Vector3(-0.7,0,3.3),200)
+	var stair: Node3D
+	for e in authored_plan.levels()[0].get_children():
+		if e.kind==2: stair=e
+	assert(stair!=null)
+	var bottom := stair.position+Vector3(0,0,stair.dimensions.z*0.5+0.55)
+	await _walk(bottom,180)
+	await _walk(stair.position+Vector3(0,storey_height,-stair.dimensions.z*0.5-0.55),300)
+	assert(active_floor==1,"Authored stairs must reach upper floor")
+	await _capture("authored_upstairs")
+	await _walk(bottom,300)
+	assert(active_floor==0,"Authored stairs must descend")
+	await _walk(Vector3(0,0,3.4),180)
+	await _walk(Vector3(0,0,6.4),180)
+	assert(not inside,"Authored entrance must permit exit")
+	print("HOUSE_AUTHORED_SAVED_FURNITURE_ENTRANCE_ROOM_STAIRS_EXIT_OK")
 	get_tree().quit()
 func _walk(target: Vector3,frames: int) -> void:
 	for i in frames:

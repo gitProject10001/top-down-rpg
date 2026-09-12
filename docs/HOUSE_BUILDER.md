@@ -99,7 +99,12 @@ E/Y per aprire o chiudere la porta vicina. F7 confronta lo zoom normale (17,5 m,
 come nel villaggio) con 12 m. La scena riusa player3, skin, HUD, camera a 48°,
 pixel snap e MSAA del gioco. Il postprocess disabilitato nel villaggio resta disabilitato.
 
-Due piani, tre stanze vuote per piano, scala con gradini visivi e collisione a
+Il workflow attuale è descritto in [HOUSE_AUTHORING.md](HOUSE_AUTHORING.md): interni
+salvati nell'House Builder, generazione di stanze e arredo, modifica manuale e Play
+della casa selezionata. I parametri descritti sotto riguardano il vecchio prototipo,
+ancora disponibile con `--house-play-test` per regressione.
+
+Il prototipo ha due piani, tre stanze vuote per piano, scala con gradini visivi e collisione a
 rampa. Nessun arredamento. Nel nodo radice dell'Inspector puoi cambiare larghezza,
 profondità, altezza dei piani, numero dei piani (1–2), posizione dei due divisori
 e spessore dei muri; riavvia la prova per rigenerare la struttura.

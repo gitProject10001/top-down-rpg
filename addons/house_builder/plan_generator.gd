@@ -3,6 +3,66 @@ extends RefCounted
 ## Rectangular subdivision + explicit adjacency graph. Coordinates are metres.
 static func rect(record: Dictionary) -> Rect2:
 	return Rect2(Vector2(record.position.x-record.dimensions.x*0.5,record.position.z-record.dimensions.z*0.5),Vector2(record.dimensions.x,record.dimensions.z))
+static func footprint(record: Dictionary) -> Rect2:
+	var angle: float=record.rotation.y
+	var size := Vector2(absf(cos(angle))*record.dimensions.x+absf(sin(angle))*record.dimensions.z,absf(sin(angle))*record.dimensions.x+absf(cos(angle))*record.dimensions.z)
+	return Rect2(Vector2(record.position.x,record.position.z)-size*0.5,size)
+static func furnish(plan: Node3D,index: int,records: Array,scope: String="") -> Array:
+	var result := records.duplicate(true)
+	var rooms: Array=records.filter(func(r): return r.kind==0)
+	var reserved: Array[Rect2]=[]
+	for r in records:
+		if r.kind==2: reserved.append(footprint(r).grow(0.8))
+		if r.kind==1 and r.get("has_door",true):
+			var length: float=r.dimensions.x; var width: float=minf(r.get("door_width",1.2),length-0.3)
+			var offset := clampf(r.get("door_offset",0.0)*length*0.5,-length*0.5+width*0.5+0.12,length*0.5-width*0.5-0.12)
+			var p := Vector2(r.position.x,r.position.z)+Vector2(cos(r.rotation.y),-sin(r.rotation.y))*offset
+			reserved.append(Rect2(p-Vector2.ONE*(width+0.2),Vector2.ONE*(width+0.2)*2))
+	if index>0:
+		for r in plan.level_records(index-1):
+			if r.kind==2: reserved.append(footprint(r).grow(0.8))
+	for opening in plan.house().openings:
+		var o: Dictionary=plan.house().resolved_opening(opening)
+		if not o.door: continue
+		var p3: Vector3=plan.house().wall_point(o.wall,o.along,0)
+		reserved.append(Rect2(Vector2(p3.x,p3.z)-Vector2.ONE*1.5,Vector2.ONE*3))
+	var rng := RandomNumberGenerator.new(); rng.seed=plan.seed_value+index*7919+101
+	for r in rooms:
+		if r.room_type=="ingresso" or (scope!="" and r.id!=scope): continue
+		var types: Array={"camera":[2,3],"soggiorno":[0,1,4],"cucina":[0,4],"ripostiglio":[4,3]}.get(r.room_type,[3])
+		for slot in types.size():
+			var id := "furniture_%s_%d"%[r.id,slot]
+			if plan.deleted_ids.has("%d/%s"%[index,id]) or result.any(func(v): return v.id==id): continue
+			var type: int=types[slot]
+			var size: Vector3=[Vector3(1.15,0.8,0.65),Vector3(0.48,0.9,0.5),Vector3(0.95,0.8,1.9),Vector3(0.8,0.55,0.45),Vector3(0.9,1.65,0.38)][type]
+			var candidates: Array=[]
+			var bounds := rect(r).grow(-0.16)
+			var first := rng.randi_range(0,3)
+			for side_index in 4:
+				var side := (first+side_index)%4
+				var angle := side*PI*0.5
+				var proto := {"id":id,"kind":3,"prop_type":type,"dimensions":size,"position":Vector3.ZERO,"rotation":Vector3(0,angle,0),"room_ids":PackedStringArray([str(r.id)])}
+				var half := footprint(proto).size*0.5
+				for fraction in [0.2,0.5,0.8]:
+					var p: Vector2=bounds.position+half+(bounds.size-half*2)*fraction
+					match side:
+						0: p.y=bounds.position.y+half.y
+						1: p.x=bounds.position.x+half.x
+						2: p.y=bounds.end.y-half.y
+						3: p.x=bounds.end.x-half.x
+					var candidate := proto.duplicate(true); candidate.position=Vector3(p.x,0,p.y)
+					var area := footprint(candidate)
+					if not bounds.encloses(area): continue
+					var blocked := false
+					for zone in reserved:
+						if zone.intersects(area): blocked=true; break
+					for other in result:
+						if other.kind in [2,3] and footprint(other).grow(0.7).intersects(area): blocked=true; break
+					if not blocked: candidates.append(candidate)
+			for candidate in candidates:
+				var trial := result+[candidate]
+				if walkability(rooms,trial).is_empty(): result=trial; break
+	return result
 static func room(id: String,bounds: Rect2,h: float,type: String) -> Dictionary:
 	return {"id":id,"kind":0,"position":Vector3(bounds.get_center().x,0,bounds.get_center().y),"rotation":Vector3.ZERO,"dimensions":Vector3(bounds.size.x,h,bounds.size.y),"room_type":type}
 static func subtract(a: Rect2,b: Rect2) -> Array[Rect2]:

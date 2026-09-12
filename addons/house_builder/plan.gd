@@ -70,7 +70,9 @@ func rebuild() -> void:
 		MeshJoin.append(mesh,slab,Transform3D.IDENTITY,cuts)
 		if house().wing_enabled:
 			var wing := BoxMesh.new(); wing.size=Vector3(house().wing_span()-0.4,0.10,house().width*0.5+house().wing_length-0.4); wing.material=wood_material()
-			MeshJoin.append(mesh,wing,house().wing_transform(),cuts)
+			var wing_cuts := cuts.duplicate(true)
+			wing_cuts.append([Plane(Vector3.RIGHT,(house().width-0.4)*0.5),Plane(Vector3.LEFT,(house().width-0.4)*0.5),Plane(Vector3.BACK,(house().depth-0.4)*0.5),Plane(Vector3.FORWARD,(house().depth-0.4)*0.5)])
+			MeshJoin.append(mesh,wing,house().wing_transform(),wing_cuts)
 		var floor_node := Node3D.new(); floor_node.position.y=i*floor_height; _floors.add_child(floor_node)
 		var visual := MeshInstance3D.new(); visual.mesh=mesh; floor_node.add_child(visual)
 		var body := StaticBody3D.new(); var shape := CollisionShape3D.new(); shape.shape=mesh.create_trimesh_shape(); body.add_child(shape); floor_node.add_child(body)
@@ -186,10 +188,33 @@ func propose_walls(index: int) -> Array:
 	return checked_proposal(index,result)
 func checked_proposal(index: int,records: Array) -> Array:
 	var rooms: Array=records.filter(func(r): return r.kind==0)
+	var main := Rect2(Vector2(-house().width*0.5+0.2,-house().depth*0.5+0.2),Vector2(house().width-0.4,house().depth-0.4))
+	var allowed: Array[Rect2]=[main]
+	if house().wing_enabled:
+		var center: Vector3=house().wing_transform().origin
+		allowed.append(Rect2(Vector2(center.x,center.z)-Vector2(house().width*0.5+house().wing_length-0.4,house().wing_span()-0.4)*0.5,Vector2(house().width*0.5+house().wing_length-0.4,house().wing_span()-0.4)))
+	for r in rooms:
+		if not r.rotation.is_zero_approx(): generation_report="Le stanze devono essere allineate agli assi della casa."; return level_records(index)
+		var remainder: Array[Rect2]=[Generator.rect(r)]
+		for region in allowed:
+			var next: Array[Rect2]=[]
+			for part in remainder: next.append_array(Generator.subtract(part,region))
+			remainder=next
+		if not remainder.is_empty(): generation_report="Stanza fuori dal perimetro della casa: "+str(r.id); return level_records(index)
 	var errors := Generator.walkability(rooms,records)
 	if not errors.is_empty(): generation_report="; ".join(errors); return level_records(index)
 	generation_report="%d stanze: passaggi verificati; modifiche manuali conservate"%rooms.size()
 	return records
+func propose_furniture(index: int,scope: String="",remove_only: bool=false) -> Array:
+	observe_deletions()
+	var keep: Array=[]
+	var protected: Dictionary={}
+	for e in levels()[index].get_children():
+		if e is Element and e.protected_edit(): protected[e.stable_id]=true
+	for r in level_records(index):
+		if r.kind!=3 or protected.has(r.id) or (scope!="" and scope not in r.get("room_ids",[])): keep.append(r)
+	var result := keep if remove_only else Generator.furnish(self,index,keep,scope)
+	return checked_proposal(index,result)
 func _notification(what: int) -> void:
 	if what==NOTIFICATION_PREDELETE:
 		for e in _retired.values():

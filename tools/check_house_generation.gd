@@ -54,4 +54,20 @@ func run() -> void:
 	blocked.append({"id":"blocker","kind":3,"position":Vector3.ZERO,"rotation":Vector3.ZERO,"dimensions":Vector3(20,2,20)})
 	assert(plan.checked_proposal(0,blocked)==plan.level_records(0),"Invalid proposal applied")
 	print("HOUSE_PLAN_LOCK_EDIT_DELETE_RESTORE_CLEARANCE_OK")
+	var furniture := plan.propose_furniture(0)
+	assert(furniture==plan.propose_furniture(0),"Furniture is not deterministic")
+	var props: Array=furniture.filter(func(r): return r.kind==3)
+	assert(props.size()>0,"No furniture fitted")
+	assert(Generator.walkability(furniture.filter(func(r): return r.kind==0),furniture).is_empty())
+	plan.apply_records(0,furniture)
+	var prop: Node3D
+	for e in level.get_children():
+		if e.kind==3: prop=e; break
+	prop.position.x+=0.03
+	var pose: Vector3=prop.position
+	plan.apply_records(0,plan.propose_furniture(0))
+	assert(prop.position==pose,"Moved furniture lost")
+	plan.apply_records(0,plan.propose_furniture(0,"",true))
+	assert(prop.get_parent()==level,"Cleanup removed edited furniture")
+	print("HOUSE_PLAN_FURNITURE_SEED_CLEARANCE_PROTECTION_OK count=",props.size())
 	house.free(); quit()

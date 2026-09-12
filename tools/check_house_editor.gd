@@ -160,6 +160,26 @@ func run(plugin: EditorPlugin) -> void:
 	assert(copied.get_node("InteriorPlan").elements()[0].dimensions==authored.dimensions)
 	copied.free()
 	print("HOUSE_PLAN_EDITOR_GIZMO_UNDO_SNAPSHOT_OK")
+	var example=load("res://scenes/dev/house_authoring_example.tscn").instantiate()
+	scene.add_child(example); plugin._owned(example,scene)
+	var example_plan=example.get_node("InteriorPlan")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(example)
+	var furnished: Array=example_plan.level_records(0)
+	plugin._plan_action("Rimuovi arredo generato")
+	assert(not example_plan.level_records(0).any(func(r): return r.kind==3))
+	history.undo(); assert(example_plan.level_records(0)==furnished)
+	history.redo(); assert(not example_plan.level_records(0).any(func(r): return r.kind==3))
+	plugin._plan_action("Arreda piano")
+	assert(example_plan.level_records(0).any(func(r): return r.kind==3))
+	var room_node: Node3D
+	for e in example_plan.levels()[0].get_children():
+		if e.kind==0 and e.room_type!="ingresso": room_node=e; break
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(room_node)
+	var upper: Array=example_plan.level_records(1)
+	plugin._plan_action("Arreda stanza selezionata")
+	assert(example_plan.level_records(1)==upper)
+	history.undo(); history.redo()
+	print("HOUSE_PLAN_FURNISH_EDITOR_SCOPE_UNDO_REDO_OK")
 	house.update_gizmos()
 	for i in 10: await plugin.get_tree().process_frame
 	print("HOUSE_GIZMO_NATIVE redraws=",plugin.gizmos.redraw_count," attached=",house.get_gizmos().size())

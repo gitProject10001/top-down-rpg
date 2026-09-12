@@ -9,6 +9,7 @@ Vertical slice minimale del villaggio giocabile, portata da `rpg-3d`. Questo rep
 - [docs/TERRAIN.md](docs/TERRAIN.md) — il materiale del terreno, come si estende senza ripetersi e come si aggiungono strade ed erba.
 - [docs/ROOF_MATERIAL.md](docs/ROOF_MATERIAL.md) — tegole in rilievo, materiale PBR e confronto delle quattro illuminazioni.
 - [docs/HOUSE_BUILDER.md](docs/HOUSE_BUILDER.md) — disegnare case nell'editor, ridimensionarle con maniglie e posizionare porte e finestre.
+- [docs/HOUSE_AUTHORING.md](docs/HOUSE_AUTHORING.md) — interni salvati, stanze, rigenerazione protetta, arredo editabile e Play della casa selezionata.
 
 ## Stato attuale
 
