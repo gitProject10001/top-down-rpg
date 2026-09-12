@@ -126,6 +126,7 @@ func apply_records(index: int,records: Array) -> void:
 		e.generated=record.get("generated",true); e.locked=record.get("locked",false)
 		e.baseline=record.get("baseline",{}).duplicate(true)
 		if e.baseline.is_empty() and e.generated: e.accept_baseline()
+		if e.kind==0: e.refresh_room_name()
 	known_generated[str(index)]=records.filter(func(r): return r.get("generated",true)).map(func(r): return str(r.id))
 	_pending=true
 func propose_rooms(index: int) -> Array:
@@ -186,6 +187,39 @@ func propose_walls(index: int) -> Array:
 	for r in walls:
 		if not protected.has(r.id) and not deleted_ids.has("%d/%s"%[index,r.id]): result.append(r)
 	return checked_proposal(index,result)
+func propose_insert_room(index: int,id: String) -> Array:
+	observe_deletions()
+	var current := level_records(index)
+	var selected: Dictionary={}; var protected: Dictionary={}
+	for e in levels()[index].get_children():
+		if e is Element and e.protected_edit(): protected[e.stable_id]=true
+	for r in current:
+		if r.id==id and r.kind==0: selected=r
+	if selected.is_empty(): generation_report="Seleziona il volume della stanza da integrare."; return current
+	var rooms: Array=[]; var preserved: Array=[]
+	for r in current:
+		if r.kind!=0:
+			if r.kind!=1 or protected.has(r.id): preserved.append(r)
+			continue
+		if r.id==id: rooms.append(r); continue
+		var overlap := Generator.rect(r).intersection(Generator.rect(selected))
+		if overlap.get_area()<0.01: rooms.append(r); continue
+		if protected.has(r.id): generation_report="La nuova stanza invade una stanza modificata o bloccata: "+str(r.id); return current
+		var pieces := Generator.subtract(Generator.rect(r),Generator.rect(selected))
+		for i in pieces.size():
+			if minf(pieces[i].size.x,pieces[i].size.y)<1.1:
+				generation_report="Il ritaglio lascia un passaggio troppo stretto: avvicina il bordo della nuova stanza a quello esistente."; return current
+			var piece := Generator.room(str(r.id) if i==0 else str(r.id)+"_part_%d"%i,pieces[i],floor_height,r.room_type)
+			rooms.append(piece)
+	var walls := Generator.walls(rooms,floor_height)
+	var obstacles: Array=preserved.filter(func(r): return r.kind==2)
+	if not walls.any(func(r): return id in r.room_ids and r.has_door):
+		generation_report="La stanza non ha un accesso: posizionala dentro una stanza generata o fai coincidere un bordo con una stanza adiacente."; return current
+	if index>0: obstacles.append_array(level_records(index-1).filter(func(r): return r.kind==2))
+	if not Generator.clear_doors(walls,obstacles): generation_report="La scala impedisce l'accesso alla stanza."; return current
+	for wall in walls:
+		if not protected.has(wall.id) and not deleted_ids.has("%d/%s"%[index,wall.id]): preserved.append(wall)
+	return checked_proposal(index,rooms+preserved)
 func checked_proposal(index: int,records: Array) -> Array:
 	var rooms: Array=records.filter(func(r): return r.kind==0)
 	var main := Rect2(Vector2(-house().width*0.5+0.2,-house().depth*0.5+0.2),Vector2(house().width-0.4,house().depth-0.4))

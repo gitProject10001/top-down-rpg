@@ -204,7 +204,7 @@ static func walkability(rooms: Array,records: Array) -> PackedStringArray:
 	for r in rooms: bounds=bounds.merge(rect(r))
 	for i in rooms.size():
 		for j in range(i+1,rooms.size()):
-			if rect(rooms[i]).intersection(rect(rooms[j])).get_area()>0.01: errors.append("Stanze sovrapposte: correggi i nodi bloccati")
+			if rect(rooms[i]).intersection(rect(rooms[j])).get_area()>0.01: errors.append("Stanze sovrapposte: seleziona la nuova stanza e usa Integra stanza e genera muri, oppure separa i volumi.")
 	if not errors.is_empty(): return errors
 	var step := 0.18
 	var columns := ceili(bounds.size.x/step); var rows := ceili(bounds.size.y/step)

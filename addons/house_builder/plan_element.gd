@@ -6,8 +6,11 @@ const Door=preload("res://addons/house_builder/door.gd")
 	set(v): kind=v; dirty()
 @export var dimensions := Vector3(3,2.6,3):
 	set(v): dimensions=Vector3(maxf(v.x,0.12),maxf(v.y,0.12),maxf(v.z,0.12)); dirty()
-@export var room_type := "camera":
+@export_enum("ingresso","soggiorno","cucina","camera","ripostiglio") var room_type := "camera":
 	set(v): room_type=v; dirty()
+@export var display_name := "":
+	set(v): display_name=v; dirty()
+@export_storage var automatic_name := ""
 @export var has_door := true:
 	set(v): has_door=v; dirty()
 @export_range(-0.85,0.85,0.01) var door_offset := 0.0:
@@ -34,10 +37,23 @@ func dirty() -> void:
 	_pending=true
 	if is_inside_tree(): update_gizmos()
 func _process(_dt: float) -> void:
+	if Engine.is_editor_hint() and kind==0: refresh_room_name()
 	if transform!=_pose:
 		_pose=transform
 		if is_inside_tree(): update_gizmos()
 	if _pending: rebuild()
+func refresh_room_name() -> void:
+	if not is_inside_tree(): return
+	var legacy := str(name).begins_with("Stanza_") or str(name)=="Stanza" or str(name).begins_with("@")
+	if automatic_name=="" and not legacy: return
+	if automatic_name!="" and str(name)!=automatic_name: return
+	var title := display_name.strip_edges()
+	if title=="": title={"ingresso":"Ingresso","soggiorno":"Soggiorno","cucina":"Cucina","camera":"Camera","ripostiglio":"Ripostiglio"}.get(room_type,room_type.capitalize())
+	var candidate := title.validate_node_name(); var suffix := 2
+	if candidate=="": candidate="Stanza"
+	while get_parent().has_node(NodePath(candidate)) and get_parent().get_node(NodePath(candidate))!=self:
+		candidate=title.validate_node_name()+"_%d"%suffix; suffix+=1
+	name=candidate; automatic_name=str(name)
 func record() -> Dictionary:
 	return {"kind":kind,"dimensions":dimensions,"room_type":room_type,"position":position,"rotation":rotation,"has_door":has_door,"door_offset":door_offset,"door_width":door_width,"prop_type":prop_type,"asset":asset.resource_path if asset else "","room_ids":room_ids}
 func protected_edit() -> bool:

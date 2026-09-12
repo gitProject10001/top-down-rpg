@@ -33,6 +33,18 @@ parametri uguali producono lo stesso risultato. Undo ripristina la proposta prec
 
 ## Passaggio 3: modifiche protette
 
+Per aggiungere una stanza dentro una stanza generata: **Aggiungi stanza**, posiziona
+e ridimensiona il volume, poi **Integra stanza e genera muri**. Il comando ritaglia
+le stanze generate sovrapposte e crea partizioni con accesso, senza alterare stanze
+modificate o bloccate. Ritagli troppo stretti o passaggi ostruiti vengono rifiutati.
+È un'operazione esplicita con undo; il semplice volume azzurro non è già un muro.
+
+Le stanze nell'albero si chiamano **Ingresso**, **Soggiorno**, **Cucina**, **Camera**,
+**Ripostiglio**, con suffisso numerico per i duplicati. `Room Type` sceglie la funzione
+e l'arredo; `Display Name` assegna un nome descrittivo. Le rinomine fatte direttamente
+nell'albero vengono rispettate. Gli identificativi interni della generazione restano
+stabili anche quando cambia il nome visibile.
+
 **Rigenera muri dalle stanze** aggiorna le partizioni dopo aver modificato le stanze.
 Il blocco esplicito, gli elementi aggiunti a mano e le proprietà cambiate rispetto
 alla generazione precedente vengono conservati. **Blocca / sblocca elemento**

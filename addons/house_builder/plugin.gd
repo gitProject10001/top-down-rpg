@@ -68,7 +68,7 @@ func _enter_tree() -> void:
 	opening_help.text="Aperture: maniglia centrale per spostare; laterale per larghezza; superiore per altezza. Le porte restano a terra."
 	opening_help.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	dock.add_child(opening_help)
-	for label in ["Interni: crea / mostra", "Vista esterna", "Aggiungi piano", "Piano successivo", "Aggiungi stanza", "Aggiungi muro", "Aggiungi scala", "Aggiungi dettaglio", "Genera stanze (piano attivo)", "Rigenera muri dalle stanze", "Blocca / sblocca elemento", "Arreda piano", "Arreda stanza selezionata", "Rimuovi arredo generato"]:
+	for label in ["Interni: crea / mostra", "Vista esterna", "Aggiungi piano", "Piano successivo", "Aggiungi stanza", "Integra stanza e genera muri", "Aggiungi muro", "Aggiungi scala", "Aggiungi dettaglio", "Genera stanze (piano attivo)", "Rigenera muri dalle stanze", "Blocca / sblocca elemento", "Arreda piano", "Arreda stanza selezionata", "Rimuovi arredo generato"]:
 		var action := Button.new(); action.text=label; action.pressed.connect(_plan_action.bind(label)); dock.add_child(action)
 	var play := Button.new()
 	play.text="▶ Play casa selezionata"
@@ -158,12 +158,20 @@ func _plan_action(label: String) -> void:
 		var floor_node := Node3D.new(); floor_node.name="Piano_%d"%(plan.levels().size()+1)
 		_add_authored(plan,floor_node,"Aggiungi piano"); plan.active_floor=plan.levels().size()-1; return
 	var level: Node3D=plan.levels()[clampi(plan.active_floor,0,plan.levels().size()-1)]
-	if label in ["Genera stanze (piano attivo)","Rigenera muri dalle stanze","Arreda piano","Arreda stanza selezionata","Rimuovi arredo generato"]:
+	for e in EditorInterface.get_selection().get_selected_nodes():
+		if e is Element and e.get_parent() in plan.levels():
+			level=e.get_parent(); plan.active_floor=plan.levels().find(level); break
+	if label in ["Genera stanze (piano attivo)","Rigenera muri dalle stanze","Integra stanza e genera muri","Arreda piano","Arreda stanza selezionata","Rimuovi arredo generato"]:
 		var index: int=clampi(plan.active_floor,0,plan.levels().size()-1)
 		plan.observe_deletions()
 		var before: Array=plan.level_records(index); var after: Array=[]
 		if label=="Genera stanze (piano attivo)": after=plan.propose_rooms(index)
 		elif label=="Rigenera muri dalle stanze": after=plan.propose_walls(index)
+		elif label=="Integra stanza e genera muri":
+			var room_id := ""
+			for e in EditorInterface.get_selection().get_selected_nodes():
+				if e is Element and e.kind==0 and e.get_parent()==level: room_id=e.stable_id
+			after=plan.propose_insert_room(index,room_id)
 		else:
 			var scope := ""
 			if label=="Arreda stanza selezionata":
@@ -181,6 +189,7 @@ func _plan_action(label: String) -> void:
 	element.stable_id="manual_%s"%str(Time.get_ticks_usec())
 	element.dimensions=[Vector3(3,plan.floor_height,3),Vector3(3,plan.floor_height,0.18),Vector3(1.2,plan.floor_height,4.2),Vector3(1,0.8,0.7)][element.kind]
 	_add_authored(level,element,label)
+	if element.kind==0: status.text="Posiziona e dimensiona la stanza, poi premi Integra stanza e genera muri. Room Type sceglie la funzione; Display Name il nome."
 func _play_selected() -> void:
 	var selected := _selected_house()
 	if selected==null: status.text="Seleziona la casa da provare."; return
