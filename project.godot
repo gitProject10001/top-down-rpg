@@ -31,7 +31,7 @@ Water="*res://scripts/water.gd"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/GPUTrail/plugin.cfg", "res://addons/world_editor/plugin.cfg", "res://addons/house_builder/plugin.cfg")
+enabled=PackedStringArray("res://addons/GPUTrail/plugin.cfg", "res://addons/world_editor/plugin.cfg", "res://addons/house_builder/plugin.cfg", "res://addons/village_builder/plugin.cfg")
 
 [input]
 

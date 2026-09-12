@@ -1,0 +1,843 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/village_builder/village.gd" id="1_2nubl"]
+[ext_resource type="Script" path="res://addons/village_builder/guide.gd" id="2_vqnmu"]
+[ext_resource type="Script" path="res://addons/village_builder/lot.gd" id="3_ikwaj"]
+[ext_resource type="Script" path="res://addons/house_builder/building_request.gd" id="4_wp2gf"]
+[ext_resource type="Script" path="res://addons/house_builder/house.gd" id="5_eugse"]
+
+[sub_resource type="Environment" id="Environment_bvxj1"]
+background_mode = 1
+background_color = Color(0.15, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cdp7o"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_mp642"]
+size = Vector2(90, 75)
+
+[sub_resource type="ConcavePolygonShape3D" id="ConcavePolygonShape3D_63qg8"]
+data = PackedVector3Array(45, 0, 37.5, -45, 0, 37.5, 45, 0, -37.5, -45, 0, 37.5, -45, 0, -37.5, 45, 0, -37.5)
+
+[sub_resource type="Resource" id="Resource_d4qlk"]
+script = ExtResource("4_wp2gf")
+building_type = 2
+footprint = Vector2(5.9, 6.6)
+storeys = 2
+seed_value = 1662114933
+
+[sub_resource type="Resource" id="Resource_6il44"]
+script = ExtResource("4_wp2gf")
+footprint = Vector2(6, 6.1)
+seed_value = 2606104011
+entrance_side = 1
+
+[sub_resource type="Resource" id="Resource_4bvvh"]
+script = ExtResource("4_wp2gf")
+building_type = 2
+footprint = Vector2(5.5, 7.6)
+storeys = 2
+seed_value = 1077390466
+
+[sub_resource type="Resource" id="Resource_8b2xk"]
+script = ExtResource("4_wp2gf")
+footprint = Vector2(4.5, 7.3)
+seed_value = 1643400350
+entrance_side = 1
+
+[sub_resource type="Resource" id="Resource_ea20q"]
+script = ExtResource("4_wp2gf")
+building_type = 2
+footprint = Vector2(5.6, 5.5)
+storeys = 2
+seed_value = 1569775852
+
+[sub_resource type="Resource" id="Resource_o4aqc"]
+script = ExtResource("4_wp2gf")
+building_type = 2
+footprint = Vector2(5.3, 7.7)
+storeys = 2
+seed_value = 753594330
+
+[sub_resource type="Resource" id="Resource_g1mi1"]
+script = ExtResource("4_wp2gf")
+footprint = Vector2(5, 6.2)
+seed_value = 3615875569
+entrance_side = 1
+
+[sub_resource type="Resource" id="Resource_57dvc"]
+script = ExtResource("4_wp2gf")
+building_type = 2
+footprint = Vector2(5.8, 5.6)
+storeys = 2
+seed_value = 1087302470
+
+[sub_resource type="Resource" id="Resource_vsi60"]
+script = ExtResource("4_wp2gf")
+footprint = Vector2(6.1, 6.4)
+seed_value = 968305696
+entrance_side = 1
+
+[sub_resource type="Resource" id="Resource_lfa4d"]
+script = ExtResource("4_wp2gf")
+footprint = Vector2(4.9, 6.3)
+seed_value = 653571134
+entrance_side = 1
+
+[sub_resource type="Resource" id="Resource_e2khj"]
+script = ExtResource("4_wp2gf")
+footprint = Vector2(5.9, 5.8)
+seed_value = 3817196698
+
+[node name="VillageWorkshop" type="Node3D" unique_id=112479689]
+
+[node name="Environment" type="WorldEnvironment" parent="." unique_id=806939008]
+environment = SubResource("Environment_bvxj1")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1648436126]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=1109660588]
+material_override = SubResource("StandardMaterial3D_cdp7o")
+mesh = SubResource("PlaneMesh_mp642")
+
+[node name="Ground_col" type="StaticBody3D" parent="Ground" unique_id=1169967644]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ground/Ground_col" unique_id=545424871]
+shape = SubResource("ConcavePolygonShape3D_63qg8")
+
+[node name="Villaggio" type="Node3D" parent="." unique_id=2142144434]
+script = ExtResource("1_2nubl")
+max_houses = 12
+known_ids = PackedStringArray("ViaPrincipale_0_0_-1", "ViaPrincipale_0_0_1", "ViaPrincipale_0_1_-1", "ViaPrincipale_0_1_1", "ViaPrincipale_0_2_-1", "ViaPrincipale_0_3_-1", "ViaPrincipale_0_3_1", "ViaPrincipale_0_4_-1", "ViaPrincipale_0_4_1", "ViaLaterale_0_1_-1", "ViaLaterale_0_1_1")
+deleted_ids = PackedStringArray()
+
+[node name="Perimetro" type="Node3D" parent="Villaggio" unique_id=1810751093]
+script = ExtResource("2_vqnmu")
+stable_id = "Perimetro"
+points = PackedVector2Array(-30, -24, 30, -24, 30, 24, -30, 24)
+
+[node name="ViaPrincipale" type="Node3D" parent="Villaggio" unique_id=1569403211]
+script = ExtResource("2_vqnmu")
+kind = 1
+stable_id = "ViaPrincipale"
+points = PackedVector2Array(-25, 0, 25, 0)
+
+[node name="ViaLaterale" type="Node3D" parent="Villaggio" unique_id=1222573707]
+script = ExtResource("2_vqnmu")
+kind = 1
+stable_id = "ViaLaterale"
+points = PackedVector2Array(0, 0, 0, 20)
+
+[node name="CasePopolane" type="Node3D" parent="Villaggio" unique_id=365505712]
+script = ExtResource("2_vqnmu")
+kind = 2
+stable_id = "CasePopolane"
+points = PackedVector2Array(-29, 2, 29, 2, 29, 23, -29, 23)
+
+[node name="QuartiereBenestante" type="Node3D" parent="Villaggio" unique_id=1917067404]
+script = ExtResource("2_vqnmu")
+kind = 2
+stable_id = "QuartiereBenestante"
+points = PackedVector2Array(-29, -23, 29, -23, 29, -2, -29, -2)
+building_type = 2
+storeys = 2
+
+[node name="Lotto_ViaPrincipale_0_0_-1" type="Node3D" parent="Villaggio" unique_id=2115979138]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -6.3)
+script = ExtResource("3_ikwaj")
+stable_id = "ViaPrincipale_0_0_-1"
+request = SubResource("Resource_d4qlk")
+baseline_pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -20, 0, -6.3)
+baseline_house = {
+"dimensions": Vector4(5.9, 6.6, 5.2, 2.7),
+"openings": Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 3.9000000000000004
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 3.9000000000000004
+}]),
+"seed": 1662114933,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+"weathered": false,
+"wing": {
+"anchor": 0,
+"enabled": false,
+"length": 3.5,
+"side": 0,
+"width": 3.0
+}
+}
+zone_id = "QuartiereBenestante"
+access_path = PackedVector3Array(0, 0, 6.3, 0, 0, 4.05, 0, 0, 3.3)
+
+[node name="Edificio" type="Node3D" parent="Villaggio/Lotto_ViaPrincipale_0_0_-1" unique_id=247382166]
+script = ExtResource("5_eugse")
+width = 5.9
+depth = 6.6
+wall_height = 5.2
+roof_height = 2.7
+weathered = false
+house_seed = 1662114933
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 3.9000000000000004
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 3.9000000000000004
+}])
+
+[node name="Lotto_ViaPrincipale_0_0_1" type="Node3D" parent="Villaggio" unique_id=1914919367]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -20, 0, 6.05)
+script = ExtResource("3_ikwaj")
+stable_id = "ViaPrincipale_0_0_1"
+request = SubResource("Resource_6il44")
+baseline_pose = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -20, 0, 6.05)
+baseline_house = {
+"dimensions": Vector4(6, 6.1, 2.6, 2.1),
+"openings": Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 1,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 1,
+"y": 1.5
+}]),
+"seed": 2606104011,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+"weathered": true,
+"wing": {
+"anchor": 0,
+"enabled": false,
+"length": 3.5,
+"side": 0,
+"width": 3.0
+}
+}
+zone_id = "CasePopolane"
+access_path = PackedVector3Array(0, 0, 6.05, 0, 0, 3.8, 3.85, 0, 3.8, 3.85, 0, -3.8999999, 0, 0, -3.8999999, 0, 0, -3.05)
+
+[node name="Edificio" type="Node3D" parent="Villaggio/Lotto_ViaPrincipale_0_0_1" unique_id=1124015543]
+script = ExtResource("5_eugse")
+width = 6.0
+depth = 6.1
+house_seed = 2606104011
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 1,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 1,
+"y": 1.5
+}])
+
+[node name="Lotto_ViaPrincipale_0_1_-1" type="Node3D" parent="Villaggio" unique_id=330255695]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -6.8)
+script = ExtResource("3_ikwaj")
+stable_id = "ViaPrincipale_0_1_-1"
+request = SubResource("Resource_4bvvh")
+baseline_pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -10, 0, -6.8)
+baseline_house = {
+"dimensions": Vector4(5.5, 7.6, 5.2, 2.7),
+"openings": Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 3.9000000000000004
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 3.9000000000000004
+}]),
+"seed": 1077390466,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+"weathered": false,
+"wing": {
+"anchor": 0,
+"enabled": false,
+"length": 3.5,
+"side": 0,
+"width": 3.0
+}
+}
+zone_id = "QuartiereBenestante"
+access_path = PackedVector3Array(0, 0, 6.8, 0, 0, 4.55, 0, 0, 3.8)
+
+[node name="Edificio" type="Node3D" parent="Villaggio/Lotto_ViaPrincipale_0_1_-1" unique_id=644385916]
+script = ExtResource("5_eugse")
+width = 5.5
+depth = 7.6
+wall_height = 5.2
+roof_height = 2.7
+weathered = false
+house_seed = 1077390466
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 3.9000000000000004
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 3.9000000000000004
+}])
+
+[node name="Lotto_ViaPrincipale_0_1_1" type="Node3D" parent="Villaggio" unique_id=1344070458]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10, 0, 6.65)
+script = ExtResource("3_ikwaj")
+stable_id = "ViaPrincipale_0_1_1"
+request = SubResource("Resource_8b2xk")
+baseline_pose = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, -10, 0, 6.65)
+baseline_house = {
+"dimensions": Vector4(4.5, 7.3, 2.6, 2.1),
+"openings": Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 1,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 1,
+"y": 1.5
+}]),
+"seed": 1643400350,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+"weathered": true,
+"wing": {
+"anchor": 0,
+"enabled": false,
+"length": 3.5,
+"side": 0,
+"width": 3.0
+}
+}
+zone_id = "CasePopolane"
+access_path = PackedVector3Array(0, 0, 6.65, 0, 0, 4.4, 3.1, 0, 4.4, 3.1, 0, -4.5, 0, 0, -4.5, 0, 0, -3.65)
+
+[node name="Edificio" type="Node3D" parent="Villaggio/Lotto_ViaPrincipale_0_1_1" unique_id=321056945]
+script = ExtResource("5_eugse")
+width = 4.5
+depth = 7.3
+house_seed = 1643400350
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 1,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 1,
+"y": 1.5
+}])
+
+[node name="Lotto_ViaPrincipale_0_2_-1" type="Node3D" parent="Villaggio" unique_id=677433433]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5.75)
+script = ExtResource("3_ikwaj")
+stable_id = "ViaPrincipale_0_2_-1"
+request = SubResource("Resource_ea20q")
+baseline_pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -5.75)
+baseline_house = {
+"dimensions": Vector4(5.6, 5.5, 5.2, 2.7),
+"openings": Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 3.9000000000000004
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 3.9000000000000004
+}]),
+"seed": 1569775852,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+"weathered": false,
+"wing": {
+"anchor": 0,
+"enabled": false,
+"length": 3.5,
+"side": 0,
+"width": 3.0
+}
+}
+zone_id = "QuartiereBenestante"
+access_path = PackedVector3Array(0, 0, 5.75, 0, 0, 3.5, 0, 0, 2.75)
+
+[node name="Edificio" type="Node3D" parent="Villaggio/Lotto_ViaPrincipale_0_2_-1" unique_id=1767224213]
+script = ExtResource("5_eugse")
+width = 5.6
+depth = 5.5
+wall_height = 5.2
+roof_height = 2.7
+weathered = false
+house_seed = 1569775852
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 3.9000000000000004
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 3.9000000000000004
+}])
+
+[node name="Lotto_ViaPrincipale_0_3_-1" type="Node3D" parent="Villaggio" unique_id=1271552007]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -6.85)
+script = ExtResource("3_ikwaj")
+stable_id = "ViaPrincipale_0_3_-1"
+request = SubResource("Resource_o4aqc")
+baseline_pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 0, -6.85)
+baseline_house = {
+"dimensions": Vector4(5.3, 7.7, 5.2, 2.7),
+"openings": Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 3.9000000000000004
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 3.9000000000000004
+}]),
+"seed": 753594330,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+"weathered": false,
+"wing": {
+"anchor": 0,
+"enabled": false,
+"length": 3.5,
+"side": 0,
+"width": 3.0
+}
+}
+zone_id = "QuartiereBenestante"
+access_path = PackedVector3Array(0, 0, 6.85, 0, 0, 4.6, 0, 0, 3.85)
+
+[node name="Edificio" type="Node3D" parent="Villaggio/Lotto_ViaPrincipale_0_3_-1" unique_id=1935484418]
+script = ExtResource("5_eugse")
+width = 5.3
+depth = 7.7
+wall_height = 5.2
+roof_height = 2.7
+weathered = false
+house_seed = 753594330
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 3.9000000000000004
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 3.9000000000000004
+}])
+
+[node name="Lotto_ViaPrincipale_0_3_1" type="Node3D" parent="Villaggio" unique_id=1126421962]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10, 0, 6.1)
+script = ExtResource("3_ikwaj")
+stable_id = "ViaPrincipale_0_3_1"
+request = SubResource("Resource_g1mi1")
+baseline_pose = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 10, 0, 6.1)
+baseline_house = {
+"dimensions": Vector4(5, 6.2, 2.6, 2.1),
+"openings": Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 1,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 1,
+"y": 1.5
+}]),
+"seed": 3615875569,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+"weathered": true,
+"wing": {
+"anchor": 0,
+"enabled": false,
+"length": 3.5,
+"side": 0,
+"width": 3.0
+}
+}
+zone_id = "CasePopolane"
+access_path = PackedVector3Array(0, 0, 6.1, 0, 0, 3.85, 3.35, 0, 3.85, 3.35, 0, -3.9499998, 0, 0, -3.9499998, 0, 0, -3.1)
+
+[node name="Edificio" type="Node3D" parent="Villaggio/Lotto_ViaPrincipale_0_3_1" unique_id=1585375517]
+script = ExtResource("5_eugse")
+width = 5.0
+depth = 6.2
+house_seed = 3615875569
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 1,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 1,
+"y": 1.5
+}])
+
+[node name="Lotto_ViaPrincipale_0_4_-1" type="Node3D" parent="Villaggio" unique_id=255637118]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -5.8)
+script = ExtResource("3_ikwaj")
+stable_id = "ViaPrincipale_0_4_-1"
+request = SubResource("Resource_57dvc")
+baseline_pose = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -5.8)
+baseline_house = {
+"dimensions": Vector4(5.8, 5.6, 5.2, 2.7),
+"openings": Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 3.9000000000000004
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 3.9000000000000004
+}]),
+"seed": 1087302470,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+"weathered": false,
+"wing": {
+"anchor": 0,
+"enabled": false,
+"length": 3.5,
+"side": 0,
+"width": 3.0
+}
+}
+zone_id = "QuartiereBenestante"
+access_path = PackedVector3Array(0, 0, 5.8, 0, 0, 3.55, 0, 0, 2.8)
+
+[node name="Edificio" type="Node3D" parent="Villaggio/Lotto_ViaPrincipale_0_4_-1" unique_id=2122544819]
+script = ExtResource("5_eugse")
+width = 5.8
+depth = 5.6
+wall_height = 5.2
+roof_height = 2.7
+weathered = false
+house_seed = 1087302470
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 3.9000000000000004
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 3.9000000000000004
+}])
+
+[node name="Lotto_ViaPrincipale_0_4_1" type="Node3D" parent="Villaggio" unique_id=2059477979]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 20, 0, 6.2)
+script = ExtResource("3_ikwaj")
+stable_id = "ViaPrincipale_0_4_1"
+request = SubResource("Resource_vsi60")
+baseline_pose = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 20, 0, 6.2)
+baseline_house = {
+"dimensions": Vector4(6.1, 6.4, 2.6, 2.1),
+"openings": Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 1,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 1,
+"y": 1.5
+}]),
+"seed": 968305696,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+"weathered": true,
+"wing": {
+"anchor": 0,
+"enabled": false,
+"length": 3.5,
+"side": 0,
+"width": 3.0
+}
+}
+zone_id = "CasePopolane"
+access_path = PackedVector3Array(0, 0, 6.2, 0, 0, 3.95, 3.8999999, 0, 3.95, 3.8999999, 0, -4.05, 0, 0, -4.05, 0, 0, -3.2)
+
+[node name="Edificio" type="Node3D" parent="Villaggio/Lotto_ViaPrincipale_0_4_1" unique_id=975768511]
+script = ExtResource("5_eugse")
+width = 6.1
+depth = 6.4
+house_seed = 968305696
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 1,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 1,
+"y": 1.5
+}])
+
+[node name="Lotto_ViaLaterale_0_1_-1" type="Node3D" parent="Villaggio" unique_id=889469742]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.15, 0, 15)
+script = ExtResource("3_ikwaj")
+stable_id = "ViaLaterale_0_1_-1"
+request = SubResource("Resource_lfa4d")
+baseline_pose = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 6.15, 0, 15)
+baseline_house = {
+"dimensions": Vector4(4.9, 6.3, 2.6, 2.1),
+"openings": Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 1,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 1,
+"y": 1.5
+}]),
+"seed": 653571134,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+"weathered": true,
+"wing": {
+"anchor": 0,
+"enabled": false,
+"length": 3.5,
+"side": 0,
+"width": 3.0
+}
+}
+zone_id = "CasePopolane"
+access_path = PackedVector3Array(0, 0, 6.15, 0, 0, 3.9, 3.3, 0, 3.9, 3.3, 0, -4, 0, 0, -4, 0, 0, -3.15)
+
+[node name="Edificio" type="Node3D" parent="Villaggio/Lotto_ViaLaterale_0_1_-1" unique_id=1453649149]
+script = ExtResource("5_eugse")
+width = 4.9
+depth = 6.3
+house_seed = 653571134
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 1,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 1,
+"y": 1.5
+}])
+
+[node name="Lotto_ViaLaterale_0_1_1" type="Node3D" parent="Villaggio" unique_id=1175036572]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -5.9, 0, 15)
+script = ExtResource("3_ikwaj")
+stable_id = "ViaLaterale_0_1_1"
+request = SubResource("Resource_e2khj")
+baseline_pose = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -5.9, 0, 15)
+baseline_house = {
+"dimensions": Vector4(5.9, 5.8, 2.6, 2.1),
+"openings": Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}]),
+"seed": 3817196698,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0),
+"weathered": true,
+"wing": {
+"anchor": 0,
+"enabled": false,
+"length": 3.5,
+"side": 0,
+"width": 3.0
+}
+}
+zone_id = "CasePopolane"
+access_path = PackedVector3Array(0, 0, 5.9, 0, 0, 3.65, 0, 0, 2.9)
+
+[node name="Edificio" type="Node3D" parent="Villaggio/Lotto_ViaLaterale_0_1_1" unique_id=2062878257]
+script = ExtResource("5_eugse")
+width = 5.9
+depth = 5.8
+house_seed = 3817196698
+openings = Array[Dictionary]([{
+"height": 2.3,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.4
+}, {
+"kind": "window",
+"u": 0.65,
+"wall": 0,
+"y": 1.5
+}])
+
+[node name="Camera" type="Camera3D" parent="." unique_id=1173576126]
+transform = Transform3D(0.70710677, -0.52555275, 0.47306898, 0, 0.6690206, 0.7432439, -0.70710677, -0.52555275, 0.47306898, 45, 70.7, 45)
+projection = 1
+current = true
+size = 68.0

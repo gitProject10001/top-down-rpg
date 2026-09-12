@@ -10,6 +10,7 @@ Vertical slice minimale del villaggio giocabile, portata da `rpg-3d`. Questo rep
 - [docs/ROOF_MATERIAL.md](docs/ROOF_MATERIAL.md) — tegole in rilievo, materiale PBR e confronto delle quattro illuminazioni.
 - [docs/HOUSE_BUILDER.md](docs/HOUSE_BUILDER.md) — disegnare case nell'editor, ridimensionarle con maniglie e posizionare porte e finestre.
 - [docs/HOUSE_AUTHORING.md](docs/HOUSE_AUTHORING.md) — interni salvati, stanze, rigenerazione protetta, arredo editabile e Play della casa selezionata.
+- [docs/VILLAGE_BUILDER.md](docs/VILLAGE_BUILDER.md) — perimetri, strade, zone, lotti e case con ingresso leggibile dalla camera fissa; UI contestuale.
 
 ## Stato attuale
 
