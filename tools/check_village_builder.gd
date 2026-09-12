@@ -9,6 +9,17 @@ func run() -> void:
 	var village := Village.new(); village.name="Villaggio"; root.add_child(village)
 	guide(village,0,"Perimetro",PackedVector2Array([Vector2(-30,-24),Vector2(30,-24),Vector2(30,24),Vector2(-30,24)]))
 	var road := guide(village,1,"ViaPrincipale",PackedVector2Array([Vector2(-25,0),Vector2(25,0)]))
+	var defaults := village.propose(); assert(not village.failed and defaults.size()>=6,"Perimeter must be buildable without districts")
+	village.density_state={"base":0.0,"cells":{}}
+	assert(village.propose().is_empty() and not village.failed,"Zero density must allow empty generation")
+	village.paint_density(Vector2.ZERO,30,1)
+	assert(village.density_at(Vector2.ZERO)>0.9)
+	assert(signature(village.propose())==signature(village.propose()),"Painted density must be deterministic")
+	village.density_state={"base":1.0,"cells":{}}
+	var exclusion := guide(village,3,"Piazza",village.guides(0)[0].points)
+	assert(village.propose().is_empty() and not village.failed,"No-build area must exclude houses without a generation error")
+	exclusion.free()
+	print("VILLAGE_DEFAULT_BUILDABLE_EXCLUSION_DENSITY_OK")
 	guide(village,2,"Quartiere",PackedVector2Array([Vector2(-29,-23),Vector2(29,-23),Vector2(29,23),Vector2(-29,23)]))
 	var proposal := village.propose(); assert(not village.failed,village.report); assert(proposal.size()>=6)
 	assert(signature(proposal)==signature(village.propose()),"Seed not deterministic")
@@ -43,11 +54,13 @@ func run() -> void:
 	var deleted_id: String=first.stable_id; village.remove_child(first)
 	var after_delete := village.propose(); assert(not after_delete.any(func(r): return r.id==deleted_id))
 	village.add_child(first); village.apply(before)
+	village.paint_density(Vector2(10,10),5,0)
 	village.owner=null
 	for child in village.get_children(): set_owner_tree(child,village)
 	var packed := PackedScene.new(); assert(packed.pack(village)==OK)
 	assert(ResourceSaver.save(packed,"user://village_roundtrip.tscn")==OK)
 	var copy=load("user://village_roundtrip.tscn").instantiate(); root.add_child(copy)
+	assert(is_equal_approx(copy.density_at(Vector2(10,10)),village.density_at(Vector2(10,10))),"Density lost on save")
 	assert(copy.lots().size()==village.lots().size())
 	for lot in copy.lots():
 		if lot.stable_id==deleted_id: assert(lot.protected_edit())

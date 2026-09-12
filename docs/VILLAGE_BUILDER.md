@@ -10,12 +10,28 @@ Apri `scenes/dev/village_builder_playground.tscn`: contiene due strade, un perim
 due zone e undici case. È una scena separata dal tuo laboratorio delle case.
 La camera della dimostrazione usa la direzione isometrica fissa del gioco.
 
-Il pannello **Villaggio** ha tre schede:
+Il pannello **Villaggio** ha quattro schede:
 
 - **Area**: crea il villaggio e disegna il suo perimetro.
 - **Strade**: disegna percorsi a segmenti e regola la larghezza.
-- **Lotti**: disegna zone edificabili, scegli tipo di casa e numero di piani,
-  poi usa **Genera / aggiorna lotti e case**.
+- **Vincoli**: disegna aree non edificabili per piazze e spazi liberi. I quartieri
+  opzionali cambiano tipo di casa e piani.
+- **Densità**: scegli raggio e percentuale, attiva il pennello e trascina nella vista
+  3D. Rosso indica 0%, verde 100%. Poi usa **Genera / aggiorna lotti e case**.
+
+Tutto il perimetro è edificabile per default. Le aree non edificabili possono
+sovrapporsi: si sommano come esclusioni e restano percorribili. Non creano ancora
+pavimentazione o arredo per una piazza. I lotti sono gli ingombri delle singole
+case generate e non possono sovrapporsi. I quartieri sovrapposti usano il primo
+nell’albero. Tipo e piani predefiniti si impostano sul nodo Villaggio.
+
+La densità è una probabilità deterministica applicata alle posizioni candidate
+lungo le strade; 100% non forza case dove mancano spazio o accessi. Ogni pennellata
+supporta undo/redo ed è salvata nella scena come griglia locale di 2 m, interpolata.
+Esc annulla la pennellata in corso e termina il pennello. Le case personalizzate
+restano protette anche con densità zero; un’esclusione che le interseca produce
+un errore esplicito. I riempimenti blu dei quartieri e rossi delle esclusioni sono
+visibili durante il disegno e nell’editor, senza comparire nel gioco.
 
 Clicca per aggiungere vertici; **Invio** conferma e **Esc** annulla. Seleziona una
 guida per trascinare i suoi punti. Puoi aggiungere un punto sul lato più lungo o
@@ -42,7 +58,7 @@ selezionato. Il pannello resta scorrevole.
 ## Cosa decide il generatore
 
 Campiona posizioni sui due lati delle strade, controlla che ogni edificio rientri
-nel perimetro e in una zona, mantiene margini tra case e strade e assegna un seed
+nel perimetro, fuori dalle esclusioni, mantiene margini tra case e strade e assegna un seed
 stabile per posizione. Le zone possono richiedere casa popolana, bottega o casa
 benestante e da uno a tre piani. I profili iniziali variano stato delle superfici,
 tetto e aperture; non sono ancora kit architettonici completi.

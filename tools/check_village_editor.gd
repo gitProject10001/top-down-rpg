@@ -35,6 +35,18 @@ func run(plugin: EditorPlugin) -> void:
 		assert(village.guides(kind).size()==1)
 		history.undo(); assert(village.guides(kind).is_empty()); history.redo(); assert(village.guides(kind).size()==1)
 	print("VILLAGE_EDITOR_DRAW_UNDO_OK")
+	plugin.tabs.current_tab=3
+	plugin._begin_paint(); assert(plugin.mode==4)
+	var down := InputEventMouseButton.new(); down.button_index=MOUSE_BUTTON_LEFT; down.pressed=true; down.position=camera.unproject_position(village.to_global(Vector3.ZERO))
+	plugin._forward_3d_gui_input(camera,down)
+	var up := InputEventMouseButton.new(); up.button_index=MOUSE_BUTTON_LEFT; up.pressed=false; up.position=down.position
+	plugin._forward_3d_gui_input(camera,up)
+	var painted: float=village.density_at(Vector2.ZERO); assert(painted<0.2)
+	history.undo(); assert(village.density_at(Vector2.ZERO)==1.0); history.redo(); assert(is_equal_approx(village.density_at(Vector2.ZERO),painted))
+	plugin._reset_density(1); assert(village.density_at(Vector2.ZERO)==1.0)
+	plugin._draw(3); assert(plugin.mode==3 and plugin.draft.kind==3); plugin._cancel()
+	print("VILLAGE_EDITOR_PAINT_UNDO_EXCLUSION_MODE_OK")
+
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(village.guides(1)[0]); plugin._selection()
 	assert(plugin.tabs.current_tab==1 and plugin.gizmos.focus==village.guides(1)[0])
 	var road=village.guides(1)[0]; var points: PackedVector2Array=road.points.duplicate()

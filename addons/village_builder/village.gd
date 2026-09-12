@@ -4,6 +4,8 @@ const Guide=preload("res://addons/village_builder/guide.gd")
 const Lot=preload("res://addons/village_builder/lot.gd")
 const Request=preload("res://addons/house_builder/building_request.gd")
 @export var seed_value := 1047
+@export_enum("Casa popolana","Bottega","Casa benestante") var building_type := 0
+@export_range(1,3) var storeys := 1
 @export_range(1,40) var max_houses := 16
 @export_range(1,5,0.25) var setback := 1.5
 @export_range(-180,180,1) var fixed_camera_yaw := 45.0
@@ -12,6 +14,27 @@ const Request=preload("res://addons/house_builder/building_request.gd")
 var report := ""
 var failed := false
 var retired: Dictionary={}
+const DENSITY_CELL := 2.0
+@export_storage var density_state: Dictionary={"base":1.0,"cells":{}}
+func density_at(point: Vector2) -> float:
+	var grid := point/DENSITY_CELL-Vector2.ONE*0.5
+	var cell := Vector2i(floori(grid.x),floori(grid.y)); var fraction := grid-Vector2(cell)
+	var cells: Dictionary=density_state.get("cells",{})
+	var base: float=density_state.get("base",1.0)
+	var a := lerpf(cells.get(cell,base),cells.get(cell+Vector2i.RIGHT,base),fraction.x)
+	var b := lerpf(cells.get(cell+Vector2i.DOWN,base),cells.get(cell+Vector2i.ONE,base),fraction.x)
+	return clampf(lerpf(a,b,fraction.y),0,1)
+func paint_density(point: Vector2,radius: float,target: float) -> void:
+	var next := density_state.duplicate(true); var cells: Dictionary=next.cells
+	var low := Vector2i(floori((point.x-radius)/DENSITY_CELL),floori((point.y-radius)/DENSITY_CELL))
+	var high := Vector2i(ceili((point.x+radius)/DENSITY_CELL),ceili((point.y+radius)/DENSITY_CELL))
+	for y in range(low.y,high.y+1):
+		for x in range(low.x,high.x+1):
+			var cell := Vector2i(x,y); var distance := ((Vector2(cell)+Vector2.ONE*0.5)*DENSITY_CELL).distance_to(point)
+			if distance>=radius: continue
+			var weight := clampf((1.0-distance/radius)*2,0,1)
+			cells[cell]=lerpf(cells.get(cell,next.base),clampf(target,0,1),weight)
+	density_state=next
 func guides(kind: int) -> Array:
 	return get_children().filter(func(n): return n is Guide and n.kind==kind)
 func lots() -> Array: return get_children().filter(func(n): return n is Lot)
@@ -66,11 +89,11 @@ func road_shapes() -> Array:
 func propose() -> Array:
 	failed=true
 	var before := snapshot()
-	if guides(0).size()!=1 or guides(1).is_empty() or guides(2).is_empty():
-		report="Servono un perimetro, almeno una strada e una zona edificabile."; return before
+	if guides(0).size()!=1 or guides(1).is_empty():
+		report="Servono un perimetro e almeno una strada. Il perimetro è edificabile per default."; return before
 	var boundary: PackedVector2Array=guides(0)[0].village_points()
 	if boundary.size()<3 or Geometry2D.triangulate_polygon(boundary).is_empty(): report="Il perimetro deve essere un poligono semplice, senza incroci."; return before
-	for zone in guides(2):
+	for zone in guides(2)+guides(3):
 		if zone.points.size()<3 or Geometry2D.triangulate_polygon(zone.village_points()).is_empty(): report="Zona non valida: "+str(zone.name); return before
 	for road in guides(1):
 		if road.points.size()<2: report="Strada incompleta: "+str(road.name); return before
@@ -86,6 +109,8 @@ func propose() -> Array:
 		if not lot.protected_edit(): continue
 		var poly: PackedVector2Array=lot.polygon()
 		if not inside(poly,boundary): report="Il perimetro esclude un lotto modificato: "+str(lot.name); return before
+		for zone in guides(3):
+			if not Geometry2D.intersect_polygons(poly,zone.village_points()).is_empty(): report="L'area non edificabile invade il lotto protetto "+str(lot.name)+". Sposta il lotto o modifica l'area."; return before
 		for obstacle in occupied+reserved_access:
 			if not Geometry2D.intersect_polygons(poly,obstacle).is_empty(): report="Il lotto protetto "+str(lot.name)+" occupa un'altra casa o il suo accesso."; return before
 		for road in roads:
@@ -104,7 +129,7 @@ func propose() -> Array:
 		occupied.append(poly)
 		reserved_access.append_array(protected_paths)
 		result.append(before.filter(func(r): return r.id==lot.stable_id)[0])
-	var skipped := 0
+	var skipped := 0; var density_skipped := 0; var excluded_count := 0
 	for road in guides(1):
 		var points: PackedVector2Array=road.village_points()
 		for segment in range(points.size()-1):
@@ -123,10 +148,15 @@ func propose() -> Array:
 					var pose := Transform3D(Basis(Vector3.UP,atan2(front.x,front.y)),Vector3(center.x,0,center.y))
 					var poly := footprint(pose,Vector2(width,depth))
 					if not inside(poly,boundary): skipped+=1; continue
-					var chosen: Node=null
+					var excluded := false
+					for zone in guides(3):
+						if not Geometry2D.intersect_polygons(poly,zone.village_points()).is_empty(): excluded=true; break
+					if excluded: skipped+=1; excluded_count+=1; continue
+					var chosen: Node=self
 					for zone in guides(2):
 						if inside(poly,zone.village_points()): chosen=zone; break
-					if chosen==null: skipped+=1; continue
+					var density_rng := RandomNumberGenerator.new(); density_rng.seed=hash(str(seed_value)+id+"density")
+					if density_rng.randf()>=density_at(center): density_skipped+=1; continue
 					var blocked := false
 					var margin_poly := footprint(pose,Vector2(width+1,depth+1))
 					for obstacle in occupied+roads+reserved_access:
@@ -141,9 +171,9 @@ func propose() -> Array:
 						for obstacle in occupied:
 							if not Geometry2D.intersect_polygons(path,obstacle).is_empty(): blocked=true; break
 					if blocked: skipped+=1; continue
-					result.append({"id":id,"transform":pose,"request":request,"zone":chosen.stable_id,"locked":false,"access":access}); occupied.append(poly); reserved_access.append_array(paths)
-	if result.is_empty(): report="Nessun lotto disponibile: allarga la zona lungo la strada o riduci la distanza dalla strada."; return before
-	failed=false; report="%d lotti proposti; %d posizioni escluse. Case modificate conservate."%[result.size(),skipped]
+					result.append({"id":id,"transform":pose,"request":request,"zone":chosen.stable_id if chosen!=self else "","locked":false,"access":access}); occupied.append(poly); reserved_access.append_array(paths)
+	if result.is_empty() and density_skipped==0 and excluded_count==0: report="Nessun lotto disponibile: allarga il perimetro lungo la strada o riduci la distanza dalla strada."; return before
+	failed=false; report="%d lotti; %d posizioni escluse, %d escluse dalla densità. Case modificate conservate."%[result.size(),skipped,density_skipped]
 	return result
 func owned(node: Node) -> void:
 	if owner: node.owner=owner

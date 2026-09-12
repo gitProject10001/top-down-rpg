@@ -20,24 +20,29 @@ var drawing_camera: Camera3D
 var cursor_point := Vector3.ZERO
 var cursor_visible := false
 var preview_draw_count := 0
+var brush_radius: SpinBox
+var brush_target: SpinBox
+var paint_before: Dictionary = {}
+var paint_village: Node3D
+var painting := false
 func _enter_tree() -> void:
 	gizmos=preload("res://addons/village_builder/gizmo.gd").new(); gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(gizmos)
 	panel=ScrollContainer.new(); panel.name="Villaggio"; panel.custom_minimum_size.x=280; panel.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	var column := VBoxContainer.new(); column.size_flags_horizontal=Control.SIZE_EXPAND_FILL; panel.add_child(column)
 	var create := Button.new(); create.text="Crea villaggio"; create.pressed.connect(_create); column.add_child(create)
-	status=Label.new(); status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; status.text="Crea un villaggio, poi disegna perimetro, strade e zone."; column.add_child(status)
+	status=Label.new(); status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; status.text="Crea un villaggio, poi disegna perimetro e strade. Tutta l’area è edificabile."; column.add_child(status)
 	drawing_actions=HBoxContainer.new(); drawing_actions.hide(); column.add_child(drawing_actions)
 	var confirm := Button.new(); confirm.text="Conferma disegno"; confirm.pressed.connect(_finish_drawing); drawing_actions.add_child(confirm)
 	var cancel := Button.new(); cancel.text="Annulla"; cancel.pressed.connect(_cancel); drawing_actions.add_child(cancel)
 	tabs=TabContainer.new(); column.add_child(tabs)
 	for i in 3:
-		var page := VBoxContainer.new(); page.name=["Area","Strade","Lotti"][i]; tabs.add_child(page)
-		var help := Label.new(); help.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; help.text=["Definisci il confine del villaggio.","Disegna percorsi a segmenti. Regola Road Width nell'Inspector.","Disegna zone edificabili. Building Type e Storeys regolano le case della zona."][i]; page.add_child(help)
-		var draw := Button.new(); draw.text=["Disegna perimetro","Disegna strada","Disegna zona edificabile"][i]; draw.pressed.connect(_draw.bind(i)); page.add_child(draw)
+		var page := VBoxContainer.new(); page.name=["Area","Strade","Vincoli"][i]; tabs.add_child(page)
+		var help := Label.new(); help.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; help.text=["Definisci il confine del villaggio.","Disegna percorsi a segmenti. Regola Road Width nell'Inspector.","Tutto il perimetro è edificabile. Escludi piazze e spazi liberi; i quartieri sono opzionali."][i]; page.add_child(help)
+		var draw := Button.new(); draw.text=["Disegna perimetro","Disegna strada","Disegna area non edificabile"][i]; draw.pressed.connect(_draw.bind(3 if i==2 else i)); page.add_child(draw)
 		var select := Button.new(); select.text="Seleziona / modifica punti"; select.pressed.connect(_cancel); page.add_child(select)
 		var point := Button.new(); point.text="Aggiungi punto sul lato più lungo"; point.pressed.connect(_add_point); page.add_child(point)
 		var remove := Button.new(); remove.text="Rimuovi ultimo punto"; remove.pressed.connect(_remove_point); page.add_child(remove)
-	var generate := Button.new(); generate.text="Genera / aggiorna lotti e case"; generate.pressed.connect(_generate); tabs.get_child(2).add_child(generate)
+	var generate := Button.new(); generate.text="Genera / aggiorna lotti e case"; generate.pressed.connect(_generate); column.add_child(generate)
 	road_width=SpinBox.new(); road_width.prefix="Larghezza strada"; road_width.suffix="m"; road_width.min_value=2; road_width.max_value=10; road_width.step=0.25; road_width.value=3
 	road_width.value_changed.connect(func(v): _guide_property("road_width",v)); tabs.get_child(1).add_child(road_width)
 	zone_type=OptionButton.new()
@@ -45,6 +50,15 @@ func _enter_tree() -> void:
 	zone_type.item_selected.connect(func(v): _guide_property("building_type",v)); tabs.get_child(2).add_child(zone_type); tabs.get_child(2).move_child(zone_type,1)
 	floors=SpinBox.new(); floors.prefix="Piani"; floors.min_value=1; floors.max_value=3; floors.step=1
 	floors.value_changed.connect(func(v): _guide_property("storeys",int(v))); tabs.get_child(2).add_child(floors); tabs.get_child(2).move_child(floors,2)
+	var district := Button.new(); district.text="Disegna quartiere (tipo di casa)"; district.pressed.connect(_draw.bind(2)); tabs.get_child(2).add_child(district)
+	var density_page := VBoxContainer.new(); density_page.name="Densità"; tabs.add_child(density_page)
+	var explanation := Label.new(); explanation.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; explanation.text="Dipingi quante case proporre: 0% nessuna, 100% massimo. Poi Genera / aggiorna. Le case modificate restano protette."; density_page.add_child(explanation)
+	brush_radius=SpinBox.new(); brush_radius.prefix="Raggio"; brush_radius.suffix="m"; brush_radius.min_value=2; brush_radius.max_value=30; brush_radius.value=6; density_page.add_child(brush_radius)
+	brush_target=SpinBox.new(); brush_target.prefix="Densità"; brush_target.suffix="%"; brush_target.max_value=100; brush_target.step=5; brush_target.value=0; density_page.add_child(brush_target)
+	var paint := Button.new(); paint.text="Dipingi densità"; paint.pressed.connect(_begin_paint); density_page.add_child(paint)
+	var stop := Button.new(); stop.text="Termina pennello"; stop.pressed.connect(_cancel); density_page.add_child(stop)
+	for value in [0.0,1.0]:
+		var reset := Button.new(); reset.text="Tutto vuoto" if value==0 else "Densità massima ovunque"; reset.pressed.connect(_reset_density.bind(value)); density_page.add_child(reset)
 	var lock := Button.new(); lock.text="Blocca / sblocca lotto selezionato"; lock.pressed.connect(_lock); tabs.get_child(2).add_child(lock)
 	var tip := Label.new(); tip.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; tip.text="Disegno: clic per aggiungere punti · Invio per confermare · Esc per annullare.\nSolo la guida selezionata mostra le maniglie.\nPrima versione: layout su terreno piano."; column.add_child(tip)
 	dialog=AcceptDialog.new(); dialog.title="Villaggio · operazione non eseguita"; dialog.get_label().autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; dialog.get_label().custom_minimum_size.x=440; EditorInterface.get_base_control().add_child(dialog)
@@ -85,7 +99,7 @@ func _selection() -> void:
 		if not _in_current_scene(node): continue
 		if node is Village or node is Guide or node is Lot: _show_context_dock.call_deferred()
 		if node is Guide:
-			gizmos.focus=node; tabs.current_tab=node.kind; status.text="Guida: "+str(node.name)
+			gizmos.focus=node; tabs.current_tab=mini(node.kind,2); status.text="Guida: "+str(node.name)
 			road_width.set_block_signals(true); road_width.value=node.road_width; road_width.set_block_signals(false)
 			zone_type.select(node.building_type); floors.set_block_signals(true); floors.value=node.storeys; floors.set_block_signals(false)
 	road_width.editable=is_instance_valid(gizmos.focus) and gizmos.focus.kind==1
@@ -107,7 +121,7 @@ func _guide_property(key: String,value: Variant) -> void:
 	undo.add_do_property(node,key,value); undo.add_undo_property(node,key,node.get(key)); undo.commit_action()
 func _tab_changed(index: int) -> void:
 	_cancel()
-	if is_instance_valid(gizmos.focus) and gizmos.focus.kind!=index:
+	if is_instance_valid(gizmos.focus) and mini(gizmos.focus.kind,2)!=index:
 		var old=gizmos.focus; gizmos.focus=null; old.update_gizmos()
 func _error(message: String) -> void:
 	status.text=message; dialog.dialog_text=message; dialog.popup_centered(Vector2i(500,200))
@@ -131,7 +145,7 @@ func _draw(kind: int) -> void:
 		if other==self or other.get_script()==null: continue
 		if other.get_script().resource_path=="res://addons/house_builder/plugin.gd": other._set_mode(0)
 		if other.get_script().resource_path=="res://addons/world_editor/plugin.gd" and is_instance_valid(other.mode): other.mode.select(0)
-	mode=kind; draft=Guide.new(); draft.kind=kind; draft.points=PackedVector2Array(); draft.name=["Perimetro","Strada","Zona"][kind]; draft.stable_id="guide_%d"%Time.get_ticks_usec(); village.add_child(draft)
+	mode=kind; draft=Guide.new(); draft.kind=kind; draft.points=PackedVector2Array(); draft.name=["Perimetro","Strada","Quartiere","AreaLibera"][kind]; draft.stable_id="guide_%d"%Time.get_ticks_usec(); village.add_child(draft)
 	gizmos.focus=draft; status.text="Clicca i vertici sul terreno. Invio conferma; Esc annulla."
 	drawing_actions.show(); cursor_visible=false; update_overlays()
 func _finish_drawing() -> void:
@@ -142,6 +156,8 @@ func _finish_drawing() -> void:
 	drawing_actions.hide(); cursor_visible=false; update_overlays()
 	_add(parent,node,"Disegna guida villaggio"); status.text=str(node.name)+" creato. Seleziona la guida per spostare i punti."
 func _cancel() -> void:
+	if painting and is_instance_valid(paint_village): paint_village.density_state=paint_before
+	painting=false; paint_before={}; paint_village=null
 	mode=-1
 	cursor_visible=false
 	if is_instance_valid(drawing_actions): drawing_actions.hide()
@@ -152,6 +168,9 @@ func _cancel() -> void:
 	draft=null
 	update_overlays()
 func _forward_3d_gui_input(camera: Camera3D,event: InputEvent) -> int:
+	drawing_camera=camera
+	if tabs.current_tab==3: update_overlays()
+	if mode==4: return _paint_input(camera,event)
 	if mode<0: return AFTER_GUI_INPUT_PASS
 	if not _in_current_scene(draft): _cancel(); return AFTER_GUI_INPUT_PASS
 	if event is InputEventKey and event.pressed:
@@ -177,11 +196,13 @@ func _forward_3d_gui_input(camera: Camera3D,event: InputEvent) -> int:
 		return AFTER_GUI_INPUT_STOP
 	return AFTER_GUI_INPUT_PASS
 func _forward_3d_draw_over_viewport(overlay: Control) -> void:
+	if tabs.current_tab==3 and is_instance_valid(drawing_camera): _draw_density(overlay)
+	if mode==4: return
 	if mode<0 or not _in_current_scene(draft) or not is_instance_valid(drawing_camera): return
 	preview_draw_count+=1
 	var points := PackedVector2Array()
 	for p in draft.points: points.append(drawing_camera.unproject_position(draft.to_global(Vector3(p.x,0,p.y))))
-	var color: Color=[Color(0.35,1,0.5),Color(1,0.8,0.25),Color(0.35,0.75,1)][mode]
+	var color: Color=[Color(0.35,1,0.5),Color(1,0.8,0.25),Color(0.35,0.75,1),Color(1,0.3,0.15)][mode]
 	var outline := points.duplicate()
 	var cursor := drawing_camera.unproject_position(draft.to_global(cursor_point))
 	if cursor_visible and (outline.is_empty() or outline[-1].distance_to(cursor)>1): outline.append(cursor)
@@ -227,3 +248,66 @@ func _lock() -> void:
 			var undo := get_undo_redo(); undo.create_action("Proteggi lotto",UndoRedo.MERGE_DISABLE,lot)
 			undo.add_do_property(lot,"locked",not lot.locked); undo.add_undo_property(lot,"locked",lot.locked); undo.commit_action(); return
 	_error("Seleziona un lotto o la sua casa.")
+
+func _begin_paint() -> void:
+	_cancel()
+	paint_village=_village()
+	if paint_village==null or paint_village.guides(0).is_empty(): _error("Crea prima il perimetro del villaggio."); return
+	for other in get_parent().get_children():
+		if other==self or other.get_script()==null: continue
+		if other.get_script().resource_path=="res://addons/house_builder/plugin.gd": other._set_mode(0)
+		if other.get_script().resource_path=="res://addons/world_editor/plugin.gd" and is_instance_valid(other.mode): other.mode.select(0)
+	mode=4; status.text="Trascina con il tasto sinistro. Esc termina; annulla la pennellata in corso. Poi Genera / aggiorna."
+	update_overlays()
+func _density_action(node: Node,before: Dictionary,after: Dictionary) -> void:
+	var undo := get_undo_redo(); undo.create_action("Dipingi densità",UndoRedo.MERGE_DISABLE,node)
+	undo.add_do_property(node,"density_state",after); undo.add_undo_property(node,"density_state",before)
+	undo.add_do_method(self,"update_overlays"); undo.add_undo_method(self,"update_overlays"); undo.commit_action()
+func _reset_density(value: float) -> void:
+	_cancel()
+	var node := _village()
+	if node==null: _error("Seleziona un villaggio."); return
+	_density_action(node,node.density_state.duplicate(true),{"base":value,"cells":{}})
+func _paint_input(camera: Camera3D,event: InputEvent) -> int:
+	if not _in_current_scene(paint_village): _cancel(); return AFTER_GUI_INPUT_PASS
+	if event is InputEventKey and event.pressed and event.keycode==KEY_ESCAPE: _cancel(); return AFTER_GUI_INPUT_STOP
+	if event is InputEventMouseMotion or (event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_LEFT):
+		var inverse := paint_village.global_transform.affine_inverse()
+		var point=Plane(Vector3.UP,0).intersects_ray(inverse*camera.project_ray_origin(event.position),inverse.basis*camera.project_ray_normal(event.position))
+		var previous := cursor_point
+		if point!=null: cursor_point=point; cursor_visible=true
+		else: cursor_visible=false
+		if event is InputEventMouseButton:
+			if event.pressed: paint_before=paint_village.density_state.duplicate(true); painting=true; previous=cursor_point
+			elif painting:
+				painting=false; _density_action(paint_village,paint_before,paint_village.density_state.duplicate(true)); paint_before={}
+		if painting and cursor_visible:
+			var steps := maxi(1,ceili(previous.distance_to(cursor_point)/1.0))
+			for i in range(1,steps+1):
+				var p := previous.lerp(cursor_point,float(i)/steps)
+				paint_village.paint_density(Vector2(p.x,p.z),brush_radius.value,brush_target.value/100.0)
+		update_overlays(); return AFTER_GUI_INPUT_STOP
+	return AFTER_GUI_INPUT_PASS
+func _draw_density(overlay: Control) -> void:
+	var node := _village()
+	if node==null or node.guides(0).is_empty(): return
+	var boundary: PackedVector2Array=node.guides(0)[0].village_points()
+	if boundary.size()<3: return
+	var bounds := Rect2(boundary[0],Vector2.ZERO)
+	for point in boundary: bounds=bounds.expand(point)
+	var cell := maxf(2.0,ceilf(maxf(bounds.size.x,bounds.size.y)/64.0))
+	for x in range(floori(bounds.position.x/cell),ceili(bounds.end.x/cell)):
+		for y in range(floori(bounds.position.y/cell),ceili(bounds.end.y/cell)):
+			var center := (Vector2(x,y)+Vector2.ONE*0.5)*cell
+			if not Geometry2D.is_point_in_polygon(center,boundary): continue
+			var quad := PackedVector2Array()
+			for corner in [Vector2(0,0),Vector2(1,0),Vector2(1,1),Vector2(0,1)]:
+				var p: Vector2=(Vector2(x,y)+corner)*cell
+				quad.append(drawing_camera.unproject_position(node.to_global(Vector3(p.x,0,p.y))))
+			overlay.draw_colored_polygon(quad,Color(0.8,0.15,0.08,0.24).lerp(Color(0.15,0.9,0.3,0.24),node.density_at(center)))
+	if mode==4 and cursor_visible:
+		var ring := PackedVector2Array()
+		for i in 33:
+			var angle := TAU*i/32.0
+			ring.append(drawing_camera.unproject_position(node.to_global(cursor_point+Vector3(cos(angle),0,sin(angle))*brush_radius.value)))
+		overlay.draw_polyline(ring,Color.WHITE,2,true)
