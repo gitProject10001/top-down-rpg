@@ -137,3 +137,56 @@ static func clear_doors(walls: Array,obstacles: Array) -> bool:
 				wall.door_offset=amount/(length*0.5); found=true; break
 		if not found: return false
 	return true
+static func walkability(rooms: Array,records: Array) -> PackedStringArray:
+	if rooms.is_empty(): return PackedStringArray()
+	var errors := PackedStringArray()
+	var bounds := rect(rooms[0])
+	for r in rooms: bounds=bounds.merge(rect(r))
+	for i in rooms.size():
+		for j in range(i+1,rooms.size()):
+			if rect(rooms[i]).intersection(rect(rooms[j])).get_area()>0.01: errors.append("Stanze sovrapposte: correggi i nodi bloccati")
+	if not errors.is_empty(): return errors
+	var step := 0.18
+	var columns := ceili(bounds.size.x/step); var rows := ceili(bounds.size.y/step)
+	var walk: Dictionary={}; var room_cells: Dictionary={}
+	for y in rows:
+		for x in columns:
+			var p := bounds.position+Vector2(x+0.5,y+0.5)*step
+			var room_id := ""
+			for r in rooms:
+				if rect(r).has_point(p): room_id=str(r.id); break
+			if room_id=="": continue
+			var blocked := false
+			for offset in [Vector2(0.31,0),Vector2(-0.31,0),Vector2(0,0.31),Vector2(0,-0.31)]:
+				var supported := false
+				for r in rooms:
+					if rect(r).has_point(p+offset): supported=true; break
+				if not supported: blocked=true; break
+			if blocked: continue
+			for r in records:
+				if r.kind not in [1,2,3]: continue
+				var delta := p-Vector2(r.position.x,r.position.z)
+				var angle: float=r.rotation.y
+				var local := Vector2(delta.dot(Vector2(cos(angle),-sin(angle))),delta.dot(Vector2(sin(angle),cos(angle))))
+				if r.kind==1:
+					if absf(local.y)>r.dimensions.z*0.5+0.31 or absf(local.x)>r.dimensions.x*0.5+0.31: continue
+					var length: float=r.dimensions.x; var dw: float=minf(r.get("door_width",1.2),length-0.3)
+					var center := clampf(r.get("door_offset",0.0)*length*0.5,-length*0.5+dw*0.5+0.12,length*0.5-dw*0.5-0.12)
+					if r.get("has_door",true) and absf(local.x-center)<dw*0.5-0.31: continue
+					blocked=true; break
+				elif absf(local.x)<r.dimensions.x*0.5+0.31 and absf(local.y)<r.dimensions.z*0.5+0.31: blocked=true; break
+			if blocked: continue
+			var cell := Vector2i(x,y); walk[cell]=room_id
+			room_cells[room_id]=cell
+	if walk.is_empty(): return PackedStringArray(["Nessun passaggio libero per il giocatore"])
+	var start: Vector2i=room_cells.get("hall",walk.keys()[0])
+	var queue: Array[Vector2i]=[start]; var visited: Dictionary={start:true}; var reached: Dictionary={}
+	var cursor := 0
+	while cursor<queue.size():
+		var cell := queue[cursor]; cursor+=1; reached[walk[cell]]=true
+		for direction in [Vector2i.LEFT,Vector2i.RIGHT,Vector2i.UP,Vector2i.DOWN]:
+			var next: Vector2i=cell+direction
+			if walk.has(next) and not visited.has(next): visited[next]=true; queue.append(next)
+	for r in rooms:
+		if not reached.has(str(r.id)): errors.append("Passaggio ostruito verso "+str(r.id))
+	return errors

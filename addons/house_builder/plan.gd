@@ -4,6 +4,9 @@ const Element=preload("res://addons/house_builder/plan_element.gd")
 const Door=preload("res://addons/house_builder/door.gd")
 const Generator=preload("res://addons/house_builder/plan_generator.gd")
 var generation_report := ""
+@export_storage var known_generated: Dictionary={}
+@export_storage var deleted_ids: Dictionary={}
+var _retired: Dictionary={}
 const MeshJoin=preload("res://addons/house_builder/mesh_join.gd")
 @export_range(2.4,3.5,0.1) var floor_height := 2.6:
 	set(v): floor_height=v; _pending=true
@@ -38,6 +41,7 @@ func elements() -> Array[Node3D]:
 	return result
 func _ready() -> void: _pending=true
 func _process(_dt: float) -> void:
+	if Engine.is_editor_hint(): observe_deletions()
 	var signature := str(house().dimensions(),house().wing_settings(),floor_height,levels().size())
 	for e in elements():
 		if e.kind==2: signature+=str(e.transform,e.dimensions)
@@ -102,12 +106,16 @@ func apply_records(index: int,records: Array) -> void:
 	var existing: Dictionary={}
 	for e in level.get_children():
 		if e is Element:
-			if not wanted.has(e.stable_id): e.free()
+			if not wanted.has(e.stable_id):
+				level.remove_child(e); _retired["%d/%s"%[index,e.stable_id]]=e
 			else: existing[e.stable_id]=e
 	for record in records:
 		var e: Node3D=existing.get(record.id)
 		if e==null:
-			e=Element.new(); e.name=["Stanza_","Muro_","Scala_","Oggetto_"][record.kind]+str(record.id)
+			var key := "%d/%s"%[index,record.id]
+			e=_retired.get(key)
+			if e!=null: _retired.erase(key)
+			else: e=Element.new(); e.name=["Stanza_","Muro_","Scala_","Oggetto_"][record.kind]+str(record.id)
 			level.add_child(e,true); e.owner=owner
 		e.stable_id=record.id
 		for key in ["kind","position","rotation","dimensions","room_type","has_door","door_offset","door_width","prop_type","room_ids"]:
@@ -116,8 +124,10 @@ func apply_records(index: int,records: Array) -> void:
 		e.generated=record.get("generated",true); e.locked=record.get("locked",false)
 		e.baseline=record.get("baseline",{}).duplicate(true)
 		if e.baseline.is_empty() and e.generated: e.accept_baseline()
+	known_generated[str(index)]=records.filter(func(r): return r.get("generated",true)).map(func(r): return str(r.id))
 	_pending=true
 func propose_rooms(index: int) -> Array:
+	observe_deletions()
 	var current := level_records(index)
 	var fixed: Array=[]
 	var preserved: Array=[]
@@ -147,4 +157,40 @@ func propose_rooms(index: int) -> Array:
 	var result: Array=rooms+preserved
 	for r in walls:
 		if not ids.has(r.id): result.append(r)
-	return result
+	result=result.filter(func(r): return not deleted_ids.has("%d/%s"%[index,r.id]))
+	return checked_proposal(index,result)
+func observe_deletions() -> void:
+	for index in levels().size():
+		var present: Dictionary={}
+		for e in levels()[index].get_children():
+			if e is Element:
+				present[e.stable_id]=true; deleted_ids.erase("%d/%s"%[index,e.stable_id])
+		for id in known_generated.get(str(index),[]):
+			if not present.has(id): deleted_ids["%d/%s"%[index,id]]=true
+func propose_walls(index: int) -> Array:
+	observe_deletions()
+	var current := level_records(index)
+	var rooms: Array=current.filter(func(r): return r.kind==0)
+	var result: Array=[]; var protected: Dictionary={}
+	for e in levels()[index].get_children():
+		if e is Element and (e.kind!=1 or e.protected_edit()): protected[e.stable_id]=true
+	for r in current:
+		if protected.has(r.id): result.append(r)
+	var walls := Generator.walls(rooms,floor_height)
+	var obstacles: Array=current.filter(func(r): return r.kind==2)
+	if index>0: obstacles.append_array(level_records(index-1).filter(func(r): return r.kind==2))
+	if not Generator.clear_doors(walls,obstacles):
+		generation_report="Una scala impedisce il passaggio di una porta"; return current
+	for r in walls:
+		if not protected.has(r.id) and not deleted_ids.has("%d/%s"%[index,r.id]): result.append(r)
+	return checked_proposal(index,result)
+func checked_proposal(index: int,records: Array) -> Array:
+	var rooms: Array=records.filter(func(r): return r.kind==0)
+	var errors := Generator.walkability(rooms,records)
+	if not errors.is_empty(): generation_report="; ".join(errors); return level_records(index)
+	generation_report="%d stanze: passaggi verificati; modifiche manuali conservate"%rooms.size()
+	return records
+func _notification(what: int) -> void:
+	if what==NOTIFICATION_PREDELETE:
+		for e in _retired.values():
+			if is_instance_valid(e): e.free()

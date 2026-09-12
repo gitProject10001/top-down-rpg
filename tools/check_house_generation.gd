@@ -25,4 +25,33 @@ func run() -> void:
 	var wing_records := plan.propose_rooms(0)
 	assert(wing_records.any(func(r): return r.id=="wing"),plan.generation_report)
 	print("HOUSE_PLAN_WING_CONNECTED_OK")
+	plan.apply_records(0,wing_records)
+	var level := plan.levels()[0]
+	var hall: Node3D
+	var wall: Node3D
+	for e in level.get_children():
+		if e.stable_id=="hall": hall=e
+		if e.kind==1: wall=e
+	hall.locked=true
+	var original: Dictionary=hall.record()
+	plan.seed_value=88
+	plan.apply_records(0,plan.propose_rooms(0))
+	assert(hall.record()==original and hall.locked,"Locked room changed")
+	wall.door_width=1.35
+	var edited: Dictionary=wall.record()
+	plan.apply_records(0,plan.propose_walls(0))
+	assert(wall.record()==edited,"Manual wall edit changed")
+	var before := plan.level_records(0)
+	var id: String=wall.stable_id
+	level.remove_child(wall); plan.observe_deletions()
+	var after := plan.propose_walls(0)
+	assert(not after.any(func(r): return r.id==id),"Deleted wall returned")
+	level.add_child(wall); plan.observe_deletions()
+	assert(not plan.deleted_ids.has("0/"+id),"Undo deletion not observed")
+	plan.apply_records(0,after); plan.apply_records(0,before)
+	assert(wall.get_parent()==level,"Undo replaced authored node identity")
+	var blocked := before.duplicate(true)
+	blocked.append({"id":"blocker","kind":3,"position":Vector3.ZERO,"rotation":Vector3.ZERO,"dimensions":Vector3(20,2,20)})
+	assert(plan.checked_proposal(0,blocked)==plan.level_records(0),"Invalid proposal applied")
+	print("HOUSE_PLAN_LOCK_EDIT_DELETE_RESTORE_CLEARANCE_OK")
 	house.free(); quit()

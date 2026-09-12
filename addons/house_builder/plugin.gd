@@ -68,7 +68,7 @@ func _enter_tree() -> void:
 	opening_help.text="Aperture: maniglia centrale per spostare; laterale per larghezza; superiore per altezza. Le porte restano a terra."
 	opening_help.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	dock.add_child(opening_help)
-	for label in ["Interni: crea / mostra", "Vista esterna", "Aggiungi piano", "Piano successivo", "Aggiungi stanza", "Aggiungi muro", "Aggiungi scala", "Aggiungi dettaglio", "Genera stanze (piano attivo)"]:
+	for label in ["Interni: crea / mostra", "Vista esterna", "Aggiungi piano", "Piano successivo", "Aggiungi stanza", "Aggiungi muro", "Aggiungi scala", "Aggiungi dettaglio", "Genera stanze (piano attivo)", "Rigenera muri dalle stanze", "Blocca / sblocca elemento"]:
 		var action := Button.new(); action.text=label; action.pressed.connect(_plan_action.bind(label)); dock.add_child(action)
 	var play := Button.new()
 	play.text="▶ Play casa selezionata"
@@ -133,6 +133,15 @@ func _add_authored(parent: Node,node: Node,label: String) -> void:
 	undo.add_undo_method(parent,"remove_child",node); undo.add_do_reference(node); undo.commit_action()
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(node); EditorInterface.edit_node(node)
 func _plan_action(label: String) -> void:
+	if label=="Blocca / sblocca elemento":
+		for e in EditorInterface.get_selection().get_selected_nodes():
+			if not e is Element: continue
+			var undo := get_undo_redo(); undo.create_action("Protezione elemento",UndoRedo.MERGE_DISABLE,e)
+			undo.add_do_property(e,"locked",not e.locked); undo.add_undo_property(e,"locked",e.locked)
+			if e.locked:
+				undo.add_do_property(e,"baseline",e.record()); undo.add_undo_property(e,"baseline",e.baseline.duplicate(true))
+			undo.commit_action()
+		return
 	var selected := _selected_house()
 	if selected==null: status.text="Seleziona una casa o uno dei suoi elementi."; return
 	var plan=selected.get_node_or_null("InteriorPlan")
@@ -149,9 +158,10 @@ func _plan_action(label: String) -> void:
 		var floor_node := Node3D.new(); floor_node.name="Piano_%d"%(plan.levels().size()+1)
 		_add_authored(plan,floor_node,"Aggiungi piano"); plan.active_floor=plan.levels().size()-1; return
 	var level: Node3D=plan.levels()[clampi(plan.active_floor,0,plan.levels().size()-1)]
-	if label=="Genera stanze (piano attivo)":
+	if label in ["Genera stanze (piano attivo)","Rigenera muri dalle stanze"]:
 		var index: int=clampi(plan.active_floor,0,plan.levels().size()-1)
-		var before: Array=plan.level_records(index); var after: Array=plan.propose_rooms(index)
+		plan.observe_deletions()
+		var before: Array=plan.level_records(index); var after: Array=plan.propose_rooms(index) if label=="Genera stanze (piano attivo)" else plan.propose_walls(index)
 		var undo := get_undo_redo(); undo.create_action("Genera stanze",UndoRedo.MERGE_DISABLE,plan)
 		undo.add_do_method(plan,"apply_records",index,after); undo.add_undo_method(plan,"apply_records",index,before); undo.commit_action()
 		status.text=plan.generation_report

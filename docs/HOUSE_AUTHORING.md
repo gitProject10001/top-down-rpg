@@ -31,7 +31,20 @@ La geometria viene verificata prima di applicarla: stanze troppo strette,
 sovrapposizioni e stanze scollegate impediscono la sostituzione. Seed uguale e
 parametri uguali producono lo stesso risultato. Undo ripristina la proposta precedente.
 
-## Passaggi successivi
+## Passaggio 3: modifiche protette
 
-3. Rigenerazione selettiva e protezione di blocchi/modifiche dell'utente.
-4. Arredamento opzionale con kit riutilizzabile e spazi di accesso liberi.
+**Rigenera muri dalle stanze** aggiorna le partizioni dopo aver modificato le stanze.
+Il blocco esplicito, gli elementi aggiunti a mano e le proprietà cambiate rispetto
+alla generazione precedente vengono conservati. **Blocca / sblocca elemento**
+permette anche di accettare una modifica come nuova base per la rigenerazione.
+Gli oggetti cancellati non ricompaiono alla rigenerazione; undo della cancellazione
+li ripristina. Le scene personali sotto il piano restano intatte.
+
+Prima della sostituzione viene controllata la percorribilità su una griglia di
+18 cm, con 31 cm di margine per il giocatore: una proposta che isola una stanza
+viene scartata interamente, con messaggio nel pannello. È una verifica della
+planimetria con porte aperte, non una simulazione completa del movimento.
+
+## Passaggio 4: arredo opzionale
+
+In preparazione: kit riutilizzabile e spazi di accesso liberi.
