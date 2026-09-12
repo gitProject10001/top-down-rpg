@@ -11,6 +11,7 @@ var scroll: ScrollContainer
 var mode := 0
 var buttons: Array[Button]=[]
 var status: Label
+var error_dialog: AcceptDialog
 var dragging := false
 var start := Vector3.ZERO
 var end := Vector3.ZERO
@@ -22,6 +23,12 @@ var last_root: Node
 var _test_runner: RefCounted
 
 func _enter_tree() -> void:
+	error_dialog=AcceptDialog.new()
+	error_dialog.title="House Builder · operazione non eseguita"
+	error_dialog.get_label().autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	error_dialog.get_label().custom_minimum_size.x=480
+	error_dialog.ok_button_text="Ho capito"
+	EditorInterface.get_base_control().add_child(error_dialog)
 	add_custom_type("HearthHouse","Node3D",House,EditorInterface.get_base_control().get_theme_icon("CSGBox3D","EditorIcons"))
 	gizmos=Gizmo.new()
 	gizmos.undo=get_undo_redo()
@@ -82,6 +89,7 @@ func _enter_tree() -> void:
 		_test_runner=load("res://tools/check_house_editor.gd").new()
 		_test_runner.call_deferred("run",self)
 func _exit_tree() -> void:
+	error_dialog.queue_free()
 	_cancel()
 	remove_node_3d_gizmo_plugin(gizmos)
 	remove_node_3d_gizmo_plugin(plan_gizmos)
@@ -132,7 +140,14 @@ func _add_authored(parent: Node,node: Node,label: String) -> void:
 	undo.add_do_method(self,"_attach",parent,node,EditorInterface.get_edited_scene_root())
 	undo.add_undo_method(parent,"remove_child",node); undo.add_do_reference(node); undo.commit_action()
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(node); EditorInterface.edit_node(node)
+func _show_plan_error(action: String,message: String) -> void:
+	status.text="OPERAZIONE NON ESEGUITA\n"+message
+	status.add_theme_color_override("font_color",Color(1.0,0.38,0.28))
+	error_dialog.dialog_text=action+"\n\n"+message+"\n\nLa scena non è stata modificata."
+	error_dialog.popup_centered(Vector2i(540,230))
+	push_warning("House Builder — "+action+": "+message)
 func _plan_action(label: String) -> void:
+	status.remove_theme_color_override("font_color")
 	if label=="Blocca / sblocca elemento":
 		for e in EditorInterface.get_selection().get_selected_nodes():
 			if not e is Element: continue
@@ -143,7 +158,7 @@ func _plan_action(label: String) -> void:
 			undo.commit_action()
 		return
 	var selected := _selected_house()
-	if selected==null: status.text="Seleziona una casa o uno dei suoi elementi."; return
+	if selected==null: _show_plan_error(label,"Seleziona una casa o uno dei suoi elementi."); return
 	var plan=selected.get_node_or_null("InteriorPlan")
 	if plan==null:
 		plan=Plan.new(); plan.name="InteriorPlan"
@@ -177,8 +192,12 @@ func _plan_action(label: String) -> void:
 			if label=="Arreda stanza selezionata":
 				for e in EditorInterface.get_selection().get_selected_nodes():
 					if e is Element and e.kind==0 and e.get_parent()==level: scope=e.stable_id
-				if scope=="": status.text="Seleziona una stanza del piano attivo."; return
+				if scope=="": _show_plan_error(label,"Seleziona una stanza del piano attivo."); return
 			after=plan.propose_furniture(index,scope,label=="Rimuovi arredo generato")
+		if plan.generation_failed:
+			_show_plan_error(label,plan.generation_report); return
+		if after==before:
+			status.text="Nessuna modifica necessaria. "+plan.generation_report; return
 		var undo := get_undo_redo(); undo.create_action(label,UndoRedo.MERGE_DISABLE,plan)
 		undo.add_do_method(plan,"apply_records",index,after); undo.add_undo_method(plan,"apply_records",index,before); undo.commit_action()
 		status.text=plan.generation_report

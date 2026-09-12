@@ -39,6 +39,11 @@ le stanze generate sovrapposte e crea partizioni con accesso, senza alterare sta
 modificate o bloccate. Ritagli troppo stretti o passaggi ostruiti vengono rifiutati.
 È un'operazione esplicita con undo; il semplice volume azzurro non è già un muro.
 
+Una proposta rifiutata apre una finestra **Operazione non eseguita** con il motivo,
+mostra il messaggio in rosso nel pannello e lo registra fra gli avvisi dell'editor.
+Non aggiunge un'azione alla cronologia undo. Un risultato valido ma identico viene
+segnalato come **Nessuna modifica necessaria**.
+
 Le stanze nell'albero si chiamano **Ingresso**, **Soggiorno**, **Cucina**, **Camera**,
 **Ripostiglio**, con suffisso numerico per i duplicati. `Room Type` sceglie la funzione
 e l'arredo; `Display Name` assegna un nome descrittivo. Le rinomine fatte direttamente

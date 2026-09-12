@@ -4,6 +4,7 @@ const Element=preload("res://addons/house_builder/plan_element.gd")
 const Door=preload("res://addons/house_builder/door.gd")
 const Generator=preload("res://addons/house_builder/plan_generator.gd")
 var generation_report := ""
+var generation_failed := false
 @export_storage var known_generated: Dictionary={}
 @export_storage var deleted_ids: Dictionary={}
 var _retired: Dictionary={}
@@ -130,6 +131,7 @@ func apply_records(index: int,records: Array) -> void:
 	known_generated[str(index)]=records.filter(func(r): return r.get("generated",true)).map(func(r): return str(r.id))
 	_pending=true
 func propose_rooms(index: int) -> Array:
+	generation_failed=true
 	observe_deletions()
 	var current := level_records(index)
 	var fixed: Array=[]
@@ -171,6 +173,7 @@ func observe_deletions() -> void:
 		for id in known_generated.get(str(index),[]):
 			if not present.has(id): deleted_ids["%d/%s"%[index,id]]=true
 func propose_walls(index: int) -> Array:
+	generation_failed=true
 	observe_deletions()
 	var current := level_records(index)
 	var rooms: Array=current.filter(func(r): return r.kind==0)
@@ -188,6 +191,7 @@ func propose_walls(index: int) -> Array:
 		if not protected.has(r.id) and not deleted_ids.has("%d/%s"%[index,r.id]): result.append(r)
 	return checked_proposal(index,result)
 func propose_insert_room(index: int,id: String) -> Array:
+	generation_failed=true
 	observe_deletions()
 	var current := level_records(index)
 	var selected: Dictionary={}; var protected: Dictionary={}
@@ -221,6 +225,7 @@ func propose_insert_room(index: int,id: String) -> Array:
 		if not protected.has(wall.id) and not deleted_ids.has("%d/%s"%[index,wall.id]): preserved.append(wall)
 	return checked_proposal(index,rooms+preserved)
 func checked_proposal(index: int,records: Array) -> Array:
+	generation_failed=true
 	var rooms: Array=records.filter(func(r): return r.kind==0)
 	var main := Rect2(Vector2(-house().width*0.5+0.2,-house().depth*0.5+0.2),Vector2(house().width-0.4,house().depth-0.4))
 	var allowed: Array[Rect2]=[main]
@@ -238,8 +243,10 @@ func checked_proposal(index: int,records: Array) -> Array:
 	var errors := Generator.walkability(rooms,records)
 	if not errors.is_empty(): generation_report="; ".join(errors); return level_records(index)
 	generation_report="%d stanze: passaggi verificati; modifiche manuali conservate"%rooms.size()
+	generation_failed=false
 	return records
 func propose_furniture(index: int,scope: String="",remove_only: bool=false) -> Array:
+	generation_failed=true
 	observe_deletions()
 	var keep: Array=[]
 	var protected: Dictionary={}
