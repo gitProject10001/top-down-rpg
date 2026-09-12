@@ -28,6 +28,12 @@ func _ready() -> void:
 	player=load("res://scenes/player/player3.tscn").instantiate(); player.name="Player"
 	var spawn := Vector3.ZERO
 	if not village.lots().is_empty() and not village.lots()[0].access_path.is_empty(): spawn=village.lots()[0].transform*village.lots()[0].access_path[0]
+	var entry: Node=null
+	for road in village.guides(1):
+		if entry==null or road.stable_id==village.entry_road_id: entry=road
+		if road.stable_id==village.entry_road_id: break
+	if entry!=null and entry.points.size()>0:
+		var p: Vector2=entry.village_points()[0]; spawn=Vector3(p.x,0,p.y)
 	player.position=spawn+Vector3.UP*0.2; world.add_child(player)
 	camera=Camera3D.new(); camera.set_script(load("res://scripts/village/iso_cam.gd")); camera.name="IsoCam"
 	camera.target_path=NodePath("../Player"); camera.pitch_deg=48; camera.yaw_deg=village.fixed_camera_yaw
@@ -40,12 +46,16 @@ func _ready() -> void:
 	debug_zones=MeshInstance3D.new(); debug_zones.visible=false; world.add_child(debug_zones)
 	var lines := ImmediateMesh.new(); var material := StandardMaterial3D.new(); material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; material.vertex_color_use_as_albedo=true; material.no_depth_test=true
 	lines.surface_begin(Mesh.PRIMITIVE_LINES,material)
-	for kind in [0,1,2,3,4]:
+	for kind in [0,1,2,3,4,5]:
 		for guide in village.guides(kind):
 			var points: PackedVector2Array=guide.village_points()
-			lines.surface_set_color([Color.GREEN,Color.YELLOW,Color.CORNFLOWER_BLUE,Color.TOMATO,Color.ORANGE][kind])
-			for i in range(points.size()-(1 if kind==1 else 0)):
+			lines.surface_set_color([Color.GREEN,Color.YELLOW,Color.CORNFLOWER_BLUE,Color.TOMATO,Color.ORANGE,Color.TURQUOISE][kind])
+			for i in range(points.size()-(1 if kind in [1,5] else 0)):
 				for p in [points[i],points[(i+1)%points.size()]]: lines.surface_add_vertex(Vector3(p.x,0.25,p.y))
+	lines.surface_set_color(Color.TURQUOISE)
+	for route in preload("res://addons/village_builder/path_network.gd").shared(village,village.snapshot(),false):
+		for i in range(route.points.size()-1):
+			for p in [route.points[i],route.points[i+1]]: lines.surface_add_vertex(Vector3(p.x,0.25,p.y))
 	lines.surface_end(); debug_zones.mesh=lines; debug_zones.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
 	var debug_button := Button.new(); debug_button.text="Mostra zone · F8"; debug_button.position=Vector2(20,70); debug_button.pressed.connect(_toggle_zones); ui.add_child(debug_button)
 	if "--village-play-test" in OS.get_cmdline_user_args(): _test.call_deferred()
@@ -59,6 +69,7 @@ func _test() -> void:
 	for i in 60: await get_tree().physics_frame
 	assert(player.is_on_floor(),"Player must stand on the test ground")
 	assert(camera.current and village.lots().size()>0)
+	if "--village-network-walk-test" in OS.get_cmdline_user_args(): await _walk_courts()
 	var start := player.position
 	Input.action_press("move_down")
 	for i in 30: await get_tree().physics_frame
@@ -75,3 +86,23 @@ func _test() -> void:
 		get_viewport().get_texture().get_image().save_png("res://captures/village_builder/organic_zones.png")
 	print("VILLAGE_PLAY_GROUND_CAMERA_MOVEMENT_DEBUG_OK")
 	get_tree().quit()
+
+func _walk_courts() -> void:
+	var network=load("res://addons/village_builder/path_network.gd")
+	assert(network.validate(village,village.snapshot()).is_empty())
+	for route in network.shared(village,village.snapshot()):
+		var first: Vector2=route.points[0]; player.position=Vector3(first.x,0.2,first.y); player.velocity=Vector3.ZERO
+		for i in 10: await get_tree().physics_frame
+		for p in route.points:
+			var target := Vector3(p.x,0,p.y)
+			for frame in 1200:
+				var delta := target-player.position; delta.y=0
+				if delta.length()<0.22: break
+				var raw := delta.normalized().rotated(Vector3.UP,-camera.global_rotation.y)
+				for pair in [["move_left",-raw.x],["move_right",raw.x],["move_up",-raw.z],["move_down",raw.z]]:
+					if pair[1]>0: Input.action_press(pair[0],pair[1])
+					else: Input.action_release(pair[0])
+				await get_tree().physics_frame
+			for action in ["move_left","move_right","move_up","move_down"]: Input.action_release(action)
+			assert(Vector2(player.position.x,player.position.z).distance_to(p)<0.35,"Player blocked on court route "+route.name)
+		print("WALK_COURT_OK ",route.name)

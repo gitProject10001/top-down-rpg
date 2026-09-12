@@ -27,7 +27,13 @@ func run() -> void:
 	guide(village,4,"CorteDelPozzo",PackedVector2Array([Vector2(1,28),Vector2(9,27),Vector2(9,34),Vector2(1,35)]))
 	guide(village,4,"CorteNordOvest",PackedVector2Array([Vector2(-30,-30),Vector2(-24,-30),Vector2(-23,-25),Vector2(-30,-24)]))
 	guide(village,4,"CorteSudEst",PackedVector2Array([Vector2(30,26),Vector2(36,25),Vector2(36,31),Vector2(30,32)]))
+	village.guides(1)[0].point_widths=PackedFloat32Array([3.0,3.2,3.8,4.4,4.0,3.0])
+	village.guides(1)[1].point_widths=PackedFloat32Array([2.8,3.2,3.6,4.0,4.0,3.0,2.8])
+	village.entry_road_id="ViaDelMercato"
 	var records := village.propose(); assert(not village.failed,village.report); village.apply(records)
+	var routes := Village.Network.shared(village,village.snapshot())
+	if not routes.is_empty():
+		var route: Dictionary=routes[0]; var editable := Guide.new(); editable.kind=5; editable.name="Percorso_"+route.name; editable.stable_id="path_"+route.group; editable.group_id=route.group; editable.points=route.points; editable.point_widths=route.widths; village.add_child(editable)
 	var camera := Camera3D.new(); camera.name="Camera"; camera.projection=Camera3D.PROJECTION_ORTHOGONAL; camera.size=91; scene.add_child(camera); camera.position=Vector3(60,94.3,60); camera.look_at(Vector3.ZERO)
 	own(scene,scene); var packed := PackedScene.new(); assert(packed.pack(scene)==OK)
 	assert(ResourceSaver.save(packed,"res://scenes/dev/village_organic_example.tscn")==OK)

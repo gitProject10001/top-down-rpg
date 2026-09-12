@@ -20,6 +20,10 @@ var drawing_camera: Camera3D
 var cursor_point := Vector3.ZERO
 var cursor_visible := false
 var preview_draw_count := 0
+var width_vertex: OptionButton
+var vertex_width: SpinBox
+var route_preview: MeshInstance3D
+var route_proposal: Array=[]
 var brush_radius: SpinBox
 var brush_target: SpinBox
 var paint_before: Dictionary = {}
@@ -45,6 +49,14 @@ func _enter_tree() -> void:
 	var generate := Button.new(); generate.text="Genera / aggiorna lotti e case"; generate.pressed.connect(_generate); column.add_child(generate)
 	road_width=SpinBox.new(); road_width.prefix="Larghezza strada"; road_width.suffix="m"; road_width.min_value=2; road_width.max_value=10; road_width.step=0.25; road_width.value=3
 	road_width.value_changed.connect(func(v): _guide_property("road_width",v)); tabs.get_child(1).add_child(road_width)
+	var edit_route := Button.new(); edit_route.text="Modifica percorso della corte selezionata"; edit_route.pressed.connect(_edit_court_route); tabs.get_child(1).add_child(edit_route)
+	width_vertex=OptionButton.new(); width_vertex.item_selected.connect(_width_selected); tabs.get_child(1).add_child(width_vertex)
+	vertex_width=SpinBox.new(); vertex_width.prefix="Larghezza al punto"; vertex_width.suffix="m"; vertex_width.min_value=1.2; vertex_width.max_value=10; vertex_width.step=0.2
+	vertex_width.value_changed.connect(_set_vertex_width); tabs.get_child(1).add_child(vertex_width)
+	var entrance := Button.new(); entrance.text="Usa strada selezionata come ingresso"; entrance.pressed.connect(_set_entrance); tabs.get_child(1).add_child(entrance)
+	var preview := Button.new(); preview.text="Anteprima / verifica percorsi"; preview.pressed.connect(_preview_routes); tabs.get_child(1).add_child(preview)
+	var apply_routes := Button.new(); apply_routes.text="Applica percorsi e suolo"; apply_routes.pressed.connect(_apply_routes); tabs.get_child(1).add_child(apply_routes)
+	var cancel_preview := Button.new(); cancel_preview.text="Chiudi anteprima"; cancel_preview.pressed.connect(_clear_route_preview); tabs.get_child(1).add_child(cancel_preview)
 	zone_type=OptionButton.new()
 	for title in ["Casa popolana","Bottega","Casa benestante"]: zone_type.add_item(title)
 	zone_type.item_selected.connect(func(v): _guide_property("building_type",v)); tabs.get_child(2).add_child(zone_type); tabs.get_child(2).move_child(zone_type,1)
@@ -107,10 +119,15 @@ func _selection() -> void:
 		if not _in_current_scene(node): continue
 		if node is Village or node is Guide or node is Lot: _show_context_dock.call_deferred()
 		if node is Guide:
-			gizmos.focus=node; tabs.current_tab=(4 if node.kind==4 else mini(node.kind,2)); status.text="Guida: "+str(node.name)
+			gizmos.focus=node; tabs.current_tab=(1 if node.kind==5 else (4 if node.kind==4 else mini(node.kind,2))); status.text="Guida: "+str(node.name)
 			road_width.set_block_signals(true); road_width.value=node.road_width; road_width.set_block_signals(false)
 			zone_type.select(node.building_type); floors.set_block_signals(true); floors.value=node.storeys; floors.set_block_signals(false)
-	road_width.editable=is_instance_valid(gizmos.focus) and gizmos.focus.kind==1
+	width_vertex.clear()
+	if is_instance_valid(gizmos.focus) and gizmos.focus.kind in [1,5]:
+		for i in gizmos.focus.points.size(): width_vertex.add_item("Punto %d"%(i+1))
+		_width_selected(0)
+	vertex_width.editable=width_vertex.item_count>0
+	road_width.editable=is_instance_valid(gizmos.focus) and gizmos.focus.kind in [1,5]
 	zone_type.disabled=not is_instance_valid(gizmos.focus) or gizmos.focus.kind!=2
 	floors.editable=is_instance_valid(gizmos.focus) and gizmos.focus.kind==2
 	if village:
@@ -126,10 +143,15 @@ func _guide_property(key: String,value: Variant) -> void:
 	var node=gizmos.focus
 	if node.get(key)==value: return
 	var undo := get_undo_redo(); undo.create_action("Impostazione guida",UndoRedo.MERGE_DISABLE,node)
-	undo.add_do_property(node,key,value); undo.add_undo_property(node,key,node.get(key)); undo.commit_action()
+	undo.add_do_property(node,key,value); undo.add_undo_property(node,key,node.get(key))
+	if key=="road_width" and not node.point_widths.is_empty():
+		var scaled: PackedFloat32Array=node.point_widths.duplicate()
+		for i in scaled.size(): scaled[i]=clampf(scaled[i]*value/node.road_width,1.2,10)
+		undo.add_do_property(node,"point_widths",scaled); undo.add_undo_property(node,"point_widths",node.point_widths)
+	undo.commit_action()
 func _tab_changed(index: int) -> void:
 	_cancel()
-	if is_instance_valid(gizmos.focus) and (4 if gizmos.focus.kind==4 else mini(gizmos.focus.kind,2))!=index:
+	if is_instance_valid(gizmos.focus) and (1 if gizmos.focus.kind==5 else (4 if gizmos.focus.kind==4 else mini(gizmos.focus.kind,2)))!=index:
 		var old=gizmos.focus; gizmos.focus=null; old.update_gizmos()
 func _error(message: String) -> void:
 	status.text=message; dialog.dialog_text=message; dialog.popup_centered(Vector2i(500,200))
@@ -164,6 +186,7 @@ func _finish_drawing() -> void:
 	drawing_actions.hide(); cursor_visible=false; update_overlays()
 	_add(parent,node,"Disegna guida villaggio"); status.text=str(node.name)+" creato. Seleziona la guida per spostare i punti."
 func _cancel() -> void:
+	_clear_route_preview()
 	if painting and is_instance_valid(paint_village): paint_village.density_state=paint_before
 	painting=false; paint_before={}; paint_village=null
 	mode=-1
@@ -228,18 +251,21 @@ func _forward_3d_draw_over_viewport(overlay: Control) -> void:
 	overlay.draw_string(overlay.get_theme_default_font(),Vector2(22,73),"DISEGNO · Clic: punto · Invio: conferma · Backspace: elimina · Esc: annulla",HORIZONTAL_ALIGNMENT_LEFT,-1,15,color)
 func _edit_points(points: PackedVector2Array) -> void:
 	var node=gizmos.focus; var undo := get_undo_redo(); undo.create_action("Modifica punti guida",UndoRedo.MERGE_DISABLE,node)
-	undo.add_do_property(node,"points",points); undo.add_undo_property(node,"points",node.points); undo.commit_action()
+	undo.add_do_property(node,"points",points); undo.add_undo_property(node,"points",node.points)
+	if node.kind in [1,5]:
+		undo.add_do_property(node,"point_widths",node.widths_for_points(points)); undo.add_undo_property(node,"point_widths",node.point_widths)
+	undo.commit_action(); _selection()
 func _add_point() -> void:
 	if not is_instance_valid(gizmos.focus): _error("Seleziona una guida nella scheda attiva."); return
 	var node=gizmos.focus; var points: PackedVector2Array=node.points.duplicate(); var best := -1; var length := 0.0
-	for i in range(points.size()-(1 if node.kind==1 else 0)):
+	for i in range(points.size()-(1 if node.kind in [1,5] else 0)):
 		var distance := points[i].distance_to(points[(i+1)%points.size()])
 		if distance>length: length=distance; best=i
 	if best>=0: points.insert(best+1,(points[best]+points[(best+1)%points.size()])*0.5); _edit_points(points)
 func _remove_point() -> void:
 	if not is_instance_valid(gizmos.focus): return
 	var node=gizmos.focus; var points: PackedVector2Array=node.points.duplicate()
-	if points.size()<=(2 if node.kind==1 else 3): _error("La guida ha già il numero minimo di punti."); return
+	if points.size()<=(2 if node.kind in [1,5] else 3): _error("La guida ha già il numero minimo di punti."); return
 	points.remove_at(points.size()-1); _edit_points(points)
 func _generate() -> void:
 	var village := _village()
@@ -247,7 +273,7 @@ func _generate() -> void:
 	var before: Array=village.snapshot(); var after: Array=village.propose()
 	if village.failed: _error(village.report); return
 	var undo := get_undo_redo(); undo.create_action("Genera lotti e case",UndoRedo.MERGE_DISABLE,village)
-	undo.add_do_method(village,"apply",after); undo.add_undo_method(village,"apply",before); undo.commit_action(); status.text=village.report
+	undo.add_do_method(village,"apply",after); undo.add_undo_method(village,"apply",before); undo.add_undo_property(village,"surface_material",village.surface_material); undo.commit_action(); status.text=village.report
 func _lock() -> void:
 	for node in EditorInterface.get_selection().get_selected_nodes():
 		var lot: Node=node
@@ -357,3 +383,64 @@ func _toggle_surface() -> void:
 func _toggle_zones() -> void:
 	var node := _village()
 	if node: node.show_zones=not node.show_zones; update_overlays()
+
+func _width_selected(index: int) -> void:
+	if not is_instance_valid(gizmos.focus) or index<0 or index>=gizmos.focus.points.size(): return
+	vertex_width.set_block_signals(true); vertex_width.value=gizmos.focus.effective_widths()[index]; vertex_width.set_block_signals(false)
+func _set_vertex_width(value: float) -> void:
+	if not is_instance_valid(gizmos.focus) or width_vertex.selected<0: return
+	var widths: PackedFloat32Array=gizmos.focus.effective_widths(); widths[width_vertex.selected]=value
+	_guide_property("point_widths",widths); gizmos.focus.update_gizmos()
+func _set_entrance() -> void:
+	var village := _village()
+	if village==null or not is_instance_valid(gizmos.focus) or gizmos.focus.kind!=1: _error("Seleziona una strada principale. Il suo primo punto indica l'ingresso."); return
+	var undo := get_undo_redo(); undo.create_action("Ingresso villaggio",UndoRedo.MERGE_DISABLE,village)
+	undo.add_do_property(village,"entry_road_id",gizmos.focus.stable_id); undo.add_undo_property(village,"entry_road_id",village.entry_road_id); undo.commit_action()
+func _edit_court_route() -> void:
+	var village := _village()
+	if village==null: _error("Seleziona una corte o un lotto del gruppo."); return
+	var group_id := ""
+	for node in EditorInterface.get_selection().get_selected_nodes():
+		if node is Guide and node.kind==4: group_id=node.stable_id
+		var parent: Node=node
+		while parent!=null:
+			if parent is Lot: group_id=parent.group_id; break
+			parent=parent.get_parent()
+	if group_id.is_empty(): _error("Seleziona una corte nell'albero oppure un lotto del gruppo."); return
+	for guide in village.guides(5):
+		if guide.group_id==group_id:
+			EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(guide); _selection(); return
+	for route in Village.Network.shared(village,village.snapshot()):
+		if route.group!=group_id: continue
+		var guide := Guide.new(); guide.kind=5; guide.name="Percorso_"+route.name; guide.stable_id="path_"+group_id; guide.group_id=group_id; guide.points=route.points; guide.point_widths=route.widths
+		_add(village,guide,"Rendi modificabile percorso corte"); _selection(); return
+	_error("Genera prima le case e i percorsi di questa corte.")
+func _clear_route_preview() -> void:
+	if is_instance_valid(route_preview): route_preview.queue_free()
+	route_preview=null; route_proposal=[]
+func _preview_routes() -> void:
+	_clear_route_preview()
+	var village := _village()
+	if village==null: _error("Seleziona un villaggio."); return
+	if village.guides(0).size()!=1 or village.guides(1).is_empty(): _error("Servono un perimetro e una strada prima di verificare i percorsi."); return
+	for kind in [0,1,4,5]:
+		for guide in village.guides(kind): guide.network_issue=false; guide.update_gizmos()
+	route_proposal=village.snapshot()
+	var error := Village.Network.unify(village,route_proposal)
+	if error.is_empty(): error=Village.Network.validate(village,route_proposal)
+	var surface := SurfaceTool.new(); surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var material := StandardMaterial3D.new(); material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED; material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; material.albedo_color=Color(0.2,0.9,0.65,0.3) if error.is_empty() else Color(1,0.15,0.05,0.4); material.no_depth_test=true; material.cull_mode=BaseMaterial3D.CULL_DISABLED; surface.set_material(material)
+	var shapes: Array=village.road_shapes()
+	for route in Village.Network.shared(village,route_proposal): shapes.append_array(Village.Network.ribbon(route.points,route.widths))
+	for polygon in shapes:
+		for index in Geometry2D.triangulate_polygon(polygon): surface.add_vertex(Vector3(polygon[index].x,0.2,polygon[index].y))
+	route_preview=MeshInstance3D.new(); route_preview.mesh=surface.commit(); route_preview.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; village.add_child(route_preview,false,Node.INTERNAL_MODE_BACK)
+	if not error.is_empty(): route_proposal=[]; _error(error)
+	else: status.text="Rete raggiungibile dall'ingresso. Anteprima verde: Applica percorsi e suolo per confermare."
+func _apply_routes() -> void:
+	_preview_routes()
+	if route_proposal.is_empty(): return
+	var village := _village(); var before: Array=village.snapshot(); var after := route_proposal
+	var undo := get_undo_redo(); undo.create_action("Applica rete di percorsi",UndoRedo.MERGE_DISABLE,village)
+	undo.add_do_method(village,"apply",after); undo.add_undo_method(village,"apply",before); undo.add_undo_property(village,"surface_material",village.surface_material); undo.commit_action(); _clear_route_preview()
+	status.text="Percorsi e suolo aggiornati."

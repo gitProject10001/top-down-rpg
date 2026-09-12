@@ -99,7 +99,7 @@ undo/redo; le revisioni sostituite sono conservate fino alla chiusura del villag
 - Terreno piano, con le guide sul piano locale Y=0. Non modifica il terreno e non
   gestisce ancora fiumi, pendenze, ponti o terrazzamenti.
 - Strade disegnate dall'utente, a segmenti rettilinei; nessuna rete viaria automatica
-  o validazione della connettività dell'intero villaggio.
+  ; connettività verificata rispetto alla strada di ingresso.
 - Lotti rettangolari, distribuzione iniziale regolare, un solo perimetro. In caso
   di zone sovrapposte prevale la prima nell'albero della scena.
 - I percorsi verso le porte sono proposte semplici, non un algoritmo di ricerca
@@ -128,7 +128,7 @@ Per l'apertura contestuale dei pannelli viene usata l'API
 ## Villaggio organico: esempio modificabile
 
 Apri `scenes/dev/village_organic_example.tscn`. È generato dal Village Builder:
-20 edifici di dimensioni diverse, otto corti e due strade principali a segmenti.
+19 edifici di dimensioni diverse, otto corti e due strade principali a segmenti.
 L’House Builder costruisce ogni edificio; materiali e dettaglio delle case restano
 quelli esistenti. La composizione riprende gruppi e spazi aperti del riferimento,
 non è una copia geometrica della mappa.
@@ -147,8 +147,7 @@ La generazione colloca prima le case, poi cerca percorsi dalle porte alla corte
 e alle strade evitando gli edifici. Usa una griglia di lavoro con margine e
 semplifica i segmenti visibili. Non è una simulazione storica della crescita:
 le strade principali e le corti restano decisioni dell’utente. Le proposte senza
-un percorso valido vengono scartate. Il collegamento tra tutte le strade principali
-non è ancora validato. Le case sono nodi Lotto con `group_id`, non figli trasformati
+un percorso valido vengono scartate. Il collegamento tra strade principali e corti popolate viene validato dalla rete. Le case sono nodi Lotto con `group_id`, non figli trasformati
 della corte: la trasformazione del gruppo viene applicata con la rigenerazione.
 
 ## Suolo e guide
@@ -188,3 +187,51 @@ Coprono salvataggio, seed, gruppi bloccati, corti libere, percorsi senza attrave
 case, maschera del suolo, copia per Play, movimento reale e toggle debug. Per
 ricreare solo l’esempio: `--script res://tools/preview_organic_village.gd` (sovrascrive
 la scena di esempio; non usarlo dopo averla personalizzata senza salvarne una copia).
+
+
+## Percorsi condivisi, larghezze e anteprima
+
+Ogni corte popolata ha un tratto condiviso dalla strada al proprio centro. Tutte
+le case del gruppo usano quel tratto prima della diramazione verso la porta.
+Il generatore allarga gli estremi quando c’è spazio; la larghezza si riduce se
+invade una casa. Segmenti a larghezza variabile e raccordi arrotondati vengono
+usati sia per la maschera del terreno sia per il controllo degli ingombri.
+
+Nella scheda **Strade**:
+
+1. Seleziona una corte (o un suo lotto), poi **Modifica percorso della corte
+   selezionata**. Il builder crea un nodo `Percorso_*`, collegato alla corte tramite
+   `group_id`. L’esempio include già `Percorso_CorteDelMercato`.
+2. Trascina i punti della guida. L’inizio deve restare sulla strada e la fine
+   si collega al centro della corte. Seleziona **Punto N** e modifica
+   **Larghezza al punto**. La larghezza generale scala l’intero profilo.
+   Inserire un punto interpola le larghezze vicine; undo/redo conserva il profilo.
+3. **Anteprima / verifica percorsi** mostra in verde il nuovo ingombro; errori
+   mostrano l’anteprima rossa e un messaggio con la strada o corte coinvolta.
+   Il suolo applicato resta invariato durante queste modifiche.
+4. **Applica percorsi e suolo** aggiorna collegamenti e materiale senza rigenerare
+   le case. Supporta undo/redo. **Chiudi anteprima** nasconde la sovrapposizione.
+
+Per tornare alla proposta automatica elimina il nodo `Percorso_*` e usa
+**Genera / aggiorna lotti e case**. I percorsi delle case protette restano conservati. Le guide manuali sopravvivono alla generazione delle case; se il nuovo
+layout rende impossibile il percorso, il builder segnala il conflitto.
+
+**Usa strada selezionata come ingresso** sceglie la radice della rete; il primo
+punto della strada identifica il lato di ingresso. In assenza di scelta viene
+usata la prima strada nell’albero. Il Play posiziona il giocatore al primo punto
+della strada scelta. F8 mostra in turchese anche i collegamenti condivisi. Tutte le strade e tutte le corti popolate devono
+risultare collegate. Il controllo confronta corridoi con un margine per il giocatore,
+non il solo contatto tra bordi. Non è una verifica del navmesh su terreno inclinato.
+
+Test: `tools/check_village_network.gd` copre tratti comuni, strade scollegate,
+percorsi manuali attraverso case, profili e raccordi. Il test dell’editor copre
+creazione della guida, larghezze, anteprima, applicazione e undo del suolo.
+Per far camminare il giocatore su tutti i collegamenti delle corti:
+
+```text
+--headless --path . res://scenes/dev/village_organic_playable.tscn -- --village-play-test --village-network-walk-test --organic-example
+```
+
+La prova posiziona il giocatore all’imbocco di ogni collegamento e lo guida fino
+alla corte usando gli input di movimento reali; la rete delle strade principali
+è controllata separatamente dal test geometrico.

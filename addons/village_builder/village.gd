@@ -2,6 +2,8 @@
 extends Node3D
 const Guide=preload("res://addons/village_builder/guide.gd")
 const Lot=preload("res://addons/village_builder/lot.gd")
+const Network=preload("res://addons/village_builder/path_network.gd")
+@export var entry_road_id := ""
 const Organic=preload("res://addons/village_builder/organic_layout.gd")
 const Request=preload("res://addons/house_builder/building_request.gd")
 @export_enum("Lungo le strade","Gruppi e corti") var layout_mode := 0
@@ -47,7 +49,7 @@ func guides(kind: int) -> Array:
 	return get_children().filter(func(n): return n is Guide and n.kind==kind)
 func lots() -> Array: return get_children().filter(func(n): return n is Lot)
 func snapshot() -> Array:
-	return lots().map(func(n): return {"id":n.stable_id,"transform":n.transform,"request":n.request,"zone":n.zone_id,"group":n.group_id,"locked":n.locked,"node":n,"baseline_pose":n.baseline_pose,"baseline_house":n.baseline_house.duplicate(true),"access":n.access_path})
+	return lots().map(func(n): return {"id":n.stable_id,"transform":n.transform,"request":n.request,"zone":n.zone_id,"group":n.group_id,"shared_widths":n.shared_widths,"locked":n.locked,"node":n,"baseline_pose":n.baseline_pose,"baseline_house":n.baseline_house.duplicate(true),"access":n.access_path})
 func entrance_wall(pose: Transform3D) -> int:
 	var toward_camera := Vector3(sin(deg_to_rad(fixed_camera_yaw)),0,cos(deg_to_rad(fixed_camera_yaw)))
 	var best := -INF; var chosen := 0
@@ -89,12 +91,12 @@ static func footprint(pose: Transform3D,size: Vector2) -> PackedVector2Array:
 func road_shapes() -> Array:
 	var result: Array=[]
 	for road in guides(1):
-		var points: PackedVector2Array=road.village_points()
-		for i in range(points.size()-1):
-			var a := points[i]; var b := points[i+1]; var normal: Vector2=(b-a).normalized().orthogonal()*road.road_width*0.5
-			result.append(PackedVector2Array([a+normal,b+normal,b-normal,a-normal]))
+		result.append_array(Network.ribbon(road.village_points(),road.effective_widths(),road.road_width))
+	result.append_array(Network.junctions(guides(1)))
 	return result
 func propose() -> Array:
+	for kind in [0,1,2,3,4,5]:
+		for guide in guides(kind): guide.network_issue=false; guide.update_gizmos()
 	failed=true
 	var before := snapshot()
 	if guides(0).size()!=1 or guides(1).is_empty():
@@ -103,7 +105,8 @@ func propose() -> Array:
 	if boundary.size()<3 or Geometry2D.triangulate_polygon(boundary).is_empty(): report="Il perimetro deve essere un poligono semplice, senza incroci."; return before
 	for zone in guides(2)+guides(3)+guides(4):
 		if zone.points.size()<3 or Geometry2D.triangulate_polygon(zone.village_points()).is_empty(): report="Zona non valida: "+str(zone.name); return before
-	for road in guides(1):
+	for road in guides(1)+guides(5):
+		road.network_issue=false
 		if road.points.size()<2: report="Strada incompleta: "+str(road.name); return before
 		for i in range(road.points.size()-1):
 			if road.points[i].distance_to(road.points[i+1])<0.5: report="Due punti della strada coincidono: "+str(road.name); return before
@@ -188,6 +191,9 @@ func propose() -> Array:
 			else: routed.append(record)
 		result=routed
 	if result.is_empty() and density_skipped==0 and excluded_count==0: report="Nessun lotto disponibile: allarga il perimetro lungo la strada o riduci la distanza dalla strada."; return before
+	var network_error := Network.unify(self,result) if layout_mode==1 else ""
+	if network_error.is_empty(): network_error=Network.validate(self,result)
+	if not network_error.is_empty(): report=network_error; return before
 	failed=false; report="%d lotti; %d posizioni escluse, %d escluse dalla densità. Case modificate conservate."%[result.size(),skipped,density_skipped]
 	return result
 func owned(node: Node) -> void:
@@ -210,6 +216,7 @@ func apply(records: Array) -> void:
 		var lot: Node3D=r.node
 		if lot.get_parent()==null: retired.erase(lot.get_instance_id()); add_child(lot,true); owned(lot)
 		lot.transform=r.transform; lot.group_id=r.get("group",""); lot.zone_id=r.zone; lot.locked=r.locked
+		lot.shared_widths=r.get("shared_widths",PackedFloat32Array())
 		lot.access_path=r.get("access",PackedVector3Array()); lot.rebuild_access()
 		lot.baseline_pose=r.get("baseline_pose",r.transform)
 		if r.has("baseline_house"): lot.baseline_house=r.baseline_house.duplicate(true)

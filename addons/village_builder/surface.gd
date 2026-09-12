@@ -11,6 +11,8 @@ static func bake(village: Node) -> void:
 	var shapes: Array=[]
 	for poly in village.road_shapes(): shapes.append([poly,0.45])
 	for group in village.guides(4): shapes.append([group.village_points(),0.18])
+	for route in preload("res://addons/village_builder/path_network.gd").shared(village,village.snapshot(),false):
+		for poly in preload("res://addons/village_builder/path_network.gd").ribbon(route.points,route.widths): shapes.append([poly,0.3])
 	for lot in village.lots():
 		for poly in village.access_shapes(lot.transform,lot.access_path): shapes.append([poly,0.25])
 	for record in shapes:

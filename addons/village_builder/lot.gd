@@ -1,6 +1,7 @@
 @tool
 extends Node3D
 const Request=preload("res://addons/house_builder/building_request.gd")
+@export_storage var shared_widths := PackedFloat32Array()
 @export_storage var group_id := ""
 @export var stable_id := ""
 @export var request: Request
