@@ -8,11 +8,30 @@ func run(plugin: EditorPlugin) -> void:
 	var history := plugin.get_undo_redo().get_history_undo_redo(plugin.get_undo_redo().get_object_history_id(scene))
 	for kind in 3:
 		plugin._draw(kind)
+		assert(plugin.drawing_actions.visible)
 		var points: Array=[Vector3(-30,0,-24),Vector3(30,0,-24),Vector3(30,0,24),Vector3(-30,0,24)] if kind!=1 else [Vector3(-25,0,0),Vector3(25,0,0)]
 		for p in points:
 			var event := InputEventMouseButton.new(); event.button_index=MOUSE_BUTTON_LEFT; event.pressed=true; event.position=camera.unproject_position(p)
 			assert(plugin._forward_3d_gui_input(camera,event)==EditorPlugin.AFTER_GUI_INPUT_STOP)
+		if kind==0:
+			var motion := InputEventMouseMotion.new(); motion.position=camera.unproject_position(Vector3(-20,0,15)); plugin._forward_3d_gui_input(camera,motion)
+			assert(plugin.cursor_visible and plugin.draft.points.size()==4)
+			if DisplayServer.get_name()!="headless":
+				var saved: PackedVector2Array=plugin.draft.points.duplicate()
+				var viewport := EditorInterface.get_editor_viewport_3d(0)
+				var native_camera := viewport.get_camera_3d()
+				plugin.draft.points=PackedVector2Array()
+				for fraction in [Vector2(0.3,0.35),Vector2(0.7,0.35),Vector2(0.7,0.75),Vector2(0.3,0.75)]:
+					var click := InputEventMouseButton.new(); click.button_index=MOUSE_BUTTON_LEFT; click.pressed=true; click.position=Vector2(viewport.size)*fraction
+					plugin._forward_3d_gui_input(native_camera,click)
+				for i in 20: await plugin.get_tree().process_frame
+				await RenderingServer.frame_post_draw
+				assert(plugin.preview_draw_count>0,"Native viewport did not draw perimeter preview")
+				DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures/village_builder"))
+				EditorInterface.get_base_control().get_viewport().get_texture().get_image().save_png("res://captures/village_builder/drawing.png")
+				plugin.draft.points=saved; plugin.drawing_camera=camera
 		var enter := InputEventKey.new(); enter.pressed=true; enter.keycode=KEY_ENTER; plugin._forward_3d_gui_input(camera,enter)
+		assert(not plugin.drawing_actions.visible)
 		assert(village.guides(kind).size()==1)
 		history.undo(); assert(village.guides(kind).is_empty()); history.redo(); assert(village.guides(kind).size()==1)
 	print("VILLAGE_EDITOR_DRAW_UNDO_OK")

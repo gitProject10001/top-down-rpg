@@ -22,6 +22,12 @@ guida per trascinare i suoi punti. Puoi aggiungere un punto sul lato più lungo 
 rimuovere l'ultimo. Le maniglie compaiono soltanto sulla guida selezionata nella
 scheda attiva. Disegno, punti, parametri, generazione e blocchi supportano undo/redo.
 
+**Disegna perimetro** attiva la modalità di disegno: muovi il mouse nella vista 3D
+e clicca almeno tre vertici. Un mirino, punti numerati, contorno e riempimento
+trasparente mostrano l'anteprima anche quando la guida provvisoria non è ancora
+nell'albero salvato. **Conferma disegno** nel pannello equivale a Invio;
+**Backspace** rimuove l'ultimo punto. Prima del primo clic è visibile il mirino.
+
 Eliminando il villaggio, il pannello abbandona anche il relativo contesto: i nodi
 conservati in memoria per undo non vengono considerati parte della scena. Per
 ripartire usa **Crea villaggio → Area → Disegna perimetro**; undo della cancellazione

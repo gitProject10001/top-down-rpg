@@ -15,12 +15,20 @@ var _test_runner: RefCounted
 var road_width: SpinBox
 var zone_type: OptionButton
 var floors: SpinBox
+var drawing_actions: HBoxContainer
+var drawing_camera: Camera3D
+var cursor_point := Vector3.ZERO
+var cursor_visible := false
+var preview_draw_count := 0
 func _enter_tree() -> void:
 	gizmos=preload("res://addons/village_builder/gizmo.gd").new(); gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(gizmos)
 	panel=ScrollContainer.new(); panel.name="Villaggio"; panel.custom_minimum_size.x=280; panel.horizontal_scroll_mode=ScrollContainer.SCROLL_MODE_DISABLED
 	var column := VBoxContainer.new(); column.size_flags_horizontal=Control.SIZE_EXPAND_FILL; panel.add_child(column)
 	var create := Button.new(); create.text="Crea villaggio"; create.pressed.connect(_create); column.add_child(create)
 	status=Label.new(); status.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; status.text="Crea un villaggio, poi disegna perimetro, strade e zone."; column.add_child(status)
+	drawing_actions=HBoxContainer.new(); drawing_actions.hide(); column.add_child(drawing_actions)
+	var confirm := Button.new(); confirm.text="Conferma disegno"; confirm.pressed.connect(_finish_drawing); drawing_actions.add_child(confirm)
+	var cancel := Button.new(); cancel.text="Annulla"; cancel.pressed.connect(_cancel); drawing_actions.add_child(cancel)
 	tabs=TabContainer.new(); column.add_child(tabs)
 	for i in 3:
 		var page := VBoxContainer.new(); page.name=["Area","Strade","Lotti"][i]; tabs.add_child(page)
@@ -125,28 +133,70 @@ func _draw(kind: int) -> void:
 		if other.get_script().resource_path=="res://addons/world_editor/plugin.gd" and is_instance_valid(other.mode): other.mode.select(0)
 	mode=kind; draft=Guide.new(); draft.kind=kind; draft.points=PackedVector2Array(); draft.name=["Perimetro","Strada","Zona"][kind]; draft.stable_id="guide_%d"%Time.get_ticks_usec(); village.add_child(draft)
 	gizmos.focus=draft; status.text="Clicca i vertici sul terreno. Invio conferma; Esc annulla."
+	drawing_actions.show(); cursor_visible=false; update_overlays()
+func _finish_drawing() -> void:
+	if not _in_current_scene(draft): _cancel(); return
+	if draft.points.size()<(2 if mode==1 else 3): _error("Aggiungi almeno due punti per una strada, tre per un'area."); return
+	if mode!=1 and Geometry2D.triangulate_polygon(draft.points).is_empty(): _error("Il contorno non è valido: evita punti coincidenti e lati incrociati."); return
+	var node := draft; var parent := node.get_parent(); parent.remove_child(node); draft=null; mode=-1
+	drawing_actions.hide(); cursor_visible=false; update_overlays()
+	_add(parent,node,"Disegna guida villaggio"); status.text=str(node.name)+" creato. Seleziona la guida per spostare i punti."
 func _cancel() -> void:
 	mode=-1
+	cursor_visible=false
+	if is_instance_valid(drawing_actions): drawing_actions.hide()
 	if is_instance_valid(draft):
 		if gizmos.focus==draft: gizmos.focus=null
 		if draft.get_parent()!=null: draft.get_parent().remove_child(draft)
 		draft.queue_free()
 	draft=null
+	update_overlays()
 func _forward_3d_gui_input(camera: Camera3D,event: InputEvent) -> int:
 	if mode<0: return AFTER_GUI_INPUT_PASS
 	if not _in_current_scene(draft): _cancel(); return AFTER_GUI_INPUT_PASS
 	if event is InputEventKey and event.pressed:
 		if event.keycode==KEY_ESCAPE: _cancel(); return AFTER_GUI_INPUT_STOP
 		if event.keycode==KEY_ENTER or event.keycode==KEY_KP_ENTER:
-			if draft.points.size()<(2 if mode==1 else 3): _error("Aggiungi almeno due punti per una strada, tre per un'area."); return AFTER_GUI_INPUT_STOP
-			var node := draft; var parent := node.get_parent(); parent.remove_child(node); draft=null; mode=-1; _add(parent,node,"Disegna guida villaggio"); return AFTER_GUI_INPUT_STOP
-	if event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT:
+			_finish_drawing(); return AFTER_GUI_INPUT_STOP
+		if event.keycode==KEY_BACKSPACE:
+			var points: PackedVector2Array=draft.points.duplicate()
+			if not points.is_empty(): points.remove_at(points.size()-1); draft.points=points; update_overlays()
+			return AFTER_GUI_INPUT_STOP
+	if event is InputEventMouseMotion or (event is InputEventMouseButton and event.pressed and event.button_index==MOUSE_BUTTON_LEFT):
+		drawing_camera=camera
 		var inverse: Transform3D=draft.global_transform.affine_inverse()
 		var point=Plane(Vector3.UP,0).intersects_ray(inverse*camera.project_ray_origin(event.position),inverse.basis*camera.project_ray_normal(event.position))
 		if point!=null:
-			var points: PackedVector2Array=draft.points.duplicate(); points.append(Vector2(snappedf(point.x,0.5),snappedf(point.z,0.5))); draft.points=points
+			cursor_point=Vector3(snappedf(point.x,0.5),0,snappedf(point.z,0.5)); cursor_visible=true
+			if event is InputEventMouseButton:
+				var points: PackedVector2Array=draft.points.duplicate(); var p := Vector2(cursor_point.x,cursor_point.z)
+				if points.is_empty() or not points[-1].is_equal_approx(p): points.append(p); draft.points=points
+			status.text="Disegno attivo · %d punti. Clic per aggiungere; Invio o Conferma disegno per finire."%draft.points.size()
+		else: cursor_visible=false
+		update_overlays()
 		return AFTER_GUI_INPUT_STOP
 	return AFTER_GUI_INPUT_PASS
+func _forward_3d_draw_over_viewport(overlay: Control) -> void:
+	if mode<0 or not _in_current_scene(draft) or not is_instance_valid(drawing_camera): return
+	preview_draw_count+=1
+	var points := PackedVector2Array()
+	for p in draft.points: points.append(drawing_camera.unproject_position(draft.to_global(Vector3(p.x,0,p.y))))
+	var color: Color=[Color(0.35,1,0.5),Color(1,0.8,0.25),Color(0.35,0.75,1)][mode]
+	var outline := points.duplicate()
+	var cursor := drawing_camera.unproject_position(draft.to_global(cursor_point))
+	if cursor_visible and (outline.is_empty() or outline[-1].distance_to(cursor)>1): outline.append(cursor)
+	if mode!=1 and outline.size()>2:
+		if not Geometry2D.triangulate_polygon(outline).is_empty(): overlay.draw_colored_polygon(outline,Color(color,0.15))
+		outline.append(outline[0])
+	if outline.size()>1: overlay.draw_polyline(outline,color,3.0,true)
+	for i in points.size():
+		overlay.draw_circle(points[i],6,Color.BLACK); overlay.draw_circle(points[i],4,color)
+		overlay.draw_string(overlay.get_theme_default_font(),points[i]+Vector2(9,-9),str(i+1),HORIZONTAL_ALIGNMENT_LEFT,-1,16,Color.WHITE)
+	if cursor_visible:
+		overlay.draw_line(cursor-Vector2(9,0),cursor+Vector2(9,0),color,2)
+		overlay.draw_line(cursor-Vector2(0,9),cursor+Vector2(0,9),color,2)
+	overlay.draw_style_box(overlay.get_theme_stylebox("panel","Panel"),Rect2(12,50,560,34))
+	overlay.draw_string(overlay.get_theme_default_font(),Vector2(22,73),"DISEGNO · Clic: punto · Invio: conferma · Backspace: elimina · Esc: annulla",HORIZONTAL_ALIGNMENT_LEFT,-1,15,color)
 func _edit_points(points: PackedVector2Array) -> void:
 	var node=gizmos.focus; var undo := get_undo_redo(); undo.create_action("Modifica punti guida",UndoRedo.MERGE_DISABLE,node)
 	undo.add_do_property(node,"points",points); undo.add_undo_property(node,"points",node.points); undo.commit_action()
