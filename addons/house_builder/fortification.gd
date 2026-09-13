@@ -69,6 +69,14 @@ func diagnostics() -> Array[Dictionary]:
 			if not detail.is_empty(): issues.append({"node":get_path_to(volume),"message":str(volume.name)+": "+detail})
 		var error := courtyard_building_error(building)
 		if not error.is_empty(): issues.append({"node":get_path_to(building),"message":str(building.name)+": "+error})
+	for court in get_children():
+		if not court.has_method("courtyard_support_height"): continue
+		for warning in court._get_configuration_warnings(): issues.append({"node":get_path_to(court),"message":str(warning)})
+		for building in buildings():
+			var expected: float=court.courtyard_support_height(building.position)
+			if is_nan(expected): expected=0.0
+			if absf(building.position.y-expected)>0.06:
+				issues.append({"node":get_path_to(building),"message":str(building.name)+": base non allineata alla corte (quota attesa %.2f m)."%expected})
 	return issues
 
 func courtyard_building_error(building: Node3D) -> String:
@@ -118,7 +126,7 @@ func resize_proposal(size: Vector2) -> Dictionary:
 		if host==null or target==null or not state.positions.has(get_path_to(target)): return {"error":"Ripristina prima i collegamenti mancanti."}
 		var a: Vector3=state.positions[get_path_to(host)]+host.wall_point(wall.tower_face,0,0)
 		var b: Vector3=state.positions[get_path_to(target)]+target.wall_point(wall.target_face,0,0)
-		var normal: Vector3=host.wall_normal(wall.tower_face); var gap := b-a; var distance := gap.dot(normal)
+		var normal: Vector3=host.wall_normal(wall.tower_face); var gap := b-a; gap.y=0; var distance := gap.dot(normal)
 		if normal.dot(target.wall_normal(wall.target_face))>-0.999 or distance<1.8 or distance>19.8 or (gap-normal*distance).length()>0.03: return {"error":"Le dimensioni richieste non rispettano i raccordi: distanza libera fra facce 1.8–19.8 m."}
 	state.entry.x=remap(entry_position.x,low.x,high.x,low.x,low.x+size.x)
 	# Preserve the distance of an exterior spawn from the front edge.

@@ -64,6 +64,7 @@ func _get_configuration_warnings() -> PackedStringArray:
 	set(value): walkway_profile=value; request_rebuild()
 var _walkway_collision: ArrayMesh
 var _slope_rise := 0.0
+var _base_drop := 0.0
 @export var connect_to_tower := false:
 	set(value): connect_to_tower=value; request_rebuild()
 @export_range(0,7,1) var tower_face := 2:
@@ -87,7 +88,8 @@ func destination_error() -> String:
 	var b: Vector3=target.to_global(target.wall_point(target_face,0,0))
 	var normal: Vector3=host.global_basis*host.wall_normal(tower_face)
 	var opposite: Vector3=target.global_basis*target.wall_normal(target_face)
-	var gap := b-a; var distance := gap.dot(normal)
+	if gate_enabled and absf(a.y-b.y)>0.03: return "Il portone richiede basi delle torri alla stessa quota."
+	var gap := b-a; gap.y=0; var distance := gap.dot(normal)
 	if normal.dot(opposite)>-0.999 or (gap-normal*distance).length()>0.03:
 		return "Le due facce devono essere allineate e rivolte l’una verso l’altra. Sposta o ruota la seconda torre."
 	if distance<1.8 or distance>19.8: return "La distanza fra le facce deve essere fra 1.8 e 19.8 metri."
@@ -116,7 +118,7 @@ func connection_error() -> String:
 			return "Due cortine occupano la stessa faccia della torre. Cambia Tower Face."
 	return destination_error()
 func prepare_attachment() -> void:
-	_slope_rise=0.0
+	_slope_rise=0.0; _base_drop=0.0
 	if not connect_to_tower: super.prepare_attachment(); return
 	if not connection_error().is_empty(): return
 	var host := fortification_host(); var normal: Vector3=host.wall_normal(tower_face)
@@ -125,6 +127,7 @@ func prepare_attachment() -> void:
 		var end: Vector3=host.to_local(target.to_global(target.wall_point(target_face,0,0)))
 		var length: float=(end-host.wall_point(tower_face,0,0)).dot(normal)+0.2
 		if not is_equal_approx(width,length): width=length
+		_base_drop=maxf(0,host.global_position.y-target.global_position.y)
 		_slope_rise=target.to_global(Vector3.UP*target.effective_elevation()).y-host.to_global(Vector3.UP*host.effective_elevation()).y
 	var tangent: Vector3=(host.wall_point(tower_face,1,0)-host.wall_point(tower_face,0,0)).normalized()
 	transform=Transform3D(Basis(normal,Vector3.UP,-tangent),host.wall_point(tower_face,0,0,width*0.5-0.10))
@@ -154,7 +157,8 @@ func _ramp_point(point: Vector3) -> Vector3:
 	var landing := 0.5 if walkway_profile==1 else 0.0
 	var t := clampf((point.x+width*0.5-0.10-landing)/maxf(width-0.20-landing*2,0.1),0,1)
 	# Keep the foundation level while raising the walkway and its parapets.
-	point.y+=_slope_rise*t*clampf(point.y/maxf(wall_height,0.1),0,1)
+	var vertical := clampf(point.y/maxf(wall_height,0.1),0,1)
+	point.y+=_slope_rise*t*vertical-_base_drop*(1.0-vertical)
 	return point
 
 func _tri(a: Vector3,b: Vector3,c: Vector3,mat: int) -> void:

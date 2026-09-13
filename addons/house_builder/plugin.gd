@@ -1023,8 +1023,9 @@ func _build_fortification_tab() -> void:
 	var elevations := VBoxContainer.new(); elevations.name="Quote"; fort_sections.add_child(elevations)
 	var slope := Button.new(); slope.text="Abilita raccordi in pendenza"; slope.pressed.connect(_enable_sloped_walkways); elevations.add_child(slope)
 	var slope_hint := Label.new(); slope_hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	slope_hint.text="Modifica Floor Height nei piani delle torri e aggiorna l’altezza delle scale; usa Wall Height per torri senza interni. Le cortine senza portone seguono le quote dei tetti. Limiti: rampe 45%; gradini 75% e pedate di almeno 24 cm. Basi delle torri alla stessa quota. Gli errori sono elencati in Recinto."
+	slope_hint.text="Modifica Floor Height nei piani delle torri e aggiorna l’altezza delle scale; usa Wall Height per torri senza interni. Le cortine senza portone seguono le quote dei tetti. Limiti: rampe 45%; gradini 75% e pedate di almeno 24 cm. Il preset Corte rialzata collega anche basi a quote diverse; il portone resta in piano. Gli errori sono elencati in Recinto."
 	elevations.add_child(slope_hint)
+	var court := Button.new(); court.text="Crea corte posteriore rialzata"; court.pressed.connect(_create_raised_courtyard); elevations.add_child(court)
 	var steps := Button.new(); steps.text="Converti cortina selezionata in gradini"; steps.pressed.connect(_set_walkway_profile.bind(1)); elevations.add_child(steps)
 	var ramp := Button.new(); ramp.text="Converti cortina selezionata in rampa"; ramp.pressed.connect(_set_walkway_profile.bind(0)); elevations.add_child(ramp)
 	var annex := Button.new(); annex.text="Aggiungi corpo accessorio al mastio"; annex.pressed.connect(_add_keep_accessory); edit.add_child(annex)
@@ -1191,4 +1192,21 @@ func _set_walkway_profile(profile: int) -> void:
 	undo.add_do_property(wall,"walkway_profile",profile); undo.add_undo_property(wall,"walkway_profile",wall.walkway_profile)
 	undo.add_do_property(wall,"allow_sloped_walkway",true); undo.add_undo_property(wall,"allow_sloped_walkway",wall.allow_sloped_walkway)
 	undo.add_do_method(wall,"request_rebuild"); undo.add_undo_method(wall,"request_rebuild"); undo.commit_action()
+	tabs.current_tab=6; fort_sections.current_tab=2
+
+func _create_raised_courtyard() -> void:
+	var group := _selected_fortification()
+	if group==null: _show_plan_error("Corte rialzata","Seleziona un castello."); return
+	var proposal: Dictionary=preload("res://addons/house_builder/raised_courtyard_factory.gd").proposal(group)
+	if proposal.has("error"): _show_plan_error("Corte rialzata",proposal.error); return
+	var undo := get_undo_redo(); undo.create_action("Crea corte rialzata",UndoRedo.MERGE_DISABLE,group)
+	undo.add_do_method(self,"_attach",group,proposal.court,EditorInterface.get_edited_scene_root()); undo.add_do_reference(proposal.court)
+	undo.add_undo_method(group,"remove_child",proposal.court)
+	for path in proposal.positions:
+		var building=group.get_node(path)
+		undo.add_do_property(building,"position",proposal.positions[path]); undo.add_undo_property(building,"position",building.position)
+	for wall in group.curtains():
+		if not wall.gate_enabled:
+			undo.add_do_property(wall,"allow_sloped_walkway",true); undo.add_undo_property(wall,"allow_sloped_walkway",wall.allow_sloped_walkway)
+	undo.add_do_method(group,"rebuild"); undo.add_undo_method(group,"rebuild"); undo.commit_action()
 	tabs.current_tab=6; fort_sections.current_tab=2

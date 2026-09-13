@@ -456,6 +456,16 @@ func run(plugin: EditorPlugin) -> void:
 	profile_history.undo(); assert(step_wall.walkway_profile==0)
 	profile_history.redo(); assert(step_wall.walkway_profile==1)
 	print("STEPPED_PROFILE_EDITOR_UNDO_REDO_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(enclosure)
+	var old_keep_position: Vector3=keep.position
+	plugin._create_raised_courtyard()
+	assert(enclosure.has_node("CorteRialzata") and is_equal_approx(keep.position.y,1.2))
+	var court=enclosure.get_node("CorteRialzata")
+	profile_history.undo(); assert(not enclosure.has_node("CorteRialzata") and keep.position==old_keep_position)
+	profile_history.redo(); assert(enclosure.get_node("CorteRialzata")==court and is_equal_approx(keep.position.y,1.2))
+	var court_snapshot: PackedScene=plugin._snapshot(enclosure); var court_copy=court_snapshot.instantiate()
+	assert(court_copy.has_node("CorteRialzata")); court_copy.free()
+	print("RAISED_COURT_EDITOR_UNDO_REDO_SNAPSHOT_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

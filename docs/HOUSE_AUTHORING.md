@@ -818,3 +818,19 @@ Limiti: alzata massima 18 cm, pedata minima 24 cm, pendenza massima 75% nel trat
 centrale; gli errori restano visibili nella diagnostica del recinto. La collisione
 è una rampa continua sotto i gradini. Le basi restano alla stessa quota.
 Esempio pronto: `scenes/dev/castle_stepped_walkways_example.tscn`.
+
+
+### Corte rialzata (A09.5)
+
+Seleziona il castello e usa **Fortificazioni → Quote → Crea corte posteriore
+rialzata**. Il preset richiede il recinto rettangolare (almeno 16 m fra centri),
+con edifici alla quota iniziale zero. Aggiunge `CorteRialzata`, alza mastio e torri
+posteriori di 1.2 m e raccorda le cortine. Undo annulla tutto insieme.
+Il nodo espone Size, Elevation, Access Width e Access Run. La geometria e le
+collisioni si aggiornano; gli edifici restano indipendenti. Dopo modifiche manuali
+allinea le basi alla nuova quota, aiutandoti con la diagnostica Recinto. Il resize
+del recinto non modifica automaticamente la piattaforma. I controlli di appoggio
+usano il centro degli edifici: controlla anche i loro bordi e le aggiunte manuali.
+Il portone rimane al terreno iniziale; la rampa conduce alla corte superiore.
+Esempio: `scenes/dev/castle_raised_courtyard_example.tscn`.
+Test: check_raised_courtyard.gd e check_raised_courtyard_play.gd.

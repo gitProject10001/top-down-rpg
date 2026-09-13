@@ -718,7 +718,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. A09.2 aggiunge il corpo accessorio collegato. A09.3 introduce raccordi in pendenza. A09.4 aggiunge raccordi a gradini. Prossimo passo: **corti e fondazioni su quote diverse**.
+se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. A09.2 aggiunge il corpo accessorio collegato. A09.3 introduce raccordi in pendenza. A09.4 aggiunge raccordi a gradini. A09.5 introduce la corte rialzata. Prossimo passo: **editing coordinato della quota e dei bordi della corte**.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -906,3 +906,25 @@ i lati con partenza sui tetti. Suite editor con messaggi preesistenti arredi.
 Limiti: cortine senza portone, basi complanari; nessuna scala a più rampe o
 pianerottolo intermedio. A09 resta IN CORSO. Prossimo passo: corti e fondazioni
 su quote diverse, con accessi coerenti alla camera fissa.
+
+
+### A09.5 — Corte e fondazioni rialzate — 2026-09-14
+
+Preset contestuale Quote/Crea corte posteriore rialzata: piattaforma modificabile,
+rampa centrale, mastio e torri posteriori a +1.2 m. Portone e torri anteriori
+restano al terreno iniziale. L'operazione preserva i nodi/interiori e supporta
+Undo/Redo; rifiuta quote preesistenti e ingombri principali fuori dalla piattaforma.
+Le cortine ammettono basi a quote diverse, mantenendo allineamento orizzontale,
+limiti delle pendenze e vincolo del portone. Il piede della cortina discendente
+si estende alla quota inferiore. Resize del recinto mantiene le quote dei nodi.
+Diagnostica del centro di appoggio degli edifici e pendenza della rampa.
+Test: collisioni piattaforma/rampa, basi/resize, mismatch manuale, salvataggio,
+Undo/Redo. Play dal portone al mastio/annesso, tre piani, ritorno al terreno.
+Esempio: `castle_raised_courtyard_example.tscn`. Suite editor passata con i
+messaggi preesistenti degli arredi. Materiali e luci di prova esistenti.
+Limiti: piattaforma rettangolare, un solo accesso centrale, nessun terreno
+scolpito; controlli di appoggio al centro, non verifica completa delle fondazioni.
+Modificare Elevation/Size/posizione non trascina automaticamente gli edifici:
+la diagnostica evidenzia quote incoerenti; resize del recinto non allarga la corte.
+A09 resta IN CORSO. Prossimo passo: editing coordinato di quota e bordi della
+corte, preservando gli offset manuali degli edifici.
