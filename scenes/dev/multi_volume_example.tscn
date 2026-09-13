@@ -17,22 +17,22 @@ albedo_color = Color(0.25, 0.28, 0.2, 1)
 [sub_resource type="PlaneMesh" id="PlaneMesh_fliea"]
 size = Vector2(50, 50)
 
-[node name="HouseWorkshop" type="Node3D" unique_id=707091772]
+[node name="HouseWorkshop" type="Node3D" unique_id=2045336916]
 
-[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=972883114]
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=1769501290]
 environment = SubResource("Environment_tcbn6")
 
-[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=2090678354]
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=279247938]
 transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
 light_color = Color(1, 0.93, 0.84, 1)
 light_energy = 1.2
 shadow_enabled = true
 
-[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=1933962131]
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=1256004151]
 material_override = SubResource("StandardMaterial3D_x55it")
 mesh = SubResource("PlaneMesh_fliea")
 
-[node name="CasaComposta" type="Node3D" parent="." unique_id=509100896]
+[node name="CasaComposta" type="Node3D" parent="." unique_id=164550678]
 script = ExtResource("1_rvgkc")
 width = 6.0
 depth = 8.0
@@ -49,12 +49,12 @@ openings = Array[Dictionary]([{
 "y": 1.5
 }])
 
-[node name="Volumes" type="Node3D" parent="CasaComposta" unique_id=1387195820]
+[node name="Volumes" type="Node3D" parent="CasaComposta" unique_id=373054325]
 
-[node name="Bottega" type="Node3D" parent="CasaComposta/Volumes" unique_id=1067682781]
+[node name="Bottega" type="Node3D" parent="CasaComposta/Volumes" unique_id=400794704]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 4.93, 0, -2)
 script = ExtResource("2_tmns8")
-volume_id = "volume_1408801_46741325488"
+volume_id = "volume_344279_38788925099"
 host_offset = 0.5
 width = 3.4
 depth = 4.5
@@ -72,11 +72,12 @@ openings = Array[Dictionary]([{
 "y": 1.5
 }])
 
-[node name="Deposito" type="Node3D" parent="CasaComposta/Volumes" unique_id=1915769376]
+[node name="Deposito" type="Node3D" parent="CasaComposta/Volumes" unique_id=85090989]
 transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 4.43, 0, 2)
 script = ExtResource("2_tmns8")
-volume_id = "volume_1534370_47580186298"
+volume_id = "volume_456813_39627785909"
 host_offset = -0.5
+junction_mode = 1
 width = 3.0
 depth = 3.5
 wall_height = 2.8
@@ -93,7 +94,7 @@ openings = Array[Dictionary]([{
 "y": 1.5
 }])
 
-[node name="Camera" type="Camera3D" parent="." unique_id=416326616]
+[node name="Camera" type="Camera3D" parent="." unique_id=316555577]
 transform = Transform3D(0.70710677, -0.45028284, 0.5452021, 0, 0.7710322, 0.6367961, -0.70710677, -0.45028284, 0.5452021, 25, 32, 25)
 projection = 1
 current = true

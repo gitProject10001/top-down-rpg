@@ -227,7 +227,7 @@ func _apply_changes() -> void:
 func _process(_delta: float) -> void:
 	if volume_info:
 		var selected_volume := _selected_house()
-		volume_info.text=("VOLUME NON RACCORDATO: "+selected_volume.volume_error() if not selected_volume.volume_error().is_empty() else "Volume valido. Dimensioni: maniglie; lato e posizione: Inspector. Sgancia per usare la trasformazione libera.") if selected_volume is Volume else "Seleziona una casa e aggiungi un corpo basso. Ogni volume conserva tetto e aperture propri."
+		volume_info.text=("VOLUME NON RACCORDATO: "+selected_volume.volume_error() if not selected_volume.volume_error().is_empty() else "Raccordo: "+["passaggio aperto","parete con porta"][selected_volume.junction_mode]+". Dimensioni e posizione porta: Inspector, Raccordo interno. Sgancia per usare la trasformazione libera.") if selected_volume is Volume else "Seleziona una casa e aggiungi un corpo basso. Ogni volume conserva tetto e aperture propri."
 	_refresh_binding_choices()
 	if balcony_info:
 		var component := _selected_balcony()
@@ -713,6 +713,8 @@ func _build_volume_tab() -> void:
 		var button := Button.new(); button.text="Aggiungi corpo · "+["davanti","dietro","destra","sinistra"][side]; button.pressed.connect(_add_volume.bind(side)); page.add_child(button)
 	for attached in [false,true]:
 		var button := Button.new(); button.text="Riaggancia volume" if attached else "Sgancia volume"; button.pressed.connect(_toggle_volume.bind(attached)); page.add_child(button)
+	for kind in 2:
+		var button := Button.new(); button.text=["Raccordo · passaggio aperto","Raccordo · parete con porta"][kind]; button.pressed.connect(_set_volume_junction.bind(kind)); page.add_child(button)
 	var remove := Button.new(); remove.text="Rimuovi volume selezionato"; remove.pressed.connect(_remove_volume); page.add_child(remove)
 	volume_info=Label.new(); volume_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(volume_info)
 func _add_volume(side: int) -> void:
@@ -757,3 +759,9 @@ func _remove_volume() -> void:
 	undo.add_do_method(self,"_detach_volume",host,container,volume)
 	undo.add_undo_method(self,"_attach",container,volume,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(volume)
 	undo.add_undo_method(host,"request_rebuild"); undo.commit_action()
+
+func _set_volume_junction(kind: int) -> void:
+	var volume := _selected_house()
+	if not volume is Volume: return
+	var undo := get_undo_redo(); undo.create_action("Cambia raccordo volume",UndoRedo.MERGE_DISABLE,volume)
+	undo.add_do_property(volume,"junction_mode",kind); undo.add_undo_property(volume,"junction_mode",volume.junction_mode); undo.commit_action()

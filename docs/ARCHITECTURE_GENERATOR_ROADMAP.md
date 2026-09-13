@@ -384,7 +384,19 @@ principale. Sono esclusi volumi annidati, convivenza con l'ala legacy e intersez
 fra corpi accessori. Non c'è ancora un piano interno unico esteso agli annessi,
 né un raccordo configurabile con tramezzo/porta, né un solver per compluvi.
 La duplicazione con rimappatura degli ID e la migrazione dell'ala restano da fare.
-Prossimo incremento: scegliere fra passaggio aperto e parete con porta nel raccordo.
+**A02.2 verificato — 2026-09-13.** Scelta contestuale del raccordo: passaggio
+aperto oppure parete principale conservata con porta derivata dal volume.
+Larghezza, altezza e offset sono editabili; il vano e la collisione si aggiornano
+insieme. La porta usa l'interazione esistente, mantiene lo stato nel volume e
+non modifica le aperture manuali. Sgancio o raccordo non valido eliminano la
+porta derivata. Esempio aggiornato: bottega aperta, deposito con porta.
+
+Verificati muro ai lati, blocco a porta chiusa, attraversamento a porta aperta,
+salvataggio e undo/redo. `check_volume_junction_play.gd` usa il personaggio reale;
+immagine `captures/balcony_attachment/junction_door.png`. Restano i limiti geometrici
+di A02.1 e l'integrazione delle stanze su più volumi; ora il raccordo con porta
+è disponibile. Prossimo passo: portici e tettoie come corpi aperti, mantenendo
+il controllo indipendente di ingombro, sostegni e copertura.
 
 - [ ] Nodi dati `Volume`: pianta rettangolare, quota, altezza, orientamento e ID.
 - [ ] Duplicazione, ridimensionamento e movimento di una sola parte con gizmo locale.

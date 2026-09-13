@@ -271,7 +271,7 @@ Il tetto e le aperture mantengono parametri indipendenti dalla casa principale.
 e rotazione con gli strumenti Godot; **Riaggancia volume** ripristina l'aggancio
 alla facciata configurata. **Rimuovi volume selezionato** conserva gli altri corpi.
 Queste operazioni supportano undo/redo. L'aggancio aggiorna automaticamente il
-taglio della parete e le collisioni; per ora crea un passaggio aperto.
+taglio della parete e le collisioni. Il tipo di raccordo si sceglie nel tab Volumi.
 
 Il pannello indica **VOLUME NON RACCORDATO** se dimensioni, tetto o posizione
 impediscono il raccordo. Il tetto accessorio deve rimanere almeno 15 cm sotto
@@ -282,4 +282,24 @@ Non inserire aperture sul retro del corpo, che è il lato condiviso.
 
 Questo incremento supporta corpi al piano terreno, senza ali legacy o volumi
 annidati. Un raccordo non valido lascia chiusa la parete principale. Interni
-su più volumi, porte fra i corpi e intersezioni complesse dei tetti sono successivi.
+su più volumi e intersezioni complesse dei tetti sono successivi.
+
+
+## Raccordo aperto oppure parete con porta
+
+Seleziona il corpo accessorio e, nel tab **Volumi**, scegli **Raccordo · passaggio
+aperto** oppure **Raccordo · parete con porta**. La seconda modalità conserva la
+parete principale e genera un'apertura con porta interattiva. Non aggiunge una
+seconda parete sovrapposta. I comandi supportano undo/redo.
+
+Nell'Inspector, **Raccordo interno** espone larghezza, altezza e offset della porta.
+L'offset sposta il vano lungo il raccordo mantenendo almeno 25 cm dai bordi.
+Una porta troppo grande produce un errore esplicito e non taglia il muro.
+La porta è derivata dal volume, non compare nell'elenco delle aperture manuali:
+passare alla modalità aperta o sganciare il corpo la rimuove senza toccare quelle.
+Dimensioni e stato aperto/chiuso si salvano con il volume.
+
+Nell'esempio `multi_volume_example.tscn`, la bottega ha un raccordo aperto e il
+deposito una porta. Seleziona CasaComposta e usa Play; **E** aziona la porta vicina.
+`tools/check_volume_junction_play.gd` verifica che la porta chiusa blocchi il
+personaggio, poi la apre e attraversa il raccordo in entrambe le direzioni.

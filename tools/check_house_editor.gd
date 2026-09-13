@@ -267,7 +267,10 @@ func run(plugin: EditorPlugin) -> void:
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(annex)
 	plugin._toggle_volume(false); assert(not annex.attached)
 	profile_history.undo(); assert(annex.attached)
-	print("VOLUME_EDITOR_ADD_DETACH_UNDO_REDO_OK")
+	plugin._set_volume_junction(1); assert(annex.junction_mode==1)
+	profile_history.undo(); assert(annex.junction_mode==0)
+	profile_history.redo(); assert(annex.junction_mode==1)
+	print("VOLUME_EDITOR_ADD_DETACH_JUNCTION_UNDO_REDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

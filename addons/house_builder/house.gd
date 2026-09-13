@@ -367,6 +367,7 @@ func _finish_openings(body: MeshInstance3D,materials: Array) -> void:
 			var frame := Transform3D(Basis(tangent,Vector3.UP,wall_normal(o.wall)),wall_point(o.wall,o.along-o.width*0.5,o.y-o.height*0.5,-0.17))
 			door.configure(frame,o.width,o.height,materials[1],bool(records[o.index].get("open",false)))
 			if o.index<openings.size(): door.changed.connect(_door_changed.bind(o.index))
+			elif records[o.index].has("volume_id"): door.changed.connect(_volume_door_changed.bind(records[o.index].volume_id))
 			else: door.changed.connect(_component_door_changed.bind(records[o.index].get("component_id","")))
 			# Contrasting threshold remains visible when the facade is cut away.
 			_wall_box(o.wall,o.along,o.y-o.height*0.5+0.02,o.width,0.04,0.55,-0.08,2)
@@ -452,7 +453,12 @@ func all_openings() -> Array[Dictionary]:
 	for component in attached_components():
 		if component.validation_error().is_empty() and component.create_door and component.door_id.is_empty():
 			result.append(component.opening_record())
+	for volume in authored_volumes():
+		if volume.attached and volume.junction_mode==1 and volume.volume_error().is_empty(): result.append(volume.junction_record())
 	return result
+func _volume_door_changed(opened: bool,id: String) -> void:
+	for volume in authored_volumes():
+		if volume.volume_id==id: volume.junction_open=opened
 func _component_door_changed(opened: bool,id: String) -> void:
 	for component in attached_components():
 		if component.component_id==id: component.door_open=opened
@@ -487,7 +493,7 @@ func _clip_authored_volumes(body: MeshInstance3D,roof: MeshInstance3D) -> void:
 	var cutters: Array=[]
 	for volume in authored_volumes(): volume.prepare_attachment()
 	for volume in authored_volumes():
-		if volume.attached and volume.volume_error().is_empty(): cutters.append(volume._volume_planes(Vector2(volume.width,volume.depth),volume.roof_height,volume.transform,0.001))
+		if volume.attached and volume.junction_mode==0 and volume.volume_error().is_empty(): cutters.append(volume._volume_planes(Vector2(volume.width,volume.depth),volume.roof_height,volume.transform,0.001))
 	if has_method("volume_host") and get("attached"):
 		var host: Node3D=call("volume_host")
 		if host and call("volume_error").is_empty(): cutters.append(host._volume_planes(Vector2(host.width,host.depth),host.roof_height,transform.affine_inverse(),-0.001))

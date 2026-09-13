@@ -36,6 +36,7 @@ func run() -> void:
 	for i in 2:
 		var body=preload("res://addons/house_builder/volume.gd").new(); body.name="Bottega" if i==0 else "Deposito"
 		body.width=3.4 if i==0 else 3.0; body.depth=4.5 if i==0 else 3.5; body.wall_height=2.8; body.roof_height=1.5 if i==0 else 1.1
+		body.junction_mode=1 if i==1 else 0
 		body.host_wall=2; body.host_offset=0.5 if i==0 else -0.5
 		var records: Array[Dictionary]=[{"kind":"window","wall":0,"u":0.0,"y":1.5},{"kind":"window","wall":2,"u":0.0,"y":1.5}]; body.openings=records
 		volumes.add_child(body); body.owner=world

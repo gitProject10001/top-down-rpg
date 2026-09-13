@@ -9,6 +9,16 @@ extends "res://addons/house_builder/house.gd"
 	set(value): host_wall=value; request_rebuild()
 @export_range(-1,1,0.01) var host_offset := 0.0:
 	set(value): host_offset=value; request_rebuild()
+@export_group("Raccordo interno")
+@export_enum("Passaggio aperto", "Parete con porta") var junction_mode := 0:
+	set(value): junction_mode=value; request_rebuild()
+@export_range(0.8,2.5,0.05) var junction_width := 1.2:
+	set(value): junction_width=value; request_rebuild()
+@export_range(1.8,3.0,0.05) var junction_height := 2.1:
+	set(value): junction_height=value; request_rebuild()
+@export_range(-1,1,0.01) var junction_offset := 0.0:
+	set(value): junction_offset=value; request_rebuild()
+@export_storage var junction_open := false
 var _observed := ""
 func volume_host() -> Node3D:
 	return get_parent().get_parent() if get_parent() and get_parent().name=="Volumes" else null
@@ -18,7 +28,7 @@ func _exit_tree() -> void:
 	var host := volume_host()
 	if host: host.request_rebuild()
 func _process(delta: float) -> void:
-	var signature := str(dimensions(),openings,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
+	var signature := str(dimensions(),openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
 	if signature!=_observed:
 		_observed=signature
 		var host := volume_host()
@@ -39,6 +49,7 @@ func volume_error() -> String:
 	if host.has_method("volume_host") or host.wing_enabled or wing_enabled: return "Aggancio supportato al corpo principale senza ala legacy."
 	if absf(host_offset*host.wall_length(host_wall)*0.5)+width*0.5>host.wall_length(host_wall)*0.5-0.25: return "Il volume supera il bordo della facciata: riduci larghezza o spostamento."
 	if wall_height+roof_height>host.wall_height-0.15: return "Per questo primo raccordo il tetto accessorio deve stare sotto la gronda principale."
+	if junction_mode==1 and (junction_width>width-0.5 or junction_height>wall_height-0.2): return "La porta del raccordo supera il corpo: riduci larghezza o altezza della porta."
 	for record in host.openings:
 		var opening: Dictionary=host.resolved_opening(record)
 		if opening.wall==host_wall and absf(opening.along-host_offset*host.wall_length(host_wall)*0.5)<(width+opening.width)*0.5+0.15:
@@ -55,3 +66,8 @@ func volume_error() -> String:
 func _get_configuration_warnings() -> PackedStringArray:
 	var error := volume_error()
 	return super._get_configuration_warnings() if error.is_empty() else PackedStringArray([error])
+
+func junction_record() -> Dictionary:
+	var host := volume_host()
+	var along: float=host_offset*host.wall_length(host_wall)*0.5+junction_offset*maxf(0,(width-junction_width)*0.5-0.25)
+	return {"kind":"door","wall":host_wall,"u":along/(host.wall_length(host_wall)*0.5),"width":junction_width,"height":junction_height,"open":junction_open,"volume_id":volume_id}
