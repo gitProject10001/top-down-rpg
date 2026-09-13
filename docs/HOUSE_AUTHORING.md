@@ -860,3 +860,8 @@ Il muro diventa invisibile solo nella zona fra camera e giocatore; rimane solido
 Pavimento sotto il giocatore e parti basse restano visibili. Il comportamento
 si somma al cutaway degli interni e funziona con i materiali architettonici del
 builder, non automaticamente con shader esterni o vegetazione.
+
+
+#### Sezioni nel Play del castello (A09.8)
+
+Con la visibilità attiva (F8), il bordo del taglio mostra ora lo spessore: pietrame scuro nelle cortine piene, sezione nera nelle pareti degli edifici cavi. La svasatura rende il bordo visibile dalla camera fissa. Il sistema segue le aperture della mesh finale e lascia liberi cortile e passaggi; resta un effetto temporaneo di visualizzazione. Non modifica i nodi salvati, le collisioni o gli strumenti del builder. Per ora le sezioni riguardano la muratura generata, non ogni oggetto o tegola.

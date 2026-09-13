@@ -972,3 +972,14 @@ dalle ombre esistenti. La reference non è riprodotta integralmente nelle copert
 
 Validazione A09.7 conclusa: OPEN_CASTLE_REVEAL_RESTORE_COLLISION_WALKWAY_OK e
 HOUSE_EDITOR_ALL_OK (con i messaggi preesistenti del reparenting arredi).
+
+
+### A09.8 — Sezioni della muratura nel reveal (2026-09-14)
+
+Il ritaglio del castello ora ha un bordo netto, irregolare e leggermente svasato verso la camera: rende leggibile lo spessore alla camera fissa. La geometria temporanea della sezione viene ricavata dalle intersezioni con la mesh finale tramite il BVH nativo TriangleMesh, conservando le aperture già generate. Le cortine piene hanno un materiale di pietrame scuro con giunti irregolari; le sezioni delle pareti degli edifici cavi sono nere. Non viene aggiunto un disco nero sopra il giocatore o il cortile.
+
+Implementazione: `architecture_sections.gd` viene coordinato da `architecture_visibility.gd`. Le sezioni seguono lo stesso fuoco e raggio del reveal, si disattivano con F8 e non proiettano ombre né aggiungono collisioni. Le mesh accelerate sono memorizzate e invalidate quando la mesh sorgente cambia. Il campionamento angolare è di 192 strisce: la sezione è una discretizzazione visiva, non una sottrazione booleana permanente.
+
+Copertura attuale: mesh Walls dei generatori esistenti e copertura/camminamento delle cortine. Tegole, infissi mobili e asset esterni non ricevono nuove sezioni. La classificazione deriva dal generatore (cortina piena / edificio cavo); non è ancora un attributo liberamente assegnabile a ogni materiale. Geometrie aperte o con orientamenti incoerenti non garantiscono una sezione chiusa. Il materiale interno è una convenzione grafica scura, non una simulazione della frattura o della luce nell'intercapedine.
+
+Validazione: `check_architecture_sections.gd` verifica spazio vuoto fra pareti, passaggio libero e spessore della sezione (`ARCHITECTURE_SECTION_ROOM_VOID_DOORWAY_THICKNESS_OK`). `check_open_castle_play.gd` verifica presenza di sezioni piene e cave, disattivazione, ingresso, collisioni e supporto dei camminamenti (`OPEN_CASTLE_REVEAL_RESTORE_COLLISION_WALKWAY_OK`). Prova grafica D3D12 completata; screenshot aggiornati in captures/balcony_attachment. Nell'ultimo campione il rebuild delle sezioni ha richiesto circa 3,9 ms: misura puntuale, non benchmark di un villaggio completo.

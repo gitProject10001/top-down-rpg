@@ -20,6 +20,12 @@ func run() -> void:
 		play.authored_group.courtyard_visibility=enabled
 		for i in 120: await physics_frame
 		assert(visibility._radius>3.5 if enabled else is_zero_approx(visibility._radius))
+		if enabled:
+			assert(visibility.sections.solid_sections>0,"Solid walls need stone cross sections")
+			assert(visibility.sections.hollow_sections>0,"Hollow towers need dark shell cross sections")
+			print("SECTION_COUNTS ",visibility.sections.solid_sections," / ",visibility.sections.hollow_sections," build_usec=",visibility.sections.last_build_usec)
+		else:
+			assert(visibility.sections.solid_sections==0 and visibility.sections.hollow_sections==0)
 		if DisplayServer.get_name()!="headless":
 			await RenderingServer.frame_post_draw
 			root.get_texture().get_image().save_png("res://captures/balcony_attachment/open_castle_%s.png"%("revealed" if enabled else "occluded"))

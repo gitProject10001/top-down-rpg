@@ -4,6 +4,12 @@ var group: Node3D
 var player: CharacterBody3D
 var camera: Camera3D
 var meshes: Array[MeshInstance3D]=[]
+var sections: Node3D
+func _ready() -> void:
+	sections=preload("res://scripts/village/architecture_sections.gd").new()
+	sections.name="RevealSections"
+	add_child(sections)
+
 var _scan := 0.0
 var _radius := 0.0
 var _last_focus := Vector3.INF
@@ -28,3 +34,5 @@ func _process(delta: float) -> void:
 		mesh.set_instance_shader_parameter("reveal_focus",focus)
 		mesh.set_instance_shader_parameter("reveal_camera",camera.global_position)
 		mesh.set_instance_shader_parameter("reveal_radius",_radius)
+
+	sections.update_sections(meshes,focus,camera.global_position,_radius)
