@@ -1,4 +1,5 @@
 extends Node
+const Door = preload("res://addons/house_builder/door.gd")
 ## Reveal player and nearby ground along the camera ray. Physics stays intact.
 var group: Node3D
 var player: CharacterBody3D
@@ -13,8 +14,12 @@ func _ready() -> void:
 var _occlusion_meshes: Dictionary = {}
 var _clear_time := 0.0
 var occluded := false
+var _blocking: Dictionary = {}
+var _mesh_radii: Dictionary = {}
+var _holds: Dictionary = {}
 
 func _player_occluded(focus: Vector3, height: float) -> bool:
+	_blocking.clear()
 	# Test the original visible geometry, ignoring the shader cut itself. This
 	# prevents the reveal from switching itself off as soon as it exposes the player.
 	for mesh in meshes:
@@ -39,8 +44,10 @@ func _player_occluded(focus: Vector3, height: float) -> bool:
 			var direction: Vector3= camera.global_basis.z if camera.projection==Camera3D.PROJECTION_ORTHOGONAL else (camera.global_position-target).normalized()
 			var end: Vector3= target+direction*minf(camera.far,target.distance_to(camera.global_position))
 			var start: Vector3= target+direction*0.08
-			if tree.intersect_segment(inverse*start,inverse*end).size()>0: return true
-	return false
+			if tree.intersect_segment(inverse*start,inverse*end).size()>0:
+				_blocking[mesh.get_instance_id()]=true
+				break
+	return not _blocking.is_empty()
 
 var _scan := 0.0
 var _radius := 0.0
@@ -48,6 +55,9 @@ var _last_focus := Vector3.INF
 var _last_camera := Vector3.INF
 var _last_radius := -1.0
 func collect(node: Node) -> void:
+	# Door leaves and opening frames remain complete and are not reveal triggers.
+	if node is Door: return
+	if node.name==&"OpeningDetails": return
 	if node is MeshInstance3D: meshes.append(node)
 	for child in node.get_children(true): collect(child)
 func _process(delta: float) -> void:
@@ -57,23 +67,42 @@ func _process(delta: float) -> void:
 	if rescan:
 		meshes.clear(); collect(group); _scan=0.3
 		var live := {}
+		var live_nodes := {}
 		for mesh in meshes:
 			if mesh.mesh: live[mesh.mesh.get_instance_id()]=true
+			live_nodes[mesh.get_instance_id()]=true
 		for key in _occlusion_meshes.keys():
 			if not live.has(key): _occlusion_meshes.erase(key)
+		for key in _mesh_radii.keys():
+			if not live_nodes.has(key):
+				_mesh_radii.erase(key); _holds.erase(key)
 	var shape: CollisionShape3D=player.get_node("Collision")
 	var focus: Vector3= player.global_position+Vector3.UP*(shape.position.y-shape.shape.height*0.5)
-	var blocked: bool= group.courtyard_visibility and _player_occluded(focus,shape.shape.height)
+	var blocked: bool= _player_occluded(focus,shape.shape.height) if group.courtyard_visibility else false
+	if not group.courtyard_visibility: _blocking.clear()
 	_clear_time=0.0 if blocked else _clear_time+delta
 	if blocked: occluded=true
 	elif _clear_time>=0.12 or not group.courtyard_visibility: occluded=false
 	_radius=move_toward(_radius,group.visibility_radius if occluded else 0.0,delta*14)
-	if not rescan and focus.distance_squared_to(_last_focus)<0.0001 and camera.global_position.distance_squared_to(_last_camera)<0.0001 and is_equal_approx(_radius,_last_radius): return
+	var changed := false
+	for mesh in meshes:
+		if not is_instance_valid(mesh): continue
+		var id := mesh.get_instance_id()
+		_holds[id]=0.12 if _blocking.has(id) else maxf(0.0,float(_holds.get(id,0.0))-delta)
+		var previous: float=_mesh_radii.get(id,0.0)
+		var target: float=group.visibility_radius if group.courtyard_visibility and _holds[id]>0.0 else 0.0
+		_mesh_radii[id]=move_toward(previous,target,delta*14.0)
+		changed=changed or not is_equal_approx(previous,_mesh_radii[id])
+	if not changed and not rescan and focus.distance_squared_to(_last_focus)<0.0001 and camera.global_position.distance_squared_to(_last_camera)<0.0001 and is_equal_approx(_radius,_last_radius): return
 	_last_focus=focus; _last_camera=camera.global_position; _last_radius=_radius
 	for mesh in meshes:
 		if not is_instance_valid(mesh): continue
+		var frame := preload("res://scripts/village/architecture_sections.gd").cut_frame(mesh,focus,camera.global_position)
+		mesh.set_instance_shader_parameter("reveal_box_center",frame.origin)
+		mesh.set_instance_shader_parameter("reveal_box_right",frame.basis.x)
+		mesh.set_instance_shader_parameter("reveal_box_forward",frame.basis.z)
 		mesh.set_instance_shader_parameter("reveal_focus",focus)
 		mesh.set_instance_shader_parameter("reveal_camera",camera.global_position)
-		mesh.set_instance_shader_parameter("reveal_radius",_radius)
+		mesh.set_instance_shader_parameter("reveal_radius",_mesh_radii.get(mesh.get_instance_id(),0.0))
 
-	sections.update_sections(meshes,focus,camera.global_position,_radius)
+	sections.update_sections(meshes,focus,camera.global_position,_radius,_mesh_radii)

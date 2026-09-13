@@ -2,11 +2,13 @@ shader_type spatial;
 render_mode unshaded, cull_disabled;
 uniform bool hollow = false;
 uniform float floor_height = 0.0;
+uniform vec3 focus;
+uniform vec3 view_direction;
 varying vec3 world;
 float hash(vec3 p) { return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453); }
 void vertex() { world=(MODEL_MATRIX*vec4(VERTEX,1)).xyz; }
 void fragment() {
- if(world.y < floor_height) discard;
+ if(world.y < floor_height || dot(world-focus,view_direction)<=0.2) discard;
  // Irregular stone cells in the exposed core, independent of the outside atlas.
  vec3 p=world*2.8;
  vec3 cell=floor(p);

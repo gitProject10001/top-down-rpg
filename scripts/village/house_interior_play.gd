@@ -135,6 +135,7 @@ func nearest_door() -> Node3D:
 		var d := Vector2(delta.x,delta.z).length()
 		if d<distance: distance=d; best=door
 	return best
+var _highlighted_door: Node3D
 func _process(delta: float) -> void:
 	if not is_instance_valid(player): return
 	if authored_group:
@@ -178,6 +179,10 @@ func _process(delta: float) -> void:
 	for light in accessory_lamps: light.visible=inside and active_floor==0
 	entrance_light.visible=inside and active_floor==0
 	var door := nearest_door()
+	if door!=_highlighted_door:
+		if is_instance_valid(_highlighted_door): _highlighted_door.set_highlight(false)
+		_highlighted_door=door
+		if door: door.set_highlight(true)
 	if Input.is_action_just_pressed("interact") and door: door.toggle(player.global_position)
 	prompt.text="WASD / stick: muovi  ·  E / Y: porta  ·  F7: zoom · F8: visibilità\n%s · Piano %d/%d%s"%[("Interno · "+str(house.name) if authored_group else "Interno") if inside else "Esterno",active_floor+1,storeys,"  —  E: "+("chiudi" if door.opened else "apri") if door else ""]
 func _unhandled_key_input(event: InputEvent) -> void:

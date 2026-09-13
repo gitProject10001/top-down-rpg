@@ -872,3 +872,14 @@ Con la visibilità attiva (F8), il bordo del taglio mostra ora lo spessore: piet
 Il reveal non rimane più attivo per semplice vicinanza alle mura. Due raggi verso la camera, all'altezza del busto e della testa, verificano se la geometria visibile del builder copre il personaggio. Per la camera ortografica i raggi sono paralleli. Il controllo usa la mesh originale, indipendentemente dal ritaglio dello shader, per evitare oscillazioni. Quando entrambi i raggi sono liberi, dopo 120 ms di stabilità il taglio si richiude gradualmente. F8 abilita/disabilita questo comportamento automatico. Gli ostacoli esterni al gruppo del castello non sono inclusi.
 
 Validazione Play: giocatore nascosto → reveal con sezioni; giocatore visibile nel cortile → raggio zero e nessuna sezione; ritorno dietro le mura → riattivazione. Screenshot: `captures/balcony_attachment/open_castle_visible_uncut.png`.
+
+
+#### A09.9 — Taglio rettangolare selettivo e porte leggibili
+
+Il reveal usa ora un volume rettangolare orientato secondo gli assi locali dell'edificio o della cortina: lati verticali e base orizzontale, senza foro circolare o svasatura. Le sezioni chiudono le quattro facce verticali e la base tramite intersezioni con la mesh finale. Questa versione sostituisce il campionamento angolare A09.8 con strisce planari (96 per faccia); edifici ruotati mantengono l'allineamento al proprio volume.
+
+L'occlusione viene registrata per singola mesh: solo quelle attraversate dai raggi busto/testa ricevono il taglio. Le mesh vicine che non coprono il giocatore rimangono complete, anche se comprese nell'area di reveal di un altro oggetto. Le transizioni di apertura e chiusura sono indipendenti. Non si tratta ancora di selezione per singolo mattone o faccia all'interno della stessa mesh.
+
+Le ante e i dettagli delle aperture sono esclusi dal reveal e dai suoi trigger. Le porte restano a tutta altezza anche nel cutaway interno. La porta utilizzabile più vicina riceve un contorno dorato con normale test di profondità, coerente con il prompt E: apri/chiudi; il contorno scompare allontanandosi. Non è un indicatore attraverso muri opachi.
+
+Validazione: Play GPU con passaggio attraverso il portone, ripristino nel cortile aperto, riattivazione dietro il muro, collisioni e camminamento. Aggiunti controlli per raggio nullo sulle mesh non ostruenti, porta esclusa e a piena altezza, highlight della porta vicina. Test delle sezioni: vuoti delle stanze, porte, spessori e orientamento di un volume ruotato. Screenshot: open_castle_revealed.png e open_castle_door_highlight.png in captures/balcony_attachment.

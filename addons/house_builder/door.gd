@@ -6,6 +6,8 @@ var open_angle := PI*0.55
 var door_width := 1.2
 var closed_frame := Transform3D.IDENTITY
 var motion: Tween
+var highlighted := false
+var _highlight_material: ShaderMaterial
 var leaf_height := 2.0
 func configure(frame: Transform3D,w: float,h: float,material: Material,initial_open: bool=false) -> void:
 	closed_frame=frame; transform=frame; door_width=w
@@ -37,9 +39,18 @@ func toggle(actor_position: Vector3) -> bool:
 func _apply_angle(angle: float) -> void:
 	transform=closed_frame*Transform3D(Basis(Vector3.UP,angle),Vector3.ZERO)
 func set_cutaway(cut: bool) -> void:
-	# Keep the swung leaf readable without changing its full-height collider.
+	# Doors remain complete, including while the surrounding architecture is cut.
 	visible=true
 	var leaf: MeshInstance3D=get_child(0)
-	var shown := minf(0.75,leaf_height) if cut else leaf_height
+	var shown := leaf_height
 	leaf.scale.y=shown/leaf_height
 	leaf.position.y=shown*0.5
+
+func set_highlight(active: bool) -> void:
+	if highlighted==active: return
+	highlighted=active
+	if active and _highlight_material==null:
+		_highlight_material=ShaderMaterial.new()
+		_highlight_material.shader=preload("res://shaders/pixelart/door_highlight.gdshader")
+	var leaf: MeshInstance3D=get_child(0)
+	leaf.material_overlay=_highlight_material if active else null

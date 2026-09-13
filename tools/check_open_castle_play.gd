@@ -11,7 +11,13 @@ func run() -> void:
 	print(play.authored_group.diagnostics())
 	assert(play.authored_group.diagnostics().is_empty())
 	await play._walk(Vector3(13,0,2.6),100)
-	var gate=play.nearest_door(); assert(gate!=null); gate.toggle(play.player.global_position)
+	var gate=play.nearest_door(); assert(gate!=null)
+	for i in 12: await physics_frame
+	assert(gate.highlighted,"The nearby usable door is highlighted")
+	if DisplayServer.get_name()!="headless":
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://captures/balcony_attachment/open_castle_door_highlight.png")
+	gate.toggle(play.player.global_position)
 	for i in 45: await physics_frame
 	await play._walk(Vector3(13,0,-3),250)
 	await play._walk(Vector3(19,0,-3),220)
@@ -22,13 +28,23 @@ func run() -> void:
 		assert(visibility._radius>3.5 if enabled else is_zero_approx(visibility._radius))
 		if enabled:
 			assert(visibility.sections.solid_sections>0,"Solid walls need stone cross sections")
-			assert(visibility.sections.hollow_sections>0,"Hollow towers need dark shell cross sections")
+			assert(not visibility._blocking.is_empty(),"Only actual blockers activate sections")
 			print("SECTION_COUNTS ",visibility.sections.solid_sections," / ",visibility.sections.hollow_sections," build_usec=",visibility.sections.last_build_usec)
 		else:
 			assert(visibility.sections.solid_sections==0 and visibility.sections.hollow_sections==0)
 		if DisplayServer.get_name()!="headless":
 			await RenderingServer.frame_post_draw
 			root.get_texture().get_image().save_png("res://captures/balcony_attachment/open_castle_%s.png"%("revealed" if enabled else "occluded"))
+	for mesh in visibility.meshes:
+		if not is_instance_valid(mesh): continue
+		if not visibility._blocking.has(mesh.get_instance_id()):
+			assert(is_zero_approx(float(mesh.get_instance_shader_parameter("reveal_radius"))),"Unrelated architecture stays complete")
+	assert(not visibility.meshes.has(gate.get_child(0)),"Doors are never reveal cutters or targets")
+	gate.set_cutaway(true)
+	assert(is_equal_approx(gate.get_child(0).scale.y,1.0),"Door remains full height")
+	gate.set_highlight(true)
+	assert(gate.get_child(0).material_overlay!=null)
+	gate.set_highlight(false)
 	var space=play.player.get_world_3d().direct_space_state
 	var query=PhysicsRayQueryParameters3D.create(Vector3(19,1,2),Vector3(19,1,-2))
 	assert(not space.intersect_ray(query).is_empty(),"Visual cut preserves wall collision")
