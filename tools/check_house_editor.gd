@@ -219,6 +219,25 @@ func run(plugin: EditorPlugin) -> void:
 	plugin._remove_balcony(); assert(balcony_house.all_openings().is_empty())
 	profile_history.undo(); assert(balcony_house.all_openings().size()==1)
 	print("BALCONY_EDITOR_ADD_REMOVE_UNDO_REDO_OK")
+	var linked_plan=preload("res://addons/house_builder/plan.gd").new(); linked_plan.name="InteriorPlan"; linked_plan.floor_height=2.8
+	balcony_house.add_child(linked_plan); linked_plan.owner=scene
+	for i in 2:
+		var level := Node3D.new(); level.name="Piano%d"%i; linked_plan.add_child(level); level.owner=scene
+	linked_plan.rebuild(); balcony_house.rebuild()
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(balcony); plugin._selection_context(); plugin._refresh_binding_choices()
+	plugin.floor_choice.select(2); plugin._bind_balcony_floor()
+	assert(not balcony.floor_id.is_empty()); var linked_floor_id=balcony.floor_id
+	profile_history.undo(); assert(balcony.floor_id.is_empty())
+	profile_history.redo(); assert(balcony.floor_id==linked_floor_id)
+	var access_records: Array[Dictionary]=[{"kind":"door","wall":0,"u":0.1,"floor_y":2.8}]
+	balcony_house.openings=access_records
+	plugin._refresh_binding_choices(); plugin.door_choice.select(1); plugin._bind_balcony_door()
+	assert(not balcony.door_id.is_empty() and balcony.validation_error().is_empty())
+	profile_history.undo(); assert(balcony.door_id.is_empty() and not balcony_house.openings[0].has("opening_id"))
+	profile_history.redo(); assert(not balcony.door_id.is_empty())
+	linked_plan.floor_height=3.1; linked_plan.rebuild(); balcony_house.rebuild()
+	assert(is_equal_approx(balcony.position.y,3.1) and is_equal_approx(balcony_house.opening_floor_y(balcony_house.openings[0]),3.1))
+	print("BALCONY_EDITOR_FLOOR_MANUAL_DOOR_BIND_UNDO_REDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

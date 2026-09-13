@@ -51,8 +51,22 @@ Se una modifica rende il balcone invalido, il pannello mostra l'errore e il cont
 
 La porta generata taglia realmente muro e collisione, alla quota del balcone.
 Rimuovere il balcone richiude quel vano. Le porte manuali non vengono cancellate:
-per utilizzarne una già allineata, disattiva **Create Door**. In questa versione
-l'allineamento e la quota del piano si regolano manualmente. Gli agganci supportano
+per utilizzarne una, sceglila nel menu degli accessi e premi **Applica accesso**.
+Il balcone segue posizione e facciata della porta; non ne assume la proprietà.
+Seleziona un piano e premi **Applica collegamento al piano**: sia il balcone sia
+la porta collegata seguono `InteriorPlan.floor_height`. **Quota manuale** rimuove
+il legame al piano mantenendo la quota corrente. La porta manuale conserva il
+proprio collegamento al piano anche se il balcone viene rimosso.
+
+Con una porta manuale collegata, sposta l'accesso dal tab Aperture: la maniglia
+centrale del balcone non sposta più l'insieme. Larghezza e profondità restano libere.
+Con un piano collegato la maniglia non cambia la quota: modifica il piano oppure
+passa a Quota manuale. **Porta generata dal balcone** scollega l'accesso manuale,
+che viene conservato; sposta quindi il balcone per evitare una sovrapposizione.
+Rinominare un piano o riordinare le aperture conserva i legami; eliminare un
+riferimento mostra un errore esplicito e sospende il balcone.
+
+Gli agganci supportano
 le quattro facciate del corpo principale; ali e terrazze sono incrementi successivi.
 Aggiunta, maniglie, rimozione e modifiche Inspector supportano undo/redo.
 

@@ -3,6 +3,9 @@ extends EditorPlugin
 const Balcony=preload("res://addons/house_builder/balcony.gd")
 var balcony_gizmos: EditorNode3DGizmoPlugin
 var balcony_info: Label
+var floor_choice: OptionButton
+var door_choice: OptionButton
+var _binding_key := ""
 const House=preload("res://addons/house_builder/house.gd")
 const Gizmo=preload("res://addons/house_builder/gizmo.gd")
 const Plan=preload("res://addons/house_builder/plan.gd")
@@ -210,9 +213,10 @@ func _apply_changes() -> void:
 		for house in _houses(root):
 			if house._pending: house.rebuild()
 func _process(_delta: float) -> void:
+	_refresh_binding_choices()
 	if balcony_info:
 		var component := _selected_balcony()
-		balcony_info.text=("ERRORE: "+component.validation_error() if not component.validation_error().is_empty() else "Balcone agganciato. Maniglie: posizione, larghezza, profondità. Quota e facciata anche nell’Inspector.") if component else "Posiziona un balcone sulla facciata: il clic indica la quota del pavimento. Servono almeno 2,12 m di muro sopra. Seleziona il balcone per modificarlo."
+		balcony_info.text=("ERRORE: "+component.validation_error() if not component.validation_error().is_empty() else "Balcone a %.2f m. %s"%[component.effective_elevation(),"Segue la porta manuale selezionata." if not component.door_id.is_empty() else ("Quota collegata al piano." if not component.floor_id.is_empty() else "Quota manuale.")]) if component else "Posiziona un balcone sulla facciata: il clic indica la quota del pavimento. Servono almeno 2,12 m di muro sopra. Seleziona il balcone per modificarlo."
 	var selected_house := _selected_house()
 	var key := str(selected_house.dimensions(),selected_house.architecture_profile,selected_house.profile_baseline) if selected_house else ""
 	if key!=_architecture_ui_key: _architecture_ui_key=key; _architecture_details()
@@ -502,6 +506,10 @@ func _build_component_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Componenti"; tabs.add_child(page)
 	var add := Button.new(); add.text="Posiziona balcone + porta"; add.pressed.connect(_set_mode.bind(6)); page.add_child(add)
 	var remove := Button.new(); remove.text="Rimuovi balcone selezionato"; remove.pressed.connect(_remove_balcony); page.add_child(remove)
+	floor_choice=OptionButton.new(); page.add_child(floor_choice)
+	var floor_button := Button.new(); floor_button.text="Applica collegamento al piano"; floor_button.pressed.connect(_bind_balcony_floor); page.add_child(floor_button)
+	door_choice=OptionButton.new(); page.add_child(door_choice)
+	var door_button := Button.new(); door_button.text="Applica accesso"; door_button.pressed.connect(_bind_balcony_door); page.add_child(door_button)
 	balcony_info=Label.new(); balcony_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(balcony_info)
 func _selected_balcony() -> Node3D:
 	for node in EditorInterface.get_selection().get_selected_nodes():
@@ -554,3 +562,64 @@ func _preview_balcony(hit: Dictionary) -> void:
 	var h: Node3D=hit.house
 	var tangent: Vector3=(h.wall_point(hit.wall,1,0)-h.wall_point(hit.wall,0,0)).normalized()
 	ghost.global_transform=h.global_transform*Transform3D(Basis(tangent,Vector3.UP,h.wall_normal(hit.wall)),h.wall_point(hit.wall,hit.u*h.wall_length(hit.wall)*0.5,snappedf(hit.y,0.1)-0.08,0.75))
+
+func _refresh_binding_choices() -> void:
+	if floor_choice==null: return
+	var b := _selected_balcony()
+	if b==null:
+		floor_choice.disabled=true; door_choice.disabled=true; _binding_key=""; return
+	floor_choice.disabled=false; door_choice.disabled=false
+	var h: Node=b.house(); var plan := h.get_node_or_null("InteriorPlan")
+	var levels: Array=plan.levels() if plan else []
+	var key := str(b.get_instance_id(),b.floor_id,b.door_id,h.openings)
+	for level in levels: key+=str(level.name,level.get_meta("floor_id",""))
+	if key==_binding_key: return
+	_binding_key=key
+	floor_choice.clear(); floor_choice.add_item("Quota manuale"); floor_choice.set_item_metadata(0,null)
+	for level in levels:
+		floor_choice.add_item(str(level.name)); floor_choice.set_item_metadata(floor_choice.item_count-1,level)
+		if not b.floor_id.is_empty() and str(level.get_meta("floor_id",""))==b.floor_id: floor_choice.select(floor_choice.item_count-1)
+	door_choice.clear(); door_choice.add_item("Porta generata dal balcone"); door_choice.set_item_metadata(0,-1)
+	for i in h.openings.size():
+		var record: Dictionary=h.openings[i]
+		if record.get("kind","window")!="door": continue
+		door_choice.add_item("Porta %d · facciata %d"%[i+1,int(record.get("wall",0))+1]); door_choice.set_item_metadata(door_choice.item_count-1,i)
+		if not b.door_id.is_empty() and str(record.get("opening_id",""))==b.door_id: door_choice.select(door_choice.item_count-1)
+func _binding_state(b: Node3D) -> Dictionary:
+	return {"floor_id":b.floor_id,"door_id":b.door_id,"elevation":b.elevation,"along":b.along,"host_id":b.host_id,"create_door":b.create_door,"openings":b.house().openings.duplicate(true)}
+func _restore_binding(b: Node3D,state: Dictionary) -> void:
+	for key in state:
+		if key!="openings": b.set(key,state[key])
+	b.house().openings=state.openings; b.house().rebuild(); _binding_key=""
+func _commit_binding(b: Node3D,before: Dictionary,after: Dictionary) -> void:
+	var undo := get_undo_redo(); undo.create_action("Collega balcone a piano / accesso",UndoRedo.MERGE_DISABLE,b)
+	undo.add_do_method(self,"_restore_binding",b,after); undo.add_undo_method(self,"_restore_binding",b,before); undo.commit_action()
+func _bind_balcony_floor() -> void:
+	var b := _selected_balcony()
+	if b==null: return
+	var before := _binding_state(b); var after := before.duplicate(true)
+	var level: Node=floor_choice.get_selected_metadata()
+	after.elevation=b.effective_elevation()
+	after.floor_id=""
+	if level:
+		if not level.has_meta("floor_id"): level.set_meta("floor_id","floor_"+str(Time.get_ticks_usec())+"_"+str(level.get_instance_id()))
+		after.floor_id=str(level.get_meta("floor_id"))
+	for record in after.openings:
+		if not b.door_id.is_empty() and str(record.get("opening_id",""))==b.door_id:
+			record.floor_y=b.house().opening_floor_y(record); record.floor_id=after.floor_id
+	_commit_binding(b,before,after)
+func _bind_balcony_door() -> void:
+	var b := _selected_balcony()
+	if b==null: return
+	var before := _binding_state(b); var after := before.duplicate(true)
+	after.along=b.effective_along(); after.elevation=b.effective_elevation()
+	after.host_id=["main/front","main/back","main/right","main/left"][b.wall()]
+	var index: int=door_choice.get_selected_metadata()
+	after.door_id=""; after.create_door=true
+	if index>=0:
+		var record: Dictionary=after.openings[index]
+		if int(record.get("wall",0))>=4: _show_plan_error("Accesso","Le porte sulle ali non sono ancora supportate."); return
+		if str(record.get("opening_id","")).is_empty(): record.opening_id="door_"+str(Time.get_ticks_usec())
+		after.door_id=record.opening_id
+		if not b.floor_id.is_empty(): record.floor_y=b.effective_elevation(); record.floor_id=b.floor_id
+	_commit_binding(b,before,after)

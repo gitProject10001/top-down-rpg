@@ -224,7 +224,7 @@ non è disponibile, senza vietare l’editing.
 
 - [x] Balcone rettangolare agganciato a una parete piana, con porta nuova o esistente.
 - [x] Spostamento e ridimensionamento con aggiornamento del vano e della collisione.
-- [ ] Quota collegata al piano; soglia e parapetto coerenti.
+- [x] Quota collegata al piano; soglia e parapetto coerenti.
 - [x] Undo/redo e riapertura ripristinano componente e foro insieme.
 - [x] Rimuovere il balcone conserva una porta preesistente/manuale e rimuove soltanto
   un vano derivato non più utilizzato.
@@ -304,14 +304,24 @@ sale, esce sul balcone e rientra (`check_balcony_attachment.gd`,
 Il test gameplay headless completa tutte le asserzioni ed esce con codice 0;
 il motore segnala a chiusura `PagedAllocator: Pages in use` e GPUTrail segnala
 il refresh rate non disponibile. Questi messaggi restano da investigare separatamente.
-Restano: quota associata automaticamente al piano, collegamento esplicito tramite
-ID a una porta manuale, agganci sulle ali, sgancio libero, controllo degli ingombri
-tra facciate differenti/altre case, terrazze su pilastri. Per usare un accesso
-manuale allineato si disabilita `create_door`; il componente non ne assume la proprietà.
-Le maniglie modificano il componente agganciato; la trasformazione nativa Godot
-viene ricalcolata dall'aggancio.
-Prossimo incremento: quota collegata al piano e porta manuale referenziata, poi
-terrazza/scala esterna sullo stesso contratto.
+**A02a.2 verificato — 2026-09-13.** Il tab Componenti ora permette di collegare
+il balcone a un piano e a una porta manuale. Gli ID sono salvati nei dati del piano
+(metadata `floor_id`) e dell'apertura (`opening_id`); la posizione nell'elenco e il
+nome del nodo non sono l'identità. La quota effettiva segue l'altezza dei piani;
+la porta referenziata determina facciata e posizione orizzontale. Applicare un
+piano a un balcone con porta manuale collega anche quella porta allo stesso piano.
+Scollegare il piano conserva la quota; rimuovere il balcone conserva la porta e
+il suo collegamento al piano. Riferimenti rimossi o quote incompatibili danno
+un errore, senza rigenerare o cancellare l'apertura manuale.
+Verificati cambio 2,8→3,2 m, rinomina, riordino aperture, rimozione/ripristino di
+piano e porta, riapertura e undo/redo dei due comandi editor. Il test giocatore
+passa anche con la porta manuale collegata. La cattura `floor_binding.png`
+confronta 2,8 e 3,3 m. Il gizmo di altezza delle porte ora conserva la soglia elevata.
+Restano: agganci sulle ali, sgancio libero, controllo degli ingombri tra facciate
+ differenti/altre case, duplicazione dei piani collegati con rimappatura degli ID,
+terrazze su pilastri. La scala interna esistente non si ridimensiona automaticamente
+quando cambia l'altezza del piano: va regolata separatamente.
+Prossimo incremento: terrazza su pilastri e scala esterna sullo stesso contratto.
 
 ### A02 — Volumi, non una lista di eccezioni per ogni edificio
 

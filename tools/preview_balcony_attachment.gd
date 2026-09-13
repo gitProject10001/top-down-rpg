@@ -38,9 +38,11 @@ func run() -> void:
 	var plan=load("res://addons/house_builder/plan.gd").new(); plan.name="InteriorPlan"; plan.floor_height=2.8; plan.preview_inside=false
 	house.add_child(plan); plan.owner=world
 	for i in 2:
-		var level := Node3D.new(); level.name="Piano_%d"%(i+1); plan.add_child(level); level.owner=world
+		var level := Node3D.new(); level.name="Piano_%d"%(i+1); plan.add_child(level); level.owner=world; level.set_meta("floor_id","example_floor_%d"%i)
 	var stairs=load("res://addons/house_builder/plan_element.gd").new(); stairs.name="Scala"; stairs.kind=2; stairs.position=Vector3(-1.6,0,0); stairs.dimensions=Vector3(1.1,2.8,4.0)
 	plan.get_child(0).add_child(stairs); stairs.owner=world
+	balcony.floor_id="example_floor_1"; balcony.door_id="example_balcony_door"
+	house.openings.append({"kind":"door","wall":0,"u":0.0,"floor_y":2.8,"floor_id":"example_floor_1","opening_id":"example_balcony_door","open":true})
 	plan.rebuild(); house.rebuild()
 	var camera := Camera3D.new(); camera.name="Camera"; camera.projection=Camera3D.PROJECTION_ORTHOGONAL; camera.size=16
 	camera.position=Vector3(25,32,25); world.add_child(camera); camera.owner=world; camera.look_at(Vector3(0,2.8,0))
@@ -48,12 +50,17 @@ func run() -> void:
 	assert(ResourceSaver.save(scene,"res://scenes/dev/balcony_attachment_example.tscn")==OK)
 	print("BALCONY_EXAMPLE_SAVED")
 	if DisplayServer.get_name()=="headless": quit(); return
+	house.position=Vector3(-5,0,5)
+	var taller=house.duplicate(); taller.name="PianoAlzato"; taller.position=Vector3(5,0,-5); world.add_child(taller)
+	var taller_plan=taller.get_node("InteriorPlan"); taller_plan.floor_height=3.3; taller_plan.rebuild(); taller.rebuild()
+	camera.size=26; camera.look_at(Vector3(0,3,0))
 	root.msaa_3d=Viewport.MSAA_4X
 	for frame in 30: await process_frame
 	for layer in root.find_children("*","CanvasLayer",true,false): layer.hide()
 	var ui := CanvasLayer.new(); root.add_child(ui)
-	var label := Label.new(); label.text="BALCONE AGGANCIATO ALLA FACCIATA\nPorta aperta · vano reale nel muro · pavimento a 2,8 m"; label.position=Vector2(30,30); label.add_theme_font_size_override("font_size",20); ui.add_child(label)
+	var label := Label.new(); label.text="PIANO A 2,8 m\nBalcone + porta manuale collegati"; label.position=Vector2(30,30); label.add_theme_font_size_override("font_size",20); ui.add_child(label)
+	var second_label := Label.new(); second_label.text="PIANO ALZATO A 3,3 m\nBalcone e porta seguono automaticamente"; second_label.position=Vector2(620,30); second_label.add_theme_font_size_override("font_size",20); ui.add_child(second_label)
 	await process_frame; await RenderingServer.frame_post_draw
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures/balcony_attachment"))
-	root.get_texture().get_image().save_png("res://captures/balcony_attachment/comparison.png")
+	root.get_texture().get_image().save_png("res://captures/balcony_attachment/floor_binding.png")
 	quit()

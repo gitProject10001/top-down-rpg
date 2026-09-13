@@ -28,12 +28,13 @@ func _set_handle(gizmo: EditorNode3DGizmo,id: int,_secondary: bool,camera: Camer
 	var n=gizmo.get_node_3d(); var h=n.house()
 	var origin := camera.project_ray_origin(screen_pos); var direction := camera.project_ray_normal(screen_pos)
 	if id==0:
+		if not n.door_id.is_empty(): return
 		var normal: Vector3=h.global_basis*h.wall_normal(n.wall())
 		var point=Plane(normal.normalized(),n.global_position).intersects_ray(origin,direction)
 		if point!=null:
 			var delta: Vector3=n.to_local(point)
 			n.along=clampf(n.along+delta.x/(h.wall_length(n.wall())*0.5),-1,1)
-			n.elevation=maxf(0,snappedf(n.elevation+delta.y,0.1))
+			if n.floor_id.is_empty(): n.elevation=maxf(0,snappedf(n.elevation+delta.y,0.1))
 	else:
 		var axis: Vector3=n.global_basis.x if id==1 else n.global_basis.z
 		var pair := Geometry3D.get_closest_points_between_segments(n.global_position-axis*100,n.global_position+axis*100,origin,origin+direction*1000)

@@ -137,7 +137,7 @@ func resolved_opening(record: Dictionary) -> Dictionary:
 	var w := clampf(float(record.get("width",0.85 if not door else 1.0)),0.35,wall_length(wall)-0.4)
 	var h := clampf(float(record.get("height",1.0 if not door else 2.0)),0.35,wall_height-0.25)
 	var along := clampf(float(record.get("u",0.0))*(wall_length(wall)*0.5),-wall_length(wall)*0.5+w*0.5+0.18,wall_length(wall)*0.5-w*0.5-0.18)
-	var y := clampf(float(record.get("floor_y",0.0)),0.0,maxf(0,wall_height-h-0.12))+h*0.5 if door else clampf(float(record.get("y",1.5)),h*0.5+0.25,wall_height-h*0.5-0.12)
+	var y := clampf(opening_floor_y(record),0.0,maxf(0,wall_height-h-0.12))+h*0.5 if door else clampf(float(record.get("y",1.5)),h*0.5+0.25,wall_height-h*0.5-0.12)
 	return {"wall":wall,"along":along,"y":y,"width":w,"height":h,"door":door}
 
 func hit_wall(world_origin: Vector3,world_direction: Vector3) -> Dictionary:
@@ -447,9 +447,28 @@ func attached_components() -> Array:
 func all_openings() -> Array[Dictionary]:
 	var result: Array[Dictionary]=openings.duplicate(true)
 	for component in attached_components():
-		if component.validation_error().is_empty() and component.create_door:
+		if component.validation_error().is_empty() and component.create_door and component.door_id.is_empty():
 			result.append(component.opening_record())
 	return result
 func _component_door_changed(opened: bool,id: String) -> void:
 	for component in attached_components():
 		if component.component_id==id: component.door_open=opened
+
+func authored_floor(id: String) -> Node3D:
+	var plan := get_node_or_null("InteriorPlan")
+	if plan and not id.is_empty():
+		for level in plan.levels():
+			if str(level.get_meta("floor_id",""))==id: return level
+	return null
+func floor_elevation(id: String,fallback: float) -> float:
+	var level := authored_floor(id)
+	if level==null: return fallback
+	var plan := level.get_parent()
+	return plan.levels().find(level)*plan.floor_height
+func opening_floor_y(record: Dictionary) -> float:
+	return floor_elevation(str(record.get("floor_id","")),float(record.get("floor_y",0.0)))
+func opening_by_id(id: String) -> Dictionary:
+	if id.is_empty(): return {}
+	for record in openings:
+		if str(record.get("opening_id",""))==id: return record
+	return {}

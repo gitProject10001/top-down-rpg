@@ -72,12 +72,12 @@ func _set_handle(gizmo: EditorNode3DGizmo,id: int,_secondary: bool,camera: Camer
 		var vertical := id%2==1
 		var tangent: Vector3=(n.wall_point(o.wall,1,0)-n.wall_point(o.wall,0,0)).normalized()
 		var axis: Vector3=n.global_basis*(Vector3.UP if vertical else tangent)
-		var base_y: float=0.0 if vertical and o.door else o.y
+		var base_y: float=o.y-o.height*0.5 if vertical and o.door else o.y
 		var start: Vector3=n.to_global(n.wall_point(o.wall,o.along,base_y,0.12))
 		var pair := Geometry3D.get_closest_points_between_segments(start-axis*100.0,start+axis*100.0,origin,origin+direction*1000.0)
 		var amount: float=(pair[0]-start).dot(axis.normalized())/axis.length()
 		var records: Array[Dictionary]=n.openings.duplicate(true)
-		var maximum: float=n.wall_height-0.25 if vertical else n.wall_length(o.wall)-2.0*absf(o.along)-0.4
+		var maximum: float=n.wall_height-(o.y-o.height*0.5 if o.door else 0.0)-0.25 if vertical else n.wall_length(o.wall)-2.0*absf(o.along)-0.4
 		if vertical and not o.door: maximum=2.0*minf(o.y-0.25,n.wall_height-0.12-o.y)
 		records[index]["height" if vertical else "width"]=clampf(snappedf(amount*(1.0 if vertical and o.door else 2.0),0.05),0.35,maximum)
 		records[index]["u"]=o.along/(n.wall_length(o.wall)*0.5)

@@ -14,12 +14,17 @@ extends Node3D
 	set(value): projection=value; changed()
 @export var create_door := true:
 	set(value): create_door=value; changed()
+@export_storage var floor_id := "":
+	set(value): floor_id=value; changed()
+@export_storage var door_id := "":
+	set(value): door_id=value; changed()
 @export var door_open := false
 var visual: Node3D
 func house() -> Node:
 	return get_parent().get_parent() if get_parent() else null
 func wall() -> int:
-	return ["main/front","main/back","main/right","main/left"].find(host_id)
+	var record := linked_door()
+	return int(record.get("wall",0)) if not record.is_empty() else ["main/front","main/back","main/right","main/left"].find(host_id)
 func changed() -> void:
 	var h := house()
 	if h and h.has_method("request_rebuild"): h.request_rebuild()
@@ -30,23 +35,30 @@ func _enter_tree() -> void:
 	changed()
 func _exit_tree() -> void: changed()
 func opening_record() -> Dictionary:
-	return {"kind":"door","wall":wall(),"u":along,"floor_y":elevation,"width":1.0,"height":2.0,"component_id":component_id,"open":door_open}
+	return {"kind":"door","wall":wall(),"u":effective_along(),"floor_y":effective_elevation(),"width":1.0,"height":2.0,"component_id":component_id,"open":door_open}
 func validation_error() -> String:
 	var h := house()
 	if h==null or not h.has_method("wall_point"): return "Il balcone deve stare in Casa / Components."
-	if wall()<0: return "Facciata non disponibile."
-	var center: float=along*h.wall_length(wall())*0.5
+	if not floor_id.is_empty() and h.authored_floor(floor_id)==null: return "Il piano collegato è stato rimosso. Scegli un piano o Quota manuale."
+	if not door_id.is_empty():
+		var record := linked_door()
+		if record.is_empty(): return "La porta collegata è stata rimossa. Scegli un altro accesso o una porta generata."
+		if record.get("kind","window")!="door": return "L’apertura collegata non è più una porta."
+		if absf(h.opening_floor_y(record)-effective_elevation())>0.06: return "Porta e balcone sono a quote diverse. Collega entrambi allo stesso piano."
+		if float(record.get("width",1.0))+0.3>balcony_width: return "La porta è più larga del balcone. Aumenta la larghezza."
+	if wall()<0 or wall()>3: return "Facciata non disponibile."
+	var center: float=effective_along()*h.wall_length(wall())*0.5
 	if absf(center)+balcony_width*0.5>h.wall_length(wall())*0.5-0.18: return "Balcone oltre il bordo: riduci larghezza o spostalo verso il centro."
-	if elevation+2.12>h.wall_height: return "Muro troppo basso per la porta: alza le pareti o abbassa il balcone."
+	if effective_elevation()+2.12>h.wall_height: return "Muro troppo basso per la porta: alza le pareti o abbassa il balcone."
 	if not h.wall_exposed(wall(),center,balcony_width*0.5): return "Facciata coperta dall'ala: scegli un altro aggancio."
-	if create_door:
+	if create_door and door_id.is_empty():
 		for record in h.openings:
 			var o: Dictionary=h.resolved_opening(record)
-			if o.wall==wall() and absf(o.along-center)<(o.width+1.0)*0.5+0.16 and absf(o.y-elevation-1)<(o.height+2)*0.5+0.16:
+			if o.wall==wall() and absf(o.along-center)<(o.width+1.0)*0.5+0.16 and absf(o.y-effective_elevation()-1)<(o.height+2)*0.5+0.16:
 				return "La porta incontra un'apertura manuale. Sposta il balcone o disattiva Crea porta per usare un accesso esistente."
 	for other in h.attached_components():
 		if other==self: continue
-		if other.host_id==host_id and absf(other.along-along)*h.wall_length(wall())*0.5<(other.balcony_width+balcony_width)*0.5+0.1 and absf(other.elevation-elevation)<2.2:
+		if other.wall()==wall() and absf(other.effective_along()-effective_along())*h.wall_length(wall())*0.5<(other.balcony_width+balcony_width)*0.5+0.1 and absf(other.effective_elevation()-effective_elevation())<2.2:
 			return "Due balconi si sovrappongono sulla stessa facciata."
 	return ""
 func _get_configuration_warnings() -> PackedStringArray:
@@ -58,7 +70,7 @@ func refresh() -> void:
 	var h := house()
 	if h==null: return
 	var tangent: Vector3=(h.wall_point(wall(),1,0)-h.wall_point(wall(),0,0)).normalized()
-	transform=Transform3D(Basis(tangent,Vector3.UP,h.wall_normal(wall())),h.wall_point(wall(),along*h.wall_length(wall())*0.5,elevation))
+	transform=Transform3D(Basis(tangent,Vector3.UP,h.wall_normal(wall())),h.wall_point(wall(),effective_along()*h.wall_length(wall())*0.5,effective_elevation()))
 	if Engine.is_editor_hint(): update_configuration_warnings()
 	if not validation_error().is_empty(): return
 	var material: Material=h._material(Vector2(0.5,0),Color(0.60,0.53,0.46))
@@ -80,3 +92,18 @@ func box(center: Vector3,size: Vector3,material: Material) -> void:
 	mesh.mesh=shape; mesh.material_override=material; mesh.position=center; visual.add_child(mesh)
 	var body := StaticBody3D.new(); var collision := CollisionShape3D.new(); var solid := BoxShape3D.new(); solid.size=size
 	collision.shape=solid; body.add_child(collision); body.position=center; visual.add_child(body)
+
+func linked_door() -> Dictionary:
+	var h := house()
+	return h.opening_by_id(door_id) if h and h.has_method("opening_by_id") else {}
+func effective_along() -> float:
+	var record := linked_door()
+	if record.is_empty(): return along
+	var resolved: Dictionary=house().resolved_opening(record)
+	return resolved.along/(house().wall_length(resolved.wall)*0.5)
+func effective_elevation() -> float:
+	var h := house()
+	if h==null: return elevation
+	if not floor_id.is_empty(): return h.floor_elevation(floor_id,elevation)
+	var record := linked_door()
+	return h.opening_floor_y(record) if not record.is_empty() else elevation
