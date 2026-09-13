@@ -761,7 +761,7 @@ func _build_volume_tab() -> void:
 		var button := Button.new(); button.text=entry[0]; button.pressed.connect(entry[1]); posts_page.add_child(button)
 	var links_page := VBoxContainer.new(); links_page.name="Collegamenti"; frame_tabs.add_child(links_page)
 	var hint := Label.new(); hint.text="Seleziona due sostegni dello stesso portico nell'albero (Ctrl + clic)."; hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; links_page.add_child(hint)
-	for entry in [["Collega con trave e controventi",_add_frame_link],["Rimuovi collegamento selezionato",_remove_frame_link]]:
+	for entry in [["Collega con trave e controventi",_add_frame_link],["Collega un sostegno alla parete",_add_wall_link],["Rimuovi collegamento selezionato",_remove_frame_link]]:
 		var button := Button.new(); button.text=entry[0]; button.pressed.connect(entry[1]); links_page.add_child(button)
 	var remove := Button.new(); remove.text="Rimuovi volume selezionato"; remove.pressed.connect(_remove_volume); page.add_child(remove)
 	volume_info=Label.new(); volume_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(volume_info)
@@ -861,20 +861,22 @@ func _automatic_supports() -> void:
 	undo.add_do_method(self,"_detach_support",volume,volume,container)
 	undo.add_undo_method(self,"_attach",volume,container,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(container); undo.add_undo_method(volume,"request_rebuild"); undo.commit_action()
 
-func _add_frame_link() -> void:
+func _add_wall_link() -> void:
+	_add_frame_link(true)
+func _add_frame_link(to_wall: bool=false) -> void:
 	var posts: Array=[]
 	for selected in EditorInterface.get_selection().get_selected_nodes():
 		if selected is Support: posts.append(selected)
-	if posts.size()!=2 or posts[0].volume()!=posts[1].volume():
-		status.text="Seleziona due sostegni dello stesso portico (Ctrl + clic nell'albero)."; return
+	if (to_wall and posts.size()!=1) or (not to_wall and (posts.size()!=2 or posts[0].volume()!=posts[1].volume())):
+		status.text="Seleziona un sostegno per la parete oppure due sostegni dello stesso portico per una trave."; return
 	var volume: Node3D=posts[0].volume()
 	var container := volume.get_node_or_null("FrameLinks"); var fresh := container==null
 	if fresh: container=Node3D.new(); container.name="FrameLinks"
 	else:
 		for existing in container.get_children():
-			if existing is FrameLink and posts[0].support_id in [existing.support_a,existing.support_b] and posts[1].support_id in [existing.support_a,existing.support_b]:
+			if existing is FrameLink and ((to_wall and existing.endpoint_mode==1 and existing.support_a==posts[0].support_id) or (not to_wall and existing.endpoint_mode==0 and posts[0].support_id in [existing.support_a,existing.support_b] and posts[1].support_id in [existing.support_a,existing.support_b])):
 				status.text="Questi sostegni sono già collegati."; return
-	var link := FrameLink.new(); link.name="Trave_"+str(posts[0].name)+"_"+str(posts[1].name); link.support_a=posts[0].support_id; link.support_b=posts[1].support_id
+	var link := FrameLink.new(); link.name="Trave_"+str(posts[0].name)+"_"+("Parete" if to_wall else str(posts[1].name)); link.support_a=posts[0].support_id; link.support_b="" if to_wall else posts[1].support_id; link.endpoint_mode=1 if to_wall else 0
 	var undo := get_undo_redo(); undo.create_action("Collega sostegni",UndoRedo.MERGE_DISABLE,volume)
 	if fresh: undo.add_do_method(self,"_attach",volume,container,EditorInterface.get_edited_scene_root()); undo.add_do_reference(container)
 	undo.add_do_method(self,"_attach",container,link,EditorInterface.get_edited_scene_root()); undo.add_do_reference(link); undo.add_do_method(volume,"request_rebuild")

@@ -4,6 +4,10 @@ extends Node3D
 @export_storage var link_id := ""
 @export_storage var support_a := ""
 @export_storage var support_b := ""
+@export_enum("Due sostegni", "Sostegno e parete") var endpoint_mode := 0:
+	set(value): endpoint_mode=value; refresh()
+@export_range(-3.0,3.0,0.05) var wall_offset := 0.0:
+	set(value): wall_offset=value; refresh()
 @export_range(0.08,0.5,0.01) var section := 0.22:
 	set(value): section=value; refresh()
 @export_range(0.1,1.0,0.01) var roof_offset := 0.25:
@@ -34,17 +38,36 @@ func support(id: String) -> Node3D:
 			if result!=null: return null
 			result=post
 	return result
+func wall_endpoint() -> Vector3:
+	var host := volume(); var post := support(support_a)
+	if host==null or post==null: return Vector3.ZERO
+	var point := Vector3(post.position.x+wall_offset,0,-host.depth*0.5+host.WALL_THICKNESS+0.08)
+	point.y=host.post_top(point)-roof_offset
+	return point
 func endpoints() -> PackedVector3Array:
 	var a := support(support_a); var b := support(support_b)
-	if a==null or b==null: return PackedVector3Array()
-	return PackedVector3Array([a.position+Vector3.UP*(a.height()-roof_offset),b.position+Vector3.UP*(b.height()-roof_offset)])
+	if a==null or (endpoint_mode==0 and b==null): return PackedVector3Array()
+	return PackedVector3Array([a.position+Vector3.UP*(a.height()-roof_offset),wall_endpoint() if endpoint_mode==1 else b.position+Vector3.UP*(b.height()-roof_offset)])
 func validation_error() -> String:
 	if not enabled: return ""
 	var a := support(support_a); var b := support(support_b)
-	if a==null or b==null: return "Collegamento sospeso: sostegno mancante o ID duplicato. Ripristina il palo oppure ricrea il collegamento."
-	if a==b or not a.valid() or not b.valid(): return "Collegamento sospeso: servono due sostegni distinti e validi."
-	if Vector2(a.position.x-b.position.x,a.position.z-b.position.z).length()<section*2: return "Sostegni troppo vicini per questa trave."
-	if minf(a.height(),b.height())<roof_offset+(brace_drop if braces else 0.0)+section: return "Il collegamento scende sotto la base dei sostegni: riduci offset o controventi."
+	if a==null or (endpoint_mode==0 and b==null): return "Collegamento sospeso: sostegno mancante o ID duplicato. Ripristina il palo oppure ricrea il collegamento."
+	if not a.valid() or (endpoint_mode==0 and (a==b or not b.valid())): return "Collegamento sospeso: servono sostegni validi e distinti."
+	if endpoint_mode==1:
+		var host := volume()
+		if not host.attached or host.volume_host()==null or not host.volume_error().is_empty(): return "Aggancio alla parete sospeso: riaggancia il portico a una facciata valida."
+		var point := wall_endpoint()
+		if absf(point.x)+section*0.5>host.width*0.5 or point.y<section: return "Aggancio fuori dalla copertura: riduci Wall Offset o Roof Offset."
+		var house: Node3D=host.volume_host()
+		var along: float=host.host_offset*house.wall_length(host.host_wall)*0.5+point.x
+		for record in house.all_openings():
+			var opening: Dictionary=house.resolved_opening(record)
+			if opening.wall==host.host_wall and absf(opening.along-along)<(opening.width+section)*0.5 and absf(opening.y-point.y)<(opening.height+section)*0.5:
+				return "Aggancio sopra un'apertura: sposta il punto lungo la parete."
+	var points := endpoints()
+	if Vector2(points[0].x-points[1].x,points[0].z-points[1].z).length()<section*2: return "Estremi troppo vicini per questa trave."
+	var clearance: float=a.height() if endpoint_mode==1 else minf(a.height(),b.height())
+	if clearance<roof_offset+(brace_drop if braces else 0.0)+section: return "Il collegamento scende sotto la base dei sostegni: riduci offset o controventi."
 	return ""
 func segments() -> Array:
 	if not enabled or not validation_error().is_empty(): return []
@@ -52,7 +75,7 @@ func segments() -> Array:
 	var result: Array=[[a,b,section]]
 	if braces:
 		result.append([a-Vector3.UP*brace_drop,a.lerp(b,brace_fraction),section*0.7])
-		result.append([b-Vector3.UP*brace_drop,b.lerp(a,brace_fraction),section*0.7])
+		if endpoint_mode==0: result.append([b-Vector3.UP*brace_drop,b.lerp(a,brace_fraction),section*0.7])
 	return result
 func _get_configuration_warnings() -> PackedStringArray:
 	var error := validation_error()

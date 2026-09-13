@@ -302,6 +302,12 @@ func run(plugin: EditorPlugin) -> void:
 	plugin._remove_frame_link(); assert(links.get_child_count()==0)
 	profile_history.undo(); assert(links.get_child(0)==link)
 	print("FRAME_LINK_EDITOR_ADD_REMOVE_UNDO_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(supports.get_child(0))
+	plugin._add_wall_link(); var wall_link=links.get_child(1)
+	assert(wall_link.endpoint_mode==1)
+	profile_history.undo(); assert(links.get_child_count()==1)
+	profile_history.redo(); assert(links.get_child(1)==wall_link)
+	print("WALL_FRAME_EDITOR_ADD_UNDO_REDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

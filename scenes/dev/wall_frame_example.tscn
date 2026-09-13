@@ -1,0 +1,125 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/house_builder/house.gd" id="1_e8s44"]
+[ext_resource type="Script" path="res://addons/house_builder/volume.gd" id="2_s2e7j"]
+[ext_resource type="Script" path="res://addons/house_builder/support.gd" id="3_jyrph"]
+[ext_resource type="Script" path="res://addons/house_builder/frame_link.gd" id="4_pvtay"]
+
+[sub_resource type="Environment" id="Environment_c276f"]
+background_mode = 1
+background_color = Color(0.16, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ac1gt"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_5xrc1"]
+size = Vector2(50, 50)
+
+[node name="HouseWorkshop" type="Node3D" unique_id=767138076]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=71705241]
+environment = SubResource("Environment_c276f")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=1027604686]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=1114396779]
+material_override = SubResource("StandardMaterial3D_ac1gt")
+mesh = SubResource("PlaneMesh_5xrc1")
+
+[node name="CasaComposta" type="Node3D" parent="." unique_id=1797217655]
+script = ExtResource("1_e8s44")
+width = 6.0
+depth = 8.0
+wall_height = 6.0
+roof_height = 2.5
+openings = Array[Dictionary]([{
+"kind": "door",
+"u": -0.35,
+"wall": 0
+}, {
+"kind": "window",
+"u": 0.45,
+"wall": 0,
+"y": 1.5
+}])
+
+[node name="Volumes" type="Node3D" parent="CasaComposta" unique_id=1913439117]
+
+[node name="Portico" type="Node3D" parent="CasaComposta/Volumes" unique_id=543812143]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.48)
+script = ExtResource("2_s2e7j")
+structure_kind = 1
+canopy_roof = 1
+post_spacing = 2.5
+volume_id = "volume_1129348_47412414130"
+host_wall = 0
+depth = 3.6
+wall_height = 2.8
+roof_height = 1.2
+
+[node name="Supports" type="Node3D" parent="CasaComposta/Volumes/Portico" unique_id=1901481341]
+
+[node name="Sostegno_01" type="Node3D" parent="CasaComposta/Volumes/Portico/Supports" unique_id=1511937134]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7085, 0, 1.71)
+script = ExtResource("3_jyrph")
+support_id = "post_1278399_48670705357"
+section = 0.32
+
+[node name="Sostegno_02" type="Node3D" parent="CasaComposta/Volumes/Portico/Supports" unique_id=690322500]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7085, 0, 1.71)
+script = ExtResource("3_jyrph")
+support_id = "post_1278410_48687482571"
+section = 0.32
+
+[node name="FrameLinks" type="Node3D" parent="CasaComposta/Volumes/Portico" unique_id=519141771]
+
+[node name="Trave_01" type="Node3D" parent="CasaComposta/Volumes/Portico/FrameLinks" unique_id=61823121]
+script = ExtResource("4_pvtay")
+link_id = "link_1278428_48721037018"
+support_a = "post_1278399_48670705357"
+support_b = "post_1278410_48687482571"
+section = 0.24
+brace_drop = 0.75
+
+[node name="Trave_02" type="Node3D" parent="CasaComposta/Volumes/Portico/FrameLinks" unique_id=400581898]
+script = ExtResource("4_pvtay")
+link_id = "link_1278436_48737814235"
+support_a = "post_1278399_48670705357"
+endpoint_mode = 1
+section = 0.24
+brace_drop = 0.75
+
+[node name="Trave_03" type="Node3D" parent="CasaComposta/Volumes/Portico/FrameLinks" unique_id=1810132208]
+script = ExtResource("4_pvtay")
+link_id = "link_1278442_48754591452"
+support_a = "post_1278410_48687482571"
+endpoint_mode = 1
+section = 0.24
+brace_drop = 0.75
+
+[node name="Tettoia" type="Node3D" parent="CasaComposta/Volumes" unique_id=1646303932]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 1)
+script = ExtResource("2_s2e7j")
+structure_kind = 1
+post_spacing = 2.5
+volume_id = "volume_1245190_48066725564"
+attached = false
+host_wall = 0
+width = 3.2
+depth = 4.0
+wall_height = 2.8
+roof_height = 1.2
+
+[node name="Camera" type="Camera3D" parent="." unique_id=1840623123]
+transform = Transform3D(0.70710677, -0.45028284, 0.5452021, 0, 0.7710322, 0.6367961, -0.70710677, -0.45028284, 0.5452021, 25, 32, 25)
+projection = 1
+current = true
+size = 23.0

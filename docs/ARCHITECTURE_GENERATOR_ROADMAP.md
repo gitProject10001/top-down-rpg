@@ -479,6 +479,18 @@ Limiti: estremi su due pali, controventi simmetrici, nessun aggancio libero o al
 parete; nessuna verifica strutturale. Prossimo passo: aggancio di un estremo alla
 parete per costruire telai completi dei portici con soli pali esterni.
 
+**A03.5 verificato — 2026-09-13.** Estremo del FrameLink agganciato alla facciata
+ospitante del portico. Un solo sostegno necessario; offset laterale editabile,
+quota derivata dal tetto e controvento solo sul palo. Validazione dell'aggancio,
+della copertura e delle aperture; sgancio del portico sospende la trave e conserva
+il record. Compatibile con le quattro facciate e undo/redo.
+
+Esempio `wall_frame_example.tscn`, render `wall_frame_detail.png` nella cartella
+captures/balcony_attachment. Test `check_wall_frame.gd`: facciate, movimento,
+offset, sgancio, valori invalidi e salvataggio. Suite editor e Play verificano
+creazione annullabile e attraversamento della porta con due soli pali anteriori.
+Limiti: parete ospitante, quota derivata; nessun estremo libero o solver strutturale.
+
 - [ ] Ogni copertura ha pianta, colmo, pendenza, quota, sporto e collegamento al volume.
 - [ ] Prima due falde e una falda; poi tetto piano/parapetto e quattro falde.
 - [ ] Raccordi: intersezioni, compluvi/displuvi, bordi e taglio delle parti nascoste.

@@ -414,3 +414,22 @@ Questo non rimuove né tetto né pali. Per ora si collegano due sostegni: non ci
 sono estremi liberi o agganci diretti alla parete e non viene verificata la
 stabilità strutturale. L'esempio include tre travi con controventi, frontale e
 laterali. La cattura `frame_links_detail.png` mostra il telaio da vicino.
+
+
+## Collegamento di un sostegno alla parete
+
+Seleziona un solo palo e usa **Volumi → Collegamenti → Collega un sostegno alla
+parete**. La trave parte dal palo e raggiunge la facciata a cui è agganciato il
+portico. Il controvento è presente solo sul palo. **Wall Offset** sposta l'estremo
+lungo la parete rispetto al palo; la quota segue il tetto e **Roof Offset**.
+Il punto rimane sulla facciata anche cambiando lato di aggancio del portico.
+
+Se sganci il portico, il collegamento viene sospeso con un messaggio; riagganciandolo
+ritorna valido. Sono segnalati estremi fuori copertura e sovrapposizioni del punto
+di aggancio con aperture. Dati e modifiche si conservano; creazione e rimozione
+supportano undo/redo. Il collegamento resta alla facciata ospitante: non permette
+ancora di scegliere una parete diversa o un punto libero in altezza.
+
+Esempio `scenes/dev/wall_frame_example.tscn`: due pali anteriori, una trave frontale
+e due travi verso la parete. Seleziona **CasaComposta → Play** per attraversare
+l'ingresso. `wall_frame_detail.png` mostra il telaio da vicino.
