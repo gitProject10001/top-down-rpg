@@ -31,6 +31,31 @@ nell'Inspector cambia l'associazione; usa i pulsanti per applicarne le proporzio
 Le risorse sono in `addons/house_builder/profiles/`. Il ruolo dell'edificio è
 separato dal profilo; nuovi ruoli non implicano ancora nuovi generatori di stanze.
 
+## Componenti agganciati: balcone
+
+Apri `scenes/dev/balcony_attachment_example.tscn`. La casa ha due piani, una scala
+interna e un balcone a 2,8 m. Seleziona la casa e usa **Play casa selezionata**:
+entra, sali la scala, raggiungi la porta del balcone; E apre/chiude le porte.
+
+Nel tab **Componenti**, premi **Posiziona balcone + porta** e clicca sulla facciata
+alla quota del pavimento desiderata. Il rettangolo azzurro anticipa l'ingombro.
+Occorrono 2,12 m liberi sopra la quota per la porta. Un posizionamento invalido
+mostra il motivo e non crea il componente.
+
+Il nodo `Components/Balcone` resta editabile e salvato nella scena. Selezionalo
+per mostrare le maniglie: posizione sulla facciata, larghezza, profondità.
+Nell'Inspector puoi cambiare facciata, quota e dimensioni. Usa queste proprietà
+anziché il gizmo di trasformazione nativo, perché il transform deriva dall'aggancio.
+Se una modifica rende il balcone invalido, il pannello mostra l'errore e il contorno
+è rosso; geometria e porta derivata restano sospese fino alla correzione.
+
+La porta generata taglia realmente muro e collisione, alla quota del balcone.
+Rimuovere il balcone richiude quel vano. Le porte manuali non vengono cancellate:
+per utilizzarne una già allineata, disattiva **Create Door**. In questa versione
+l'allineamento e la quota del piano si regolano manualmente. Gli agganci supportano
+le quattro facciate del corpo principale; ali e terrazze sono incrementi successivi.
+Aggiunta, maniglie, rimozione e modifiche Inspector supportano undo/redo.
+
 ## Passaggio 1: dati dell'editor
 
 Seleziona una casa e premi **Interni: crea / mostra**. `InteriorPlan` contiene

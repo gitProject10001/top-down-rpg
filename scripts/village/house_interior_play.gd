@@ -2,6 +2,7 @@ extends Node
 const House=preload("res://addons/house_builder/house.gd")
 const Interior=preload("res://addons/house_builder/interior.gd")
 const Door=preload("res://addons/house_builder/door.gd")
+@export var authored_house_scene: PackedScene
 @export_group("Dimensioni edificio")
 @export_range(6.0,12.0,0.25) var house_width := 7.0
 @export_range(8.0,16.0,0.25) var house_depth := 10.0
@@ -53,9 +54,9 @@ func _ready() -> void:
 	interior=Interior.new()
 	interior.box(world,Vector3(0,-0.14,0),Vector3(30,0.2,30),ground_material)
 	var authored_test := "--house-authored-test" in OS.get_cmdline_user_args()
-	if authored_test or (FileAccess.file_exists("user://house_builder_playtest.tscn") and not "--house-play-test" in OS.get_cmdline_user_args()):
+	if authored_house_scene or authored_test or (FileAccess.file_exists("user://house_builder_playtest.tscn") and not "--house-play-test" in OS.get_cmdline_user_args()):
 		selected_source=true
-		house=load("res://scenes/dev/house_authoring_example.tscn" if authored_test else "user://house_builder_playtest.tscn").instantiate()
+		house=authored_house_scene.instantiate() if authored_house_scene else load("res://scenes/dev/house_authoring_example.tscn" if authored_test else "user://house_builder_playtest.tscn").instantiate()
 		authored_plan=house.get_node_or_null("InteriorPlan")
 		house_width=house.width; house_depth=house.depth
 		storeys=maxi(1,authored_plan.levels().size()) if authored_plan else 1

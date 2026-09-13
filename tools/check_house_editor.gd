@@ -191,7 +191,7 @@ func run(plugin: EditorPlugin) -> void:
 	assert(example_plan.level_records(0)==unchanged)
 	plugin.error_dialog.hide()
 	print("HOUSE_PLAN_ERROR_DIALOG_NO_UNDO_OK")
-	assert(plugin.tabs.get_tab_count()==4)
+	assert(plugin.tabs.get_tab_count()==5)
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house); plugin._selection_context()
 	plugin.tabs.current_tab=0; assert(plugin.gizmos.focus==house and plugin.gizmos.context==0)
 	plugin.tabs.current_tab=1; assert(plugin.gizmos.context==1 and plugin.opening_choice.item_count==house.openings.size())
@@ -207,6 +207,20 @@ func run(plugin: EditorPlugin) -> void:
 	profile_history.undo(); assert(house.architecture_state()==old_architecture)
 	profile_history.redo(); assert(house.architecture_profile.profile_id=="compact_timber")
 	print("HOUSE_ARCHITECTURE_PROFILE_EDITOR_UNDO_OK")
+	var balcony_house=preload("res://addons/house_builder/house.gd").new(); balcony_house.name="BalconyTest"; balcony_house.width=6; balcony_house.wall_height=5.5
+	scene.add_child(balcony_house); balcony_house.owner=scene
+	plugin._place_balcony({"house":balcony_house,"wall":0,"u":0.0,"y":2.8})
+	var balcony=balcony_house.attached_components()[0]; var balcony_id=balcony.component_id
+	assert(plugin.tabs.current_tab==4 and plugin.balcony_gizmos.focus==balcony)
+	assert(balcony_house.all_openings().size()==1)
+	profile_history.undo(); assert(balcony_house.attached_components().is_empty())
+	profile_history.redo(); assert(balcony_house.attached_components()[0].component_id==balcony_id)
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(balcony)
+	plugin._remove_balcony(); assert(balcony_house.all_openings().is_empty())
+	profile_history.undo(); assert(balcony_house.all_openings().size()==1)
+	print("BALCONY_EDITOR_ADD_REMOVE_UNDO_REDO_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
+
 
 	house.update_gizmos()
 	for i in 10: await plugin.get_tree().process_frame

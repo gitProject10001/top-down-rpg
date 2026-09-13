@@ -222,13 +222,13 @@ non è disponibile, senza vietare l’editing.
 
 ### Primo caso completo: A02a
 
-- [ ] Balcone rettangolare agganciato a una parete piana, con porta nuova o esistente.
-- [ ] Spostamento e ridimensionamento con aggiornamento del vano e della collisione.
+- [x] Balcone rettangolare agganciato a una parete piana, con porta nuova o esistente.
+- [x] Spostamento e ridimensionamento con aggiornamento del vano e della collisione.
 - [ ] Quota collegata al piano; soglia e parapetto coerenti.
-- [ ] Undo/redo e riapertura ripristinano componente e foro insieme.
-- [ ] Rimuovere il balcone conserva una porta preesistente/manuale e rimuove soltanto
+- [x] Undo/redo e riapertura ripristinano componente e foro insieme.
+- [x] Rimuovere il balcone conserva una porta preesistente/manuale e rimuove soltanto
   un vano derivato non più utilizzato.
-- [ ] Provare il passaggio interno→balcone con il giocatore.
+- [x] Provare il passaggio interno→balcone con il giocatore.
 - [ ] Poi estendere a terrazza su pilastri e scala esterna; abbaini e solai vengono
   dopo, riutilizzando lo stesso meccanismo di dipendenze.
 
@@ -246,8 +246,8 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | ID | Stato | Incremento | Dipendenze | Esempio / criterio di uscita |
 |---|---|---|---|---|
 | A00 | FATTO | Analisi delle 21 immagini e roadmap | — | Inventario e vincolo: architettura, resa attuale invariata |
-| A01 | IN CORSO | Profilo architettonico minimo e contratto versionato | A00 | A01.1 verificato: preset, editing preservato, esempio salvato; restano gli ID dei componenti |
-| A02a | TODO | Componenti agganciati: balcone + porta | A01 | Vano, collisione e aggancio aggiornati senza perdere le modifiche manuali |
+| A01 | FATTO | Profilo architettonico minimo e contratto versionato | A00 | Preset, editing preservato, container Components e ID persistenti |
+| A02a | IN CORSO | Componenti agganciati: balcone + porta | A01 | Vano, collisione e aggancio aggiornati senza perdere le modifiche manuali |
 | A02 | TODO | Composizione di più volumi rettangolari | A01 | Fucina R04 con corpo e tettoie modificabili indipendentemente |
 | A03 | TODO | Coperture indipendenti e parti aperte | A02 | Falde a quote diverse, portico e tetto piano; raccordi senza geometria interna superflua |
 | A04 | TODO | Piani e interni coerenti con i volumi | A02, A03 | Casa R02: ingresso, scala esterna/interna, piano superiore percorribile |
@@ -268,7 +268,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 - [x] Versionare i nuovi dati e preservare i vecchi salvataggi.
 - [x] Rendere visibile nell'UI cosa eredita il profilo e cosa è manuale.
 - [x] Dimostrare che cambiare profilo non cancella un'apertura modificata.
-- [ ] Preparare il contenitore per componenti con ID, senza riscrivere subito tutto
+- [x] Preparare il contenitore per componenti con ID, senza riscrivere subito tutto
   `house.gd`: il vecchio generatore resta il primo backend.
 
 **Uscita:** due preset geometrici distinguibili usando il vocabolario già disponibile,
@@ -288,7 +288,30 @@ Verificati riapertura, aperture conservate, undo/redo editor e regressioni villa
 con `check_architecture_profiles.gd`, `check_house_editor.gd` e
 `check_village_builder.gd`. Il ruolo separato è un dato: non aggiunge ancora nuove
 regole di distribuzione per sala o fucina.
-Prossimo incremento: identità/agganci dei componenti, poi balcone con porta (A02a).
+**A02a.1 verificato — 2026-09-13.** `Components/Balcone` salva un ID persistente
+locale alla casa e un host semantico (`main/front`, `main/back`, `main/right`,
+`main/left`). La duplicazione nella stessa casa assegna un nuovo ID. Porta e vano
+sono derivati dal componente; le aperture manuali restano dati indipendenti.
+Il tab Componenti offre posizionamento con anteprima, tre maniglie contestuali,
+rimozione e messaggi di errore. Una configurazione invalida non genera un foro;
+il contorno selezionato diventa rosso. Sono controllati bordo, altezza, ala che
+copre la facciata, aperture manuali e balconi sulla stessa facciata.
+Esempio: `scenes/dev/balcony_attachment_example.tscn`, con due piani e scala.
+Verifiche: collisione del vano/pavimento, spostamento, cancellazione, riapertura,
+ID, conservazione di accesso manuale; undo/redo nell'editor; giocatore reale che
+sale, esce sul balcone e rientra (`check_balcony_attachment.gd`,
+`check_house_editor.gd`, `check_balcony_play.gd`).
+Il test gameplay headless completa tutte le asserzioni ed esce con codice 0;
+il motore segnala a chiusura `PagedAllocator: Pages in use` e GPUTrail segnala
+il refresh rate non disponibile. Questi messaggi restano da investigare separatamente.
+Restano: quota associata automaticamente al piano, collegamento esplicito tramite
+ID a una porta manuale, agganci sulle ali, sgancio libero, controllo degli ingombri
+tra facciate differenti/altre case, terrazze su pilastri. Per usare un accesso
+manuale allineato si disabilita `create_door`; il componente non ne assume la proprietà.
+Le maniglie modificano il componente agganciato; la trasformazione nativa Godot
+viene ricalcolata dall'aggancio.
+Prossimo incremento: quota collegata al piano e porta manuale referenziata, poi
+terrazza/scala esterna sullo stesso contratto.
 
 ### A02 — Volumi, non una lista di eccezioni per ogni edificio
 

@@ -1,5 +1,8 @@
 @tool
 extends EditorPlugin
+const Balcony=preload("res://addons/house_builder/balcony.gd")
+var balcony_gizmos: EditorNode3DGizmoPlugin
+var balcony_info: Label
 const House=preload("res://addons/house_builder/house.gd")
 const Gizmo=preload("res://addons/house_builder/gizmo.gd")
 const Plan=preload("res://addons/house_builder/plan.gd")
@@ -40,6 +43,8 @@ func _enter_tree() -> void:
 	gizmos=Gizmo.new()
 	gizmos.undo=get_undo_redo()
 	add_node_3d_gizmo_plugin(gizmos)
+	balcony_gizmos=preload("res://addons/house_builder/balcony_gizmo.gd").new()
+	balcony_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(balcony_gizmos)
 	plan_gizmos=preload("res://addons/house_builder/plan_gizmo.gd").new()
 	plan_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(plan_gizmos)
 	dock=VBoxContainer.new()
@@ -89,6 +94,7 @@ func _enter_tree() -> void:
 	play.pressed.connect(_play_selected)
 	dock.add_child(play)
 	_build_context_tabs()
+	_build_component_tab()
 	architecture_choice=OptionButton.new()
 	for profile in architecture_profiles: architecture_choice.add_item(profile.display_name)
 	tabs.get_child(0).add_child(architecture_choice)
@@ -111,6 +117,7 @@ func _exit_tree() -> void:
 	error_dialog.queue_free()
 	_cancel()
 	remove_node_3d_gizmo_plugin(gizmos)
+	remove_node_3d_gizmo_plugin(balcony_gizmos)
 	remove_node_3d_gizmo_plugin(plan_gizmos)
 	remove_custom_type("HearthHouse")
 	remove_control_from_docks(scroll)
@@ -146,10 +153,11 @@ func _selection_context() -> void:
 	var selected := EditorInterface.get_selection().get_selected_nodes()
 	var node: Node=selected[0] if not selected.is_empty() else null
 	context_label.text="Selezione: "+str(node.name) if node else "Seleziona una casa o disegnane una."
-	if node is Element: tabs.current_tab=3 if node.kind==3 else 2
+	if node is Balcony: tabs.current_tab=4
+	elif node is Element: tabs.current_tab=3 if node.kind==3 else 2
 	elif node is Plan: tabs.current_tab=2
 	elif node is House and tabs.current_tab>1: tabs.current_tab=0
-	if node is House or node is Plan or node is Element: _show_context_dock.call_deferred()
+	if node is House or node is Plan or node is Element or node is Balcony: _show_context_dock.call_deferred()
 	opening_choice.clear()
 	var house := _selected_house()
 	if house:
@@ -169,6 +177,9 @@ func _context_changed(_index: int) -> void:
 func _refresh_context_gizmos() -> void:
 	var house := _selected_house()
 	gizmos.focus=house; gizmos.context=mini(tabs.current_tab,2)
+	balcony_gizmos.focus=null
+	for selected in EditorInterface.get_selection().get_selected_nodes():
+		if selected is Balcony and tabs.current_tab==4: balcony_gizmos.focus=selected; selected.update_gizmos()
 	plan_gizmos.focus=null
 	for node in EditorInterface.get_selection().get_selected_nodes():
 		if node is Element and ((tabs.current_tab==3 and node.kind==3) or (tabs.current_tab==2 and node.kind!=3)): plan_gizmos.focus=node
@@ -176,6 +187,7 @@ func _refresh_context_gizmos() -> void:
 	if root:
 		for h in _houses(root):
 			h.update_gizmos()
+			for component in h.attached_components(): component.update_gizmos()
 			var plan=h.get_node_or_null("InteriorPlan")
 			if plan:
 				for e in plan.elements(): e.update_gizmos()
@@ -198,13 +210,16 @@ func _apply_changes() -> void:
 		for house in _houses(root):
 			if house._pending: house.rebuild()
 func _process(_delta: float) -> void:
+	if balcony_info:
+		var component := _selected_balcony()
+		balcony_info.text=("ERRORE: "+component.validation_error() if not component.validation_error().is_empty() else "Balcone agganciato. Maniglie: posizione, larghezza, profondità. Quota e facciata anche nell’Inspector.") if component else "Posiziona un balcone sulla facciata: il clic indica la quota del pavimento. Servono almeno 2,12 m di muro sopra. Seleziona il balcone per modificarlo."
 	var selected_house := _selected_house()
 	var key := str(selected_house.dimensions(),selected_house.architecture_profile,selected_house.profile_baseline) if selected_house else ""
 	if key!=_architecture_ui_key: _architecture_ui_key=key; _architecture_details()
 	var root := EditorInterface.get_edited_scene_root()
 	if root!=last_root:
 		_cancel(); last_root=root
-func _handles(object: Object) -> bool: return object is House or object is Plan or object is Element or mode!=0
+func _handles(object: Object) -> bool: return object is Balcony or object is House or object is Plan or object is Element or mode!=0
 
 func _selected_house() -> Node3D:
 	for selected in EditorInterface.get_selection().get_selected_nodes():
@@ -324,7 +339,7 @@ func _set_mode(value: int) -> void:
 		for other in get_parent().get_children():
 			if other!=self and other.get_script()!=null and other.get_script().resource_path=="res://addons/world_editor/plugin.gd":
 				if is_instance_valid(other.mode): other.mode.select(0)
-	status.text=["Seleziona una casa per modificarla.","Trascina un rettangolo sul terreno.","Clicca per appoggiare una finestra.","Clicca per appoggiare una porta.","Trascina una finestra o una porta.","Clicca l'apertura da rimuovere."][mode]
+	status.text=["Seleziona una casa per modificarla.","Trascina un rettangolo sul terreno.","Clicca per appoggiare una finestra.","Clicca per appoggiare una porta.","Trascina una finestra o una porta.","Clicca l'apertura da rimuovere.","Clicca la facciata alla quota del pavimento del balcone."][mode]
 func _cancel() -> void:
 	if dragging and is_instance_valid(target) and opening_index>=0: target.openings=restore_openings
 	dragging=false; target=null; opening_index=-1
@@ -414,6 +429,8 @@ func _forward_3d_gui_input(camera: Camera3D,event: InputEvent) -> int:
 	if event is InputEventMouseButton and event.button_index==MOUSE_BUTTON_RIGHT:
 		_cancel(); return AFTER_GUI_INPUT_PASS
 	if event is InputEventMouseMotion:
+		if mode==6:
+			_preview_balcony(_wall(camera,event.position)); return AFTER_GUI_INPUT_STOP
 		if dragging and mode==1:
 			var p=_ground(camera,event.position)
 			if p!=null: end=p; _preview()
@@ -439,6 +456,8 @@ func _forward_3d_gui_input(camera: Camera3D,event: InputEvent) -> int:
 		if hit.is_empty(): return AFTER_GUI_INPUT_STOP
 		var house: Node3D=hit.house
 		var records: Array[Dictionary]=house.openings.duplicate(true)
+		if mode==6:
+			_place_balcony(hit); return AFTER_GUI_INPUT_STOP
 		if mode in [2,3]:
 			if not house.opening_fits(_record(hit,"window" if mode==2 else "door")):
 				status.text="Aperture troppo vicine: scegli un punto libero."
@@ -478,3 +497,60 @@ func _apply_architecture_profile(adopt: bool) -> void:
 	undo.add_do_method(house,"apply_architecture",after); undo.add_undo_method(house,"apply_architecture",before)
 	undo.add_do_method(self,"_architecture_details"); undo.add_undo_method(self,"_architecture_details"); undo.commit_action()
 	status.text="Profilo aggiornato. Materiali, aperture e dettagli conservati."
+
+func _build_component_tab() -> void:
+	var page := VBoxContainer.new(); page.name="Componenti"; tabs.add_child(page)
+	var add := Button.new(); add.text="Posiziona balcone + porta"; add.pressed.connect(_set_mode.bind(6)); page.add_child(add)
+	var remove := Button.new(); remove.text="Rimuovi balcone selezionato"; remove.pressed.connect(_remove_balcony); page.add_child(remove)
+	balcony_info=Label.new(); balcony_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(balcony_info)
+func _selected_balcony() -> Node3D:
+	for node in EditorInterface.get_selection().get_selected_nodes():
+		if node is Balcony: return node
+	return null
+func _place_balcony(hit: Dictionary) -> void:
+	if hit.wall>=4: _show_plan_error("Balcone","Questo primo componente supporta le quattro facciate del corpo principale."); return
+	var h: Node=hit.house
+	var container := h.get_node_or_null("Components")
+	var fresh := container==null
+	if fresh: container=Node3D.new(); container.name="Components"; h.add_child(container)
+	var component := Balcony.new(); component.name="Balcone"
+	component.host_id=["main/front","main/back","main/right","main/left"][hit.wall]
+	component.along=hit.u; component.elevation=snappedf(hit.y,0.1)
+	container.add_child(component)
+	var error := component.validation_error()
+	container.remove_child(component)
+	if fresh: h.remove_child(container)
+	if not error.is_empty():
+		component.free()
+		if fresh: container.free()
+		_show_plan_error("Balcone",error); return
+	var undo := get_undo_redo(); undo.create_action("Aggancia balcone e porta",UndoRedo.MERGE_DISABLE,h)
+	if fresh:
+		undo.add_do_method(self,"_attach",h,container,EditorInterface.get_edited_scene_root())
+		undo.add_undo_method(h,"remove_child",container); undo.add_do_reference(container)
+	undo.add_do_method(self,"_attach",container,component,EditorInterface.get_edited_scene_root())
+	undo.add_undo_method(container,"remove_child",component); undo.add_do_reference(component)
+	undo.add_do_method(h,"request_rebuild"); undo.add_undo_method(h,"request_rebuild"); undo.commit_action()
+	_set_mode(0); EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(component); EditorInterface.edit_node(component); _selection_context()
+func _remove_balcony() -> void:
+	var component := _selected_balcony()
+	if component==null: status.text="Seleziona un balcone nell’albero della scena."; return
+	var parent := component.get_parent(); var h: Node=component.house()
+	var undo := get_undo_redo(); undo.create_action("Rimuovi balcone e porta derivata",UndoRedo.MERGE_DISABLE,h)
+	undo.add_do_method(parent,"remove_child",component)
+	undo.add_undo_method(self,"_attach",parent,component,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(component)
+	undo.add_do_method(h,"request_rebuild"); undo.add_undo_method(h,"request_rebuild"); undo.commit_action()
+
+func _preview_balcony(hit: Dictionary) -> void:
+	if hit.is_empty() or hit.wall>=4:
+		if is_instance_valid(ghost): ghost.hide()
+		return
+	if not is_instance_valid(ghost):
+		ghost=MeshInstance3D.new(); ghost.mesh=BoxMesh.new()
+		var material := StandardMaterial3D.new(); material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
+		material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; material.albedo_color=Color(0.2,0.8,1,0.45)
+		ghost.material_override=material; ghost.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; _world_parent().add_child(ghost)
+	ghost.show(); ghost.mesh.size=Vector3(3,0.15,1.5)
+	var h: Node3D=hit.house
+	var tangent: Vector3=(h.wall_point(hit.wall,1,0)-h.wall_point(hit.wall,0,0)).normalized()
+	ghost.global_transform=h.global_transform*Transform3D(Basis(tangent,Vector3.UP,h.wall_normal(hit.wall)),h.wall_point(hit.wall,hit.u*h.wall_length(hit.wall)*0.5,snappedf(hit.y,0.1)-0.08,0.75))

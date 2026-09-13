@@ -118,7 +118,7 @@ func _get_configuration_warnings() -> PackedStringArray:
 	return PackedStringArray()
 func _post_segments(wall: int,along: float) -> Array[Vector2]:
 	var spans: Array[Vector2]=[Vector2(0,wall_height)]
-	for record in openings:
+	for record in all_openings():
 		var o := resolved_opening(record)
 		if o.wall!=wall or absf(o.along-along)>o.width*0.5+0.15: continue
 		var next: Array[Vector2]=[]
@@ -137,7 +137,7 @@ func resolved_opening(record: Dictionary) -> Dictionary:
 	var w := clampf(float(record.get("width",0.85 if not door else 1.0)),0.35,wall_length(wall)-0.4)
 	var h := clampf(float(record.get("height",1.0 if not door else 2.0)),0.35,wall_height-0.25)
 	var along := clampf(float(record.get("u",0.0))*(wall_length(wall)*0.5),-wall_length(wall)*0.5+w*0.5+0.18,wall_length(wall)*0.5-w*0.5-0.18)
-	var y := h*0.5 if door else clampf(float(record.get("y",1.5)),h*0.5+0.25,wall_height-h*0.5-0.12)
+	var y := clampf(float(record.get("floor_y",0.0)),0.0,maxf(0,wall_height-h-0.12))+h*0.5 if door else clampf(float(record.get("y",1.5)),h*0.5+0.25,wall_height-h*0.5-0.12)
 	return {"wall":wall,"along":along,"y":y,"width":w,"height":h,"door":door}
 
 func hit_wall(world_origin: Vector3,world_direction: Vector3) -> Dictionary:
@@ -255,6 +255,7 @@ func rebuild() -> void:
 	_generated.add_child(roof)
 	if wing_enabled: _join_wing(body,roof)
 	if not _is_wing_part: _finish_openings(body,materials)
+	for component in attached_components(): component.refresh()
 	var plan := get_node_or_null("InteriorPlan")
 	if plan and plan.has_method("editor_view"):
 		plan._pending=true
@@ -334,8 +335,9 @@ func _opening_cut(o: Dictionary) -> Array:
 func _finish_openings(body: MeshInstance3D,materials: Array) -> void:
 	var cutters: Array=[]
 	var active: Array=[]
-	for index in openings.size():
-		var record: Dictionary=openings[index]
+	var records := all_openings()
+	for index in records.size():
+		var record: Dictionary=records[index]
 		var o := resolved_opening(record)
 		if not wall_exposed(o.wall,o.along,o.width*0.5): continue
 		o["index"]=index
@@ -360,11 +362,12 @@ func _finish_openings(body: MeshInstance3D,materials: Array) -> void:
 			door.name="Door_%d"%o.index
 			_generated.add_child(door)
 			var tangent := (wall_point(o.wall,1,0)-wall_point(o.wall,0,0)).normalized()
-			var frame := Transform3D(Basis(tangent,Vector3.UP,wall_normal(o.wall)),wall_point(o.wall,o.along-o.width*0.5,0,-0.17))
-			door.configure(frame,o.width,o.height,materials[1],bool(openings[o.index].get("open",false)))
-			door.changed.connect(_door_changed.bind(o.index))
+			var frame := Transform3D(Basis(tangent,Vector3.UP,wall_normal(o.wall)),wall_point(o.wall,o.along-o.width*0.5,o.y-o.height*0.5,-0.17))
+			door.configure(frame,o.width,o.height,materials[1],bool(records[o.index].get("open",false)))
+			if o.index<openings.size(): door.changed.connect(_door_changed.bind(o.index))
+			else: door.changed.connect(_component_door_changed.bind(records[o.index].get("component_id","")))
 			# Contrasting threshold remains visible when the facade is cut away.
-			_wall_box(o.wall,o.along,0.02,o.width,0.04,0.55,-0.08,2)
+			_wall_box(o.wall,o.along,o.y-o.height*0.5+0.02,o.width,0.04,0.55,-0.08,2)
 		else:
 			_wall_box(o.wall,o.along,o.y-o.height*0.5-0.04,o.width+0.20,0.08,0.40,-0.08,2)
 			_wall_box(o.wall,o.along,o.y,o.width-0.02,o.height-0.02,0.012,-0.22,3)
@@ -432,3 +435,21 @@ func apply_architecture(state: Dictionary) -> void:
 	profile_baseline=state.baseline.duplicate(true)
 	for key in state.values: set(key,state.values[key])
 	request_rebuild()
+
+# Component doors are derived; deleting a component never deletes authored openings.
+func attached_components() -> Array:
+	var result: Array=[]
+	var container := get_node_or_null("Components")
+	if container:
+		for child in container.get_children():
+			if child.has_method("opening_record"): result.append(child)
+	return result
+func all_openings() -> Array[Dictionary]:
+	var result: Array[Dictionary]=openings.duplicate(true)
+	for component in attached_components():
+		if component.validation_error().is_empty() and component.create_door:
+			result.append(component.opening_record())
+	return result
+func _component_door_changed(opened: bool,id: String) -> void:
+	for component in attached_components():
+		if component.component_id==id: component.door_open=opened
