@@ -7,7 +7,7 @@ const Door=preload("res://addons/house_builder/door.gd")
 const ArchitectureProfile=preload("res://addons/house_builder/architecture_profile.gd")
 @export_group("Architettura")
 @export var architecture_profile: ArchitectureProfile
-@export_enum("dwelling","shop","hall","forge","tower") var archetype_id := "dwelling"
+@export_enum("dwelling","shop","hall","forge","tower","keep") var archetype_id := "dwelling"
 @export_storage var authoring_version := 1
 @export_storage var profile_baseline: Dictionary={}
 @export_group("Dimensioni")

@@ -1,5 +1,6 @@
 @tool
 extends Node3D
+const House=preload("res://addons/house_builder/house.gd")
 ## Group of independently authored towers; links are stored on curtains.
 @export var courtyard_entry := false
 @export var entry_position := Vector3(8,0.15,4)
@@ -24,6 +25,9 @@ func rebuild() -> void:
 
 func towers() -> Array:
 	return get_children().filter(func(n): return n.has_method("footprint_vertices"))
+
+func buildings() -> Array:
+	return get_children().filter(func(n): return n is House)
 
 func diagnostics() -> Array[Dictionary]:
 	var issues: Array[Dictionary]=[]; var slots := {}; var degree := {}; var gates := 0
@@ -58,7 +62,24 @@ func diagnostics() -> Array[Dictionary]:
 		for tower in degree:
 			if degree[tower]!=2: issues.append({"node":get_path_to(tower),"message":str(tower.name)+": il recinto richiede due collegamenti; presenti "+str(degree[tower])+"."})
 		if gates==0: issues.append({"node":NodePath("."),"message":"Il recinto non ha un portone di ingresso."})
+	for building in buildings():
+		if building in towers(): continue
+		var error := courtyard_building_error(building)
+		if not error.is_empty(): issues.append({"node":get_path_to(building),"message":str(building.name)+": "+error})
 	return issues
+
+func courtyard_building_error(building: Node3D) -> String:
+	if towers().size()!=4: return "Verifica manualmente i passaggi: controllo corte disponibile per quattro torri."
+	var low: Vector3=towers()[0].position; var high := low; var clearance := Vector2.ZERO
+	for tower in towers():
+		low=low.min(tower.position); high=high.max(tower.position)
+		clearance=clearance.max(Vector2(tower.width,tower.depth)*0.5)
+	for x in [-1.0,1.0]:
+		for z in [-1.0,1.0]:
+			var point: Vector3=building.transform*Vector3(x*building.width*0.5,0,z*building.depth*0.5)
+			if point.x<low.x+clearance.x+1-0.01 or point.x>high.x-clearance.x-1+0.01 or point.z<low.z+clearance.y+1-0.01 or point.z>high.z-clearance.y-1+0.01:
+				return "Edificio fuori dalla zona centrale con passaggio di 1 m: spostalo, riducilo o allarga il recinto."
+	return ""
 
 func layout_state() -> Dictionary:
 	var positions := {}

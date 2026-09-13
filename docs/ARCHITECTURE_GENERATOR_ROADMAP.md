@@ -255,7 +255,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A06 | TODO | Due archetipi completi con profili architettonici | A04, A05 | Fucina e sala nordica: differenze leggibili nelle forme e negli interni |
 | A07 | IN CORSO | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
 | A08 | IN CORSO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
-| A09 | TODO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
+| A09 | IN CORSO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
 | A10 | TODO | Rovine strutturali controllabili | A03, A04, A07 | R07: togli una porzione di tetto/muro, interno e collisione coerenti |
 | A11 | TODO | Integrazione insediamento e consolidamento | Incrementale; chiusura dopo A08 | Case e castello nello stesso villaggio, rigenerazione locale e budget misurati |
 
@@ -718,7 +718,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. Prossimo passo prioritario: **parapetti e sbarchi dei vani scala**, poi mastio A09.
+se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. Prossimo passo prioritario: **corpi accessori del mastio e collegamenti interni**.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -824,3 +824,25 @@ di reparenting degli arredi nella suite editor, che termina HOUSE_EDITOR_ALL_OK.
 Limiti: parapetto pieno in legno, altezza fissa 0.92 m, nessuna botola;
 nessun controllo automatico delle interferenze con elementi manuali adiacenti.
 Prossimo passo: A09, primo mastio modificabile con piani e accesso alla corte.
+
+
+### A09.1 — Primo mastio indipendente — 2026-09-13
+
+Comando contestuale Fortificazioni → Recinto → Aggiungi mastio nella corte.
+Preset 6 × 6 m, tre piani da 2.8 m, scale alternate e parapetti automatici,
+finestre e ingresso sul lato +Z (sud del preset). Tipo architettonico `keep`.
+Usa Volume/House e InteriorPlan: piani, scale, dimensioni e aperture sono nodi
+modificabili, non un interno generato soltanto nel Play. `buildings()` separa
+gli edifici visitabili dal grafo delle torri/cortine; il Play include il mastio
+nel cambio di edificio, luci, porte e cutaway. Materiali esistenti.
+Esempio: `scenes/dev/castle_keep_example.tscn`.
+Verificati ingresso, tre piani, ritorno nella corte con il giocatore;
+Undo/Redo preserva l'identità del mastio, snapshot e duplicati controllati.
+Diagnostica di ingombro centrale con margine 1 m, conservativa su quattro torri;
+non è un controllo completo di collisioni per corti arbitrarie. Suite editor
+conclusa HOUSE_EDITOR_ALL_OK, con i messaggi preesistenti di reparenting arredi.
+Limiti: primo preset singolo, nessun arredo/stanze automatiche, tetto a falde
+non accessibile; il resize del recinto lascia il mastio nella posizione manuale
+ed evidenzia eventuali ingombri fuori limite. A09 resta IN CORSO.
+Prossimo passo A09.2: corpo accessorio agganciato al mastio con passaggio interno,
+poi corti e quote diverse. Riferimenti: check_keep_play.gd e check_house_editor.gd.

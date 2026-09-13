@@ -1018,6 +1018,7 @@ func _build_fortification_tab() -> void:
 	for child in page.get_children():
 		if child!=fort_sections: child.reparent(create)
 	var edit := VBoxContainer.new(); edit.name="Recinto"; fort_sections.add_child(edit)
+	var keep := Button.new(); keep.text="Aggiungi mastio nella corte"; keep.pressed.connect(_add_keep); edit.add_child(keep)
 	var fill := Button.new(); fill.text="Completa interni delle torri mancanti"; fill.pressed.connect(_complete_tower_interiors); edit.add_child(fill)
 	fort_info=Label.new(); fort_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; edit.add_child(fort_info)
 	for axis in ["X","Z"]:
@@ -1086,7 +1087,7 @@ func _refresh_fortification_ui(force: bool=false) -> void:
 		fort_issues.clear(); _fort_issue_key=""
 		fort_info.text="Seleziona un gruppo fortificazione o uno dei suoi elementi."; return
 	var issues: Array=group.diagnostics()
-	fort_info.text=str(group.name)+" · "+str(group.towers().size())+" torri · "+str(group.curtains().size())+" cortine"
+	fort_info.text=str(group.name)+" · "+str(group.towers().size())+" torri · "+str(group.curtains().size())+" cortine · "+str(group.buildings().size()-group.towers().size())+" edifici nella corte"
 	var issue_key := str(group.get_instance_id(),issues)
 	if issue_key==_fort_issue_key: return
 	_fort_issue_key=issue_key; fort_issues.clear()
@@ -1137,3 +1138,13 @@ func _complete_tower_interiors() -> void:
 		undo.add_undo_method(item.tower,"remove_child",plan); undo.add_do_reference(plan)
 		undo.add_do_property(item.tower,"openings",item.openings); undo.add_undo_property(item.tower,"openings",item.tower.openings.duplicate(true))
 	undo.add_do_method(group,"rebuild"); undo.add_undo_method(group,"rebuild"); undo.commit_action()
+
+func _add_keep() -> void:
+	var group := _selected_fortification()
+	if group==null: _show_plan_error("Mastio","Seleziona una fortificazione."); return
+	var factory=preload("res://addons/house_builder/keep_factory.gd")
+	var proposal: Dictionary=factory.placement(group)
+	if proposal.has("error"): _show_plan_error("Mastio",proposal.error); return
+	var keep: Node3D=factory.create(); keep.position=proposal.position
+	_add_authored(group,keep,"Aggiungi mastio"); keep.get_node("InteriorPlan").rebuild(); keep.rebuild()
+	tabs.current_tab=6; fort_sections.current_tab=1

@@ -109,7 +109,7 @@ func _ready() -> void:
 func nearest_door() -> Node3D:
 	var best: Node3D=null; var distance := 2.2
 	var all: Array=[]
-	var buildings: Array=authored_group.towers() if authored_group else [house]
+	var buildings: Array=authored_group.buildings() if authored_group else [house]
 	for building in buildings:
 		for child in building._generated.get_children():
 			if child is Door: all.append(child)
@@ -133,7 +133,7 @@ func nearest_door() -> Node3D:
 func _process(delta: float) -> void:
 	if not is_instance_valid(player): return
 	if authored_group:
-		for tower in authored_group.towers():
+		for tower in authored_group.buildings():
 			if tower.contains_footprint(tower.to_local(player.global_position),0.12):
 				if tower!=house: _activate_tower(tower)
 				break
@@ -160,7 +160,7 @@ func _process(delta: float) -> void:
 	interior.show_level(active_floor,inside)
 	if inside: interior.reveal_room(player.global_position,camera.global_position)
 	if authored_group:
-		for tower in authored_group.towers():
+		for tower in authored_group.buildings():
 			var plan=tower.get_node_or_null("InteriorPlan")
 			if plan: plan.runtime_view(inside and tower==house,active_floor,player.global_position,camera.global_position)
 	elif authored_plan: authored_plan.runtime_view(inside,active_floor,player.global_position,camera.global_position)

@@ -409,6 +409,25 @@ func run(plugin: EditorPlugin) -> void:
 	var fill_version: int=profile_history.get_version(); plugin._complete_tower_interiors()
 	assert(profile_history.get_version()==fill_version,"Completing existing interiors is a no-op")
 	print("SECONDARY_INTERIORS_PRESERVE_UNDO_NOOP_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(enclosure)
+	plugin._add_keep()
+	assert(enclosure.has_node("Mastio"))
+	var keep=enclosure.get_node("Mastio")
+	assert(keep.get_node("InteriorPlan").levels().size()==3 and enclosure.towers().size()==4 and enclosure.buildings().size()==5)
+	keep.width=6.5
+	profile_history.undo(); assert(not enclosure.has_node("Mastio"))
+	profile_history.redo(); assert(enclosure.get_node("Mastio")==keep and is_equal_approx(keep.width,6.5))
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(keep)
+	var keep_version: int=profile_history.get_version(); plugin._add_keep()
+	assert(profile_history.get_version()==keep_version); plugin.error_dialog.hide()
+	var keep_snapshot: PackedScene=plugin._snapshot(enclosure)
+	var keep_copy=keep_snapshot.instantiate()
+	assert(keep_copy.has_node("Mastio/InteriorPlan/SecondoPiano")); keep_copy.free()
+	var keep_position: Vector3=keep.position
+	keep.position.x=100
+	assert(enclosure.diagnostics().any(func(issue): return issue.node==enclosure.get_path_to(keep)))
+	keep.position=keep_position
+	print("KEEP_EDITOR_ADD_UNDO_REDO_DUPLICATE_SNAPSHOT_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

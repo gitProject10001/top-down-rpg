@@ -756,3 +756,21 @@ del piano di arrivo; non modificare le mesh interne generate.
 Prova `castle_interiors_example.tscn` con Play dal builder.
 Test: `tools/check_stair_guards.gd`; immagini riproducibili tramite
 `tools/preview_stair_guards.gd`.
+
+
+### Mastio nella corte (A09.1)
+
+Seleziona Castello o un suo elemento, apri **Fortificazioni → Recinto** e premi
+**Aggiungi mastio nella corte**. Richiede un recinto rettangolare con quattro
+torri e spazio centrale sufficiente; un secondo clic segnala l'edificio già
+presente senza duplicarlo. L'operazione supporta Undo/Redo.
+Il nodo `Mastio` è un Volume indipendente: usa i normali strumenti della casa
+per dimensioni, aperture e componenti. In `InteriorPlan` trovi PianoTerra,
+PrimoPiano e SecondoPiano con scale editabili. Le altezze seguono Floor Height
+e il numero di piani; le scale manuali vanno mantenute coerenti con tali quote.
+Il resize del recinto non sposta il mastio; la diagnostica segnala gli ingombri
+fuori dalla zona centrale prevista. Il controllo è conservativo, non copre
+ogni interferenza fra aggiunte manuali.
+Apri `scenes/dev/castle_keep_example.tscn`, seleziona Castello/Mastio e usa il
+Play del builder per entrare e salire ai tre piani. La copertura a falde non
+è accessibile. Nessun arredo aggiunto in questa versione.
