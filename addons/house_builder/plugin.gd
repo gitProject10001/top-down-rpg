@@ -3,6 +3,8 @@ extends EditorPlugin
 const ExteriorStair=preload("res://addons/house_builder/exterior_stair.gd")
 const Balcony=preload("res://addons/house_builder/balcony.gd")
 var balcony_gizmos: EditorNode3DGizmoPlugin
+const Support=preload("res://addons/house_builder/support.gd")
+var support_gizmos: EditorNode3DGizmoPlugin
 var stair_gizmos: EditorNode3DGizmoPlugin
 var balcony_info: Label
 var floor_choice: OptionButton
@@ -57,6 +59,7 @@ func _enter_tree() -> void:
 	balcony_gizmos=preload("res://addons/house_builder/balcony_gizmo.gd").new()
 	balcony_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(balcony_gizmos)
 	stair_gizmos=preload("res://addons/house_builder/exterior_stair_gizmo.gd").new(); stair_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(stair_gizmos)
+	support_gizmos=preload("res://addons/house_builder/support_gizmo.gd").new(); add_node_3d_gizmo_plugin(support_gizmos)
 	plan_gizmos=preload("res://addons/house_builder/plan_gizmo.gd").new()
 	plan_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(plan_gizmos)
 	dock=VBoxContainer.new()
@@ -132,6 +135,7 @@ func _exit_tree() -> void:
 	remove_node_3d_gizmo_plugin(gizmos)
 	remove_node_3d_gizmo_plugin(balcony_gizmos)
 	remove_node_3d_gizmo_plugin(stair_gizmos)
+	remove_node_3d_gizmo_plugin(support_gizmos)
 	remove_node_3d_gizmo_plugin(plan_gizmos)
 	remove_custom_type("HearthHouse")
 	remove_control_from_docks(scroll)
@@ -167,12 +171,12 @@ func _selection_context() -> void:
 	var selected := EditorInterface.get_selection().get_selected_nodes()
 	var node: Node=selected[0] if not selected.is_empty() else null
 	context_label.text="Selezione: "+str(node.name) if node else "Seleziona una casa o disegnane una."
-	if node is Volume: tabs.current_tab=5
+	if node is Volume or node is Support: tabs.current_tab=5
 	elif node is Balcony or node is ExteriorStair: tabs.current_tab=4
 	elif node is Element: tabs.current_tab=3 if node.kind==3 else 2
 	elif node is Plan: tabs.current_tab=2
 	elif node is House and tabs.current_tab>1: tabs.current_tab=0
-	if node is House or node is Plan or node is Element or node is Balcony or node is ExteriorStair: _show_context_dock.call_deferred()
+	if node is House or node is Plan or node is Element or node is Balcony or node is ExteriorStair or node is Support: _show_context_dock.call_deferred()
 	opening_choice.clear()
 	var house := _selected_house()
 	if house:
@@ -192,8 +196,11 @@ func _context_changed(_index: int) -> void:
 func _refresh_context_gizmos() -> void:
 	var house := _selected_house()
 	gizmos.focus=house; gizmos.context=0 if house is Volume and tabs.current_tab==5 else mini(tabs.current_tab,2)
+	support_gizmos.focus=null
 	balcony_gizmos.focus=null; stair_gizmos.focus=null
 	for selected in EditorInterface.get_selection().get_selected_nodes():
+		if selected is Support:
+			gizmos.context=2; support_gizmos.focus=selected if tabs.current_tab==5 else null; selected.update_gizmos()
 		if selected is ExteriorStair and tabs.current_tab==4: stair_gizmos.focus=selected; selected.update_gizmos(); continue
 		if selected is Balcony and tabs.current_tab==4: balcony_gizmos.focus=selected; selected.update_gizmos()
 	plan_gizmos.focus=null
@@ -203,6 +210,8 @@ func _refresh_context_gizmos() -> void:
 	if root:
 		for h in _houses(root):
 			h.update_gizmos()
+			if h.has_node("Supports"):
+				for post in h.get_node("Supports").get_children(): post.update_gizmos()
 			for component in h.attached_components():
 				component.update_gizmos()
 				if component.stair_component(): component.stair_component().update_gizmos()
@@ -234,6 +243,14 @@ func _process(_delta: float) -> void:
 		if not canopy_roof_choice.disabled: canopy_roof_choice.select(selected_volume.canopy_roof)
 		for button in junction_buttons: button.disabled=not selected_volume is Volume or selected_volume.structure_kind!=0
 		volume_info.text=("VOLUME NON RACCORDATO: "+selected_volume.volume_error() if not selected_volume.volume_error().is_empty() else "Portico aperto: altezza sostegni = Wall Height; colmo = Roof Height. Passo e sezione pali: Struttura. La parete della casa resta intatta." if selected_volume.structure_kind==1 else "Raccordo: "+["passaggio aperto","parete con porta"][selected_volume.junction_mode]+". Dimensioni e posizione porta: Inspector, Raccordo interno. Sgancia per usare la trasformazione libera.") if selected_volume is Volume else "Seleziona una casa e aggiungi un corpo basso. Ogni volume conserva tetto e aperture propri."
+		if selected_volume is Volume and selected_volume.structure_kind==1:
+			volume_info.text+="\nSostegni: "+("manuali in Supports; le posizioni restano fisse durante il ridimensionamento." if selected_volume.has_node("Supports") else "automatici; usa Rendi editabili per modificarli singolarmente.")
+			for selected in EditorInterface.get_selection().get_selected_nodes():
+				if selected is Support:
+					volume_info.text="Sostegno: "+str(selected.name)+". Sposta con il gizmo Godot; Section cambia la sezione."
+					var warnings=selected._get_configuration_warnings()
+					if not warnings.is_empty(): volume_info.text+="\nATTENZIONE: "+warnings[0]
+
 	_refresh_binding_choices()
 	if balcony_info:
 		var component := _selected_balcony()
@@ -723,6 +740,8 @@ func _build_volume_tab() -> void:
 		var button := Button.new(); button.text="Riaggancia volume" if attached else "Sgancia volume"; button.pressed.connect(_toggle_volume.bind(attached)); page.add_child(button)
 	for kind in 2:
 		var button := Button.new(); button.text=["Raccordo · passaggio aperto","Raccordo · parete con porta"][kind]; button.pressed.connect(_set_volume_junction.bind(kind)); page.add_child(button); junction_buttons.append(button)
+	for entry in [["Sostegni: rendi editabili",_edit_supports],["Aggiungi sostegno",_add_support],["Rimuovi sostegno selezionato",_remove_support],["Ripristina sostegni automatici",_automatic_supports]]:
+		var button := Button.new(); button.text=entry[0]; button.pressed.connect(entry[1]); page.add_child(button)
 	var remove := Button.new(); remove.text="Rimuovi volume selezionato"; remove.pressed.connect(_remove_volume); page.add_child(remove)
 	volume_info=Label.new(); volume_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(volume_info)
 func _add_volume_from_ui(side: int) -> void:
@@ -781,3 +800,42 @@ func _set_canopy_roof(kind: int) -> void:
 	if not volume is Volume or volume.structure_kind!=1: return
 	var undo := get_undo_redo(); undo.create_action("Copertura portico",UndoRedo.MERGE_DISABLE,volume)
 	undo.add_do_property(volume,"canopy_roof",kind); undo.add_undo_property(volume,"canopy_roof",volume.canopy_roof); undo.commit_action()
+
+func _edit_supports() -> void:
+	var volume := _selected_house()
+	if not volume is Volume or volume.structure_kind!=1: return
+	if volume.has_node("Supports"): status.text="I sostegni sono già editabili: selezionali sotto Supports."; return
+	var container := Node3D.new(); container.name="Supports"
+	for point in volume.automatic_posts():
+		var post := Support.new(); post.name="Sostegno_%02d"%(container.get_child_count()+1); post.position=point; post.section=volume.post_size; container.add_child(post)
+	var undo := get_undo_redo(); undo.create_action("Rendi sostegni editabili",UndoRedo.MERGE_DISABLE,volume)
+	undo.add_do_method(self,"_attach",volume,container,EditorInterface.get_edited_scene_root()); undo.add_do_reference(container); undo.add_do_method(volume,"request_rebuild")
+	undo.add_undo_method(volume,"remove_child",container); undo.add_undo_method(volume,"request_rebuild"); undo.commit_action()
+	status.text="Sostegni editabili in Supports. Sposta i nodi; Section regola la sezione."
+func _add_support() -> void:
+	var volume := _selected_house()
+	if not volume is Volume or volume.structure_kind!=1: return
+	if not volume.has_node("Supports"): _edit_supports()
+	var container := volume.get_node("Supports"); var post := Support.new(); post.name="Sostegno"; post.section=volume.post_size
+	post.position=Vector3(0,0,(volume.depth-volume.post_size)*0.5)
+	var undo := get_undo_redo(); undo.create_action("Aggiungi sostegno",UndoRedo.MERGE_DISABLE,volume)
+	undo.add_do_method(self,"_attach",container,post,EditorInterface.get_edited_scene_root()); undo.add_do_reference(post); undo.add_do_method(volume,"request_rebuild")
+	undo.add_undo_method(container,"remove_child",post); undo.add_undo_method(volume,"request_rebuild"); undo.commit_action()
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(post); EditorInterface.edit_node(post); _selection_context()
+func _remove_support() -> void:
+	for selected in EditorInterface.get_selection().get_selected_nodes():
+		if not selected is Support: continue
+		var volume: Node3D=selected.volume(); var container:=selected.get_parent()
+		var undo := get_undo_redo(); undo.create_action("Rimuovi sostegno",UndoRedo.MERGE_DISABLE,volume)
+		undo.add_do_method(self,"_detach_support",volume,container,selected)
+		undo.add_undo_method(self,"_attach",container,selected,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(selected); undo.add_undo_method(volume,"request_rebuild"); undo.commit_action(); return
+func _detach_support(volume: Node3D,container: Node,node: Node) -> void:
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(volume)
+	container.remove_child(node); volume.request_rebuild(); _selection_context()
+func _automatic_supports() -> void:
+	var volume := _selected_house()
+	if not volume is Volume or not volume.has_node("Supports"): return
+	var container := volume.get_node("Supports"); var undo := get_undo_redo()
+	undo.create_action("Ripristina sostegni automatici",UndoRedo.MERGE_DISABLE,volume)
+	undo.add_do_method(self,"_detach_support",volume,volume,container)
+	undo.add_undo_method(self,"_attach",volume,container,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(container); undo.add_undo_method(volume,"request_rebuild"); undo.commit_action()

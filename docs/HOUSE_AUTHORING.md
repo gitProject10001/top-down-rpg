@@ -355,3 +355,32 @@ la tettoia a due falde. Verificati adattamento al ridimensionamento, salvataggio
 undo/redo e ingresso/uscita col giocatore. Questa copertura è per i corpi aperti:
 i corpi chiusi conservano il tetto a due falde. Restano da implementare coperture
 piane e sostegni modificabili individualmente.
+
+
+## Sostegni modificabili singolarmente
+
+Nel tab **Volumi**, seleziona un portico e premi **Sostegni: rendi editabili**.
+La disposizione corrente diventa una lista di nodi `Supports/Sostegno_…`, ciascuno
+con ID persistente. Seleziona un nodo nell'albero o tramite il suo gizmo: compare
+solo il suo contorno. Usa la traslazione Godot per spostarlo e **Section**
+nell'Inspector per la sezione quadrata; **Enabled** lo sospende senza cancellarlo.
+L'altezza segue la copertura dalla quota base del nodo.
+
+**Aggiungi sostegno** inserisce un palo al centro del bordo anteriore;
+**Rimuovi sostegno selezionato** lo cancella. Queste operazioni, la conversione e
+**Ripristina sostegni automatici** supportano undo/redo. Il ripristino rimuove
+l'intera disposizione manuale; Undo la recupera. Prima della conversione continua
+a funzionare il passo automatico. Dopo, anche una lista vuota rimane manuale:
+i pali cancellati non ricompaiono e cambiare Post Spacing non li ridistribuisce.
+
+Ridimensionare o sganciare il portico conserva numero, posizioni locali e sezioni
+manuali. I pali fuori dalla copertura vengono segnalati nell'Inspector e nel
+pannello quando selezionati, conservati nei dati e sospesi nella geometria.
+Non vengono spostati automaticamente per adattarli: correggili a mano.
+
+Prima versione: pali verticali, sezione quadrata; usa posizione e Section, non
+rotazione o scala (se impostate, compare una segnalazione). Le travi restano
+quelle del telaio automatico: non è un controllo di stabilità strutturale.
+L'esempio porch_canopy ora ha due pali anteriori più spessi e spostati verso
+l'interno. Verificati persistenza dopo ridimensionamento, collisioni, cancellazione,
+salvataggio, undo/redo e Play.

@@ -443,6 +443,24 @@ solo volumi aperti, direzione locale retro → fronte, terreno piano. Prossimo
 incremento: sostegni selezionabili e modificabili singolarmente, preservando
 le modifiche manuali quando cambiano le dimensioni del portico.
 
+**A03.3 verificato — 2026-09-13.** Conversione esplicita della disposizione dei
+pali in nodi dati `Supports/Sostegno_…`. ID, posizione locale, sezione e abilitazione
+persistono; il builder genera mesh e collisioni senza rigenerare i nodi manuali.
+Gizmo di selezione contestuale e traslazione nativa; aggiunta, rimozione e ritorno
+alla disposizione automatica con undo/redo. Il resize conserva i dati, adatta
+le altezze e segnala i pali fuori copertura invece di spostarli o cancellarli.
+
+Esempio porch_canopy aggiornato con pali anteriori spostati e ingrossati.
+`check_authored_supports.gd` verifica resize, collisioni, disabilitazione,
+cancellazione e salvataggio; suite editor e Play superati. Nell'apertura della
+scena playground personalizzata sono comparsi anche messaggi preesistenti di
+`plan.gd:58` sull'organizzazione dell'arredo fuori dall'albero: non riguardano i
+sostegni e quella scena non è stata modificata da questo incremento.
+
+Limiti: sezione quadrata, pali verticali; niente ridistribuzione automatica dopo
+la conversione, né adattamento delle travi alle posizioni manuali. Prossimo passo:
+controventi e travi di collegamento editabili per completare il telaio dei portici.
+
 - [ ] Ogni copertura ha pianta, colmo, pendenza, quota, sporto e collegamento al volume.
 - [ ] Prima due falde e una falda; poi tetto piano/parapetto e quattro falde.
 - [ ] Raccordi: intersezioni, compluvi/displuvi, bordi e taglio delle parti nascoste.

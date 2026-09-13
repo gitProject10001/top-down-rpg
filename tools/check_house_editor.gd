@@ -281,6 +281,18 @@ func run(plugin: EditorPlugin) -> void:
 	profile_history.undo(); assert(porch.canopy_roof==0)
 	profile_history.redo(); assert(porch.canopy_roof==1)
 	print("PORCH_EDITOR_CREATE_ROOF_UNDO_REDO_OK")
+	plugin._edit_supports(); var supports=porch.get_node("Supports"); var support_count=supports.get_child_count()
+	assert(support_count>0 and supports.get_child(0).owner==scene)
+	profile_history.undo(); assert(not porch.has_node("Supports"))
+	profile_history.redo(); assert(porch.get_node("Supports")==supports)
+	plugin._add_support(); assert(supports.get_child_count()==support_count+1)
+	var selected_post=EditorInterface.get_selection().get_selected_nodes()[0]
+	assert(plugin.gizmos.context==2 and plugin.support_gizmos.focus==selected_post)
+	plugin._remove_support(); assert(supports.get_child_count()==support_count)
+	profile_history.undo(); assert(supports.get_child_count()==support_count+1)
+	plugin._automatic_supports(); assert(not porch.has_node("Supports"))
+	profile_history.undo(); assert(porch.get_node("Supports")==supports)
+	print("SUPPORTS_EDITOR_CONVERT_ADD_REMOVE_RESET_UNDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

@@ -96,15 +96,9 @@ func _build_shell() -> void:
 		super._build_shell(); return
 	if canopy_roof==1:
 		_build_shed_supports(); return
-	# Two rows of posts: rear posts are unnecessary for a valid wall attachment.
-	var anchored := attached and volume_host()!=null and volume_error().is_empty()
-	var bays := maxi(1,ceili((depth-post_size)/post_spacing))
+	_build_posts()
 	for side in [-1.0,1.0]:
 		var x: float=side*(width-post_size)*0.5
-		for i in bays+1:
-			if anchored and i==0: continue
-			var z: float=-(depth-post_size)*0.5+i*(depth-post_size)/bays
-			_box(Vector3(x,wall_height*0.5,z),Vector3(post_size,wall_height,post_size),1)
 		_box(Vector3(x,wall_height-0.10,0),Vector3(post_size+0.04,0.20,depth),1)
 	for z in [-depth*0.5,depth*0.5]:
 		_box(Vector3(0,wall_height-0.10,z),Vector3(width,0.20,post_size),1)
@@ -119,15 +113,35 @@ func _build_roof() -> ArrayMesh:
 	return RoofMesh.new().generate(width,depth,wall_height,roof_height,house_seed,weathered,structure_kind==1 and canopy_roof==1)
 
 func _build_shed_supports() -> void:
-	var anchored := attached and volume_host()!=null and volume_error().is_empty()
-	var bays := maxi(1,ceili((depth-post_size)/post_spacing))
+	_build_posts()
 	for side in [-1.0,1.0]:
 		var x: float=side*(width-post_size)*0.5
-		for i in bays+1:
-			if anchored and i==0: continue
-			var z: float=-(depth-post_size)*0.5+i*(depth-post_size)/bays
-			var h := support_height(z)
-			_box(Vector3(x,h*0.5,z),Vector3(post_size,h,post_size),1)
 		_beam(Vector3(x,support_height(-depth*0.5)-0.10,-depth*0.5),Vector3(x,support_height(depth*0.5)-0.10,depth*0.5),post_size)
 	for z in [-depth*0.5,depth*0.5]:
 		_box(Vector3(0,support_height(z)-0.10,z),Vector3(width,0.20,post_size),1)
+
+func automatic_posts() -> Array[Vector3]:
+	var result: Array[Vector3]=[]
+	var anchored := attached and volume_host()!=null and volume_error().is_empty()
+	var bays := maxi(1,ceili((depth-post_size)/post_spacing))
+	for side in [-1.0,1.0]:
+		for i in bays+1:
+			if anchored and i==0: continue
+			result.append(Vector3(side*(width-post_size)*0.5,0,-(depth-post_size)*0.5+i*(depth-post_size)/bays))
+	return result
+
+func _build_posts() -> void:
+	var supports := get_node_or_null("Supports")
+	if supports:
+		for post in supports.get_children():
+			if not post.has_method("valid"): continue
+			post.update_gizmos()
+			if Engine.is_editor_hint(): post.update_configuration_warnings()
+			if post.valid(): _box(post.position+Vector3.UP*post.height()*0.5,Vector3(post.section,post.height(),post.section),1)
+	else:
+		for point in automatic_posts():
+			var h := support_height(point.z)
+			_box(point+Vector3.UP*h*0.5,Vector3(post_size,h,post_size),1)
+
+func post_top(point: Vector3) -> float:
+	return support_height(point.z) if canopy_roof==1 else wall_height+roof_height*(1.0-absf(point.x)/(width*0.5))
