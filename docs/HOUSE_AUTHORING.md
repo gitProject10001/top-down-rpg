@@ -253,3 +253,33 @@ parapetti, salvataggio e undo/redo. Una sola scala per terrazza in questo increm
 rampe a L/U, pianerottoli intermedi e posizionamento libero senza terrazza restano
 successivi. Il nodo è indipendente nei parametri ma rimane agganciato alla terrazza:
 usa le sue maniglie e proprietà invece della trasformazione nativa Godot.
+
+## Corpi accessori: tab Volumi
+
+Apri `scenes/dev/multi_volume_example.tscn`: **CasaComposta** contiene
+`Volumes/Bottega` e `Volumes/Deposito`, modificabili separatamente.
+Seleziona **CasaComposta** e premi **Play casa selezionata** per provare l'intero
+edificio; l'ingresso frontale porta anche ai due corpi laterali.
+
+Nel tab **Volumi**, scegli **Aggiungi corpo** sulla facciata desiderata. Seleziona
+il nuovo nodo per usare le maniglie di larghezza, profondità, altezza e tetto.
+Nell'Inspector, **Host Wall** e **Host Offset** controllano facciata e posizione
+lungo la parete. Il tab **Aperture** modifica le finestre e porte di quel corpo.
+Il tetto e le aperture mantengono parametri indipendenti dalla casa principale.
+
+**Sgancia volume** conserva la trasformazione corrente e permette spostamento
+e rotazione con gli strumenti Godot; **Riaggancia volume** ripristina l'aggancio
+alla facciata configurata. **Rimuovi volume selezionato** conserva gli altri corpi.
+Queste operazioni supportano undo/redo. L'aggancio aggiorna automaticamente il
+taglio della parete e le collisioni; per ora crea un passaggio aperto.
+
+Il pannello indica **VOLUME NON RACCORDATO** se dimensioni, tetto o posizione
+impediscono il raccordo. Il tetto accessorio deve rimanere almeno 15 cm sotto
+l'altezza della parete principale: il corpo predefinito richiede circa 4 m di
+parete. Riduci le altezze del corpo o aumenta quella della casa. La larghezza deve
+entrare nella facciata, senza sovrapporsi ad aperture manuali o ad altri annessi.
+Non inserire aperture sul retro del corpo, che è il lato condiviso.
+
+Questo incremento supporta corpi al piano terreno, senza ali legacy o volumi
+annidati. Un raccordo non valido lascia chiusa la parete principale. Interni
+su più volumi, porte fra i corpi e intersezioni complesse dei tetti sono successivi.

@@ -9,6 +9,8 @@ var floor_choice: OptionButton
 var door_choice: OptionButton
 var _binding_key := ""
 var placing_terrace := false
+const Volume=preload("res://addons/house_builder/volume.gd")
+var volume_info: Label
 const House=preload("res://addons/house_builder/house.gd")
 const Gizmo=preload("res://addons/house_builder/gizmo.gd")
 const Plan=preload("res://addons/house_builder/plan.gd")
@@ -102,6 +104,7 @@ func _enter_tree() -> void:
 	dock.add_child(play)
 	_build_context_tabs()
 	_build_component_tab()
+	_build_volume_tab()
 	architecture_choice=OptionButton.new()
 	for profile in architecture_profiles: architecture_choice.add_item(profile.display_name)
 	tabs.get_child(0).add_child(architecture_choice)
@@ -161,7 +164,8 @@ func _selection_context() -> void:
 	var selected := EditorInterface.get_selection().get_selected_nodes()
 	var node: Node=selected[0] if not selected.is_empty() else null
 	context_label.text="Selezione: "+str(node.name) if node else "Seleziona una casa o disegnane una."
-	if node is Balcony or node is ExteriorStair: tabs.current_tab=4
+	if node is Volume: tabs.current_tab=5
+	elif node is Balcony or node is ExteriorStair: tabs.current_tab=4
 	elif node is Element: tabs.current_tab=3 if node.kind==3 else 2
 	elif node is Plan: tabs.current_tab=2
 	elif node is House and tabs.current_tab>1: tabs.current_tab=0
@@ -184,7 +188,7 @@ func _context_changed(_index: int) -> void:
 	_refresh_context_gizmos()
 func _refresh_context_gizmos() -> void:
 	var house := _selected_house()
-	gizmos.focus=house; gizmos.context=mini(tabs.current_tab,2)
+	gizmos.focus=house; gizmos.context=0 if house is Volume and tabs.current_tab==5 else mini(tabs.current_tab,2)
 	balcony_gizmos.focus=null; stair_gizmos.focus=null
 	for selected in EditorInterface.get_selection().get_selected_nodes():
 		if selected is ExteriorStair and tabs.current_tab==4: stair_gizmos.focus=selected; selected.update_gizmos(); continue
@@ -221,6 +225,9 @@ func _apply_changes() -> void:
 		for house in _houses(root):
 			if house._pending: house.rebuild()
 func _process(_delta: float) -> void:
+	if volume_info:
+		var selected_volume := _selected_house()
+		volume_info.text=("VOLUME NON RACCORDATO: "+selected_volume.volume_error() if not selected_volume.volume_error().is_empty() else "Volume valido. Dimensioni: maniglie; lato e posizione: Inspector. Sgancia per usare la trasformazione libera.") if selected_volume is Volume else "Seleziona una casa e aggiungi un corpo basso. Ogni volume conserva tetto e aperture propri."
 	_refresh_binding_choices()
 	if balcony_info:
 		var component := _selected_balcony()
@@ -372,7 +379,7 @@ func _houses(root: Node) -> Array[Node3D]:
 	var result: Array[Node3D]=[]
 	for child in root.get_children():
 		if child is House: result.append(child)
-		else: result.append_array(_houses(child))
+		result.append_array(_houses(child))
 	return result
 func _wall(camera: Camera3D,position: Vector2) -> Dictionary:
 	var root := EditorInterface.get_edited_scene_root()
@@ -699,3 +706,54 @@ func _detach_stair(host: Node3D,stair: Node3D) -> void:
 		EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(host); EditorInterface.edit_node(host)
 	stair_gizmos.focus=null
 	host.remove_child(stair); _selection_context()
+
+func _build_volume_tab() -> void:
+	var page := VBoxContainer.new(); page.name="Volumi"; tabs.add_child(page)
+	for side in 4:
+		var button := Button.new(); button.text="Aggiungi corpo · "+["davanti","dietro","destra","sinistra"][side]; button.pressed.connect(_add_volume.bind(side)); page.add_child(button)
+	for attached in [false,true]:
+		var button := Button.new(); button.text="Riaggancia volume" if attached else "Sgancia volume"; button.pressed.connect(_toggle_volume.bind(attached)); page.add_child(button)
+	var remove := Button.new(); remove.text="Rimuovi volume selezionato"; remove.pressed.connect(_remove_volume); page.add_child(remove)
+	volume_info=Label.new(); volume_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(volume_info)
+func _add_volume(side: int) -> void:
+	var host := _selected_house()
+	if host is Volume: host=host.volume_host()
+	if host==null: status.text="Seleziona una casa."; return
+	var container := host.get_node_or_null("Volumes"); var fresh := container==null
+	if fresh: container=Node3D.new(); container.name="Volumes"; host.add_child(container)
+	var volume := Volume.new(); volume.name="CorpoAccessorio"; volume.width=3.0; volume.depth=4.0; volume.wall_height=2.6; volume.roof_height=1.2; volume.host_wall=side
+	volume.openings=[{"kind":"window","wall":0,"u":0.0,"y":1.4}]
+	container.add_child(volume); volume.prepare_attachment(); var error := volume.volume_error()
+	container.remove_child(volume)
+	if fresh: host.remove_child(container)
+	if not error.is_empty():
+		volume.free()
+		if fresh: container.free()
+		_show_plan_error("Corpo accessorio",error); return
+	var undo := get_undo_redo(); undo.create_action("Aggiungi corpo accessorio",UndoRedo.MERGE_DISABLE,host)
+	if fresh:
+		undo.add_do_method(self,"_attach",host,container,EditorInterface.get_edited_scene_root()); undo.add_do_reference(container)
+	undo.add_do_method(self,"_attach",container,volume,EditorInterface.get_edited_scene_root()); undo.add_do_reference(volume)
+	undo.add_do_method(host,"request_rebuild")
+	undo.add_undo_method(self,"_detach_volume",host,container,volume)
+	if fresh: undo.add_undo_method(host,"remove_child",container)
+	undo.commit_action()
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(volume); EditorInterface.edit_node(volume); _selection_context()
+func _detach_volume(host: Node3D,container: Node3D,volume: Node3D) -> void:
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(host); EditorInterface.edit_node(host)
+	container.remove_child(volume); host.request_rebuild(); _selection_context()
+func _toggle_volume(attached: bool) -> void:
+	var volume := _selected_house()
+	if not volume is Volume: return
+	var undo := get_undo_redo(); undo.create_action("Aggancio volume",UndoRedo.MERGE_DISABLE,volume)
+	undo.add_do_property(volume,"attached",attached); undo.add_undo_property(volume,"attached",volume.attached)
+	undo.add_undo_property(volume,"transform",volume.transform); undo.commit_action()
+
+func _remove_volume() -> void:
+	var volume := _selected_house()
+	if not volume is Volume: return
+	var host: Node3D=volume.volume_host(); var container := volume.get_parent()
+	var undo := get_undo_redo(); undo.create_action("Rimuovi corpo accessorio",UndoRedo.MERGE_DISABLE,host)
+	undo.add_do_method(self,"_detach_volume",host,container,volume)
+	undo.add_undo_method(self,"_attach",container,volume,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(volume)
+	undo.add_undo_method(host,"request_rebuild"); undo.commit_action()

@@ -59,4 +59,10 @@ func polygon() -> PackedVector2Array:
 		for wall in range(4,8):
 			for side in [-1,1]:
 				var q: Vector3=transform*house_pose*h.wall_point(wall,side*h.wall_length(wall)*0.5,0); result.append(Vector2(q.x,q.z))
+	if h:
+		for volume in h.authored_volumes():
+			for x in [-volume.width*0.5,volume.width*0.5]:
+				for z in [-volume.depth*0.5,volume.depth*0.5]:
+					var q: Vector3=transform*house_pose*volume.transform*Vector3(x,0,z)
+					result.append(Vector2(q.x,q.z))
 	return Geometry2D.convex_hull(result)

@@ -191,7 +191,7 @@ func run(plugin: EditorPlugin) -> void:
 	assert(example_plan.level_records(0)==unchanged)
 	plugin.error_dialog.hide()
 	print("HOUSE_PLAN_ERROR_DIALOG_NO_UNDO_OK")
-	assert(plugin.tabs.get_tab_count()==5)
+	assert(plugin.tabs.get_tab_count()==6)
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house); plugin._selection_context()
 	plugin.tabs.current_tab=0; assert(plugin.gizmos.focus==house and plugin.gizmos.context==0)
 	plugin.tabs.current_tab=1; assert(plugin.gizmos.context==1 and plugin.opening_choice.item_count==house.openings.size())
@@ -259,6 +259,15 @@ func run(plugin: EditorPlugin) -> void:
 	var fresh_terrace=fresh_house.attached_components()[0]
 	assert(fresh_terrace.stair_component()!=null and fresh_terrace.stair_component().owner==scene and not fresh_terrace.exterior_stairs)
 	print("NEW_TERRACE_OWNS_INDEPENDENT_STAIR_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(fresh_house)
+	plugin._add_volume(2); var annex=fresh_house.authored_volumes()[0]; var annex_id=annex.volume_id
+	assert(plugin.tabs.current_tab==5 and plugin.gizmos.focus==annex and plugin.gizmos.context==0)
+	profile_history.undo(); assert(fresh_house.authored_volumes().is_empty())
+	profile_history.redo(); assert(fresh_house.authored_volumes()[0].volume_id==annex_id)
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(annex)
+	plugin._toggle_volume(false); assert(not annex.attached)
+	profile_history.undo(); assert(annex.attached)
+	print("VOLUME_EDITOR_ADD_DETACH_UNDO_REDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

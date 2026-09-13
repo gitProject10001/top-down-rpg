@@ -248,7 +248,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A00 | FATTO | Analisi delle 21 immagini e roadmap | — | Inventario e vincolo: architettura, resa attuale invariata |
 | A01 | FATTO | Profilo architettonico minimo e contratto versionato | A00 | Preset, editing preservato, container Components e ID persistenti |
 | A02a | IN CORSO | Componenti agganciati: balcone + porta | A01 | Vano, collisione e aggancio aggiornati senza perdere le modifiche manuali |
-| A02 | TODO | Composizione di più volumi rettangolari | A01 | Fucina R04 con corpo e tettoie modificabili indipendentemente |
+| A02 | IN CORSO | Composizione di più volumi rettangolari | A01 | Fucina R04 con corpo e tettoie modificabili indipendentemente |
 | A03 | TODO | Coperture indipendenti e parti aperte | A02 | Falde a quote diverse, portico e tetto piano; raccordi senza geometria interna superflua |
 | A04 | TODO | Piani e interni coerenti con i volumi | A02, A03 | Casa R02: ingresso, scala esterna/interna, piano superiore percorribile |
 | A05 | TODO | Facciate e strutture per campate | A03, A04 | Graticcio e portico: travi e aperture seguono la struttura senza invadere i vani |
@@ -360,6 +360,31 @@ A02 per verificare la stessa modularità su forme architettoniche più grandi.
 
 
 ### A02 — Volumi, non una lista di eccezioni per ogni edificio
+
+**A02.1 verificato — 2026-09-13.** Il tab **Volumi** aggiunge corpi accessori
+su una facciata della casa. Ogni nodo `Volumes/…` riusa il builder della casa e
+conserva dimensioni, tetto, aperture e ID propri. Le maniglie modificano il corpo
+selezionato; facciata e offset definiscono l'aggancio. Sganciandolo si possono
+usare le trasformazioni native, senza perdere gli altri corpi.
+
+Il raccordo taglia involucro e collisioni nascoste: il giocatore attraversa
+casa e bottega senza incontrare una doppia parete. Sgancio, rimozione o raccordo
+non valido richiudono la casa principale. Gli errori compaiono nel tab e nelle
+configuration warnings. Il Village Builder include i corpi nell'ingombro del lotto.
+
+Esempio editabile: `scenes/dev/multi_volume_example.tscn`, casa + bottega + deposito.
+Verificati salvataggio, aperture indipendenti, collisioni del raccordo, sgancio,
+undo/redo dell'editor e attraversamento con il giocatore reale. Test:
+`check_multi_volume.gd`, `check_multi_volume_play.gd`, `check_house_editor.gd`;
+regressioni Village Builder e balconi superate. Render:
+`captures/balcony_attachment/multi_volume.png`.
+
+**Limiti:** agganci ortogonali al piano terreno e tetti accessori sotto la gronda
+principale. Sono esclusi volumi annidati, convivenza con l'ala legacy e intersezioni
+fra corpi accessori. Non c'è ancora un piano interno unico esteso agli annessi,
+né un raccordo configurabile con tramezzo/porta, né un solver per compluvi.
+La duplicazione con rimappatura degli ID e la migrazione dell'ala restano da fare.
+Prossimo incremento: scegliere fra passaggio aperto e parete con porta nel raccordo.
 
 - [ ] Nodi dati `Volume`: pianta rettangolare, quota, altezza, orientamento e ID.
 - [ ] Duplicazione, ridimensionamento e movimento di una sola parte con gizmo locale.

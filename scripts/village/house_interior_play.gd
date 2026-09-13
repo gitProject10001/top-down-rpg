@@ -82,7 +82,7 @@ func _ready() -> void:
 	world.add_child(entrance_light)
 	player=load("res://scenes/player/player3.tscn").instantiate(); player.name="Player"
 	player.position=Vector3(entry_x,0.15,house_depth*0.5+2.0); world.add_child(player)
-	if authored_plan:
+	if selected_source:
 		for record in house.openings:
 			var opening: Dictionary=house.resolved_opening(record)
 			if opening.door and house.wall_exposed(opening.wall,opening.along):
@@ -103,6 +103,9 @@ func nearest_door() -> Node3D:
 	var all: Array=[]
 	for child in house._generated.get_children():
 		if child is Door: all.append(child)
+	for volume in house.authored_volumes():
+		for child in volume._generated.get_children():
+			if child is Door: all.append(child)
 	all.append_array(interior.doors)
 	if authored_plan: all.append_array(authored_plan.doors())
 	for door in all:
@@ -120,6 +123,10 @@ func _process(delta: float) -> void:
 	if house.wing_enabled:
 		var q: Vector3=house.wing_transform().affine_inverse()*p
 		entered=entered or (absf(q.x)<house.wing_span()*0.5-margin and absf(q.z)<(house.width*0.5+house.wing_length)*0.5-margin and p.y>-0.5)
+	for volume in house.authored_volumes():
+		if not volume.attached or not volume.volume_error().is_empty(): continue
+		var q: Vector3=volume.to_local(player.global_position)
+		entered=entered or (absf(q.x)<volume.width*0.5-margin and absf(q.z)<volume.depth*0.5-margin and q.y>-0.5)
 	var collision: CollisionShape3D=player.get_node("Collision")
 	var feet_y: float=p.y+collision.position.y-collision.shape.height*0.5
 	active_floor=clampi(floori((feet_y+0.2)/storey_height),0,storeys-1)

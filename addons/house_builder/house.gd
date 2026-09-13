@@ -254,8 +254,10 @@ func rebuild() -> void:
 	roof.mesh=RoofMesh.new().generate(width,depth,wall_height,roof_height,house_seed,weathered)
 	_generated.add_child(roof)
 	if wing_enabled: _join_wing(body,roof)
+	_clip_authored_volumes(body,roof)
 	if not _is_wing_part: _finish_openings(body,materials)
 	for component in attached_components(): component.refresh()
+	for volume in authored_volumes(): volume.rebuild()
 	var plan := get_node_or_null("InteriorPlan")
 	if plan and plan.has_method("editor_view"):
 		plan._pending=true
@@ -415,6 +417,7 @@ func set_cutaway(enabled: bool,floor_base: float=0.0,storey_height: float=-1.0) 
 	_generated.get_node("Roof").visible=not enabled
 	for child in _generated.get_children():
 		if child is Door: child.set_cutaway(enabled)
+	for volume in authored_volumes(): volume.set_cutaway(enabled,floor_base,storey_height)
 
 
 func architecture_state() -> Dictionary:
@@ -472,3 +475,22 @@ func opening_by_id(id: String) -> Dictionary:
 	for record in openings:
 		if str(record.get("opening_id",""))==id: return record
 	return {}
+
+func authored_volumes() -> Array:
+	var result: Array=[]
+	var container := get_node_or_null("Volumes")
+	if container:
+		for child in container.get_children():
+			if child.has_method("volume_host"): result.append(child)
+	return result
+func _clip_authored_volumes(body: MeshInstance3D,roof: MeshInstance3D) -> void:
+	var cutters: Array=[]
+	for volume in authored_volumes(): volume.prepare_attachment()
+	for volume in authored_volumes():
+		if volume.attached and volume.volume_error().is_empty(): cutters.append(volume._volume_planes(Vector2(volume.width,volume.depth),volume.roof_height,volume.transform,0.001))
+	if has_method("volume_host") and get("attached"):
+		var host: Node3D=call("volume_host")
+		if host and call("volume_error").is_empty(): cutters.append(host._volume_planes(Vector2(host.width,host.depth),host.roof_height,transform.affine_inverse(),-0.001))
+	if cutters.is_empty(): return
+	for instance in [body,roof]:
+		var clipped := ArrayMesh.new(); MeshJoin.append(clipped,instance.mesh,Transform3D.IDENTITY,cutters); instance.mesh=clipped
