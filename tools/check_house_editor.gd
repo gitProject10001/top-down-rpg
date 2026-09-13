@@ -321,6 +321,17 @@ func run(plugin: EditorPlugin) -> void:
 	plugin._remove_roof_stair(); assert(annex.stair_component()==null)
 	profile_history.undo(); assert(annex.stair_component()==roof_stair)
 	print("ROOF_ACCESS_EDITOR_ADD_REMOVE_UNDO_OK")
+	var access_plan=preload("res://addons/house_builder/plan.gd").new(); access_plan.name="InteriorPlan"; access_plan.floor_height=annex.effective_elevation(); fresh_house.add_child(access_plan); access_plan.owner=scene
+	for i in 2:
+		var access_level := Node3D.new(); access_level.name="Livello%d"%i; access_plan.add_child(access_level); access_level.owner=scene
+	access_plan.rebuild()
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(annex)
+	plugin._set_roof_door(true); assert(annex.roof_door_enabled and not annex.roof_door_floor_id.is_empty())
+	profile_history.undo(); assert(not annex.roof_door_enabled)
+	profile_history.redo(); assert(annex.roof_door_enabled and annex.roof_door_error().is_empty())
+	plugin._set_roof_door(false); assert(not annex.roof_door_enabled)
+	profile_history.undo(); assert(annex.roof_door_enabled)
+	print("ROOF_DOOR_EDITOR_FLOOR_BIND_UNDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

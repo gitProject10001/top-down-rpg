@@ -474,3 +474,25 @@ Raggiungi la scala esterna della bottega, sali sul tetto e ridiscendi. Il tetto 
 illuminato come esterno e visibile quando il giocatore vi cammina. Non è ancora
 collegato con una porta al piano superiore della casa; la planimetria interna
 non viene modificata. Le texture sono rimaste quelle della versione precedente.
+
+
+## Porta dal tetto al piano superiore
+
+Seleziona il volume con tetto piano e usa **Volumi → Accesso tetto → Collega porta
+al piano interno**. Il comando cerca un livello dell'InteriorPlan della casa alla
+quota del tetto, con tolleranza di 6 cm. Collega il suo ID persistente senza
+modificare stanze, muri o quote. Se manca il livello, compare un errore esplicito:
+allinea prima le quote nella tua planimetria. Non viene creato un piano nascosto.
+
+La porta è derivata dal volume, larga 1,2 m e alta 2 m. **Roof Door Offset** la
+sposta lungo il raccordo; **Rimuovi porta dal tetto** richiude il muro conservando
+le aperture manuali. Aggiunta e rimozione supportano undo/redo. La rinomina del
+piano non rompe il collegamento; cancellazione, quota incompatibile o sgancio
+del volume sospendono la porta e mostrano l'errore. Lo stato aperto si salva con
+il volume separatamente dalla porta del raccordo al piano terra.
+
+`scenes/dev/roof_door_example.tscn` contiene un piano superiore vuoto persistente,
+una porta e la scala esterna. Con CasaComposta → Play: sali, premi E alla porta,
+entra, ritorna sul tetto e scendi. Non viene verificata la presenza di arredi o
+tramezzi davanti alla porta: libera manualmente il passaggio nel piano collegato.
+Il formato attuale ha un collegamento superiore per ciascun volume.

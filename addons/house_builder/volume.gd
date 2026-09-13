@@ -22,6 +22,13 @@ extends "res://addons/house_builder/house.gd"
 	set(value): host_wall=value; request_rebuild()
 @export_range(-1,1,0.01) var host_offset := 0.0:
 	set(value): host_offset=value; request_rebuild()
+@export_group("Porta dal tetto")
+@export var roof_door_enabled := false:
+	set(value): roof_door_enabled=value; request_rebuild()
+@export_storage var roof_door_floor_id := ""
+@export_range(-1,1,0.05) var roof_door_offset := 0.0:
+	set(value): roof_door_offset=value; request_rebuild()
+@export_storage var roof_door_open := false
 @export_group("Raccordo interno")
 @export_enum("Passaggio aperto", "Parete con porta") var junction_mode := 0:
 	set(value): junction_mode=value; request_rebuild()
@@ -41,7 +48,7 @@ func _exit_tree() -> void:
 	var host := volume_host()
 	if host: host.request_rebuild()
 func _process(delta: float) -> void:
-	var signature := str(dimensions(),parapet_enabled,automatic_frame,canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
+	var signature := str(dimensions(),roof_door_enabled,roof_door_floor_id,roof_door_offset,parapet_enabled,automatic_frame,canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
 	if signature!=_observed:
 		_observed=signature
 		var host := volume_host()
@@ -89,6 +96,8 @@ func volume_error() -> String:
 func _get_configuration_warnings() -> PackedStringArray:
 	var error := volume_error()
 	if not error.is_empty(): return PackedStringArray([error])
+	var door_error := roof_door_error()
+	if not door_error.is_empty(): return PackedStringArray([door_error])
 	var access_error := roof_access_error()
 	if not access_error.is_empty(): return PackedStringArray([access_error])
 	return PackedStringArray() if structure_kind==1 else super._get_configuration_warnings()
@@ -251,3 +260,23 @@ func roof_access_error() -> String:
 func has_roof_access() -> bool:
 	var stairs := stair_component()
 	return stairs!=null and stairs.enabled and roof_access_error().is_empty()
+
+func roof_door_record() -> Dictionary:
+	var host := volume_host()
+	var along: float=host_offset*host.wall_length(host_wall)*0.5+roof_door_offset*maxf(0,(width-1.2)*0.5-0.2)
+	return {"kind":"door","wall":host_wall,"u":along/(host.wall_length(host_wall)*0.5),"floor_y":effective_elevation(),"width":1.2,"height":2.0,"open":roof_door_open,"volume_id":volume_id,"roof_entry":true}
+func roof_door_error() -> String:
+	if not roof_door_enabled: return ""
+	var host := volume_host()
+	if not attached or canopy_roof!=2 or host==null: return "Porta tetto sospesa: serve un tetto piano agganciato alla casa."
+	var level: Node3D=host.authored_floor(roof_door_floor_id)
+	if level==null: return "Porta tetto sospesa: piano interno collegato mancante."
+	if absf(host.floor_elevation(roof_door_floor_id,-100)-effective_elevation())>0.06: return "Porta tetto sospesa: quota del tetto e piano interno non coincidono (tolleranza 6 cm)."
+	if effective_elevation()+2.12>host.wall_height: return "Porta tetto sospesa: muro troppo basso sopra la soletta."
+	if not volume_error().is_empty(): return "Porta tetto sospesa: correggi il raccordo del volume."
+	if width<1.6: return "Tetto troppo stretto per la porta."
+	var candidate: Dictionary=host.resolved_opening(roof_door_record())
+	for record in host.openings:
+		var opening: Dictionary=host.resolved_opening(record)
+		if opening.wall==candidate.wall and absf(opening.along-candidate.along)<(opening.width+candidate.width)*0.5+0.16 and absf(opening.y-candidate.y)<(opening.height+candidate.height)*0.5+0.16: return "Porta tetto sovrapposta a un'apertura manuale: spostala."
+	return ""

@@ -377,7 +377,7 @@ func _finish_openings(body: MeshInstance3D,materials: Array) -> void:
 			var frame := Transform3D(Basis(tangent,Vector3.UP,wall_normal(o.wall)),wall_point(o.wall,o.along-o.width*0.5,o.y-o.height*0.5,-0.17))
 			door.configure(frame,o.width,o.height,materials[1],bool(records[o.index].get("open",false)))
 			if o.index<openings.size(): door.changed.connect(_door_changed.bind(o.index))
-			elif records[o.index].has("volume_id"): door.changed.connect(_volume_door_changed.bind(records[o.index].volume_id))
+			elif records[o.index].has("volume_id"): door.changed.connect(_volume_door_changed.bind(records[o.index].volume_id,bool(records[o.index].get("roof_entry",false))))
 			else: door.changed.connect(_component_door_changed.bind(records[o.index].get("component_id","")))
 			# Contrasting threshold remains visible when the facade is cut away.
 			_wall_box(o.wall,o.along,o.y-o.height*0.5+0.02,o.width,0.04,0.55,-0.08,2)
@@ -465,10 +465,13 @@ func all_openings() -> Array[Dictionary]:
 			result.append(component.opening_record())
 	for volume in authored_volumes():
 		if volume.attached and volume.structure_kind==0 and volume.junction_mode==1 and volume.volume_error().is_empty(): result.append(volume.junction_record())
+		if volume.roof_door_enabled and volume.roof_door_error().is_empty(): result.append(volume.roof_door_record())
 	return result
-func _volume_door_changed(opened: bool,id: String) -> void:
+func _volume_door_changed(opened: bool,id: String,roof_entry: bool=false) -> void:
 	for volume in authored_volumes():
-		if volume.volume_id==id: volume.junction_open=opened
+		if volume.volume_id==id:
+			if roof_entry: volume.roof_door_open=opened
+			else: volume.junction_open=opened
 func _component_door_changed(opened: bool,id: String) -> void:
 	for component in attached_components():
 		if component.component_id==id: component.door_open=opened

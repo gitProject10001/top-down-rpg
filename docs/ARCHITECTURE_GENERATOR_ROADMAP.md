@@ -518,6 +518,19 @@ suite editor su undo/redo. Esempio `roof_access_example.tscn`; immagine
 su richiesta. Restano porta verso il piano superiore, controllo degli ingombri
 esterni e integrazione con il piano interno; nessuna planimetria viene riscritta.
 
+**A03.8 / primo raccordo A04 verificato — 2026-09-13.** Porta derivata dal tetto
+piano verso un livello persistente dell'InteriorPlan della casa. ID del livello,
+controllo di quota (6 cm), offset lungo la facciata, stato della porta indipendente
+dal raccordo inferiore. Il comando non crea o sposta stanze e solai; un piano
+mancante o una quota incompatibile produce un errore. Rimozione richiude la parete.
+
+Esempio `roof_door_example.tscn` con piano superiore vuoto. Test
+`check_roof_door.gd`: ID, rename, mismatch, rimozione, sgancio e salvataggio.
+`check_roof_door_play.gd`: scala → tetto → porta → solaio superiore → ritorno e
+ discesa; cattura `captures/balcony_attachment/roof_door_play.png`. Comandi editor
+con undo/redo verificati. Limiti: una porta di dimensioni fisse per volume;
+nessun controllo automatico di tramezzi o arredi davanti all'accesso.
+
 - [ ] Ogni copertura ha pianta, colmo, pendenza, quota, sporto e collegamento al volume.
 - [ ] Prima due falde e una falda; poi tetto piano/parapetto e quattro falde.
 - [ ] Raccordi: intersezioni, compluvi/displuvi, bordi e taglio delle parti nascoste.

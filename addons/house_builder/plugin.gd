@@ -258,6 +258,7 @@ func _process(_delta: float) -> void:
 		if not canopy_roof_choice.disabled: canopy_roof_choice.select(selected_volume.canopy_roof)
 		for button in junction_buttons: button.disabled=not selected_volume is Volume or selected_volume.structure_kind!=0
 		volume_info.text=("VOLUME NON RACCORDATO: "+selected_volume.volume_error() if not selected_volume.volume_error().is_empty() else "Portico aperto: altezza sostegni = Wall Height; colmo = Roof Height. Passo e sezione pali: Struttura. La parete della casa resta intatta." if selected_volume.structure_kind==1 else "Raccordo: "+["passaggio aperto","parete con porta"][selected_volume.junction_mode]+". Dimensioni e posizione porta: Inspector, Raccordo interno. Sgancia per usare la trasformazione libera.") if selected_volume is Volume else "Seleziona una casa e aggiungi un corpo basso. Ogni volume conserva tetto e aperture propri."
+		if selected_volume is Volume and not selected_volume.roof_door_error().is_empty(): volume_info.text+="\nATTENZIONE: "+selected_volume.roof_door_error()
 		if selected_volume is Volume and not selected_volume.roof_access_error().is_empty(): volume_info.text+="\nATTENZIONE: "+selected_volume.roof_access_error()
 		if selected_volume is Volume and selected_volume.structure_kind==1:
 			volume_info.text+="\nSostegni: "+("manuali in Supports; le posizioni restano fisse durante il ridimensionamento." if selected_volume.has_node("Supports") else "automatici; usa Rendi editabili per modificarli singolarmente.")
@@ -768,7 +769,7 @@ func _build_volume_tab() -> void:
 	for entry in [["Collega con trave e controventi",_add_frame_link],["Collega un sostegno alla parete",_add_wall_link],["Rimuovi collegamento selezionato",_remove_frame_link]]:
 		var button := Button.new(); button.text=entry[0]; button.pressed.connect(entry[1]); links_page.add_child(button)
 	var access_page := VBoxContainer.new(); access_page.name="Accesso tetto"; frame_tabs.add_child(access_page)
-	for entry in [["Aggiungi scala al tetto piano",_add_roof_stair],["Rimuovi scala dal tetto",_remove_roof_stair]]:
+	for entry in [["Aggiungi scala al tetto piano",_add_roof_stair],["Rimuovi scala dal tetto",_remove_roof_stair],["Collega porta al piano interno",_set_roof_door.bind(true)],["Rimuovi porta dal tetto",_set_roof_door.bind(false)]]:
 		var button := Button.new(); button.text=entry[0]; button.pressed.connect(entry[1]); access_page.add_child(button)
 	var remove := Button.new(); remove.text="Rimuovi volume selezionato"; remove.pressed.connect(_remove_volume); page.add_child(remove)
 	volume_info=Label.new(); volume_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(volume_info)
@@ -916,3 +917,25 @@ func _remove_roof_stair() -> void:
 	undo.create_action("Rimuovi scala tetto",UndoRedo.MERGE_DISABLE,volume)
 	undo.add_do_method(self,"_detach_support",volume,volume,stairs)
 	undo.add_undo_method(self,"_attach",volume,stairs,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(stairs); undo.add_undo_method(volume,"request_rebuild"); undo.commit_action()
+
+func _set_roof_door(enabled: bool) -> void:
+	var volume := _selected_house()
+	if not volume is Volume: return
+	var level: Node3D; var id: String=volume.roof_door_floor_id
+	if enabled:
+		var host: Node3D=volume.volume_host(); var plan=host.get_node_or_null("InteriorPlan") if host else null
+		if plan:
+			for candidate in plan.levels():
+				if absf(plan.levels().find(candidate)*plan.floor_height-volume.effective_elevation())<=0.06: level=candidate; break
+		if level==null:
+			_show_plan_error("Porta dal tetto","Non esiste un piano interno alla quota del tetto (%.2f m). Allinea prima le quote; il comando non modifica la planimetria."%volume.effective_elevation()); return
+		id=str(level.get_meta("floor_id",""))
+		if id.is_empty(): id="floor_"+str(Time.get_ticks_usec())
+	var undo := get_undo_redo(); undo.create_action("Porta dal tetto",UndoRedo.MERGE_DISABLE,volume)
+	if enabled and str(level.get_meta("floor_id",""))!=id:
+		undo.add_do_method(level,"set_meta","floor_id",id)
+		if level.has_meta("floor_id"): undo.add_undo_method(level,"set_meta","floor_id",level.get_meta("floor_id"))
+		else: undo.add_undo_method(level,"remove_meta","floor_id")
+	undo.add_do_property(volume,"roof_door_floor_id",id); undo.add_undo_property(volume,"roof_door_floor_id",volume.roof_door_floor_id)
+	undo.add_do_property(volume,"roof_door_enabled",enabled); undo.add_undo_property(volume,"roof_door_enabled",volume.roof_door_enabled)
+	undo.add_do_method(volume.volume_host(),"request_rebuild"); undo.add_undo_method(volume.volume_host(),"request_rebuild"); undo.commit_action()
