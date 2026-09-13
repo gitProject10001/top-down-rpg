@@ -191,7 +191,7 @@ func run(plugin: EditorPlugin) -> void:
 	assert(example_plan.level_records(0)==unchanged)
 	plugin.error_dialog.hide()
 	print("HOUSE_PLAN_ERROR_DIALOG_NO_UNDO_OK")
-	assert(plugin.tabs.get_tab_count()==6)
+	assert(plugin.tabs.get_tab_count()==7)
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house); plugin._selection_context()
 	plugin.tabs.current_tab=0; assert(plugin.gizmos.focus==house and plugin.gizmos.context==0)
 	plugin.tabs.current_tab=1; assert(plugin.gizmos.context==1 and plugin.opening_choice.item_count==house.openings.size())
@@ -356,6 +356,11 @@ func run(plugin: EditorPlugin) -> void:
 	profile_history.undo(); assert(not tower_plan.has_node("PrimoPiano/ScalaTetto"))
 	profile_history.redo(); assert(tower_plan.has_node("PrimoPiano/ScalaTetto"))
 	print("TOWER_ROOF_STAIR_EDITOR_UNDO_OK")
+	plugin._create_curtain_wall(); var curtain=EditorInterface.get_selection().get_selected_nodes()[0]
+	assert(curtain.is_curtain_wall() and plugin.tabs.current_tab==6)
+	profile_history.undo(); assert(curtain.get_parent()==null)
+	profile_history.redo(); assert(curtain.get_parent()==scene)
+	print("CURTAIN_EDITOR_TAB_CREATE_UNDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

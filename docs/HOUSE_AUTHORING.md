@@ -584,3 +584,28 @@ Verificati percorso completo in entrambe le direzioni, collisioni, spostamento,
 disattivazione/eliminazione del foro, salvataggio e Undo/Redo. Restano botola e
 parapetti automatici del vano; la prima disposizione non risolve automaticamente
 interferenze con muri o arredi aggiunti manualmente.
+
+
+### Fortificazioni: cortina e portone (A08.1)
+
+Nuovo tab **Fortificazioni → Crea mura con portone**. Il nodo Cortina usa i gizmo
+per lunghezza (Width), spessore (Depth), altezza e merli. In Inspector → Portone
+si regolano Gate Enabled, Gate Width, Gate Height, Gate Offset e Gate Open.
+Il passaggio attraversa tutto lo spessore; disattivandolo il muro torna pieno.
+Il portone riutilizza la porta interattiva e conserva lo stato aperto/chiuso.
+I materiali sono quelli esistenti del builder.
+
+**Play fortificazione** prova il nodo selezionato. Esempio:
+`scenes/dev/curtain_wall_example.tscn`, con ScalaCamminamento modificabile
+come scala esterna del builder. Il passaggio e il camminamento sono esterni:
+non attivano il taglio o l’oscuramento dell’interno di una casa.
+
+Verifiche: portone chiuso blocca il giocatore, aperto permette l’attraversamento;
+salita/discesa dal camminamento; collisione dell’architrave e passaggio a tutto
+spessore; spostamento/disattivazione, salvataggio, tab contestuale e Undo/Redo.
+Limiti: segmento diritto indipendente, portone a una sola anta, lunghezza fino
+al limite di 20 m del builder; nessun raccordo automatico a torri, angoli o altri
+segmenti. Gli strumenti generici di aperture/interiori delle case non sono il
+flusso di authoring della cortina: usa i parametri Portone. Scala nell’esempio;
+il comando di creazione produce soltanto il muro. Per aggiungerla usa Volumi →
+Accesso tetto sul muro selezionato.

@@ -254,7 +254,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A05 | TODO | Facciate e strutture per campate | A03, A04 | Graticcio e portico: travi e aperture seguono la struttura senza invadere i vani |
 | A06 | TODO | Due archetipi completi con profili architettonici | A04, A05 | Fucina e sala nordica: differenze leggibili nelle forme e negli interni |
 | A07 | IN CORSO | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
-| A08 | TODO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
+| A08 | IN CORSO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
 | A09 | TODO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
 | A10 | TODO | Rovine strutturali controllabili | A03, A04, A07 | R07: togli una porzione di tetto/muro, interno e collisione coerenti |
 | A11 | TODO | Integrazione insediamento e consolidamento | Incrementale; chiusura dopo A08 | Case e castello nello stesso villaggio, rigenerazione locale e budget misurati |
@@ -718,4 +718,18 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A08: cortina parametrica e portone**, poi collegamento alle torri e recinto fortificato.
+se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A08: collegamento cortina–torre**, poi angoli e recinto fortificato.
+
+
+### A08.1 — Cortina rettilinea e portone — 2026-09-13
+
+Implementato un componente Cortina modificabile tramite il builder, con
+camminamento e merli, spessore solido e passaggio a tutto spessore. Portone
+interattivo parametrico e persistente. UI nel tab separato Fortificazioni con
+Play sul componente selezionato; gizmo contestuali e creazione annullabile.
+Esempio `curtain_wall_example.tscn` con scala esterna. Test
+`check_curtain_wall.gd`, `check_curtain_wall_play.gd` e suite editor: passaggio,
+collisioni, salita/discesa, spostamento/disattivazione portone, save e Undo/Redo.
+Questo non chiude A08: manca il recinto, i raccordi alle torri e gli angoli.
+Prossimo incremento: collegamento tra cortina e torre con passaggio sul
+camminamento, poi composizione del piccolo recinto fortificato.

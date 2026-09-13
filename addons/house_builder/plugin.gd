@@ -115,6 +115,7 @@ func _enter_tree() -> void:
 	_build_context_tabs()
 	_build_component_tab()
 	_build_volume_tab()
+	_build_fortification_tab()
 	architecture_choice=OptionButton.new()
 	for profile in architecture_profiles: architecture_choice.add_item(profile.display_name)
 	tabs.get_child(0).add_child(architecture_choice)
@@ -176,7 +177,8 @@ func _selection_context() -> void:
 	var selected := EditorInterface.get_selection().get_selected_nodes()
 	var node: Node=selected[0] if not selected.is_empty() else null
 	context_label.text="Selezione: "+str(node.name) if node else "Seleziona una casa o disegnane una."
-	if node is Volume or node is Support or node is FrameLink: tabs.current_tab=5
+	if node.has_method("is_curtain_wall"): tabs.current_tab=6
+	elif node is Volume or node is Support or node is FrameLink: tabs.current_tab=5
 	elif node is ExteriorStair and node.terrace() is Volume: tabs.current_tab=5; frame_tabs.current_tab=2
 	elif node is Balcony or node is ExteriorStair: tabs.current_tab=4
 	elif node is Element: tabs.current_tab=3 if node.kind==3 else 2
@@ -203,7 +205,7 @@ func _context_changed(_index: int) -> void:
 	_refresh_context_gizmos()
 func _refresh_context_gizmos() -> void:
 	var house := _selected_house()
-	gizmos.focus=house; gizmos.context=0 if house is Volume and tabs.current_tab==5 else mini(tabs.current_tab,2)
+	gizmos.focus=house; gizmos.context=0 if house is Volume and tabs.current_tab in [5,6] else mini(tabs.current_tab,2)
 	frame_gizmos.focus=null
 	support_gizmos.focus=null
 	balcony_gizmos.focus=null; stair_gizmos.focus=null
@@ -985,3 +987,15 @@ func _create_polygon_tower() -> void:
 	var records: Array[Dictionary]=[{"kind":"door","wall":0,"width":1.2,"height":2.1},{"kind":"window","wall":7,"width":0.5,"height":1.1,"y":3.6}]
 	tower.openings=records
 	_add_authored(root,tower,"Crea torre ottagonale"); _selection_context()
+
+func _build_fortification_tab() -> void:
+	var page := VBoxContainer.new(); page.name="Fortificazioni"; tabs.add_child(page)
+	var label := Label.new(); label.text="Cortina rettilinea con camminamento e portone.\nSeleziona il muro e usa i gizmo per le dimensioni.\nInspector → Portone: larghezza, altezza, posizione."; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(label)
+	var button := Button.new(); button.text="Crea mura con portone"; button.pressed.connect(_create_curtain_wall); page.add_child(button)
+	var play := Button.new(); play.text="Play fortificazione"; play.pressed.connect(_play_selected); page.add_child(play)
+
+func _create_curtain_wall() -> void:
+	var root := EditorInterface.get_edited_scene_root()
+	if root==null: return
+	var wall=preload("res://addons/house_builder/curtain_wall.gd").new(); wall.name="Cortina"
+	_add_authored(root,wall,"Crea cortina con portone"); _selection_context()
