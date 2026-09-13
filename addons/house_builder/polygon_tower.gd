@@ -128,8 +128,11 @@ func cutaway_cutters(floor_base: float,storey_height: float) -> Array:
 
 
 func connection_spans(wall: int,spans: Array[Vector2]) -> Array[Vector2]:
-	for child in get_children():
-		if not child.has_method("fortification_host") or not child.connect_to_tower or child.tower_face!=wall or not child.connection_error().is_empty(): continue
+	var curtains: Array=get_children()
+	if get_parent() and get_parent().has_method("curtains"): curtains=get_parent().curtains()
+	for child in curtains:
+		if not child.has_method("fortification_host") or not child.connect_to_tower or not child.connection_error().is_empty(): continue
+		if not ((child.fortification_host()==self and child.tower_face==wall) or (child.destination()==self and child.target_face==wall)): continue
 		var half: float=child.depth*0.5-0.22
 		var remaining: Array[Vector2]=[]
 		for span in spans:

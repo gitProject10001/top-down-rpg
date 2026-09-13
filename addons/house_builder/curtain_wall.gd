@@ -62,7 +62,33 @@ func _get_configuration_warnings() -> PackedStringArray:
 	set(value): connect_to_tower=value; request_rebuild()
 @export_range(0,7,1) var tower_face := 2:
 	set(value): tower_face=value; request_rebuild()
+@export_node_path("Node3D") var target_tower: NodePath:
+	set(value): target_tower=value; request_rebuild()
+@export_range(0,7,1) var target_face := 6:
+	set(value): target_face=value; request_rebuild()
+var _last_target: Node3D
 var _connection_signature := ""
+func destination() -> Node3D:
+	var node := get_node_or_null(target_tower) if not target_tower.is_empty() else null
+	return node if node and node.has_method("footprint_vertices") else null
+func destination_error() -> String:
+	if target_tower.is_empty(): return ""
+	var host := fortification_host(); var target := destination()
+	if target==null or target==host: return "Seleziona una seconda torre valida per Target Tower."
+	if host==null or not host.is_inside_tree() or not target.is_inside_tree(): return "Torri non disponibili nella scena."
+	if depth>target.wall_length(target_face)-0.25: return "La faccia della seconda torre è troppo stretta."
+	var a: Vector3=host.to_global(host.wall_point(tower_face,0,0))
+	var b: Vector3=target.to_global(target.wall_point(target_face,0,0))
+	var normal: Vector3=host.global_basis*host.wall_normal(tower_face)
+	var opposite: Vector3=target.global_basis*target.wall_normal(target_face)
+	var gap := b-a; var distance := gap.dot(normal)
+	if normal.dot(opposite)>-0.999 or (gap-normal*distance).length()>0.03:
+		return "Le due facce devono essere allineate e rivolte l’una verso l’altra. Sposta o ruota la seconda torre."
+	if distance<1.8 or distance>19.8: return "La distanza fra le facce deve essere fra 1.8 e 19.8 metri."
+	if absf(host.to_global(Vector3.UP*host.effective_elevation()).y-target.to_global(Vector3.UP*target.effective_elevation()).y)>0.03:
+		return "I tetti delle due torri devono avere la stessa quota."
+	return ""
+
 func fortification_host() -> Node3D:
 	var parent := get_parent()
 	return parent if parent and parent.has_method("footprint_vertices") else null
@@ -74,25 +100,36 @@ func connection_error() -> String:
 	for other in host.get_children():
 		if other!=self and other.has_method("fortification_host") and other.connect_to_tower and other.tower_face==tower_face:
 			return "Due cortine occupano la stessa faccia della torre. Cambia Tower Face."
-	return ""
+	return destination_error()
 func prepare_attachment() -> void:
 	if not connect_to_tower: super.prepare_attachment(); return
 	if not connection_error().is_empty(): return
 	var host := fortification_host(); var normal: Vector3=host.wall_normal(tower_face)
+	var target := destination()
+	if target:
+		var end: Vector3=host.to_local(target.to_global(target.wall_point(target_face,0,0)))
+		var length: float=(end-host.wall_point(tower_face,0,0)).dot(normal)+0.2
+		if not is_equal_approx(width,length): width=length
 	var tangent: Vector3=(host.wall_point(tower_face,1,0)-host.wall_point(tower_face,0,0)).normalized()
 	transform=Transform3D(Basis(normal,Vector3.UP,-tangent),host.wall_point(tower_face,0,0,width*0.5-0.10))
 	if not is_equal_approx(wall_height,host.wall_height): wall_height=host.wall_height
 func _process(delta: float) -> void:
 	var host := fortification_host()
-	var signature := str(connection_error(),connect_to_tower,tower_face,width,depth,host.dimensions() if host else Vector4.ZERO)
+	var target := destination()
+	var signature := str(host.global_transform if host and host.is_inside_tree() else Transform3D.IDENTITY,target_tower,target_face,target.global_transform if target and target.is_inside_tree() else Transform3D.IDENTITY,target.dimensions() if target else Vector4.ZERO,connection_error(),connect_to_tower,tower_face,width,depth,host.dimensions() if host else Vector4.ZERO)
 	if signature!=_connection_signature:
 		_connection_signature=signature; request_rebuild()
 		if host: host.request_rebuild()
+		if is_instance_valid(_last_target): _last_target.request_rebuild()
+		_last_target=target
+		if target: target.request_rebuild()
 	super._process(delta)
 func _exit_tree() -> void:
 	var host := fortification_host()
 	if host: host.request_rebuild()
+	if is_instance_valid(_last_target): _last_target.request_rebuild()
 	super._exit_tree()
 func connection_spans(wall: int,spans: Array[Vector2]) -> Array[Vector2]:
-	if wall==3 and connect_to_tower and connection_error().is_empty(): return []
+	if connect_to_tower and connection_error().is_empty():
+		if wall==3 or (wall==2 and destination()!=null): return []
 	return spans

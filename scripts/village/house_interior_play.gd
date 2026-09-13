@@ -15,6 +15,7 @@ const Door=preload("res://addons/house_builder/door.gd")
 @export_range(0.12,0.35,0.01) var partition_thickness := 0.18
 var house: House
 var interior: Interior
+var authored_group: Node3D
 var authored_plan: Node3D
 var player: CharacterBody3D
 var camera: Camera3D
@@ -52,11 +53,14 @@ func _ready() -> void:
 	sun.shadow_blur=0.85; world.add_child(sun)
 	ground_material=StandardMaterial3D.new(); ground_material.albedo_color=Color(0.27,0.25,0.17); ground_material.roughness=1.0
 	interior=Interior.new()
-	interior.box(world,Vector3(0,-0.14,0),Vector3(30,0.2,30),ground_material)
+
 	var authored_test := "--house-authored-test" in OS.get_cmdline_user_args()
 	if authored_house_scene or authored_test or (FileAccess.file_exists("user://house_builder_playtest.tscn") and not "--house-play-test" in OS.get_cmdline_user_args()):
 		selected_source=true
-		house=authored_house_scene.instantiate() if authored_house_scene else load("res://scenes/dev/house_authoring_example.tscn" if authored_test else "user://house_builder_playtest.tscn").instantiate()
+		var loaded=authored_house_scene.instantiate() if authored_house_scene else load("res://scenes/dev/house_authoring_example.tscn" if authored_test else "user://house_builder_playtest.tscn").instantiate()
+		if loaded.has_method("primary_tower"):
+			authored_group=loaded; house=authored_group.primary_tower()
+		else: house=loaded
 		authored_plan=house.get_node_or_null("InteriorPlan")
 		house_width=house.width; house_depth=house.depth
 		storeys=maxi(1,authored_plan.levels().size()) if authored_plan else 1
@@ -67,7 +71,9 @@ func _ready() -> void:
 		var divider := lerpf(-house_width*0.5+1.8,house_width*0.5-2.2,room_split_x)
 		entry_x=(divider+house_width*0.5-1.55)*0.5
 		house.openings=[{"kind":"door","wall":0,"u":entry_x/(house_width*0.5),"width":1.5,"height":2.3},{"kind":"window","wall":1,"u":-0.45,"y":1.5},{"kind":"window","wall":2,"u":-0.6,"y":1.5}]
-	world.add_child(house)
+	if authored_group: world.add_child(authored_group)
+	else: world.add_child(house)
+	interior.box(world,Vector3(0,-0.14,0),Vector3(64 if authored_group else 30,0.2,40 if authored_group else 30),ground_material)
 	world.add_child(interior)
 	if not selected_source: interior.build(house_width,house_depth,storey_height,storeys,room_split_x,room_split_z,partition_thickness,house._material(Vector2(0.5,0),Color(0.60,0.53,0.46)),house._plaster_material())
 	for floor_index in storeys:
@@ -86,7 +92,7 @@ func _ready() -> void:
 		for record in house.openings:
 			var opening: Dictionary=house.resolved_opening(record)
 			if opening.door and house.wall_exposed(opening.wall,opening.along):
-				player.position=house.wall_point(opening.wall,opening.along,0.15,1.5); break
+				player.position=house.to_global(house.wall_point(opening.wall,opening.along,0.15,1.5)); break
 	camera=Camera3D.new(); camera.set_script(load("res://scripts/village/iso_cam.gd")); camera.name="IsoCam"
 	camera.target_path=NodePath("../Player"); camera.pitch_deg=48; camera.ortho_size=17.5
 	camera.focus_height=4.0; camera.pixel_rows=450; camera.add_to_group("camera_rig"); world.add_child(camera)
@@ -106,7 +112,7 @@ func nearest_door() -> Node3D:
 	for volume in house.authored_volumes():
 		for child in volume._generated.get_children():
 			if child is Door: all.append(child)
-	for curtain in house.get_children():
+	for curtain in (authored_group.curtains() if authored_group else house.get_children()):
 		if curtain.has_method("fortification_host") and is_instance_valid(curtain._generated):
 			for child in curtain._generated.get_children():
 				if child is Door: all.append(child)

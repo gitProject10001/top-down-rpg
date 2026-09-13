@@ -367,6 +367,14 @@ func run(plugin: EditorPlugin) -> void:
 	profile_history.undo(); assert(linked.get_parent()==null)
 	profile_history.redo(); assert(linked.get_parent()==polygon)
 	print("TOWER_CURTAIN_EDITOR_ATTACH_UNDO_OK")
+	plugin._create_fortification(); var fort=EditorInterface.get_selection().get_selected_nodes()[0]
+	assert(fort.primary_tower()!=null and fort.curtains().size()==1)
+	assert(fort.curtains()[0].destination()==fort.get_node("TorreEst"))
+	profile_history.undo(); assert(fort.get_parent()==null)
+	profile_history.redo(); assert(fort.get_parent()==scene)
+	var fort_snapshot: PackedScene=plugin._snapshot(fort); var fort_copy=fort_snapshot.instantiate()
+	assert(fort_copy.curtains()[0].destination()==fort_copy.get_node("TorreEst")); fort_copy.free()
+	print("TWO_TOWERS_EDITOR_UNDO_SNAPSHOT_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

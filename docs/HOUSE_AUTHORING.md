@@ -637,3 +637,31 @@ Limiti: una torre all’origine di ogni cortina, estremità opposta ancora chius
 nessun raccordo a una seconda torre, angolo tra muri o recinto automatico.
 Le aperture manuali sottostanti non vengono controllate per interferenze con
 il volume pieno della cortina: scegli una faccia libera.
+
+
+### Due estremità e gruppo fortificazione (A08.3)
+
+**Fortificazioni → Crea due torri collegate** crea un gruppo Fortificazione con
+TorreOvest e TorreEst distinte. La cortina è sotto la torre di partenza e usa
+`Target Tower` (riferimento relativo) e `Target Face` per l’arrivo. I nodi delle
+torri restano modificabili; il gruppo serve a salvare e provare l’insieme.
+
+Muovi la torre di arrivo lungo l’asse del collegamento: lunghezza e posizione
+della cortina si aggiornano. Le facce devono essere opposte e allineate, i tetti
+alla stessa quota; la distanza libera ammessa è 1.8–19.8 m. Una configurazione
+invalida produce un avviso e non apre i parapetti. Svuotando Target Tower si
+torna alla cortina collegata soltanto all’origine e il parapetto d’arrivo si richiude.
+Non usare il gizmo Width per cambiare la lunghezza di una cortina vincolata a
+due torri: è derivata dalla loro posizione.
+
+Play fortificazione su gruppo, torre o cortina include l’intero gruppo.
+Esempio `scenes/dev/two_towers_example.tscn`: entra in TorreOvest, sali al tetto,
+attraversa la cortina e raggiungi TorreEst. Interni e ingresso sono predisposti
+solo nella torre principale; per ora Play gestisce il cambio interno/esterno
+su quella torre, mentre la seconda è percorribile sul tetto.
+
+Verificati andata/ritorno con giocatore, apertura del secondo parapetto,
+spostamento di entrambe le torri, errore di disallineamento, scollegamento,
+riferimenti dopo salvataggio, creazione/Undo/Redo e snapshot del gruppo.
+Limiti: nessun recinto automatico o risolutore per facce disallineate; nessuna
+migrazione automatica degli interni su tutte le torri del gruppo.

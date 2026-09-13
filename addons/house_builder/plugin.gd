@@ -177,7 +177,7 @@ func _selection_context() -> void:
 	var selected := EditorInterface.get_selection().get_selected_nodes()
 	var node: Node=selected[0] if not selected.is_empty() else null
 	context_label.text="Selezione: "+str(node.name) if node else "Seleziona una casa o disegnane una."
-	if node.has_method("is_curtain_wall"): tabs.current_tab=6
+	if node and node.has_method("is_curtain_wall"): tabs.current_tab=6
 	elif node is Volume or node is Support or node is FrameLink: tabs.current_tab=5
 	elif node is ExteriorStair and node.terrace() is Volume: tabs.current_tab=5; frame_tabs.current_tab=2
 	elif node is Balcony or node is ExteriorStair: tabs.current_tab=4
@@ -406,8 +406,11 @@ func _plan_action(label: String) -> void:
 	if element.kind==0: status.text="Posiziona e dimensiona la stanza, poi premi Integra stanza e genera muri. Room Type sceglie la funzione; Display Name il nome."
 func _play_selected() -> void:
 	var selected := _selected_house()
-	if selected==null: status.text="Seleziona la casa da provare."; return
+	for node in EditorInterface.get_selection().get_selected_nodes():
+		if node.has_method("primary_tower"): selected=node
+	if selected==null: status.text="Seleziona la casa o la fortificazione da provare."; return
 	if selected.has_method("fortification_host") and selected.connect_to_tower and selected.fortification_host(): selected=selected.fortification_host()
+	if selected.get_parent() and selected.get_parent().has_method("primary_tower"): selected=selected.get_parent()
 	var packed := _snapshot(selected)
 	var error := ResourceSaver.save(packed,"user://house_builder_playtest.tscn") if packed else ERR_CANT_CREATE
 	if error!=OK: status.text="Impossibile preparare la prova: %d"%error; return
@@ -993,6 +996,7 @@ func _build_fortification_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Fortificazioni"; tabs.add_child(page)
 	var label := Label.new(); label.text="Cortina rettilinea con camminamento e portone.\nSeleziona il muro e usa i gizmo per le dimensioni.\nInspector → Portone: larghezza, altezza, posizione."; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(label)
 	var button := Button.new(); button.text="Crea mura con portone"; button.pressed.connect(_create_curtain_wall); page.add_child(button)
+	var pair := Button.new(); pair.text="Crea due torri collegate"; pair.pressed.connect(_create_fortification); page.add_child(pair)
 	var attach := Button.new(); attach.text="Collega nuova cortina alla torre"; attach.pressed.connect(_attach_curtain); page.add_child(attach)
 	var play := Button.new(); play.text="Play fortificazione"; play.pressed.connect(_play_selected); page.add_child(play)
 
@@ -1018,3 +1022,9 @@ func _attach_curtain() -> void:
 	wall.tower_face=chosen; wall.depth=minf(2.8,tower.wall_length(chosen)-0.3)
 	if wall.depth<1.8: wall.free(); _show_plan_error("Collega cortina","La torre è troppo piccola per un camminamento: allarga la pianta."); return
 	_add_authored(tower,wall,"Collega cortina alla torre"); tower.request_rebuild()
+
+func _create_fortification() -> void:
+	var root := EditorInterface.get_edited_scene_root()
+	if root==null: return
+	var group=preload("res://addons/house_builder/fortification_factory.gd").create()
+	_add_authored(root,group,"Crea due torri collegate"); group.rebuild(); tabs.current_tab=6

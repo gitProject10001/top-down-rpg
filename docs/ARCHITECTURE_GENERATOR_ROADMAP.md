@@ -718,7 +718,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A08: seconda estremità della cortina e recinto con torri**.
+se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A08: recinto chiuso con quattro torri**.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -747,3 +747,19 @@ ridimensionamento, scollegamento/rimozione e serializzazione.
 Limiti: raccordo al tetto, singola estremità; nessun collegamento alla seconda
 torre, angolo o recinto chiuso. Prossimo incremento: seconda estremità della
 cortina e composizione del primo recinto con torri.
+
+
+### A08.3 — Due torri collegate — 2026-09-13
+
+Gruppo Fortificazione con torri indipendenti, cortina referenziata a entrambe
+le estremità, lunghezza derivata e apertura del parapetto di arrivo.
+Validazione allineamento, facce opposte, larghezze e quote. Comando nel tab
+Fortificazioni e snapshot/Play dell’intero gruppo. Interni attivi sulla torre
+principale; torre secondaria percorribile sul tetto.
+Esempio `two_towers_example.tscn`; test `check_two_towers.gd`,
+`check_two_towers_play.gd` e suite editor (scena base square_tower_example per
+non ostruire i raycast dei test di authoring con la fortificazione estesa).
+Verificati percorso completo, spostamento origine/destinazione, errori,
+scollegamento, riferimenti serializzati e Undo/Redo.
+Prossimo passo: quattro torri e recinto chiuso, mantenendo le cortine come
+collegamenti fra nodi distinti. A08 non è ancora conclusa.

@@ -1,0 +1,116 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/house_builder/fortification.gd" id="1_whlr5"]
+[ext_resource type="Script" path="res://addons/house_builder/polygon_tower.gd" id="2_fydfy"]
+[ext_resource type="Script" path="res://addons/house_builder/plan.gd" id="3_yyaxn"]
+[ext_resource type="Script" path="res://addons/house_builder/plan_element.gd" id="4_5fe8y"]
+[ext_resource type="Script" path="res://addons/house_builder/curtain_wall.gd" id="5_s8xom"]
+
+[sub_resource type="Environment" id="Environment_g4h1x"]
+background_mode = 1
+background_color = Color(0.16, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_hopy0"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_5b0u3"]
+size = Vector2(50, 50)
+
+[node name="HouseWorkshop" type="Node3D" unique_id=1671773947]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=377134373]
+environment = SubResource("Environment_g4h1x")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=426569264]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=1024934940]
+material_override = SubResource("StandardMaterial3D_hopy0")
+mesh = SubResource("PlaneMesh_5b0u3")
+
+[node name="Fortificazione" type="Node3D" parent="." unique_id=988978133]
+script = ExtResource("1_whlr5")
+
+[node name="TorreOvest" type="Node3D" parent="Fortificazione" unique_id=1044766042]
+script = ExtResource("2_fydfy")
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1450000_48452601504"
+attached = false
+archetype_id = "tower"
+width = 8.0
+depth = 8.0
+wall_height = 5.6
+roof_height = 1.0
+openings = Array[Dictionary]([{
+"height": 2.1,
+"kind": "door",
+"wall": 0,
+"width": 1.2
+}])
+
+[node name="InteriorPlan" type="Node3D" parent="Fortificazione/TorreOvest" unique_id=1313208788]
+script = ExtResource("3_yyaxn")
+floor_height = 2.8
+
+[node name="PianoTerra" type="Node3D" parent="Fortificazione/TorreOvest/InteriorPlan" unique_id=400568456]
+metadata/floor_id = "tower_ground"
+
+[node name="ScalaPrimoPiano" type="Node3D" parent="Fortificazione/TorreOvest/InteriorPlan/PianoTerra" unique_id=531124469]
+script = ExtResource("4_5fe8y")
+kind = 2
+dimensions = Vector3(1.2, 2.8, 4.2)
+stable_id = "tower_stair_0"
+room_ids = PackedStringArray()
+
+[node name="PrimoPiano" type="Node3D" parent="Fortificazione/TorreOvest/InteriorPlan" unique_id=1525900810]
+metadata/floor_id = "tower_upper"
+
+[node name="ScalaTetto" type="Node3D" parent="Fortificazione/TorreOvest/InteriorPlan/PrimoPiano" unique_id=1494676311]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.5, 0, 0)
+script = ExtResource("4_5fe8y")
+kind = 2
+roof_exit = true
+dimensions = Vector3(1.2, 2.93, 4.2)
+stable_id = "tower_roof_stair"
+room_ids = PackedStringArray()
+
+[node name="Cortina" type="Node3D" parent="Fortificazione/TorreOvest" unique_id=568628484]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 0)
+script = ExtResource("5_s8xom")
+connect_to_tower = true
+target_tower = NodePath("../../TorreEst")
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1450007_48570042023"
+attached = false
+width = 8.2
+depth = 2.8
+wall_height = 5.6
+roof_height = 1.0
+
+[node name="TorreEst" type="Node3D" parent="Fortificazione" unique_id=836110662]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 0)
+script = ExtResource("2_fydfy")
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1450008_48553264806"
+attached = false
+archetype_id = "tower"
+width = 8.0
+depth = 8.0
+wall_height = 5.6
+roof_height = 1.0
+
+[node name="Camera" type="Camera3D" parent="." unique_id=1367177028]
+transform = Transform3D(0.8269265, -0.39064714, 0.4044593, 0, 0.71928173, 0.6947185, -0.56231, -0.5744811, 0.59479314, 25, 32, 25)
+projection = 1
+current = true
+size = 30.0
