@@ -60,6 +60,9 @@ func _get_configuration_warnings() -> PackedStringArray:
 @export_group("Raccordo torre")
 @export var allow_sloped_walkway := false:
 	set(value): allow_sloped_walkway=value; request_rebuild()
+@export_enum("Rampa", "Gradini") var walkway_profile := 0:
+	set(value): walkway_profile=value; request_rebuild()
+var _walkway_collision: ArrayMesh
 var _slope_rise := 0.0
 @export var connect_to_tower := false:
 	set(value): connect_to_tower=value; request_rebuild()
@@ -92,7 +95,12 @@ func destination_error() -> String:
 	if absf(rise)>0.03:
 		if not allow_sloped_walkway: return "Quote diverse: abilita Allow Sloped Walkway sulla cortina per raccordarle."
 		if gate_enabled: return "La cortina con portone richiede quote uguali. Usa una cortina senza portone per il dislivello."
-		if absf(rise)/distance>0.45: return "Camminamento troppo ripido: massimo 45% di pendenza. Allontana le torri o riduci il dislivello."
+		if walkway_profile==0 and absf(rise)/distance>0.45: return "Camminamento troppo ripido: massimo 45% di pendenza. Allontana le torri o riduci il dislivello."
+		if walkway_profile==1:
+			var run := distance-1.0
+			var count := ceili(absf(rise)/0.18)
+			if run<=0 or absf(rise)/run>0.75 or run/maxi(count,1)<0.24:
+				return "Scala troppo ripida o pedate troppo corte: allontana le torri o riduci il dislivello (75%, pedata minima 24 cm)."
 	return ""
 
 func fortification_host() -> Node3D:
@@ -124,7 +132,7 @@ func prepare_attachment() -> void:
 func _process(delta: float) -> void:
 	var host := fortification_host()
 	var target := destination()
-	var signature := str(host.global_transform if host and host.is_inside_tree() else Transform3D.IDENTITY,target_tower,target_face,target.global_transform if target and target.is_inside_tree() else Transform3D.IDENTITY,target.dimensions() if target else Vector4.ZERO,connection_error(),allow_sloped_walkway,connect_to_tower,tower_face,width,depth,host.dimensions() if host else Vector4.ZERO)
+	var signature := str(host.global_transform if host and host.is_inside_tree() else Transform3D.IDENTITY,target_tower,target_face,target.global_transform if target and target.is_inside_tree() else Transform3D.IDENTITY,target.dimensions() if target else Vector4.ZERO,connection_error(),walkway_profile,allow_sloped_walkway,connect_to_tower,tower_face,width,depth,host.dimensions() if host else Vector4.ZERO)
 	if signature!=_connection_signature:
 		_connection_signature=signature; request_rebuild()
 		if host: host.request_rebuild()
@@ -143,10 +151,56 @@ func connection_spans(wall: int,spans: Array[Vector2]) -> Array[Vector2]:
 	return spans
 
 func _ramp_point(point: Vector3) -> Vector3:
-	var t := clampf((point.x+width*0.5-0.10)/maxf(width-0.20,0.1),0,1)
+	var landing := 0.5 if walkway_profile==1 else 0.0
+	var t := clampf((point.x+width*0.5-0.10-landing)/maxf(width-0.20-landing*2,0.1),0,1)
 	# Keep the foundation level while raising the walkway and its parapets.
 	point.y+=_slope_rise*t*clampf(point.y/maxf(wall_height,0.1),0,1)
 	return point
 
 func _tri(a: Vector3,b: Vector3,c: Vector3,mat: int) -> void:
-	super._tri(_ramp_point(a),_ramp_point(b),_ramp_point(c),mat)
+	var pieces: Array=[[a,b,c]]
+	if walkway_profile==1 and absf(_slope_rise)>0.03:
+		for x in [-(width-1.2)*0.5,(width-1.2)*0.5]:
+			var split: Array=[]
+			for polygon in pieces:
+				for sign_value in [-1.0,1.0]:
+					var clipped := _clip_x(polygon,x,sign_value)
+					if clipped.size()>=3: split.append(clipped)
+			pieces=split
+	for polygon in pieces:
+		for i in range(1,polygon.size()-1):
+			var p := _ramp_point(polygon[0]); var q := _ramp_point(polygon[i]); var r := _ramp_point(polygon[i+1])
+			if (q-p).cross(r-p).length_squared()>0.00000001: super._tri(p,q,r,mat)
+
+func _clip_x(polygon: Array,x: float,sign_value: float) -> Array:
+	var result: Array=[]
+	for i in polygon.size():
+		var a: Vector3=polygon[i]; var b: Vector3=polygon[(i+1)%polygon.size()]
+		var da := (a.x-x)*sign_value; var db := (b.x-x)*sign_value
+		if da<=0: result.append(a)
+		if (da<0 and db>0) or (da>0 and db<0): result.append(a.lerp(b,da/(da-db)))
+	return result
+
+func _build_roof() -> ArrayMesh:
+	var roof := super._build_roof()
+	_walkway_collision=roof
+	if walkway_profile!=1 or absf(_slope_rise)<0.03: return roof
+	# Render regular treads over a continuous collision surface, as for interior stairs.
+	var result := ArrayMesh.new(); MeshJoin.append(result,roof,Transform3D.IDENTITY,[])
+	var count := ceili(absf(_slope_rise)/0.18)
+	var run := width-1.2; var tread := run/count
+	for i in count:
+		var top := wall_height+0.18+_slope_rise*float(i+1 if _slope_rise>0 else i)/count
+		var box := BoxMesh.new(); box.size=Vector3(tread+0.002,0.20,depth-0.44)
+		box.material=_material(Vector2(0,0.5),Color(0.65,0.63,0.59))
+		var center := Vector3(-run*0.5+(i+0.5)*tread,top-0.10,0)
+		MeshJoin.append(result,box,Transform3D(Basis.IDENTITY,center),[])
+	return result
+
+func rebuild() -> void:
+	super.rebuild()
+	if walkway_profile!=1 or _walkway_collision==null or not is_instance_valid(_generated): return
+	var body := _generated.get_node_or_null("HouseCollision")
+	if body and body.get_child_count()>0:
+		var shape=body.get_child(body.get_child_count()-1)
+		if shape is CollisionShape3D: shape.shape=_walkway_collision.create_trimesh_shape()

@@ -718,7 +718,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. A09.2 aggiunge il corpo accessorio collegato. A09.3 introduce raccordi in pendenza. Prossimo passo: **accessi e scale per dislivelli maggiori**.
+se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. A09.2 aggiunge il corpo accessorio collegato. A09.3 introduce raccordi in pendenza. A09.4 aggiunge raccordi a gradini. Prossimo passo: **corti e fondazioni su quote diverse**.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -888,3 +888,21 @@ pendenza massima 45% (non 45 gradi); niente portone sul tratto inclinato.
 Sono rampe continue, non scale. Nessun adattamento al terreno e nessuna quota
 indipendente di fondazione in questa versione. A09 resta IN CORSO.
 Prossimo passo: accessi e scale per dislivelli maggiori, poi corti su quote diverse.
+
+
+### A09.4 — Raccordi a gradini e sbarchi — 2026-09-14
+
+Profilo `walkway_profile` Rampa/Gradini per cortina, con conversione contestuale
+nel tab Quote e Undo/Redo. Il profilo a gradini ammette dislivelli oltre il limite
+delle rampe, con alzata visiva massima 18 cm, pedata minima 24 cm e pendenza
+massima 75%. Due sbarchi da 50 cm restano piani; parapetti e muro seguono il
+raccordo. La collisione è continua sotto le pedate, come nelle scale interne,
+per evitare sobbalzi del personaggio. Non è una simulazione del contatto piede-pedata.
+Esempio `castle_stepped_walkways_example.tscn`: torri posteriori +4 m, tre piani
+editabili, vano scala laterale che lascia libero l'arrivo del camminamento.
+Test: quote degli sbarchi, collisione separata dalle pedate, limiti, salvataggio,
+ritorno a quota uniforme, UI Undo/Redo; Play dedicato salita/discesa di entrambi
+i lati con partenza sui tetti. Suite editor con messaggi preesistenti arredi.
+Limiti: cortine senza portone, basi complanari; nessuna scala a più rampe o
+pianerottolo intermedio. A09 resta IN CORSO. Prossimo passo: corti e fondazioni
+su quote diverse, con accessi coerenti alla camera fissa.

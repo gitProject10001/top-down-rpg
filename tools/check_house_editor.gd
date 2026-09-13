@@ -450,6 +450,12 @@ func run(plugin: EditorPlugin) -> void:
 	var slope_version: int=profile_history.get_version(); plugin._enable_sloped_walkways()
 	assert(profile_history.get_version()==slope_version)
 	print("SLOPE_UI_UNDO_REDO_NOOP_OK")
+	var step_wall=enclosure.curtains().filter(func(w): return not w.gate_enabled)[0]
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(step_wall)
+	plugin._set_walkway_profile(1); assert(step_wall.walkway_profile==1)
+	profile_history.undo(); assert(step_wall.walkway_profile==0)
+	profile_history.redo(); assert(step_wall.walkway_profile==1)
+	print("STEPPED_PROFILE_EDITOR_UNDO_REDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

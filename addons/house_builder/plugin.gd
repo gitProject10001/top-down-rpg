@@ -1023,8 +1023,10 @@ func _build_fortification_tab() -> void:
 	var elevations := VBoxContainer.new(); elevations.name="Quote"; fort_sections.add_child(elevations)
 	var slope := Button.new(); slope.text="Abilita raccordi in pendenza"; slope.pressed.connect(_enable_sloped_walkways); elevations.add_child(slope)
 	var slope_hint := Label.new(); slope_hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
-	slope_hint.text="Modifica Floor Height nei piani delle torri e aggiorna l’altezza delle scale; usa Wall Height per torri senza interni. Le cortine senza portone seguono le quote dei tetti. Limite: 45% di pendenza; basi delle torri alla stessa quota. Gli errori sono elencati in Recinto."
+	slope_hint.text="Modifica Floor Height nei piani delle torri e aggiorna l’altezza delle scale; usa Wall Height per torri senza interni. Le cortine senza portone seguono le quote dei tetti. Limiti: rampe 45%; gradini 75% e pedate di almeno 24 cm. Basi delle torri alla stessa quota. Gli errori sono elencati in Recinto."
 	elevations.add_child(slope_hint)
+	var steps := Button.new(); steps.text="Converti cortina selezionata in gradini"; steps.pressed.connect(_set_walkway_profile.bind(1)); elevations.add_child(steps)
+	var ramp := Button.new(); ramp.text="Converti cortina selezionata in rampa"; ramp.pressed.connect(_set_walkway_profile.bind(0)); elevations.add_child(ramp)
 	var annex := Button.new(); annex.text="Aggiungi corpo accessorio al mastio"; annex.pressed.connect(_add_keep_accessory); edit.add_child(annex)
 	var keep := Button.new(); keep.text="Aggiungi mastio nella corte"; keep.pressed.connect(_add_keep); edit.add_child(keep)
 	var fill := Button.new(); fill.text="Completa interni delle torri mancanti"; fill.pressed.connect(_complete_tower_interiors); edit.add_child(fill)
@@ -1176,4 +1178,17 @@ func _enable_sloped_walkways() -> void:
 	for wall in walls:
 		undo.add_do_property(wall,"allow_sloped_walkway",true); undo.add_undo_property(wall,"allow_sloped_walkway",false)
 	undo.add_do_method(group,"rebuild"); undo.add_undo_method(group,"rebuild"); undo.commit_action()
+	tabs.current_tab=6; fort_sections.current_tab=2
+
+func _set_walkway_profile(profile: int) -> void:
+	var wall := _selected_house()
+	if wall==null or not wall.has_method("is_curtain_wall") or not wall.connect_to_tower:
+		_show_plan_error("Camminamento","Seleziona una cortina collegata a due torri."); return
+	if wall.gate_enabled or wall.destination()==null:
+		_show_plan_error("Camminamento","Serve una cortina senza portone con una torre di destinazione."); return
+	if wall.walkway_profile==profile and wall.allow_sloped_walkway: return
+	var undo := get_undo_redo(); undo.create_action("Profilo camminamento",UndoRedo.MERGE_DISABLE,wall)
+	undo.add_do_property(wall,"walkway_profile",profile); undo.add_undo_property(wall,"walkway_profile",wall.walkway_profile)
+	undo.add_do_property(wall,"allow_sloped_walkway",true); undo.add_undo_property(wall,"allow_sloped_walkway",wall.allow_sloped_walkway)
+	undo.add_do_method(wall,"request_rebuild"); undo.add_undo_method(wall,"request_rebuild"); undo.commit_action()
 	tabs.current_tab=6; fort_sections.current_tab=2

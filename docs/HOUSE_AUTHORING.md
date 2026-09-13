@@ -805,3 +805,16 @@ portone su un dislivello. I parapetti terminali si aprono solo con raccordo vali
 Esempio pronto: `scenes/dev/castle_sloped_walkways_example.tscn`.
 Le rampe sono continue e seguono le quote; materiali e illuminazione restano quelli
 esistenti. Test: check_sloped_walkways.gd e check_sloped_walkways_play.gd.
+
+
+### Camminamenti a gradini (A09.4)
+
+Seleziona la cortina nell'albero e usa **Fortificazioni → Quote → Converti cortina
+selezionata in gradini**. Deve collegare due torri e non avere portone. Il comando
+abilita anche il raccordo delle quote; puoi tornare alla rampa dallo stesso tab.
+Nell'Inspector trovi **Walkway Profile**. Dimensioni e numero di gradini seguono
+le altezze delle torri e la loro distanza, con 50 cm di sbarco a ogni estremità.
+Limiti: alzata massima 18 cm, pedata minima 24 cm, pendenza massima 75% nel tratto
+centrale; gli errori restano visibili nella diagnostica del recinto. La collisione
+è una rampa continua sotto i gradini. Le basi restano alla stessa quota.
+Esempio pronto: `scenes/dev/castle_stepped_walkways_example.tscn`.
