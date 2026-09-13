@@ -529,9 +529,34 @@ La scala a sinistra usa la faccia 6; a destra la 2; davanti la 0.
 Apri `scenes/dev/polygon_tower_example.tscn`, seleziona TorreOttagonale e usa
 Play per provare la scala e il tetto. L'esempio è salvato con parametri del
 builder, non come mesh scollegata. Non sono ancora supportati ala legacy,
-aggancio ad altri corpi, coperture diverse da quella piana e interni suddivisi
-in piani/stanze poligonali. Non usare ancora InteriorPlan rettangolari sulla torre.
+aggancio ad altri corpi e coperture diverse da quella piana. Per i piani interni
+usa il supporto InteriorPlan descritto in A07.2; la generazione delle stanze
+poligonali resta da implementare.
 
 Verifiche: `check_polygon_tower.gd`, `check_polygon_tower_play.gd` e suite
 editor. Rimane il messaggio noto PagedAllocator alla chiusura del test Play,
 dopo il completamento delle asserzioni.
+
+
+### Interni torre ottagonale (A07.2)
+
+Seleziona una torre di almeno 6 × 6 metri, quindi **Interni → Torre: due piani e scala**.
+Il comando crea un `InteriorPlan` ordinario con `PianoTerra`, `PrimoPiano` e
+`PianoTerra/ScalaPrimoPiano`. Non sostituisce un piano già presente; è annullabile.
+La quota iniziale è 2.8 m per piano e le pareti si adeguano ai due piani.
+
+Sposta o ridimensiona ScalaPrimoPiano con gli strumenti esistenti: il vano nel
+solaio superiore segue posizione, rotazione e dimensioni. I pavimenti seguono
+la pianta ottagonale anche dopo il ridimensionamento della torre. Per cambiare
+l’altezza dei piani modifica Floor Height e adegua Dimensions Y della scala.
+Un avviso sul nodo Scala segnala quota errata o sbarco fuori dalla pianta.
+
+Usa Piano successivo per la vista editor; Play seleziona il piano in base alla
+quota del giocatore. Esempio salvato: `scenes/dev/tower_interior_example.tscn`.
+Verificati ingresso, salita, discesa e uscita con il giocatore reale; taglio del
+solaio dopo spostamento manuale della scala; salvataggio e Undo/Redo.
+
+Limiti: scala rettilinea tra i due piani, nessun accesso interno al tetto ancora;
+nessuna generazione automatica di stanze poligonali (il comando espone un errore
+esplicito). Il vano scala non ha ancora parapetti automatici. Muri e dettagli
+manuali restano disponibili; non vengono adattati automaticamente alle facce oblique.

@@ -421,7 +421,7 @@ func set_cutaway(enabled: bool,floor_base: float=0.0,storey_height: float=-1.0) 
 		var cut: MeshInstance3D=_generated.get_node_or_null(cut_name)
 		if enabled and cut==null:
 			var mesh := ArrayMesh.new()
-			var cutters: Array=[[Plane(Vector3.DOWN,-floor_base-storey_height)],[Plane(Vector3.LEFT,-width*0.5+0.35),Plane(Vector3.DOWN,-floor_base-0.8)],[Plane(Vector3.FORWARD,-depth*0.5+0.35),Plane(Vector3.DOWN,-floor_base-0.8)]]
+			var cutters: Array=cutaway_cutters(floor_base,storey_height)
 			MeshJoin.append(mesh,source.mesh,Transform3D.IDENTITY,cutters)
 			cut=MeshInstance3D.new(); cut.name=cut_name; cut.mesh=mesh
 			_generated.add_child(cut)
@@ -515,3 +515,6 @@ func _clip_authored_volumes(body: MeshInstance3D,roof: MeshInstance3D) -> void:
 	if cutters.is_empty(): return
 	for instance in [body,roof]:
 		var clipped := ArrayMesh.new(); MeshJoin.append(clipped,instance.mesh,Transform3D.IDENTITY,cutters); instance.mesh=clipped
+
+func cutaway_cutters(floor_base: float,storey_height: float) -> Array:
+	return [[Plane(Vector3.DOWN,-floor_base-storey_height)],[Plane(Vector3.LEFT,-width*0.5+0.35),Plane(Vector3.DOWN,-floor_base-0.8)],[Plane(Vector3.FORWARD,-depth*0.5+0.35),Plane(Vector3.DOWN,-floor_base-0.8)]]

@@ -88,7 +88,8 @@ func rebuild() -> void:
 						var n: Vector3=e.basis*pair[0]; planes.append(Plane(n,float(pair[1])+n.dot(e.position)))
 					cuts.append(planes)
 		var slab := BoxMesh.new(); slab.size=Vector3(house().width-0.4,0.10,house().depth-0.4); slab.material=wood_material()
-		MeshJoin.append(mesh,slab,Transform3D.IDENTITY,cuts)
+		var floor_mesh: Mesh=house().interior_floor_mesh(wood_material()) if house().has_method("interior_floor_mesh") else slab
+		MeshJoin.append(mesh,floor_mesh,Transform3D.IDENTITY,cuts)
 		if house().wing_enabled:
 			var wing := BoxMesh.new(); wing.size=Vector3(house().wing_span()-0.4,0.10,house().width*0.5+house().wing_length-0.4); wing.material=wood_material()
 			var wing_cuts := cuts.duplicate(true)

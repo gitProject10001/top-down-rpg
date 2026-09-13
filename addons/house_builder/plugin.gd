@@ -106,7 +106,7 @@ func _enter_tree() -> void:
 	opening_help.text="Aperture: maniglia centrale per spostare; laterale per larghezza; superiore per altezza. Le porte restano a terra."
 	opening_help.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	dock.add_child(opening_help)
-	for label in ["Interni: crea / mostra", "Vista esterna", "Aggiungi piano", "Piano successivo", "Aggiungi stanza", "Integra stanza e genera muri", "Aggiungi muro", "Aggiungi scala", "Aggiungi dettaglio", "Genera stanze (piano attivo)", "Rigenera muri dalle stanze", "Blocca / sblocca elemento", "Arreda piano", "Arreda stanza selezionata", "Rimuovi arredo generato"]:
+	for label in ["Interni: crea / mostra", "Torre: due piani e scala", "Vista esterna", "Aggiungi piano", "Piano successivo", "Aggiungi stanza", "Integra stanza e genera muri", "Aggiungi muro", "Aggiungi scala", "Aggiungi dettaglio", "Genera stanze (piano attivo)", "Rigenera muri dalle stanze", "Blocca / sblocca elemento", "Arreda piano", "Arreda stanza selezionata", "Rimuovi arredo generato"]:
 		var action := Button.new(); action.text=label; action.pressed.connect(_plan_action.bind(label)); dock.add_child(action)
 	var play := Button.new()
 	play.text="▶ Play casa selezionata"
@@ -322,6 +322,17 @@ func _plan_action(label: String) -> void:
 	var selected := _selected_house()
 	if selected==null: _show_plan_error(label,"Seleziona una casa o uno dei suoi elementi."); return
 	var plan=selected.get_node_or_null("InteriorPlan")
+	if label=="Torre: due piani e scala":
+		if not selected.has_method("interior_floor_mesh"):
+			_show_plan_error(label,"Seleziona una torre ottagonale."); return
+		if plan!=null:
+			_show_plan_error(label,"Gli interni esistono già: modifica i piani e la scala presenti."); return
+		if selected.width<6.0 or selected.depth<6.0:
+			_show_plan_error(label,"Per questo layout iniziale servono almeno 6 × 6 metri, inclusi gli sbarchi."); return
+		_add_authored(selected,preload("res://addons/house_builder/tower_interior_factory.gd").create(),label)
+		return
+	if selected.has_method("interior_floor_mesh") and label in ["Genera stanze (piano attivo)","Rigenera muri dalle stanze","Integra stanza e genera muri"]:
+		_show_plan_error(label,"La generazione di stanze poligonali non è ancora disponibile. Piani, muri e dettagli possono essere modificati manualmente."); return
 	if plan==null:
 		plan=Plan.new(); plan.name="InteriorPlan"
 		var floor_node := Node3D.new(); floor_node.name="Piano_1"; plan.add_child(floor_node)

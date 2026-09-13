@@ -38,8 +38,11 @@ func _wall_box(wall: int,along: float,y: float,w: float,h: float,thick: float,of
 		_tri(points[face[0]],points[face[1]],points[face[2]],mat)
 		_tri(points[face[0]],points[face[2]],points[face[3]],mat)
 
-func _polygon_slab(bottom: float,top: float,mat: int) -> void:
+func _polygon_slab(bottom: float,top: float,mat: int,inset: float=0.0) -> void:
 	var points := footprint_vertices()
+	for i in 8:
+		var a_normal := wall_normal(i); var b_normal := wall_normal(posmod(i-1,8))
+		points[i]-=(a_normal+b_normal)*inset/(1.0+a_normal.dot(b_normal))
 	for i in 8:
 		var a := points[i]; var b := points[(i+1)%8]
 		_tri(Vector3.UP*top,a+Vector3.UP*top,b+Vector3.UP*top,mat)
@@ -92,3 +95,21 @@ func contains_footprint(point: Vector3,margin: float=0.0) -> bool:
 func stair_wall() -> int:
 	var stairs := stair_component()
 	return [0,2,6][stairs.side] if stairs else 0
+
+func interior_floor_mesh(material: Material) -> ArrayMesh:
+	var previous := _buffers
+	_buffers=[]
+	for i in 4:
+		var buffer := SurfaceTool.new(); buffer.begin(Mesh.PRIMITIVE_TRIANGLES); _buffers.append(buffer)
+	_polygon_slab(-0.05,0.05,0,0.20)
+	var mesh := ArrayMesh.new(); _buffers[0].commit(mesh); mesh.surface_set_material(0,material)
+	_buffers=previous
+	return mesh
+
+func cutaway_cutters(floor_base: float,storey_height: float) -> Array:
+	var cuts: Array=[[Plane(Vector3.DOWN,-floor_base-storey_height)]]
+	for wall in 8:
+		var normal := wall_normal(wall)
+		if normal.dot(Vector3(1,0,1))>0.1:
+			cuts.append([Plane(-normal,-normal.dot(wall_point(wall,0,0))+0.4),Plane(Vector3.DOWN,-floor_base-0.8)])
+	return cuts

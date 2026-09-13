@@ -31,6 +31,7 @@ var _pending := true
 var _visual: Node3D
 var _pose := Transform3D.IDENTITY
 var _cut := false
+var _warning_signature := ""
 func _ready() -> void:
 	_pose=transform; dirty()
 func dirty() -> void:
@@ -42,6 +43,11 @@ func _process(_dt: float) -> void:
 		_pose=transform
 		if is_inside_tree(): update_gizmos()
 	if _pending: rebuild()
+	if Engine.is_editor_hint() and kind==2:
+		var p=plan()
+		var signature := str(transform,dimensions,p.floor_height if p else 0,p.house().dimensions() if p else Vector4.ZERO)
+		if signature!=_warning_signature:
+			_warning_signature=signature; update_configuration_warnings()
 func refresh_room_name() -> void:
 	if not is_inside_tree(): return
 	var legacy := str(name).begins_with("Stanza_") or str(name)=="Stanza" or str(name).begins_with("@")
@@ -178,3 +184,14 @@ func runtime_view(inside: bool,actor: Vector3,camera: Vector3) -> void:
 			var shown := minf(h,maxf(0.8-bottom,0)) if cut else h
 			child.visible=shown>0.001; child.scale.y=maxf(0.001,shown/h); child.position.y=bottom+shown*0.5
 		elif child is Door: child.set_cutaway(cut)
+
+func _get_configuration_warnings() -> PackedStringArray:
+	var p=plan()
+	if kind!=2 or p==null or not p.house().has_method("contains_footprint"): return PackedStringArray()
+	if not is_equal_approx(dimensions.y,p.floor_height):
+		return PackedStringArray(["La scala non raggiunge il piano: imposta Dimensions Y uguale a Floor Height dell’InteriorPlan."])
+	for x in [-dimensions.x*0.5-0.2,dimensions.x*0.5+0.2]:
+		for z in [-dimensions.z*0.5-0.5,dimensions.z*0.5+0.5]:
+			if not p.house().contains_footprint(transform*Vector3(x,0,z),0.25):
+				return PackedStringArray(["Scala o spazio di sbarco fuori dalla torre: sposta/riduci la scala oppure allarga la pianta."])
+	return PackedStringArray()

@@ -342,6 +342,13 @@ func run(plugin: EditorPlugin) -> void:
 	profile_history.undo(); assert(polygon.get_parent()==null)
 	profile_history.redo(); assert(polygon.get_parent()==scene)
 	print("POLYGON_TOWER_EDITOR_CREATE_UNDO_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(polygon)
+	plugin._plan_action("Torre: due piani e scala")
+	var tower_plan=polygon.get_node("InteriorPlan")
+	assert(tower_plan.levels().size()==2 and tower_plan.has_node("PianoTerra/ScalaPrimoPiano"))
+	profile_history.undo(); assert(not polygon.has_node("InteriorPlan"))
+	profile_history.redo(); assert(polygon.get_node("InteriorPlan")==tower_plan)
+	print("TOWER_INTERIOR_EDITOR_CREATE_UNDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

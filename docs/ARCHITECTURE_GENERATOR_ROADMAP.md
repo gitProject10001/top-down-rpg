@@ -588,6 +588,18 @@ aggiungere altro dettaglio a portici e terrazze.
 
 ### A07 — Geometrie non rettangolari
 
+**A07.2 verificata — 2026-09-13:** due piani interni con lo stesso InteriorPlan
+modificabile delle case, solai ottagonali e scala rettilinea tra i piani. Il vano
+segue le modifiche manuali della scala; il taglio visivo segue le facce rivolte
+alla camera. Preset in Interni con protezione da sovrascrittura e Undo/Redo.
+Esempio `tower_interior_example.tscn`; test `check_tower_interior.gd`,
+`check_tower_interior_play.gd`, suite editor. Verificati quota, collisioni,
+spostamento vano, salvataggio e percorso ingresso→primo piano→uscita.
+Restano accesso interno al tetto, parapetti del vano, scale più compatte e
+stanze poligonali. Prossimo passo: collegamento dal piano superiore al tetto,
+poi primo recinto fortificato A08.
+
+
 **A07.1 verificata — 2026-09-13:** torre ottagonale indipendente in Volumi,
 con larghezza/profondità modificabili, aperture sulle otto facce (anche oblique),
 pavimento e tetto poligonali, merli e scala esterna condivisi con il builder.
@@ -597,7 +609,7 @@ Verificati raycast sulle otto facce, taglio/collisione porta obliqua, assenza di
 solai negli angoli esterni, salvataggio, creazione/Undo/Redo e salita/discesa reale.
 Limiti: otto lati fissi, tetto piano, corpo indipendente; piani/stanze poligonali,
 scale interne, coperture coniche e raccordi alle mura ancora da implementare.
-Prossimo incremento: piani interni coerenti con la pianta e collegamento verticale.
+Passo successivo realizzato in A07.2: piani interni coerenti con la pianta e collegamento verticale.
 
 
 - [ ] Piante poligonali semplici; supporto delle curve con pochi controlli leggibili.
@@ -695,4 +707,4 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A07: piani e collegamenti verticali della torre**, poi **A08: recinto fortificato**.
+se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A07: accesso interno al tetto**, poi **A08: recinto fortificato**.
