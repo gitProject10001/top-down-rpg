@@ -29,7 +29,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		points.append(frame*Vector3(n.wing_span()*0.5,h*0.5,(n.width*0.5+n.wing_length)*0.3))
 		ids.append(6); ids.append(7)
 	for i in n.openings.size():
-		if not n.wing_enabled and int(n.openings[i].get("wall",0))>=4: continue
+		if int(n.openings[i].get("wall",0))>=n.wall_count(): continue
 		points.append(n.opening_position(i))
 		ids.append(100+i)
 		var o: Dictionary=n.resolved_opening(n.openings[i])
@@ -44,8 +44,9 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	if not shown_points.is_empty(): gizmo.add_handles(shown_points,get_material("handles",gizmo),shown_ids)
 	var lines := PackedVector3Array()
 	var corners := [Vector3(-w,0,-d),Vector3(w,0,-d),Vector3(w,0,d),Vector3(-w,0,d)]
-	for i in 4:
-		lines.append(corners[i]); lines.append(corners[(i+1)%4])
+	if n.has_method("footprint_vertices"): corners=n.footprint_vertices()
+	for i in corners.size():
+		lines.append(corners[i]); lines.append(corners[(i+1)%corners.size()])
 		lines.append(corners[i]); lines.append(corners[i]+Vector3.UP*h)
 	if n.wing_enabled:
 		var frame: Transform3D=n.wing_transform()

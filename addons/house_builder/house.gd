@@ -73,6 +73,8 @@ func dimensions() -> Vector4:
 func set_dimensions(value: Vector4) -> void:
 	width=value.x; depth=value.y; wall_height=value.z; roof_height=value.w
 
+func wall_count() -> int: return 8 if wing_enabled else 4
+
 func wall_length(wall: int) -> float:
 	var size := _wall_size(wall)
 	return size.x if wall%4<2 else size.y
@@ -104,7 +106,7 @@ func opening_fits(record: Dictionary,ignore_index: int=-1) -> bool:
 	for i in openings.size():
 		if i==ignore_index: continue
 		var b := resolved_opening(openings[i])
-		if not wing_enabled and b.wall>=4: continue
+		if b.wall>=wall_count(): continue
 		var normal := wall_normal(a.wall)
 		var delta := wall_point(a.wall,a.along,a.y)-wall_point(b.wall,b.along,b.y)
 		var tangent := (wall_point(a.wall,1,0)-wall_point(a.wall,0,0)).normalized()
@@ -113,7 +115,7 @@ func opening_fits(record: Dictionary,ignore_index: int=-1) -> bool:
 	return true
 func _get_configuration_warnings() -> PackedStringArray:
 	for i in openings.size():
-		if not wing_enabled and int(openings[i].get("wall",0))>=4: continue
+		if int(openings[i].get("wall",0))>=wall_count(): continue
 		if not opening_fits(openings[i],i): return PackedStringArray(["Un'apertura è coperta dall'ala o troppo vicina a un'altra: spostala su una parete libera."])
 	return PackedStringArray()
 func _post_segments(wall: int,along: float) -> Array[Vector2]:

@@ -513,3 +513,25 @@ Una scala esterna laterale porta al tetto; scala e merli restano modificabili.
 Non ci sono ancora scale interne o piani arredati nel preset. La torre è
 indipendente: gli agganci dei corpi accessori alla torre e le torri poligonali
 sono incrementi successivi.
+
+
+### Torre ottagonale (A07.1)
+
+In **Volumi → Crea torre ottagonale**, poi modifica larghezza, profondità,
+altezza pareti e parapetto con i gizmo o Inspector. Le otto facce sono fisse;
+larghezza e profondità diverse producono una pianta allungata.
+Porte e finestre si inseriscono con gli strumenti Aperture sulle facce del
+modello: i tagli e le cornici seguono anche le pareti oblique. Gli ID delle
+facce sono 0–7, partendo dalla facciata anteriore e procedendo verso destra.
+Merli, spaziatura e scala esterna sono gli stessi componenti della torre quadrata.
+La scala a sinistra usa la faccia 6; a destra la 2; davanti la 0.
+
+Apri `scenes/dev/polygon_tower_example.tscn`, seleziona TorreOttagonale e usa
+Play per provare la scala e il tetto. L'esempio è salvato con parametri del
+builder, non come mesh scollegata. Non sono ancora supportati ala legacy,
+aggancio ad altri corpi, coperture diverse da quella piana e interni suddivisi
+in piani/stanze poligonali. Non usare ancora InteriorPlan rettangolari sulla torre.
+
+Verifiche: `check_polygon_tower.gd`, `check_polygon_tower_play.gd` e suite
+editor. Rimane il messaggio noto PagedAllocator alla chiusura del test Play,
+dopo il completamento delle asserzioni.

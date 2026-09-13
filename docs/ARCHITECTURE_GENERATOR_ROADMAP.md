@@ -253,7 +253,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A04 | TODO | Piani e interni coerenti con i volumi | A02, A03 | Casa R02: ingresso, scala esterna/interna, piano superiore percorribile |
 | A05 | TODO | Facciate e strutture per campate | A03, A04 | Graticcio e portico: travi e aperture seguono la struttura senza invadere i vani |
 | A06 | TODO | Due archetipi completi con profili architettonici | A04, A05 | Fucina e sala nordica: differenze leggibili nelle forme e negli interni |
-| A07 | TODO | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
+| A07 | IN CORSO | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
 | A08 | TODO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
 | A09 | TODO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
 | A10 | TODO | Rovine strutturali controllabili | A03, A04, A07 | R07: togli una porzione di tetto/muro, interno e collisione coerenti |
@@ -588,6 +588,18 @@ aggiungere altro dettaglio a portici e terrazze.
 
 ### A07 — Geometrie non rettangolari
 
+**A07.1 verificata — 2026-09-13:** torre ottagonale indipendente in Volumi,
+con larghezza/profondità modificabili, aperture sulle otto facce (anche oblique),
+pavimento e tetto poligonali, merli e scala esterna condivisi con il builder.
+Gizmo del perimetro e selezione aperture aggiornati; il Play distingue i vertici
+tagliati dall’interno. Esempio: `scenes/dev/polygon_tower_example.tscn`.
+Verificati raycast sulle otto facce, taglio/collisione porta obliqua, assenza di
+solai negli angoli esterni, salvataggio, creazione/Undo/Redo e salita/discesa reale.
+Limiti: otto lati fissi, tetto piano, corpo indipendente; piani/stanze poligonali,
+scale interne, coperture coniche e raccordi alle mura ancora da implementare.
+Prossimo incremento: piani interni coerenti con la pianta e collegamento verticale.
+
+
 - [ ] Piante poligonali semplici; supporto delle curve con pochi controlli leggibili.
 - [ ] Torri cilindriche/prismatiche, coperture coniche, cupole, parapetti.
 - [ ] Taglio di aperture su pareti non planari o facce segmentate.
@@ -683,4 +695,4 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A07: torre poligonale**, poi **A08: recinto fortificato**.
+se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A07: piani e collegamenti verticali della torre**, poi **A08: recinto fortificato**.

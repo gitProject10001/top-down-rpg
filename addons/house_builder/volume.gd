@@ -207,12 +207,12 @@ func _flat_roof() -> ArrayMesh:
 	_buffers=[]
 	for i in 4:
 		var buffer := SurfaceTool.new(); buffer.begin(Mesh.PRIMITIVE_TRIANGLES); _buffers.append(buffer)
-	_box(Vector3(0,wall_height+0.09,0),Vector3(width+0.24,0.18,depth+0.24),2)
+	_build_roof_slab()
 	if parapet_enabled:
-		for wall in 4:
+		for wall in wall_count():
 			var length := wall_length(wall)
 			var spans: Array[Vector2]=[Vector2(-length*0.5,length*0.5)]
-			if has_roof_access() and wall==[0,2,3][stair_component().side]:
+			if has_roof_access() and wall==stair_wall():
 				var half: float=stair_component().width*0.5+0.05
 				spans=[Vector2(-length*0.5,stair_center()-half),Vector2(stair_center()+half,length*0.5)]
 			for span in spans:
@@ -247,7 +247,7 @@ func stair_center() -> float:
 	return stairs.offset*maxf(0,(stair_edge_length()-stairs.width)*0.5-0.2) if stairs else 0.0
 func stair_run() -> float: return (effective_elevation()-stair_ground())/tan(deg_to_rad(32.0))+0.45
 func stair_frame() -> Transform3D:
-	var stairs := stair_component(); var wall: int=[0,2,3][stairs.side] if stairs else 0
+	var wall := stair_wall()
 	var tangent := (wall_point(wall,1,0)-wall_point(wall,0,0)).normalized()
 	return Transform3D(Basis(tangent,Vector3.UP,wall_normal(wall)),wall_point(wall,stair_center(),effective_elevation(),0.05))
 func roof_access_error() -> String:
@@ -300,3 +300,10 @@ func _build_parapet_span(wall: int,span: Vector2,length: float) -> void:
 		if high-low<0.01: continue
 		_wall_box(wall,(low+high)*0.5,effective_elevation()+base+(roof_height-base)*0.5,high-low,roof_height-base,0.22,-0.11,0)
 		_wall_box(wall,(low+high)*0.5,roof_top(),high-low,0.08,0.28,-0.11,2)
+
+func _build_roof_slab() -> void:
+	_box(Vector3(0,wall_height+0.09,0),Vector3(width+0.24,0.18,depth+0.24),2)
+
+func stair_wall() -> int:
+	var stairs := stair_component()
+	return [0,2,3][stairs.side] if stairs else 0

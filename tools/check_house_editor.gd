@@ -337,6 +337,11 @@ func run(plugin: EditorPlugin) -> void:
 	profile_history.undo(); assert(tower.get_parent()==null)
 	profile_history.redo(); assert(tower.get_parent()==scene)
 	print("SQUARE_TOWER_EDITOR_CREATE_UNDO_OK")
+	plugin._create_polygon_tower(); var polygon=EditorInterface.get_selection().get_selected_nodes()[0]
+	assert(polygon.wall_count()==8 and polygon.openings.size()==2)
+	profile_history.undo(); assert(polygon.get_parent()==null)
+	profile_history.redo(); assert(polygon.get_parent()==scene)
+	print("POLYGON_TOWER_EDITOR_CREATE_UNDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

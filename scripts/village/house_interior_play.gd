@@ -122,6 +122,7 @@ func _process(delta: float) -> void:
 	var foot_offset: float=player_shape.position.y-player_shape.shape.height*0.5
 	var margin := -0.12 if inside else 0.12
 	var entered := absf(p.x)<house_width*0.5-margin and absf(p.z)<house_depth*0.5-margin and p.y>-0.5
+	if house.has_method("contains_footprint"): entered=house.contains_footprint(p,margin) and p.y>-0.5
 	if house.wing_enabled:
 		var q: Vector3=house.wing_transform().affine_inverse()*p
 		entered=entered or (absf(q.x)<house.wing_span()*0.5-margin and absf(q.z)<(house.width*0.5+house.wing_length)*0.5-margin and p.y>-0.5)
