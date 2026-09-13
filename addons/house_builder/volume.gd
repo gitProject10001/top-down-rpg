@@ -1,6 +1,13 @@
 @tool
 extends "res://addons/house_builder/house.gd"
 ## A rectangular authored body, with its own openings and roof proportions.
+@export_group("Struttura")
+@export_enum("Corpo chiuso", "Portico / tettoia aperta") var structure_kind := 0:
+	set(value): structure_kind=value; request_rebuild()
+@export_range(0.12,0.4,0.01) var post_size := 0.18:
+	set(value): post_size=value; request_rebuild()
+@export_range(1.5,5.0,0.1) var post_spacing := 3.0:
+	set(value): post_spacing=value; request_rebuild()
 @export_group("Aggancio del volume")
 @export_storage var volume_id := ""
 @export var attached := true:
@@ -28,7 +35,7 @@ func _exit_tree() -> void:
 	var host := volume_host()
 	if host: host.request_rebuild()
 func _process(delta: float) -> void:
-	var signature := str(dimensions(),openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
+	var signature := str(dimensions(),structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
 	if signature!=_observed:
 		_observed=signature
 		var host := volume_host()
@@ -49,13 +56,14 @@ func volume_error() -> String:
 	if host.has_method("volume_host") or host.wing_enabled or wing_enabled: return "Aggancio supportato al corpo principale senza ala legacy."
 	if absf(host_offset*host.wall_length(host_wall)*0.5)+width*0.5>host.wall_length(host_wall)*0.5-0.25: return "Il volume supera il bordo della facciata: riduci larghezza o spostamento."
 	if wall_height+roof_height>host.wall_height-0.15: return "Per questo primo raccordo il tetto accessorio deve stare sotto la gronda principale."
-	if junction_mode==1 and (junction_width>width-0.5 or junction_height>wall_height-0.2): return "La porta del raccordo supera il corpo: riduci larghezza o altezza della porta."
+	if structure_kind==0 and junction_mode==1 and (junction_width>width-0.5 or junction_height>wall_height-0.2): return "La porta del raccordo supera il corpo: riduci larghezza o altezza della porta."
 	for record in host.openings:
 		var opening: Dictionary=host.resolved_opening(record)
 		if opening.wall==host_wall and absf(opening.along-host_offset*host.wall_length(host_wall)*0.5)<(width+opening.width)*0.5+0.15:
-			return "Il corpo copre un'apertura manuale della casa. Scegli una zona libera."
+			if structure_kind==0: return "Il corpo copre un'apertura manuale della casa. Scegli una zona libera."
+			if opening.y+opening.height*0.5>wall_height-0.25: return "La copertura interferisce con un'apertura della casa: alza i sostegni o sposta la tettoia."
 	for record in openings:
-		if int(record.get("wall",0))==1: return "La facciata posteriore è il raccordo: sposta la sua apertura su un lato libero."
+		if structure_kind==0 and int(record.get("wall",0))==1: return "La facciata posteriore è il raccordo: sposta la sua apertura su un lato libero."
 	for other in host.authored_volumes():
 		if other==self or not other.attached: continue
 		# Footprints are transformed to host axes for orthogonal attachments.
@@ -65,9 +73,37 @@ func volume_error() -> String:
 	return ""
 func _get_configuration_warnings() -> PackedStringArray:
 	var error := volume_error()
-	return super._get_configuration_warnings() if error.is_empty() else PackedStringArray([error])
+	if not error.is_empty(): return PackedStringArray([error])
+	return PackedStringArray() if structure_kind==1 else super._get_configuration_warnings()
 
 func junction_record() -> Dictionary:
 	var host := volume_host()
 	var along: float=host_offset*host.wall_length(host_wall)*0.5+junction_offset*maxf(0,(width-junction_width)*0.5-0.25)
 	return {"kind":"door","wall":host_wall,"u":along/(host.wall_length(host_wall)*0.5),"width":junction_width,"height":junction_height,"open":junction_open,"volume_id":volume_id}
+
+func all_openings() -> Array[Dictionary]:
+	# Keep authored openings when converting, but never generate floating frames.
+	if structure_kind==0: return super.all_openings()
+	return []
+
+func opening_fits(record: Dictionary,ignore_index: int=-1) -> bool:
+	return structure_kind==0 and super.opening_fits(record,ignore_index)
+
+func _build_shell() -> void:
+	if structure_kind==0:
+		super._build_shell(); return
+	# Two rows of posts: rear posts are unnecessary for a valid wall attachment.
+	var anchored := attached and volume_host()!=null and volume_error().is_empty()
+	var bays := maxi(1,ceili((depth-post_size)/post_spacing))
+	for side in [-1.0,1.0]:
+		var x: float=side*(width-post_size)*0.5
+		for i in bays+1:
+			if anchored and i==0: continue
+			var z: float=-(depth-post_size)*0.5+i*(depth-post_size)/bays
+			_box(Vector3(x,wall_height*0.5,z),Vector3(post_size,wall_height,post_size),1)
+		_box(Vector3(x,wall_height-0.10,0),Vector3(post_size+0.04,0.20,depth),1)
+	for z in [-depth*0.5,depth*0.5]:
+		_box(Vector3(0,wall_height-0.10,z),Vector3(width,0.20,post_size),1)
+		_beam(Vector3(-width*0.5,wall_height,z),Vector3(0,wall_height+roof_height,z),post_size)
+		_beam(Vector3(width*0.5,wall_height,z),Vector3(0,wall_height+roof_height,z),post_size)
+	_box(Vector3(0,wall_height+roof_height,0),Vector3(post_size,post_size,depth+0.6),1)

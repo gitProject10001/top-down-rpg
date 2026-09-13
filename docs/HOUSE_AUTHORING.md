@@ -303,3 +303,34 @@ Nell'esempio `multi_volume_example.tscn`, la bottega ha un raccordo aperto e il
 deposito una porta. Seleziona CasaComposta e usa Play; **E** aziona la porta vicina.
 `tools/check_volume_junction_play.gd` verifica che la porta chiusa blocchi il
 personaggio, poi la apre e attraversa il raccordo in entrambe le direzioni.
+
+
+## Portici e tettoie aperte
+
+Nel tab **Volumi**, scegli **Nuovo: portico / tettoia aperta**, poi la facciata con
+**Aggiungi corpo**. Il tipo nuovo vale solo per le creazioni successive. Per
+convertire un volume esistente usa **Struttura → Structure Kind** nell'Inspector.
+Le aperture manuali del corpo vengono conservate ma non generate nel tipo aperto;
+tornano visibili riconvertendolo in corpo chiuso. I pulsanti del raccordo interno
+sono disabilitati quando si seleziona un portico.
+
+Le maniglie controllano larghezza, profondità, altezza di gronda (**Wall Height**,
+qui altezza dei sostegni) e rialzo del colmo (**Roof Height**). **Post Size** regola
+la sezione dei pali, **Post Spacing** la distanza massima lungo i lati. Il numero
+di campate segue la profondità: allungare una tettoia aggiunge sostegni.
+
+Il portico agganciato conserva la parete della casa e può coprire una porta
+esistente se l'altezza lascia spazio al suo vano. Non genera un ingresso nuovo.
+**Sgancia volume** permette di spostarlo liberamente come tettoia: ricompaiono i
+sostegni posteriori. Terreno e pavimentazione restano quelli della scena.
+
+Apri `scenes/dev/porch_canopy_example.tscn`: portico davanti all'ingresso e tettoia
+indipendente accanto alla casa. Seleziona **CasaComposta → Play casa selezionata**.
+Sotto le coperture si resta all'esterno; l'oscuramento si attiva entrando in casa.
+Verificati collisione dei pali, lati aperti, ingresso/uscita del giocatore,
+salvataggio e creazione con undo/redo.
+
+Prima versione: tetto a due falde, pali rettilinei in due file, base orizzontale.
+Non include ancora falda singola, archi, controventi, terreno irregolare o
+modifica individuale dei pali. Per un portico agganciato la copertura deve restare
+sotto la gronda principale, come per i corpi chiusi.

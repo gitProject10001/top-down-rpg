@@ -271,6 +271,12 @@ func run(plugin: EditorPlugin) -> void:
 	profile_history.undo(); assert(annex.junction_mode==0)
 	profile_history.redo(); assert(annex.junction_mode==1)
 	print("VOLUME_EDITOR_ADD_DETACH_JUNCTION_UNDO_REDO_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(fresh_house)
+	plugin._add_volume(1,1); var porch=fresh_house.authored_volumes()[1]
+	assert(porch.structure_kind==1 and porch.openings.is_empty())
+	profile_history.undo(); assert(fresh_house.authored_volumes().size()==1)
+	profile_history.redo(); assert(fresh_house.authored_volumes()[1]==porch)
+	print("PORCH_EDITOR_CREATE_UNDO_REDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

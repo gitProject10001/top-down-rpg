@@ -10,6 +10,8 @@ var door_choice: OptionButton
 var _binding_key := ""
 var placing_terrace := false
 const Volume=preload("res://addons/house_builder/volume.gd")
+var junction_buttons: Array[Button]=[]
+var volume_kind: OptionButton
 var volume_info: Label
 const House=preload("res://addons/house_builder/house.gd")
 const Gizmo=preload("res://addons/house_builder/gizmo.gd")
@@ -227,7 +229,8 @@ func _apply_changes() -> void:
 func _process(_delta: float) -> void:
 	if volume_info:
 		var selected_volume := _selected_house()
-		volume_info.text=("VOLUME NON RACCORDATO: "+selected_volume.volume_error() if not selected_volume.volume_error().is_empty() else "Raccordo: "+["passaggio aperto","parete con porta"][selected_volume.junction_mode]+". Dimensioni e posizione porta: Inspector, Raccordo interno. Sgancia per usare la trasformazione libera.") if selected_volume is Volume else "Seleziona una casa e aggiungi un corpo basso. Ogni volume conserva tetto e aperture propri."
+		for button in junction_buttons: button.disabled=not selected_volume is Volume or selected_volume.structure_kind!=0
+		volume_info.text=("VOLUME NON RACCORDATO: "+selected_volume.volume_error() if not selected_volume.volume_error().is_empty() else "Portico aperto: altezza sostegni = Wall Height; colmo = Roof Height. Passo e sezione pali: Struttura. La parete della casa resta intatta." if selected_volume.structure_kind==1 else "Raccordo: "+["passaggio aperto","parete con porta"][selected_volume.junction_mode]+". Dimensioni e posizione porta: Inspector, Raccordo interno. Sgancia per usare la trasformazione libera.") if selected_volume is Volume else "Seleziona una casa e aggiungi un corpo basso. Ogni volume conserva tetto e aperture propri."
 	_refresh_binding_choices()
 	if balcony_info:
 		var component := _selected_balcony()
@@ -709,22 +712,25 @@ func _detach_stair(host: Node3D,stair: Node3D) -> void:
 
 func _build_volume_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Volumi"; tabs.add_child(page)
+	volume_kind=OptionButton.new(); volume_kind.add_item("Nuovo: corpo chiuso"); volume_kind.add_item("Nuovo: portico / tettoia aperta"); page.add_child(volume_kind)
 	for side in 4:
-		var button := Button.new(); button.text="Aggiungi corpo · "+["davanti","dietro","destra","sinistra"][side]; button.pressed.connect(_add_volume.bind(side)); page.add_child(button)
+		var button := Button.new(); button.text="Aggiungi corpo · "+["davanti","dietro","destra","sinistra"][side]; button.pressed.connect(_add_volume_from_ui.bind(side)); page.add_child(button)
 	for attached in [false,true]:
 		var button := Button.new(); button.text="Riaggancia volume" if attached else "Sgancia volume"; button.pressed.connect(_toggle_volume.bind(attached)); page.add_child(button)
 	for kind in 2:
-		var button := Button.new(); button.text=["Raccordo · passaggio aperto","Raccordo · parete con porta"][kind]; button.pressed.connect(_set_volume_junction.bind(kind)); page.add_child(button)
+		var button := Button.new(); button.text=["Raccordo · passaggio aperto","Raccordo · parete con porta"][kind]; button.pressed.connect(_set_volume_junction.bind(kind)); page.add_child(button); junction_buttons.append(button)
 	var remove := Button.new(); remove.text="Rimuovi volume selezionato"; remove.pressed.connect(_remove_volume); page.add_child(remove)
 	volume_info=Label.new(); volume_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(volume_info)
-func _add_volume(side: int) -> void:
+func _add_volume_from_ui(side: int) -> void:
+	_add_volume(side,volume_kind.selected)
+func _add_volume(side: int,kind: int=0) -> void:
 	var host := _selected_house()
 	if host is Volume: host=host.volume_host()
 	if host==null: status.text="Seleziona una casa."; return
 	var container := host.get_node_or_null("Volumes"); var fresh := container==null
 	if fresh: container=Node3D.new(); container.name="Volumes"; host.add_child(container)
-	var volume := Volume.new(); volume.name="CorpoAccessorio"; volume.width=3.0; volume.depth=4.0; volume.wall_height=2.6; volume.roof_height=1.2; volume.host_wall=side
-	volume.openings=[{"kind":"window","wall":0,"u":0.0,"y":1.4}]
+	var volume := Volume.new(); volume.name="Portico" if kind==1 else "CorpoAccessorio"; volume.structure_kind=kind; volume.width=3.0; volume.depth=4.0; volume.wall_height=2.6; volume.roof_height=1.2; volume.host_wall=side
+	if kind==0: volume.openings=[{"kind":"window","wall":0,"u":0.0,"y":1.4}]
 	container.add_child(volume); volume.prepare_attachment(); var error := volume.volume_error()
 	container.remove_child(volume)
 	if fresh: host.remove_child(container)

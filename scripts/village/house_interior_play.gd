@@ -123,8 +123,9 @@ func _process(delta: float) -> void:
 	if house.wing_enabled:
 		var q: Vector3=house.wing_transform().affine_inverse()*p
 		entered=entered or (absf(q.x)<house.wing_span()*0.5-margin and absf(q.z)<(house.width*0.5+house.wing_length)*0.5-margin and p.y>-0.5)
+	if house.has_method("volume_host") and house.structure_kind!=0: entered=false
 	for volume in house.authored_volumes():
-		if not volume.attached or not volume.volume_error().is_empty(): continue
+		if volume.structure_kind!=0 or not volume.attached or not volume.volume_error().is_empty(): continue
 		var q: Vector3=volume.to_local(player.global_position)
 		entered=entered or (absf(q.x)<volume.width*0.5-margin and absf(q.z)<volume.depth*0.5-margin and q.y>-0.5)
 	var collision: CollisionShape3D=player.get_node("Collision")

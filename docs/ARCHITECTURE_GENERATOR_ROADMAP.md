@@ -249,7 +249,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A01 | FATTO | Profilo architettonico minimo e contratto versionato | A00 | Preset, editing preservato, container Components e ID persistenti |
 | A02a | IN CORSO | Componenti agganciati: balcone + porta | A01 | Vano, collisione e aggancio aggiornati senza perdere le modifiche manuali |
 | A02 | IN CORSO | Composizione di più volumi rettangolari | A01 | Fucina R04 con corpo e tettoie modificabili indipendentemente |
-| A03 | TODO | Coperture indipendenti e parti aperte | A02 | Falde a quote diverse, portico e tetto piano; raccordi senza geometria interna superflua |
+| A03 | IN CORSO | Coperture indipendenti e parti aperte | A02 | Falde a quote diverse, portico e tetto piano; raccordi senza geometria interna superflua |
 | A04 | TODO | Piani e interni coerenti con i volumi | A02, A03 | Casa R02: ingresso, scala esterna/interna, piano superiore percorribile |
 | A05 | TODO | Facciate e strutture per campate | A03, A04 | Graticcio e portico: travi e aperture seguono la struttura senza invadere i vani |
 | A06 | TODO | Due archetipi completi con profili architettonici | A04, A05 | Fucina e sala nordica: differenze leggibili nelle forme e negli interni |
@@ -409,6 +409,25 @@ il controllo indipendente di ingombro, sostegni e copertura.
 un raccordo problematico. L'utente può scollegare un volume senza perdere gli altri.
 
 ### A03 — Tetti e parti aperte
+
+**A03.1 verificato — 2026-09-13.** Tipo `Portico / tettoia aperta` sul Volume,
+con involucro generato da sostegni e travi. Riusa copertura e materiali esistenti,
+aggancio e maniglie del builder. Sezione e passo dei pali sono editabili; le
+campate seguono la profondità. Il portico valido si appoggia alla casa senza
+pali posteriori; sganciandolo diventa una tettoia con sostegni anche sul retro.
+La parete principale non viene tagliata e gli ingressi manuali restano utilizzabili.
+Le aperture proprie sono conservate nei dati ma sospese finché il corpo è aperto.
+
+La UI sceglie il tipo prima della creazione e disabilita i comandi del raccordo
+interno sui portici. Play considera le tettoie esterne, senza oscurare il mondo.
+Esempio: `scenes/dev/porch_canopy_example.tscn`; render reale:
+`captures/balcony_attachment/porch_canopy.png`. Verifiche:
+`check_porch_canopy.gd`, `check_porch_canopy_play.gd` e suite editor.
+
+Limiti: due falde, terreno piano, file di pali automatiche. Restano coperture a
+falda singola/piane, scelta individuale dei sostegni, archi e controventi.
+Prossimo incremento consigliato: falda singola per portici appoggiati alla parete,
+con pendenza verso l'esterno e la stessa gestione delle tegole.
 
 - [ ] Ogni copertura ha pianta, colmo, pendenza, quota, sporto e collegamento al volume.
 - [ ] Prima due falde e una falda; poi tetto piano/parapetto e quattro falde.

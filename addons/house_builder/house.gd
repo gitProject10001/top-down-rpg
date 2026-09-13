@@ -216,25 +216,7 @@ func rebuild() -> void:
 		var buffer := SurfaceTool.new()
 		buffer.begin(Mesh.PRIMITIVE_TRIANGLES)
 		_buffers.append(buffer)
-	# Hollow shell: the inner face is 24 cm behind the exterior face.
-	_box(Vector3(0,-0.045,0),Vector3(width,0.09,depth),3)
-	for wall in 4:
-		var length := wall_length(wall)
-		_wall_box(wall,0,wall_height*0.5,length,wall_height,WALL_THICKNESS,-WALL_THICKNESS*0.5,0)
-		_wall_box(wall,0,0.14,length+0.10,0.28,WALL_THICKNESS+0.10,-WALL_THICKNESS*0.5,2)
-		for y in [0.32,wall_height-0.08]: _wall_box(wall,0,y,length+0.12,0.14,0.14,0.04,1)
-		var posts := maxi(1,roundi(length/1.7))
-		for i in posts+1:
-			var along := -length*0.5+i*length/posts
-			for span in _post_segments(wall,along): _wall_box(wall,along,(span.x+span.y)*0.5,0.13,span.y-span.x,0.14,0.055,1)
-	for side in [-1.0,1.0]:
-		var a := Vector3(-width*0.5,wall_height,side*depth*0.5)
-		var b := Vector3(width*0.5,wall_height,side*depth*0.5)
-		var c := Vector3(0,wall_height+roof_height,side*depth*0.5)
-		_tri(a,b,c,0) if side>0 else _tri(a,c,b,0)
-		_beam(a,c,0.12); _beam(b,c,0.12)
-		_box(Vector3(0,wall_height+roof_height*0.5,side*(depth*0.5+0.035)),Vector3(0.12,roof_height,0.12),1)
-	_box(Vector3(0,wall_height+roof_height+0.06,0),Vector3(0.13,0.15,depth+0.7),1)
+	_build_shell()
 	var dark := StandardMaterial3D.new()
 	dark.albedo_color=Color(0.015,0.011,0.009)
 	dark.roughness=1.0
@@ -263,6 +245,27 @@ func rebuild() -> void:
 		plan._pending=true
 	update_gizmos()
 	if Engine.is_editor_hint(): update_configuration_warnings()
+
+func _build_shell() -> void:
+	# Hollow shell: the inner face is 24 cm behind the exterior face.
+	_box(Vector3(0,-0.045,0),Vector3(width,0.09,depth),3)
+	for wall in 4:
+		var length := wall_length(wall)
+		_wall_box(wall,0,wall_height*0.5,length,wall_height,WALL_THICKNESS,-WALL_THICKNESS*0.5,0)
+		_wall_box(wall,0,0.14,length+0.10,0.28,WALL_THICKNESS+0.10,-WALL_THICKNESS*0.5,2)
+		for y in [0.32,wall_height-0.08]: _wall_box(wall,0,y,length+0.12,0.14,0.14,0.04,1)
+		var posts := maxi(1,roundi(length/1.7))
+		for i in posts+1:
+			var along := -length*0.5+i*length/posts
+			for span in _post_segments(wall,along): _wall_box(wall,along,(span.x+span.y)*0.5,0.13,span.y-span.x,0.14,0.055,1)
+	for side in [-1.0,1.0]:
+		var a := Vector3(-width*0.5,wall_height,side*depth*0.5)
+		var b := Vector3(width*0.5,wall_height,side*depth*0.5)
+		var c := Vector3(0,wall_height+roof_height,side*depth*0.5)
+		_tri(a,b,c,0) if side>0 else _tri(a,c,b,0)
+		_beam(a,c,0.12); _beam(b,c,0.12)
+		_box(Vector3(0,wall_height+roof_height*0.5,side*(depth*0.5+0.035)),Vector3(0.12,roof_height,0.12),1)
+	_box(Vector3(0,wall_height+roof_height+0.06,0),Vector3(0.13,0.15,depth+0.7),1)
 
 func _volume_planes(size: Vector2,rise: float,frame: Transform3D,padding: float=0.0) -> Array:
 	var planes: Array=[]
@@ -454,7 +457,7 @@ func all_openings() -> Array[Dictionary]:
 		if component.validation_error().is_empty() and component.create_door and component.door_id.is_empty():
 			result.append(component.opening_record())
 	for volume in authored_volumes():
-		if volume.attached and volume.junction_mode==1 and volume.volume_error().is_empty(): result.append(volume.junction_record())
+		if volume.attached and volume.structure_kind==0 and volume.junction_mode==1 and volume.volume_error().is_empty(): result.append(volume.junction_record())
 	return result
 func _volume_door_changed(opened: bool,id: String) -> void:
 	for volume in authored_volumes():
@@ -493,7 +496,7 @@ func _clip_authored_volumes(body: MeshInstance3D,roof: MeshInstance3D) -> void:
 	var cutters: Array=[]
 	for volume in authored_volumes(): volume.prepare_attachment()
 	for volume in authored_volumes():
-		if volume.attached and volume.junction_mode==0 and volume.volume_error().is_empty(): cutters.append(volume._volume_planes(Vector2(volume.width,volume.depth),volume.roof_height,volume.transform,0.001))
+		if volume.attached and volume.structure_kind==0 and volume.junction_mode==0 and volume.volume_error().is_empty(): cutters.append(volume._volume_planes(Vector2(volume.width,volume.depth),volume.roof_height,volume.transform,0.001))
 	if has_method("volume_host") and get("attached"):
 		var host: Node3D=call("volume_host")
 		if host and call("volume_error").is_empty(): cutters.append(host._volume_planes(Vector2(host.width,host.depth),host.roof_height,transform.affine_inverse(),-0.001))
