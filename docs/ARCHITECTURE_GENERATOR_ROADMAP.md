@@ -947,3 +947,28 @@ piattaforma restano manuali. Modificare direttamente Elevation nell'Inspector
 non sposta gli edifici: usare il comando coordinato. Nessun trascinamento
 implicito degli edifici aggiunti dopo aver creato i collegamenti.
 Prossimo passo: bordi della corte e accessi, mantenendo espliciti i collegamenti.
+
+
+### A09.7 — Corte aperta e visibilità del giocatore — 2026-09-14
+
+Nuovo esempio con torri distanti 26 m, mastio/annesso e servizi sul fondo; centro
+ampio e libero. Creato con gli stessi builder, salvato come nodi editabili:
+`castle_open_courtyard_example.tscn`. Il terreno verde è solo una base di prova,
+non un giardino arredato o una nuova texture definitiva.
+Nel Play dei gruppi fortificati un taglio locale lungo la vista della camera
+libera giocatore e spazio circostante. Raggio predefinito 3.6 m; sotto piedi
++35 cm non si taglia, preservando piano dei camminamenti e riferimenti bassi.
+Agisce su materiali architettonici esistenti (intonaco, legno/pietra, tetti),
+senza modificare collisioni o mesh persistenti. Bordo sfumato a dithering e
+transizione di attivazione; nessuna trasparenza globale di tutta la facciata.
+Tab Vista e F8 per confronto. In editor il taglio è disattivato per default sui
+materiali: i parametri sono applicati per mesh soltanto nel Play. Gli oggetti
+aggiunti/rigenerati vengono rilevati periodicamente.
+Test: immagini prima/dopo nella stessa posizione, ripristino, muro ancora solido,
+camminamento con pavimento preservato, creazione UI e snapshot. Limiti: solo
+shader architettonici integrati, un giocatore/camera per il gruppo, niente
+vegetazione o materiali importati; la lettura del terreno resta influenzata
+dalle ombre esistenti. La reference non è riprodotta integralmente nelle coperture.
+
+Validazione A09.7 conclusa: OPEN_CASTLE_REVEAL_RESTORE_COLLISION_WALKWAY_OK e
+HOUSE_EDITOR_ALL_OK (con i messaggi preesistenti del reparenting arredi).

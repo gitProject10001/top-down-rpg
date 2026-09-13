@@ -1012,6 +1012,7 @@ func _build_fortification_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Fortificazioni"; tabs.add_child(page)
 	var label := Label.new(); label.text="Cortina rettilinea con camminamento e portone.\nSeleziona il muro e usa i gizmo per le dimensioni.\nInspector → Portone: larghezza, altezza, posizione."; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(label)
 	var button := Button.new(); button.text="Crea mura con portone"; button.pressed.connect(_create_curtain_wall); page.add_child(button)
+	var open_castle := Button.new(); open_castle.text="Crea castello con corte aperta"; open_castle.pressed.connect(_create_open_castle); page.add_child(open_castle)
 	var enclosure := Button.new(); enclosure.text="Crea recinto con quattro torri"; enclosure.pressed.connect(_create_enclosure); page.add_child(enclosure)
 	var pair := Button.new(); pair.text="Crea due torri collegate"; pair.pressed.connect(_create_fortification); page.add_child(pair)
 	var attach := Button.new(); attach.text="Collega nuova cortina alla torre"; attach.pressed.connect(_attach_curtain); page.add_child(attach)
@@ -1022,6 +1023,13 @@ func _build_fortification_tab() -> void:
 		if child!=fort_sections: child.reparent(create)
 	var edit := VBoxContainer.new(); edit.name="Recinto"; fort_sections.add_child(edit)
 	var elevations := VBoxContainer.new(); elevations.name="Quote"; fort_sections.add_child(elevations)
+	var visibility := VBoxContainer.new(); visibility.name="Vista"; fort_sections.add_child(visibility)
+	for enabled in [true,false]:
+		var visibility_button := Button.new(); visibility_button.text="Libera vista del giocatore" if enabled else "Vista completa (confronto)"
+		visibility_button.pressed.connect(_set_castle_visibility.bind(enabled)); visibility.add_child(visibility_button)
+	var visibility_hint := Label.new(); visibility_hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	visibility_hint.text="Nel Play F8 confronta le due viste. Il taglio libera anche lo spazio vicino; collisioni e pavimento restano. Seleziona il gruppo per regolare Visibility Radius (metri)."
+	visibility.add_child(visibility_hint)
 	var slope := Button.new(); slope.text="Abilita raccordi in pendenza"; slope.pressed.connect(_enable_sloped_walkways); elevations.add_child(slope)
 	var slope_hint := Label.new(); slope_hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	slope_hint.text="Modifica Floor Height nei piani delle torri e aggiorna l’altezza delle scale; usa Wall Height per torri senza interni. Le cortine senza portone seguono le quote dei tetti. Limiti: rampe 45%; gradini 75% e pedate di almeno 24 cm. Il preset Corte rialzata collega anche basi a quote diverse; il portone resta in piano. Gli errori sono elencati in Recinto."
@@ -1227,3 +1235,17 @@ func _set_courtyard_height() -> void:
 	var undo := get_undo_redo(); undo.create_action("Quota corte ed edifici",UndoRedo.MERGE_DISABLE,group)
 	undo.add_do_method(court,"apply_height_state",after); undo.add_undo_method(court,"apply_height_state",before)
 	undo.commit_action(); tabs.current_tab=6; fort_sections.current_tab=2
+
+func _create_open_castle() -> void:
+	var root := EditorInterface.get_edited_scene_root()
+	if root==null: return
+	var group=preload("res://addons/house_builder/open_castle_factory.gd").create()
+	_add_authored(root,group,"Crea castello con corte aperta"); group.rebuild(); tabs.current_tab=6
+
+func _set_castle_visibility(enabled: bool) -> void:
+	var group := _selected_fortification()
+	if group==null: _show_plan_error("Vista","Seleziona un castello."); return
+	if group.courtyard_visibility==enabled: return
+	var undo := get_undo_redo(); undo.create_action("Visibilità castello",UndoRedo.MERGE_DISABLE,group)
+	undo.add_do_property(group,"courtyard_visibility",enabled); undo.add_undo_property(group,"courtyard_visibility",group.courtyard_visibility); undo.commit_action()
+	tabs.current_tab=6; fort_sections.current_tab=3

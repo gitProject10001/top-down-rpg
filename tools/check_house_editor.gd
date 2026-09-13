@@ -473,6 +473,14 @@ func run(plugin: EditorPlugin) -> void:
 	profile_history.undo(); assert(is_equal_approx(court.elevation,1.2) and is_equal_approx(keep.position.y,1.35))
 	profile_history.redo(); assert(is_equal_approx(keep.position.y,1.75))
 	print("COURT_LINKED_HEIGHT_OFFSET_UNDO_REDO_OK")
+	plugin._create_open_castle()
+	var open_castle=EditorInterface.get_selection().get_selected_nodes()[0]
+	assert(open_castle.layout_size()==Vector2(26,26) and open_castle.buildings().size()==6)
+	plugin._set_castle_visibility(false); assert(not open_castle.courtyard_visibility)
+	profile_history.undo(); assert(open_castle.courtyard_visibility)
+	var open_snapshot: PackedScene=plugin._snapshot(open_castle); var open_copy=open_snapshot.instantiate()
+	assert(open_copy.courtyard_visibility and open_copy.has_node("CorpoServizi/InteriorPlan")); open_copy.free()
+	print("OPEN_CASTLE_UI_VISIBILITY_UNDO_SNAPSHOT_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

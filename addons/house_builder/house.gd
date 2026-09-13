@@ -518,3 +518,10 @@ func _clip_authored_volumes(body: MeshInstance3D,roof: MeshInstance3D) -> void:
 
 func cutaway_cutters(floor_base: float,storey_height: float) -> Array:
 	return [[Plane(Vector3.DOWN,-floor_base-storey_height)],[Plane(Vector3.LEFT,-width*0.5+0.35),Plane(Vector3.DOWN,-floor_base-0.8)],[Plane(Vector3.FORWARD,-depth*0.5+0.35),Plane(Vector3.DOWN,-floor_base-0.8)]]
+
+func contains_footprint(point: Vector3,margin: float=0.0) -> bool:
+	if absf(point.x)<width*0.5-margin and absf(point.z)<depth*0.5-margin: return true
+	if wing_enabled:
+		var local := wing_transform().affine_inverse()*point
+		return absf(local.x)<wing_span()*0.5-margin and absf(local.z)<(width*0.5+wing_length)*0.5-margin
+	return false

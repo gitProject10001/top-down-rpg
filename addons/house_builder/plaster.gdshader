@@ -1,4 +1,5 @@
 shader_type spatial;
+#include "res://shaders/pixelart/architecture_reveal.gdshaderinc"
 render_mode cull_disabled;
 
 uniform vec3 pattern_offset = vec3(0.0);
@@ -21,8 +22,8 @@ float noise(vec3 p) {
             mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
                 mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
 }
-void vertex() { local_position = VERTEX; }
-void fragment() {
+void vertex() { reveal_world=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; local_position = VERTEX; }
+void fragment() { architecture_reveal(FRAGCOORD.xy);
  // Continuous object-space field: no tiled patch, seams or stretching on resize.
  vec3 p = local_position + pattern_offset;
  float wear = noise(p * 1.13) * 0.58 + noise(p * 3.17) * 0.27 + noise(p * 9.31) * 0.15;

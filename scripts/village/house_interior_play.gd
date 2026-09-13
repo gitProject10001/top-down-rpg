@@ -104,7 +104,11 @@ func _ready() -> void:
 	snap.camera_path=NodePath("../IsoCam"); snap.targets=targets; world.add_child(snap)
 	var ui := CanvasLayer.new(); add_child(ui)
 	prompt=Label.new(); prompt.position=Vector2(22,20); prompt.add_theme_font_size_override("font_size",18); ui.add_child(prompt)
-	if authored_group: _activate_tower(house)
+	if authored_group:
+		_activate_tower(house)
+		var visibility=preload("res://scripts/village/architecture_visibility.gd").new()
+		visibility.name="ArchitectureVisibility"; visibility.group=authored_group; visibility.player=player; visibility.camera=camera
+		world.add_child(visibility)
 	if "--house-play-test" in OS.get_cmdline_user_args(): _test.call_deferred()
 	if authored_test: _test_authored.call_deferred()
 func nearest_door() -> Node3D:
@@ -168,15 +172,17 @@ func _process(delta: float) -> void:
 	blend=move_toward(blend,1.0 if inside else 0.0,delta*4)
 	sun.light_energy=lerpf(1.15,0.025,blend)
 	environment.ambient_light_energy=lerpf(0.408,0.10,blend)
-	ground_material.albedo_color=Color(0.27,0.25,0.17).lerp(Color(0.008,0.009,0.012),blend)
+	ground_material.albedo_color=(authored_group.courtyard_ground_color if authored_group else Color(0.27,0.25,0.17)).lerp(Color(0.008,0.009,0.012),blend)
 	camera.focus_height=lerpf(4.0,1.1,blend); camera.ortho_size=12.0 if zoomed else 17.5
 	for i in lamps.size(): lamps[i].visible=inside and i/3==active_floor
 	for light in accessory_lamps: light.visible=inside and active_floor==0
 	entrance_light.visible=inside and active_floor==0
 	var door := nearest_door()
 	if Input.is_action_just_pressed("interact") and door: door.toggle(player.global_position)
-	prompt.text="WASD / stick: muovi  ·  E / Y: porta  ·  F7: zoom confronto\n%s · Piano %d/%d%s"%[("Interno · "+str(house.name) if authored_group else "Interno") if inside else "Esterno",active_floor+1,storeys,"  —  E: "+("chiudi" if door.opened else "apri") if door else ""]
+	prompt.text="WASD / stick: muovi  ·  E / Y: porta  ·  F7: zoom · F8: visibilità\n%s · Piano %d/%d%s"%[("Interno · "+str(house.name) if authored_group else "Interno") if inside else "Esterno",active_floor+1,storeys,"  —  E: "+("chiudi" if door.opened else "apri") if door else ""]
 func _unhandled_key_input(event: InputEvent) -> void:
+	if authored_group and event is InputEventKey and event.pressed and not event.echo and event.physical_keycode==KEY_F8:
+		authored_group.courtyard_visibility=not authored_group.courtyard_visibility
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_F7: zoomed=not zoomed
 func _test() -> void:
 	for i in 90: await get_tree().physics_frame

@@ -2,6 +2,9 @@
 extends Node3D
 const House=preload("res://addons/house_builder/house.gd")
 ## Group of independently authored towers; links are stored on curtains.
+@export var courtyard_ground_color := Color(0.27,0.25,0.17)
+@export var courtyard_visibility := true
+@export_range(2,6,0.1) var visibility_radius := 3.6
 @export var courtyard_entry := false
 @export var entry_position := Vector3(8,0.15,4)
 

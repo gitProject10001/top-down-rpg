@@ -1,4 +1,5 @@
 shader_type spatial;
+#include "res://shaders/pixelart/architecture_reveal.gdshaderinc"
 render_mode diffuse_burley, specular_schlick_ggx;
 
 // Unlit pigment only: no painted light direction, crevice outline or highlights.
@@ -10,8 +11,8 @@ float noise(vec2 p) {
  vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
  return mix(mix(hash(i),hash(i+vec2(1,0)),f.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1)),f.x),f.y);
 }
-void vertex(){ clay_position=VERTEX; }
-void fragment(){
+void vertex(){ reveal_world=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; clay_position=VERTEX; }
+void fragment(){ architecture_reveal(FRAGCOORD.xy);
  vec2 p=clay_position.xz;
  float cloud=noise(p*7.0)*0.65+noise(p*23.0)*0.35;
  float grain=noise(p*95.0);

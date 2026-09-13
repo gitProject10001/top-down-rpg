@@ -847,3 +847,16 @@ Un riferimento mancante o una rampa troppo ripida blocca l'operazione senza
 spostamenti parziali. Modificando direttamente Elevation rimane disponibile il
 comportamento manuale; Size e posizione non trascinano gli edifici.
 Esempio: `scenes/dev/castle_linked_courtyard_example.tscn`.
+
+
+### Castello aperto e visuale libera (A09.7)
+
+**Fortificazioni → Crea → Crea castello con corte aperta** genera il layout più
+spazioso. Apri `scenes/dev/castle_open_courtyard_example.tscn` e usa il Play del
+builder. **F8** confronta visuale completa e taglio locale; il sottotab **Vista**
+permette di salvare la preferenza. Sul gruppo, **Visibility Radius** regola quanto
+spazio attorno al giocatore liberare; **Courtyard Visibility** abilita il sistema.
+Il muro diventa invisibile solo nella zona fra camera e giocatore; rimane solido.
+Pavimento sotto il giocatore e parti basse restano visibili. Il comportamento
+si somma al cutaway degli interni e funziona con i materiali architettonici del
+builder, non automaticamente con shader esterni o vegetazione.
