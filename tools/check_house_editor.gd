@@ -276,7 +276,11 @@ func run(plugin: EditorPlugin) -> void:
 	assert(porch.structure_kind==1 and porch.openings.is_empty())
 	profile_history.undo(); assert(fresh_house.authored_volumes().size()==1)
 	profile_history.redo(); assert(fresh_house.authored_volumes()[1]==porch)
-	print("PORCH_EDITOR_CREATE_UNDO_REDO_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(porch)
+	plugin._set_canopy_roof(1); assert(porch.canopy_roof==1)
+	profile_history.undo(); assert(porch.canopy_roof==0)
+	profile_history.redo(); assert(porch.canopy_roof==1)
+	print("PORCH_EDITOR_CREATE_ROOF_UNDO_REDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

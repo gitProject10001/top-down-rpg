@@ -19,6 +19,8 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	var d: float=n.depth*0.5
 	var h: float=n.wall_height
 	var points := PackedVector3Array([Vector3(w,h*0.5,0),Vector3(-w,h*0.5,0),Vector3(0,h*0.5,d),Vector3(0,h*0.5,-d),Vector3(0,h,0),Vector3(0,h+n.roof_height,0)])
+	if n.has_method("support_height") and n.structure_kind==1 and n.canopy_roof==1:
+		points[4].z=d; points[5].z=-d
 	var ids := PackedInt32Array([0,1,2,3,4,5])
 	if n.wing_enabled:
 		var frame: Transform3D=n.wing_transform()
@@ -103,6 +105,7 @@ func _set_handle(gizmo: EditorNode3DGizmo,id: int,_secondary: bool,camera: Camer
 		return
 	var axis: Vector3=n.global_basis.x if id<2 else (n.global_basis.z if id<4 else n.global_basis.y)
 	var start: Vector3=n.to_global(Vector3(0,n.wall_height*0.5,0)) if id<4 else n.global_position
+	if id>=4 and n.has_method("support_height") and n.structure_kind==1 and n.canopy_roof==1: start=n.to_global(Vector3(0,0,n.depth*0.5 if id==4 else -n.depth*0.5))
 	var pair := Geometry3D.get_closest_points_between_segments(start-axis*100.0,start+axis*100.0,origin,origin+direction*1000.0)
 	var amount: float=(pair[0]-start).dot(axis.normalized())/axis.length()
 	var value: Vector4=n.dimensions()

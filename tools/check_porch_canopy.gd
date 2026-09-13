@@ -6,6 +6,15 @@ func run() -> void:
 	var scene=load("res://scenes/dev/porch_canopy_example.tscn").instantiate(); root.add_child(scene)
 	var house=scene.get_node("CasaComposta"); var porch=house.authored_volumes()[0]; var canopy=house.authored_volumes()[1]
 	house.rebuild(); assert(porch.volume_error().is_empty())
+	assert(porch.canopy_roof==1)
+	var vertices: PackedVector3Array=porch._generated.get_node("Roof").mesh.surface_get_arrays(0)[Mesh.ARRAY_VERTEX]
+	for vertex in vertices:
+		assert(absf(vertex.y-porch.support_height(vertex.z))<0.45,"Tiles follow one outward slope with relief")
+	assert(porch.support_height(-porch.depth*0.5)>porch.support_height(porch.depth*0.5))
+	var original_width: float=porch.width
+	porch.width+=1; porch.depth+=1; house.rebuild()
+	assert(porch._generated.get_node("Roof").mesh.get_aabb().size.x>original_width+1,"Roof expands with authored dimensions")
+	porch.width-=1; porch.depth-=1; house.rebuild()
 	await physics_frame; await physics_frame
 	assert(not ray(Vector3(0,1,3.5),Vector3(0,1,4.5)).is_empty(),"Porch never cuts the host wall")
 	assert(ray(porch.to_global(Vector3(-3,1,0.4)),porch.to_global(Vector3(3,1,0.4))).is_empty(),"Open sides remain traversable")
@@ -16,5 +25,5 @@ func run() -> void:
 	porch.attached=false; porch.position=Vector3(-6,0,0); porch.width=5; porch.post_spacing=1.8; house.rebuild()
 	var packed := PackedScene.new(); assert(packed.pack(scene)==OK)
 	var copy=packed.instantiate(); var saved=copy.get_node("CasaComposta").authored_volumes()[0]
-	assert(saved.structure_kind==1 and not saved.attached and saved.width==5 and saved.post_spacing==1.8 and saved.openings==records); copy.free()
+	assert(saved.canopy_roof==1 and saved.structure_kind==1 and not saved.attached and saved.width==5 and saved.post_spacing==1.8 and saved.openings==records); copy.free()
 	print("PORCH_WALL_OPEN_SIDES_POST_COLLISION_SAVE_OK"); scene.free(); quit()

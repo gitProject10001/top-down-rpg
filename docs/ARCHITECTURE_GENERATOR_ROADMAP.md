@@ -429,6 +429,20 @@ falda singola/piane, scelta individuale dei sostegni, archi e controventi.
 Prossimo incremento consigliato: falda singola per portici appoggiati alla parete,
 con pendenza verso l'esterno e la stessa gestione delle tegole.
 
+**A03.2 verificato — 2026-09-13.** Falda singola per i volumi aperti, alta sul
+retro locale (parete quando agganciata) e bassa verso l'esterno. La generazione
+riusa le tegole con un riferimento ruotato e una sola superficie inclinata:
+nessuna scalatura della mesh per ottenere la pendenza. Pali e travi seguono
+l'altezza locale. Dropdown contestuale con undo/redo e maniglie sui bordi alto/basso.
+Conservate le due falde esistenti e i dati durante il cambio della copertura.
+
+Esempio aggiornato `porch_canopy_example.tscn`, render `porch_canopy.png` nella
+cartella captures/balcony_attachment. Test su pendenza dei vertici, ridimensionamento,
+salvataggio, editor e attraversamento reale dell'ingresso superati. Limite:
+solo volumi aperti, direzione locale retro → fronte, terreno piano. Prossimo
+incremento: sostegni selezionabili e modificabili singolarmente, preservando
+le modifiche manuali quando cambiano le dimensioni del portico.
+
 - [ ] Ogni copertura ha pianta, colmo, pendenza, quota, sporto e collegamento al volume.
 - [ ] Prima due falde e una falda; poi tetto piano/parapetto e quattro falde.
 - [ ] Raccordi: intersezioni, compluvi/displuvi, bordi e taglio delle parti nascoste.

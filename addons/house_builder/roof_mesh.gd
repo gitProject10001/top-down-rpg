@@ -2,6 +2,7 @@
 extends RefCounted
 ## Parameterized version of the authored relief tiles, used by the house editor.
 ## Returns one mesh surface; no scene access, file I/O or per-tile nodes.
+var roof_frame := Transform3D.IDENTITY
 var half_span := 2.5
 var ridge_height := 4.72
 var slope := 0.96
@@ -15,10 +16,20 @@ var tile_transform := Transform3D.IDENTITY
 var broken_count := 0
 var shifted_count := 0
 
-func generate(width: float, depth: float, height: float, rise: float, seed_value: int, weathered: bool=true) -> ArrayMesh:
+func generate(width: float, depth: float, height: float, rise: float, seed_value: int, weathered: bool=true, single_slope: bool=false) -> ArrayMesh:
 	half_span=width*0.5+0.3
 	ridge_height=height+rise
 	slope=rise/(width*0.5)
+	roof_frame=Transform3D.IDENTITY
+	var run_width := depth
+	var sides := [-1.0,1.0]
+	if single_slope:
+		half_span=depth+0.6
+		slope=rise/depth
+		ridge_height=height+rise+slope*0.3
+		run_width=width
+		sides=[1.0]
+		roof_frame=Transform3D(Basis(Vector3(0,0,1),Vector3.UP,Vector3(-1,0,0)),Vector3(0,0,-depth*0.5-0.3))
 	rng.seed=seed_value
 	tile_count=0
 	broken_count=0
@@ -29,14 +40,14 @@ func generate(width: float, depth: float, height: float, rise: float, seed_value
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var rows := ceili(half_span/0.25)
 	var step := half_span/rows
-	for side in [-1.0,1.0]:
+	for side in sides:
 		for row in rows:
 			var distance := row*step
 			var length := minf(step*1.6,half_span-distance)
-			var z := -depth*0.5-0.3
+			var z := -run_width*0.5-0.3
 			var column := 0
-			while z<depth*0.5+0.29:
-				var width_tile := minf(0.35+rng.randf_range(-0.04,0.04),depth*0.5+0.3-z)
+			while z<run_width*0.5+0.29:
+				var width_tile := minf(0.35+rng.randf_range(-0.04,0.04),run_width*0.5+0.3-z)
 				if column==0 and row%2==1: width_tile*=0.5
 				# Independent seeded samples avoid the former repeating diagonal damage.
 				var damaged := weathered and damage_rng.randf()<0.022
@@ -58,11 +69,11 @@ func face(a: Vector3,b: Vector3,c: Vector3,color: Color, cavity: float=1.0) -> v
 	var normal := (b-a).cross(c-a).normalized()
 	color.a=cavity
 	for p in [a,c,b]:
-		st.set_normal(tile_transform.basis*normal)
+		st.set_normal(roof_frame.basis*tile_transform.basis*normal)
 		st.set_color(color)
 		st.set_uv(Vector2(p.z,p.x))
 		st.set_uv2(Vector2((p.z-tile_uv_origin.x)/tile_uv_size.x+0.5,(tile_uv_origin.y-p.x*tile_side)/tile_uv_size.y))
-		st.add_vertex(tile_transform*p)
+		st.add_vertex(roof_frame*tile_transform*p)
 
 func point(uv: Vector2, side: float, distance: float, z: float, lift: float) -> Vector3:
 	var x := side*(half_span-distance-uv.y)

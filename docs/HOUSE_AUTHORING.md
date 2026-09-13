@@ -334,3 +334,24 @@ Prima versione: tetto a due falde, pali rettilinei in due file, base orizzontale
 Non include ancora falda singola, archi, controventi, terreno irregolare o
 modifica individuale dei pali. Per un portico agganciato la copertura deve restare
 sotto la gronda principale, come per i corpi chiusi.
+
+
+## Falda singola per portici e tettoie
+
+Seleziona il portico nel tab **Volumi** e scegli **Copertura selezionata: falda
+singola**. Il controllo è attivo solo sui corpi aperti e supporta undo/redo.
+La stessa proprietà è nell'Inspector, **Struttura → Canopy Roof**.
+
+**Wall Height** è la quota del bordo basso esterno; **Roof Height** è il dislivello
+verso la parete. La profondità determina la pendenza insieme al dislivello.
+Le maniglie di altezza si trovano sui due bordi corrispondenti. Pali e travi
+seguono la falda; le tegole conservano rilievo, materiali e variazioni esistenti.
+L'aggancio taglia la porzione nascosta nella parete senza chiudere l'ingresso.
+Sganciando la tettoia rimane la stessa direzione locale di pendenza; si può ruotare
+l'intero volume con Godot.
+
+L'esempio `porch_canopy_example.tscn` ora confronta il portico a falda singola con
+la tettoia a due falde. Verificati adattamento al ridimensionamento, salvataggio,
+undo/redo e ingresso/uscita col giocatore. Questa copertura è per i corpi aperti:
+i corpi chiusi conservano il tetto a due falde. Restano da implementare coperture
+piane e sostegni modificabili individualmente.

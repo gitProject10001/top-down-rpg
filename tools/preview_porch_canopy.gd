@@ -35,7 +35,7 @@ func run() -> void:
 	var volumes := Node3D.new(); volumes.name="Volumes"; house.add_child(volumes); volumes.owner=world
 	for i in 2:
 		var body=preload("res://addons/house_builder/volume.gd").new(); body.name="Portico" if i==0 else "Tettoia"
-		body.structure_kind=1; body.width=4.2 if i==0 else 3.2; body.depth=3.6 if i==0 else 4.0
+		body.canopy_roof=1 if i==0 else 0; body.structure_kind=1; body.width=4.2 if i==0 else 3.2; body.depth=3.6 if i==0 else 4.0
 		body.wall_height=2.8; body.roof_height=1.2; body.host_wall=0; body.post_spacing=2.5
 		if i==1: body.attached=false; body.position=Vector3(6,0,1)
 		volumes.add_child(body); body.owner=world
@@ -51,7 +51,7 @@ func run() -> void:
 	for frame in 30: await process_frame
 	for layer in root.find_children("*","CanvasLayer",true,false): layer.hide()
 	var ui := CanvasLayer.new(); root.add_child(ui)
-	var label := Label.new(); label.text="PORTICO + TETTOIA\nAggancio alla casa · sostegni automatici · volumi aperti"; label.position=Vector2(30,30); label.add_theme_font_size_override("font_size",20); ui.add_child(label)
+	var label := Label.new(); label.text="PORTICO + TETTOIA\nFalda singola alla parete · confronto con due falde"; label.position=Vector2(30,30); label.add_theme_font_size_override("font_size",20); ui.add_child(label)
 	await process_frame; await RenderingServer.frame_post_draw
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures/balcony_attachment"))
 	root.get_texture().get_image().save_png("res://captures/balcony_attachment/porch_canopy.png")

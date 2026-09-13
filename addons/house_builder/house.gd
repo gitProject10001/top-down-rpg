@@ -233,7 +233,7 @@ func rebuild() -> void:
 	_generated.add_child(body)
 	var roof := MeshInstance3D.new()
 	roof.name="Roof"
-	roof.mesh=RoofMesh.new().generate(width,depth,wall_height,roof_height,house_seed,weathered)
+	roof.mesh=_build_roof()
 	_generated.add_child(roof)
 	if wing_enabled: _join_wing(body,roof)
 	_clip_authored_volumes(body,roof)
@@ -245,6 +245,9 @@ func rebuild() -> void:
 		plan._pending=true
 	update_gizmos()
 	if Engine.is_editor_hint(): update_configuration_warnings()
+
+func _build_roof() -> ArrayMesh:
+	return RoofMesh.new().generate(width,depth,wall_height,roof_height,house_seed,weathered)
 
 func _build_shell() -> void:
 	# Hollow shell: the inner face is 24 cm behind the exterior face.

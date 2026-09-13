@@ -4,6 +4,8 @@ extends "res://addons/house_builder/house.gd"
 @export_group("Struttura")
 @export_enum("Corpo chiuso", "Portico / tettoia aperta") var structure_kind := 0:
 	set(value): structure_kind=value; request_rebuild()
+@export_enum("Due falde", "Falda singola verso esterno") var canopy_roof := 0:
+	set(value): canopy_roof=value; request_rebuild()
 @export_range(0.12,0.4,0.01) var post_size := 0.18:
 	set(value): post_size=value; request_rebuild()
 @export_range(1.5,5.0,0.1) var post_spacing := 3.0:
@@ -35,7 +37,7 @@ func _exit_tree() -> void:
 	var host := volume_host()
 	if host: host.request_rebuild()
 func _process(delta: float) -> void:
-	var signature := str(dimensions(),structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
+	var signature := str(dimensions(),canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
 	if signature!=_observed:
 		_observed=signature
 		var host := volume_host()
@@ -61,7 +63,7 @@ func volume_error() -> String:
 		var opening: Dictionary=host.resolved_opening(record)
 		if opening.wall==host_wall and absf(opening.along-host_offset*host.wall_length(host_wall)*0.5)<(width+opening.width)*0.5+0.15:
 			if structure_kind==0: return "Il corpo copre un'apertura manuale della casa. Scegli una zona libera."
-			if opening.y+opening.height*0.5>wall_height-0.25: return "La copertura interferisce con un'apertura della casa: alza i sostegni o sposta la tettoia."
+			if opening.y+opening.height*0.5>support_height(-depth*0.5+WALL_THICKNESS+0.08)-0.25: return "La copertura interferisce con un'apertura della casa: alza i sostegni o sposta la tettoia."
 	for record in openings:
 		if structure_kind==0 and int(record.get("wall",0))==1: return "La facciata posteriore è il raccordo: sposta la sua apertura su un lato libero."
 	for other in host.authored_volumes():
@@ -92,6 +94,8 @@ func opening_fits(record: Dictionary,ignore_index: int=-1) -> bool:
 func _build_shell() -> void:
 	if structure_kind==0:
 		super._build_shell(); return
+	if canopy_roof==1:
+		_build_shed_supports(); return
 	# Two rows of posts: rear posts are unnecessary for a valid wall attachment.
 	var anchored := attached and volume_host()!=null and volume_error().is_empty()
 	var bays := maxi(1,ceili((depth-post_size)/post_spacing))
@@ -107,3 +111,23 @@ func _build_shell() -> void:
 		_beam(Vector3(-width*0.5,wall_height,z),Vector3(0,wall_height+roof_height,z),post_size)
 		_beam(Vector3(width*0.5,wall_height,z),Vector3(0,wall_height+roof_height,z),post_size)
 	_box(Vector3(0,wall_height+roof_height,0),Vector3(post_size,post_size,depth+0.6),1)
+
+func support_height(z: float) -> float:
+	return wall_height+roof_height*(0.5-z/depth) if structure_kind==1 and canopy_roof==1 else wall_height
+
+func _build_roof() -> ArrayMesh:
+	return RoofMesh.new().generate(width,depth,wall_height,roof_height,house_seed,weathered,structure_kind==1 and canopy_roof==1)
+
+func _build_shed_supports() -> void:
+	var anchored := attached and volume_host()!=null and volume_error().is_empty()
+	var bays := maxi(1,ceili((depth-post_size)/post_spacing))
+	for side in [-1.0,1.0]:
+		var x: float=side*(width-post_size)*0.5
+		for i in bays+1:
+			if anchored and i==0: continue
+			var z: float=-(depth-post_size)*0.5+i*(depth-post_size)/bays
+			var h := support_height(z)
+			_box(Vector3(x,h*0.5,z),Vector3(post_size,h,post_size),1)
+		_beam(Vector3(x,support_height(-depth*0.5)-0.10,-depth*0.5),Vector3(x,support_height(depth*0.5)-0.10,depth*0.5),post_size)
+	for z in [-depth*0.5,depth*0.5]:
+		_box(Vector3(0,support_height(z)-0.10,z),Vector3(width,0.20,post_size),1)
