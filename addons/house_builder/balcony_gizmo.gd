@@ -15,6 +15,9 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	var corners := PackedVector3Array([Vector3(-n.balcony_width/2,0,0),Vector3(n.balcony_width/2,0,0),Vector3(n.balcony_width/2,0,n.projection),Vector3(-n.balcony_width/2,0,n.projection)])
 	var lines := PackedVector3Array()
 	for i in 4: lines.append(corners[i]); lines.append(corners[(i+1)%4])
+	if n.exterior_stairs:
+		for x in [n.stair_center()-n.stair_width*0.5,n.stair_center()+n.stair_width*0.5]:
+			lines.append(Vector3(x,0,n.projection)); lines.append(Vector3(x,n.ground_level-n.effective_elevation(),n.projection+n.stair_run()))
 	gizmo.add_collision_segments(lines)
 	if n!=focus: return
 	gizmo.add_lines(lines,get_material("outline" if n.validation_error().is_empty() else "error",gizmo))

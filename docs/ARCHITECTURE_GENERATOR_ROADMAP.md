@@ -321,7 +321,24 @@ Restano: agganci sulle ali, sgancio libero, controllo degli ingombri tra facciat
  differenti/altre case, duplicazione dei piani collegati con rimappatura degli ID,
 terrazze su pilastri. La scala interna esistente non si ridimensiona automaticamente
 quando cambia l'altezza del piano: va regolata separatamente.
-Prossimo incremento: terrazza su pilastri e scala esterna sullo stesso contratto.
+**A02a.3 verificato — 2026-09-13.** Terrazza su quattro pilastri e scala esterna
+rettilinea frontale, tramite opzioni dello stesso componente. Il parapetto apre
+solo il varco della rampa e si richiude quando questa viene rimossa. Piano e quota
+terreno determinano altezza dei pilastri, numero di gradini e lunghezza della
+scala (32 gradi, pianerottolo superiore). Collisione inclinata continua per il
+personaggio; gradini separati nella geometria visibile.
+UI contestuale: posizionamento con anteprima del piano e della scala, conversione
+del selezionato e rimozione scala con undo/redo. Inspector per larghezza, offset
+laterale e quota terreno. Esempio: `terrace_stairs_example.tscn`.
+Verifiche: `check_terrace_geometry.gd` (parapetto, ripristino, serializzazione,
+validazione), `check_terrace_play.gd` (giocatore sale, entra, scende; poi piano
+alzato a 3,2 m), test editor conversione/rimozione/undo/redo, regressioni balcone.
+Persistono i messaggi di chiusura headless già annotati in A02a.1.
+Limiti: quota terreno manuale uniforme; nessuna verifica contro strade, edifici
+o terreno irregolare; rampa frontale con offset, senza rotazioni laterali/L/U.
+La scala resta una parte configurabile del componente, non un nodo agganciabile
+indipendente. Prossimo passo: separare le rampe come componenti con agganci propri,
+consentendo scelta del lato e pianerottoli; poi composizione multi-volume A02.
 
 ### A02 — Volumi, non una lista di eccezioni per ogni edificio
 

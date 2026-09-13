@@ -6,6 +6,7 @@ var balcony_info: Label
 var floor_choice: OptionButton
 var door_choice: OptionButton
 var _binding_key := ""
+var placing_terrace := false
 const House=preload("res://addons/house_builder/house.gd")
 const Gizmo=preload("res://addons/house_builder/gizmo.gd")
 const Plan=preload("res://addons/house_builder/plan.gd")
@@ -337,7 +338,7 @@ func _snapshot(selected: Node3D) -> PackedScene:
 	clone.free()
 	return packed if error==OK else null
 func _set_mode(value: int) -> void:
-	_cancel(); mode=value
+	_cancel(); mode=value; placing_terrace=false
 	# The terrain brush and house placement must not consume the same stroke.
 	if mode!=0:
 		for other in get_parent().get_children():
@@ -505,7 +506,10 @@ func _apply_architecture_profile(adopt: bool) -> void:
 func _build_component_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Componenti"; tabs.add_child(page)
 	var add := Button.new(); add.text="Posiziona balcone + porta"; add.pressed.connect(_set_mode.bind(6)); page.add_child(add)
-	var remove := Button.new(); remove.text="Rimuovi balcone selezionato"; remove.pressed.connect(_remove_balcony); page.add_child(remove)
+	var terrace := Button.new(); terrace.text="Posiziona terrazza + scala"; terrace.pressed.connect(_start_terrace); page.add_child(terrace)
+	var convert := Button.new(); convert.text="Aggiungi pilastri e scala al selezionato"; convert.pressed.connect(_terrace_selected.bind(true)); page.add_child(convert)
+	var stairs_off := Button.new(); stairs_off.text="Rimuovi scala esterna"; stairs_off.pressed.connect(_terrace_selected.bind(false)); page.add_child(stairs_off)
+	var remove := Button.new(); remove.text="Rimuovi componente selezionato"; remove.pressed.connect(_remove_balcony); page.add_child(remove)
 	floor_choice=OptionButton.new(); page.add_child(floor_choice)
 	var floor_button := Button.new(); floor_button.text="Applica collegamento al piano"; floor_button.pressed.connect(_bind_balcony_floor); page.add_child(floor_button)
 	door_choice=OptionButton.new(); page.add_child(door_choice)
@@ -524,6 +528,7 @@ func _place_balcony(hit: Dictionary) -> void:
 	var component := Balcony.new(); component.name="Balcone"
 	component.host_id=["main/front","main/back","main/right","main/left"][hit.wall]
 	component.along=hit.u; component.elevation=snappedf(hit.y,0.1)
+	if placing_terrace: component.name="Terrazza"; component.support_posts=true; component.exterior_stairs=true; component.projection=2.4
 	container.add_child(component)
 	var error := component.validation_error()
 	container.remove_child(component)
@@ -558,10 +563,19 @@ func _preview_balcony(hit: Dictionary) -> void:
 		var material := StandardMaterial3D.new(); material.shading_mode=BaseMaterial3D.SHADING_MODE_UNSHADED
 		material.transparency=BaseMaterial3D.TRANSPARENCY_ALPHA; material.albedo_color=Color(0.2,0.8,1,0.45)
 		ghost.material_override=material; ghost.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; _world_parent().add_child(ghost)
-	ghost.show(); ghost.mesh.size=Vector3(3,0.15,1.5)
+	ghost.show(); ghost.mesh.size=Vector3(3,0.15,2.4 if placing_terrace else 1.5)
 	var h: Node3D=hit.house
 	var tangent: Vector3=(h.wall_point(hit.wall,1,0)-h.wall_point(hit.wall,0,0)).normalized()
-	ghost.global_transform=h.global_transform*Transform3D(Basis(tangent,Vector3.UP,h.wall_normal(hit.wall)),h.wall_point(hit.wall,hit.u*h.wall_length(hit.wall)*0.5,snappedf(hit.y,0.1)-0.08,0.75))
+	ghost.global_transform=h.global_transform*Transform3D(Basis(tangent,Vector3.UP,h.wall_normal(hit.wall)),h.wall_point(hit.wall,hit.u*h.wall_length(hit.wall)*0.5,snappedf(hit.y,0.1)-0.08,1.2 if placing_terrace else 0.75))
+	if placing_terrace:
+		var stair_preview: MeshInstance3D=ghost.get_node_or_null("ScalaPreview")
+		if stair_preview==null:
+			stair_preview=MeshInstance3D.new(); stair_preview.name="ScalaPreview"; stair_preview.mesh=BoxMesh.new(); stair_preview.material_override=ghost.material_override
+			stair_preview.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; ghost.add_child(stair_preview)
+		var rise: float=maxf(0.1,snappedf(hit.y,0.1)); var run := rise/tan(deg_to_rad(32.0))+0.45
+		stair_preview.mesh.size=Vector3(1.2,0.08,sqrt(run*run+rise*rise))
+		stair_preview.position=Vector3(0,-rise*0.5+0.08,1.2+run*0.5); stair_preview.rotation.x=atan2(rise,run)
+
 
 func _refresh_binding_choices() -> void:
 	if floor_choice==null: return
@@ -623,3 +637,16 @@ func _bind_balcony_door() -> void:
 		after.door_id=record.opening_id
 		if not b.floor_id.is_empty(): record.floor_y=b.effective_elevation(); record.floor_id=b.floor_id
 	_commit_binding(b,before,after)
+
+func _start_terrace() -> void:
+	_set_mode(6); placing_terrace=true
+	status.text="Clicca la facciata alla quota della terrazza. Scala frontale fino alla quota terreno (Inspector)."
+func _terrace_selected(enabled: bool) -> void:
+	var b := _selected_balcony()
+	if b==null: status.text="Seleziona un balcone o una terrazza."; return
+	var undo := get_undo_redo(); undo.create_action("Configura terrazza e scala",UndoRedo.MERGE_DISABLE,b)
+	undo.add_do_property(b,"exterior_stairs",enabled); undo.add_undo_property(b,"exterior_stairs",b.exterior_stairs)
+	if enabled:
+		undo.add_do_property(b,"support_posts",true); undo.add_undo_property(b,"support_posts",b.support_posts)
+		undo.add_do_property(b,"projection",maxf(b.projection,2.4)); undo.add_undo_property(b,"projection",b.projection)
+	undo.commit_action()

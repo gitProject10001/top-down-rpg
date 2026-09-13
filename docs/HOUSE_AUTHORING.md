@@ -205,3 +205,28 @@ non eseguirlo su una copia che hai personalizzato senza prima salvarla con altro
 Checkpoint: `e0a6b08` stato iniziale, `6cb96c2` interni persistenti, `a0698e1`
 planimetrie, `154bd81` rigenerazione protetta. L'arredo e le verifiche finali sono
 nel commit successivo a questi checkpoint.
+
+## Terrazza su pilastri e scala esterna
+
+Nel tab **Componenti**, **Posiziona terrazza + scala** crea il piano con quattro
+pilastri e una rampa frontale. Il clic indica la quota del piano; l'anteprima mostra
+anche l'ingombro della scala. Per convertire un balcone già selezionato usa
+**Aggiungi pilastri e scala al selezionato**. **Rimuovi scala esterna** conserva
+terrazza e pilastri e richiude automaticamente il parapetto. Undo/redo ripristina
+la configurazione precedente.
+
+Nell'Inspector, **Terrazza e scala esterna** offre pilastri e scala indipendenti,
+larghezza e spostamento laterale della rampa lungo il bordo frontale, e **Ground
+Level** (quota del terreno nelle coordinate della casa, inizialmente 0). La scala
+mantiene 32 gradi di pendenza e comprende un pianerottolo di raccordo; lunghezza,
+gradini, pilastri e collisioni seguono automaticamente il piano collegato.
+
+Esempio editabile: `scenes/dev/terrace_stairs_example.tscn`. Seleziona la casa e
+premi **Play casa selezionata**: gira davanti alla rampa, sali ed entra dalla porta
+superiore. Verificati salita, ingresso, discesa e ripetizione dopo aver alzato il
+piano da 2,8 a 3,2 m, con il giocatore del gioco.
+
+Per ora la scala è rettilinea e frontale: non gira ad angolo e non si aggancia ai
+lati della terrazza. La quota terreno è manuale e uniforme; non vengono ancora
+rilevati terreno irregolare, strade o edifici nell'ingombro della rampa. L'errore
+per una quota terreno incompatibile compare nel pannello Componenti.

@@ -1,0 +1,109 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/house_builder/house.gd" id="1_gttam"]
+[ext_resource type="Script" path="res://addons/house_builder/balcony.gd" id="2_1nx5n"]
+[ext_resource type="Script" path="res://addons/house_builder/plan.gd" id="3_eiokd"]
+[ext_resource type="Script" path="res://addons/house_builder/plan_element.gd" id="4_1rd3n"]
+
+[sub_resource type="Environment" id="Environment_2bubh"]
+background_mode = 1
+background_color = Color(0.16, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ydqct"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_1tvtj"]
+size = Vector2(50, 50)
+
+[node name="HouseWorkshop" type="Node3D" unique_id=592663099]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=435523128]
+environment = SubResource("Environment_2bubh")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=1694488961]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=2083143110]
+material_override = SubResource("StandardMaterial3D_ydqct")
+mesh = SubResource("PlaneMesh_1tvtj")
+
+[node name="CasaConTerrazza" type="Node3D" parent="." unique_id=1014165879]
+script = ExtResource("1_gttam")
+width = 6.0
+depth = 7.0
+wall_height = 5.6
+roof_height = 2.5
+openings = Array[Dictionary]([{
+"kind": "door",
+"u": -0.5,
+"wall": 0
+}, {
+"kind": "window",
+"u": 0.5,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.4,
+"wall": 2,
+"y": 4.0
+}, {
+"kind": "window",
+"u": -0.4,
+"wall": 2,
+"y": 1.5
+}, {
+"floor_id": "example_floor_1",
+"floor_y": 2.8,
+"kind": "door",
+"open": true,
+"opening_id": "example_balcony_door",
+"u": 0.0,
+"wall": 0
+}])
+
+[node name="Components" type="Node3D" parent="CasaConTerrazza" unique_id=716707584]
+
+[node name="TerrazzaIngresso" type="Node3D" parent="CasaConTerrazza/Components" unique_id=1459476424]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, 3.5)
+script = ExtResource("2_1nx5n")
+component_id = "balcony_1789315594_552_46221231791"
+balcony_width = 4.0
+projection = 2.4
+floor_id = "example_floor_1"
+door_id = "example_balcony_door"
+support_posts = true
+exterior_stairs = true
+door_open = true
+
+[node name="InteriorPlan" type="Node3D" parent="CasaConTerrazza" unique_id=795037186]
+script = ExtResource("3_eiokd")
+floor_height = 2.8
+preview_inside = false
+
+[node name="Piano_1" type="Node3D" parent="CasaConTerrazza/InteriorPlan" unique_id=1579096114]
+metadata/floor_id = "example_floor_0"
+
+[node name="Scala" type="Node3D" parent="CasaConTerrazza/InteriorPlan/Piano_1" unique_id=986197054]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.6, 0, 0)
+script = ExtResource("4_1rd3n")
+kind = 2
+dimensions = Vector3(1.1, 2.8, 4)
+room_ids = PackedStringArray()
+
+[node name="Piano_2" type="Node3D" parent="CasaConTerrazza/InteriorPlan" unique_id=77786702]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, 0)
+metadata/floor_id = "example_floor_1"
+
+[node name="Camera" type="Camera3D" parent="." unique_id=1247585276]
+transform = Transform3D(0.70710677, -0.45028284, 0.5452021, 0, 0.7710322, 0.6367961, -0.70710677, -0.45028284, 0.5452021, 25, 32, 25)
+projection = 1
+current = true
+size = 16.0

@@ -238,6 +238,13 @@ func run(plugin: EditorPlugin) -> void:
 	linked_plan.floor_height=3.1; linked_plan.rebuild(); balcony_house.rebuild()
 	assert(is_equal_approx(balcony.position.y,3.1) and is_equal_approx(balcony_house.opening_floor_y(balcony_house.openings[0]),3.1))
 	print("BALCONY_EDITOR_FLOOR_MANUAL_DOOR_BIND_UNDO_REDO_OK")
+	var old_projection=balcony.projection
+	plugin._terrace_selected(true); assert(balcony.exterior_stairs and balcony.support_posts and balcony.projection>=2.4)
+	profile_history.undo(); assert(not balcony.exterior_stairs and not balcony.support_posts and balcony.projection==old_projection)
+	profile_history.redo(); assert(balcony.exterior_stairs)
+	plugin._terrace_selected(false); assert(not balcony.exterior_stairs and balcony.support_posts)
+	profile_history.undo(); assert(balcony.exterior_stairs)
+	print("TERRACE_EDITOR_CONVERT_REMOVE_STAIR_UNDO_REDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 
