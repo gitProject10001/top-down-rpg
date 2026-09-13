@@ -718,7 +718,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. A09.2 aggiunge il corpo accessorio collegato. Prossimo passo: **editing delle quote e raccordi verticali del complesso**.
+se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. A09.2 aggiunge il corpo accessorio collegato. A09.3 introduce raccordi in pendenza. Prossimo passo: **accessi e scale per dislivelli maggiori**.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -868,3 +868,23 @@ nessun arredo, illuminazione solo di prova. Le verifiche degli ingombri sono
 conservative per rotazioni oblique e non considerano ogni oggetto manuale.
 Prossimo passo: quote e raccordi verticali del complesso, mantenendo indipendenti
 muri, edifici e interni. A09 resta IN CORSO.
+
+
+### A09.3 — Camminamenti fra tetti a quote diverse — 2026-09-13
+
+Opt-in per cortina `allow_sloped_walkway`; sottotab Fortificazioni/Quote con
+abilitazione collettiva delle cortine senza portone e Undo/Redo. Le altezze
+restano sui nodi torre/InteriorPlan. Muro, camminamento, parapetti e collisioni
+si adattano alle quote terminali senza sollevare la fondazione. Aperture dei
+parapetti delle torri riutilizzano il controllo di validità del raccordo.
+Esempio `castle_sloped_walkways_example.tscn`: due torri posteriori più alte
+(+1.2 m), con piani e scale aggiornati, mastio e corpo accessorio preservati.
+Test geometrici su quote/collisioni, opt-in, portone incompatibile, limite,
+ritorno a quota uniforme e salvataggio. Test Play dedicato con partenza sul tetto
+per percorrere entrambi i raccordi in salita/discesa. Suite editor: Undo/Redo e
+no-op, oltre alle regressioni precedenti; messaggi preesistenti degli arredi.
+Limiti: basi sullo stesso piano, assi verticali e facce opposte allineate;
+pendenza massima 45% (non 45 gradi); niente portone sul tratto inclinato.
+Sono rampe continue, non scale. Nessun adattamento al terreno e nessuna quota
+indipendente di fondazione in questa versione. A09 resta IN CORSO.
+Prossimo passo: accessi e scale per dislivelli maggiori, poi corti su quote diverse.

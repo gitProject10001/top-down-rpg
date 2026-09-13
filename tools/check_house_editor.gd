@@ -440,6 +440,16 @@ func run(plugin: EditorPlugin) -> void:
 	var accessory_copy=accessory_snapshot.instantiate()
 	assert(accessory_copy.has_node("Mastio/Volumes/CorpoAccessorio")); accessory_copy.free()
 	print("KEEP_ACCESSORY_EDITOR_UNDO_REDO_SNAPSHOT_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(enclosure)
+	plugin._enable_sloped_walkways()
+	assert(plugin.fort_sections.current_tab==2)
+	assert(enclosure.curtains().all(func(w): return w.gate_enabled or w.allow_sloped_walkway))
+	assert(enclosure.curtains().filter(func(w): return w.gate_enabled).all(func(w): return not w.allow_sloped_walkway))
+	profile_history.undo(); assert(enclosure.curtains().all(func(w): return not w.allow_sloped_walkway))
+	profile_history.redo()
+	var slope_version: int=profile_history.get_version(); plugin._enable_sloped_walkways()
+	assert(profile_history.get_version()==slope_version)
+	print("SLOPE_UI_UNDO_REDO_NOOP_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

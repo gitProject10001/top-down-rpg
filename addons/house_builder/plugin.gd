@@ -1020,6 +1020,11 @@ func _build_fortification_tab() -> void:
 	for child in page.get_children():
 		if child!=fort_sections: child.reparent(create)
 	var edit := VBoxContainer.new(); edit.name="Recinto"; fort_sections.add_child(edit)
+	var elevations := VBoxContainer.new(); elevations.name="Quote"; fort_sections.add_child(elevations)
+	var slope := Button.new(); slope.text="Abilita raccordi in pendenza"; slope.pressed.connect(_enable_sloped_walkways); elevations.add_child(slope)
+	var slope_hint := Label.new(); slope_hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	slope_hint.text="Modifica Floor Height nei piani delle torri e aggiorna l’altezza delle scale; usa Wall Height per torri senza interni. Le cortine senza portone seguono le quote dei tetti. Limite: 45% di pendenza; basi delle torri alla stessa quota. Gli errori sono elencati in Recinto."
+	elevations.add_child(slope_hint)
 	var annex := Button.new(); annex.text="Aggiungi corpo accessorio al mastio"; annex.pressed.connect(_add_keep_accessory); edit.add_child(annex)
 	var keep := Button.new(); keep.text="Aggiungi mastio nella corte"; keep.pressed.connect(_add_keep); edit.add_child(keep)
 	var fill := Button.new(); fill.text="Completa interni delle torri mancanti"; fill.pressed.connect(_complete_tower_interiors); edit.add_child(fill)
@@ -1161,3 +1166,14 @@ func _add_keep_accessory() -> void:
 	var keep: Node3D=candidates[0]
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(keep)
 	_add_volume(3)
+
+func _enable_sloped_walkways() -> void:
+	var group := _selected_fortification()
+	if group==null: _show_plan_error("Quote","Seleziona una fortificazione."); return
+	var walls: Array=group.curtains().filter(func(w): return not w.gate_enabled and not w.allow_sloped_walkway)
+	if walls.is_empty(): status.text="I raccordi disponibili sono già abilitati."; return
+	var undo := get_undo_redo(); undo.create_action("Abilita raccordi in pendenza",UndoRedo.MERGE_DISABLE,group)
+	for wall in walls:
+		undo.add_do_property(wall,"allow_sloped_walkway",true); undo.add_undo_property(wall,"allow_sloped_walkway",false)
+	undo.add_do_method(group,"rebuild"); undo.add_undo_method(group,"rebuild"); undo.commit_action()
+	tabs.current_tab=6; fort_sections.current_tab=2

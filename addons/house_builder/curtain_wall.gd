@@ -58,6 +58,9 @@ func _get_configuration_warnings() -> PackedStringArray:
 
 
 @export_group("Raccordo torre")
+@export var allow_sloped_walkway := false:
+	set(value): allow_sloped_walkway=value; request_rebuild()
+var _slope_rise := 0.0
 @export var connect_to_tower := false:
 	set(value): connect_to_tower=value; request_rebuild()
 @export_range(0,7,1) var tower_face := 2:
@@ -85,8 +88,11 @@ func destination_error() -> String:
 	if normal.dot(opposite)>-0.999 or (gap-normal*distance).length()>0.03:
 		return "Le due facce devono essere allineate e rivolte l’una verso l’altra. Sposta o ruota la seconda torre."
 	if distance<1.8 or distance>19.8: return "La distanza fra le facce deve essere fra 1.8 e 19.8 metri."
-	if absf(host.to_global(Vector3.UP*host.effective_elevation()).y-target.to_global(Vector3.UP*target.effective_elevation()).y)>0.03:
-		return "I tetti delle due torri devono avere la stessa quota."
+	var rise: float=target.to_global(Vector3.UP*target.effective_elevation()).y-host.to_global(Vector3.UP*host.effective_elevation()).y
+	if absf(rise)>0.03:
+		if not allow_sloped_walkway: return "Quote diverse: abilita Allow Sloped Walkway sulla cortina per raccordarle."
+		if gate_enabled: return "La cortina con portone richiede quote uguali. Usa una cortina senza portone per il dislivello."
+		if absf(rise)/distance>0.45: return "Camminamento troppo ripido: massimo 45% di pendenza. Allontana le torri o riduci il dislivello."
 	return ""
 
 func fortification_host() -> Node3D:
@@ -102,6 +108,7 @@ func connection_error() -> String:
 			return "Due cortine occupano la stessa faccia della torre. Cambia Tower Face."
 	return destination_error()
 func prepare_attachment() -> void:
+	_slope_rise=0.0
 	if not connect_to_tower: super.prepare_attachment(); return
 	if not connection_error().is_empty(): return
 	var host := fortification_host(); var normal: Vector3=host.wall_normal(tower_face)
@@ -110,13 +117,14 @@ func prepare_attachment() -> void:
 		var end: Vector3=host.to_local(target.to_global(target.wall_point(target_face,0,0)))
 		var length: float=(end-host.wall_point(tower_face,0,0)).dot(normal)+0.2
 		if not is_equal_approx(width,length): width=length
+		_slope_rise=target.to_global(Vector3.UP*target.effective_elevation()).y-host.to_global(Vector3.UP*host.effective_elevation()).y
 	var tangent: Vector3=(host.wall_point(tower_face,1,0)-host.wall_point(tower_face,0,0)).normalized()
 	transform=Transform3D(Basis(normal,Vector3.UP,-tangent),host.wall_point(tower_face,0,0,width*0.5-0.10))
 	if not is_equal_approx(wall_height,host.wall_height): wall_height=host.wall_height
 func _process(delta: float) -> void:
 	var host := fortification_host()
 	var target := destination()
-	var signature := str(host.global_transform if host and host.is_inside_tree() else Transform3D.IDENTITY,target_tower,target_face,target.global_transform if target and target.is_inside_tree() else Transform3D.IDENTITY,target.dimensions() if target else Vector4.ZERO,connection_error(),connect_to_tower,tower_face,width,depth,host.dimensions() if host else Vector4.ZERO)
+	var signature := str(host.global_transform if host and host.is_inside_tree() else Transform3D.IDENTITY,target_tower,target_face,target.global_transform if target and target.is_inside_tree() else Transform3D.IDENTITY,target.dimensions() if target else Vector4.ZERO,connection_error(),allow_sloped_walkway,connect_to_tower,tower_face,width,depth,host.dimensions() if host else Vector4.ZERO)
 	if signature!=_connection_signature:
 		_connection_signature=signature; request_rebuild()
 		if host: host.request_rebuild()
@@ -133,3 +141,12 @@ func connection_spans(wall: int,spans: Array[Vector2]) -> Array[Vector2]:
 	if connect_to_tower and connection_error().is_empty():
 		if wall==3 or (wall==2 and destination()!=null): return []
 	return spans
+
+func _ramp_point(point: Vector3) -> Vector3:
+	var t := clampf((point.x+width*0.5-0.10)/maxf(width-0.20,0.1),0,1)
+	# Keep the foundation level while raising the walkway and its parapets.
+	point.y+=_slope_rise*t*clampf(point.y/maxf(wall_height,0.1),0,1)
+	return point
+
+func _tri(a: Vector3,b: Vector3,c: Vector3,mat: int) -> void:
+	super._tri(_ramp_point(a),_ramp_point(b),_ramp_point(c),mat)

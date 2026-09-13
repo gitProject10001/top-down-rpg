@@ -789,3 +789,19 @@ Le geometrie interne generate non vanno modificate direttamente.
 La luce dell'annesso nel Play è una luce di prova, non un impianto salvato o GI.
 Esempio: `scenes/dev/castle_keep_accessory_example.tscn`.
 Verifiche: `check_keep_accessory.gd`, `check_keep_accessory_play.gd` e suite editor.
+
+
+### Quote dei camminamenti (A09.3)
+
+Seleziona il castello e apri **Fortificazioni → Quote → Abilita raccordi in
+pendenza**. Il comando abilita le cortine senza portone e supporta Undo/Redo.
+Modifica **Floor Height** dell'InteriorPlan della torre e l'altezza delle sue
+scale ordinarie; la scala Roof Exit aggiorna automaticamente la propria altezza.
+Per una torre priva di interni usa **Wall Height**. Non spostare la base in Y:
+questa versione raccorda altezze dei tetti con fondazioni sullo stesso piano.
+Per agire su una singola cortina usa **Allow Sloped Walkway** nell'Inspector.
+Gli errori compaiono in Recinto: disallineamento, pendenza oltre 45%, oppure
+portone su un dislivello. I parapetti terminali si aprono solo con raccordo valido.
+Esempio pronto: `scenes/dev/castle_sloped_walkways_example.tscn`.
+Le rampe sono continue e seguono le quote; materiali e illuminazione restano quelli
+esistenti. Test: check_sloped_walkways.gd e check_sloped_walkways_play.gd.
