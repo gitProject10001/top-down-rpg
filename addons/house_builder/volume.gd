@@ -4,6 +4,10 @@ extends "res://addons/house_builder/house.gd"
 @export_group("Struttura")
 @export_enum("Corpo chiuso", "Portico / tettoia aperta") var structure_kind := 0:
 	set(value): structure_kind=value; request_rebuild()
+@export var battlements_enabled := false:
+	set(value): battlements_enabled=value; request_rebuild()
+@export_range(0.6,2.0,0.05) var battlement_spacing := 1.0:
+	set(value): battlement_spacing=value; request_rebuild()
 @export var parapet_enabled := true:
 	set(value): parapet_enabled=value; request_rebuild()
 @export var automatic_frame := true:
@@ -48,7 +52,7 @@ func _exit_tree() -> void:
 	var host := volume_host()
 	if host: host.request_rebuild()
 func _process(delta: float) -> void:
-	var signature := str(dimensions(),roof_door_enabled,roof_door_floor_id,roof_door_offset,parapet_enabled,automatic_frame,canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
+	var signature := str(dimensions(),battlements_enabled,battlement_spacing,roof_door_enabled,roof_door_floor_id,roof_door_offset,parapet_enabled,automatic_frame,canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
 	if signature!=_observed:
 		_observed=signature
 		var host := volume_host()
@@ -73,8 +77,8 @@ func rebuild() -> void:
 			var shape := CollisionShape3D.new(); shape.shape=_generated.get_node("Roof").mesh.create_trimesh_shape(); collision.add_child(shape)
 func volume_error() -> String:
 	var host := volume_host()
-	if host==null: return "Il corpo accessorio deve stare in Casa / Volumes."
 	if not attached: return ""
+	if host==null: return "Il corpo accessorio deve stare in Casa / Volumes."
 	if host.has_method("volume_host") or host.wing_enabled or wing_enabled: return "Aggancio supportato al corpo principale senza ala legacy."
 	if absf(host_offset*host.wall_length(host_wall)*0.5)+width*0.5>host.wall_length(host_wall)*0.5-0.25: return "Il volume supera il bordo della facciata: riduci larghezza o spostamento."
 	if roof_top()>host.wall_height-0.15: return "Per questo primo raccordo il tetto accessorio deve stare sotto la gronda principale."
@@ -213,8 +217,8 @@ func _flat_roof() -> ArrayMesh:
 				spans=[Vector2(-length*0.5,stair_center()-half),Vector2(stair_center()+half,length*0.5)]
 			for span in spans:
 				if span.y-span.x<0.01: continue
-				_wall_box(wall,(span.x+span.y)*0.5,effective_elevation()+roof_height*0.5,span.y-span.x,roof_height,0.18,-0.09,0)
-				_wall_box(wall,(span.x+span.y)*0.5,roof_top(),span.y-span.x,0.08,0.24,-0.09,2)
+				_build_parapet_span(wall,span,length)
+
 	var mesh := ArrayMesh.new()
 	var materials := [_plaster_material(),_material(Vector2(0.5,0),Color(0.60,0.53,0.46)),_material(Vector2(0,0.5),Color(0.65,0.63,0.59))]
 	for i in 3:
@@ -280,3 +284,19 @@ func roof_door_error() -> String:
 		var opening: Dictionary=host.resolved_opening(record)
 		if opening.wall==candidate.wall and absf(opening.along-candidate.along)<(opening.width+candidate.width)*0.5+0.16 and absf(opening.y-candidate.y)<(opening.height+candidate.height)*0.5+0.16: return "Porta tetto sovrapposta a un'apertura manuale: spostala."
 	return ""
+
+func _build_parapet_span(wall: int,span: Vector2,length: float) -> void:
+	if not battlements_enabled:
+		_wall_box(wall,(span.x+span.y)*0.5,effective_elevation()+roof_height*0.5,span.y-span.x,roof_height,0.18,-0.09,0)
+		_wall_box(wall,(span.x+span.y)*0.5,roof_top(),span.y-span.x,0.08,0.24,-0.09,2)
+		return
+	var base := roof_height*0.45
+	_wall_box(wall,(span.x+span.y)*0.5,effective_elevation()+base*0.5,span.y-span.x,base,0.22,-0.11,0)
+	_wall_box(wall,(span.x+span.y)*0.5,effective_elevation()+base,span.y-span.x,0.06,0.26,-0.11,2)
+	var count := maxi(2,roundi(length/battlement_spacing)); var step := length/count
+	for i in count+1:
+		var center: float=-length*0.5+i*step
+		var low := maxf(span.x,center-step*0.27); var high := minf(span.y,center+step*0.27)
+		if high-low<0.01: continue
+		_wall_box(wall,(low+high)*0.5,effective_elevation()+base+(roof_height-base)*0.5,high-low,roof_height-base,0.22,-0.11,0)
+		_wall_box(wall,(low+high)*0.5,roof_top(),high-low,0.08,0.28,-0.11,2)

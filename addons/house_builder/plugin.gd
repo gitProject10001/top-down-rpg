@@ -752,6 +752,7 @@ func _detach_stair(host: Node3D,stair: Node3D) -> void:
 
 func _build_volume_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Volumi"; tabs.add_child(page)
+	var tower_button := Button.new(); tower_button.text="Crea torre quadrata merlata"; tower_button.pressed.connect(_create_square_tower); page.add_child(tower_button)
 	volume_kind=OptionButton.new(); volume_kind.add_item("Nuovo: corpo chiuso"); volume_kind.add_item("Nuovo: portico / tettoia aperta"); page.add_child(volume_kind)
 	canopy_roof_choice=OptionButton.new(); canopy_roof_choice.add_item("Copertura selezionata: due falde"); canopy_roof_choice.add_item("Copertura selezionata: falda singola"); canopy_roof_choice.add_item("Copertura selezionata: piana / parapetto"); canopy_roof_choice.item_selected.connect(_set_canopy_roof); page.add_child(canopy_roof_choice)
 	for side in 4:
@@ -812,6 +813,12 @@ func _toggle_volume(attached: bool) -> void:
 func _remove_volume() -> void:
 	var volume := _selected_house()
 	if not volume is Volume: return
+	if volume.volume_host()==null:
+		var root := EditorInterface.get_edited_scene_root()
+		if root==volume: status.text="La torre è la radice della scena: rimuovila dalla scena che la istanzia."; return
+		var parent := volume.get_parent(); var standalone_undo := get_undo_redo()
+		standalone_undo.create_action("Rimuovi torre",UndoRedo.MERGE_DISABLE,root)
+		standalone_undo.add_do_method(parent,"remove_child",volume); standalone_undo.add_undo_method(self,"_attach",parent,volume,root); standalone_undo.add_undo_reference(volume); standalone_undo.commit_action(); return
 	var host: Node3D=volume.volume_host(); var container := volume.get_parent()
 	var undo := get_undo_redo(); undo.create_action("Rimuovi corpo accessorio",UndoRedo.MERGE_DISABLE,host)
 	undo.add_do_method(self,"_detach_volume",host,container,volume)
@@ -921,6 +928,7 @@ func _remove_roof_stair() -> void:
 func _set_roof_door(enabled: bool) -> void:
 	var volume := _selected_house()
 	if not volume is Volume: return
+	if volume.volume_host()==null: status.text="La porta dal tetto richiede un volume agganciato a una casa."; return
 	var level: Node3D; var id: String=volume.roof_door_floor_id
 	if enabled:
 		var host: Node3D=volume.volume_host(); var plan=host.get_node_or_null("InteriorPlan") if host else null
@@ -939,3 +947,9 @@ func _set_roof_door(enabled: bool) -> void:
 	undo.add_do_property(volume,"roof_door_floor_id",id); undo.add_undo_property(volume,"roof_door_floor_id",volume.roof_door_floor_id)
 	undo.add_do_property(volume,"roof_door_enabled",enabled); undo.add_undo_property(volume,"roof_door_enabled",volume.roof_door_enabled)
 	undo.add_do_method(volume.volume_host(),"request_rebuild"); undo.add_undo_method(volume.volume_host(),"request_rebuild"); undo.commit_action()
+
+func _create_square_tower() -> void:
+	var root := EditorInterface.get_edited_scene_root()
+	if root==null: return
+	var tower=preload("res://addons/house_builder/tower_factory.gd").create()
+	_add_authored(root,tower,"Crea torre quadrata"); _selection_context()

@@ -496,3 +496,20 @@ una porta e la scala esterna. Con CasaComposta → Play: sali, premi E alla port
 entra, ritorna sul tetto e scendi. Non viene verificata la presenza di arredi o
 tramezzi davanti alla porta: libera manualmente il passaggio nel piano collegato.
 Il formato attuale ha un collegamento superiore per ciascun volume.
+
+
+## Torre quadrata e merli
+
+**Volumi → Crea torre quadrata merlata** aggiunge un volume indipendente costruito
+con lo stesso builder: pianta e altezza modificabili, porta e finestra, tetto piano.
+**Battlements Enabled** alterna parapetto continuo e merli; **Battlement Spacing**
+regola il passo. Il ritmo si adatta alla lunghezza dei lati e rispetta il varco
+per la scala. I vuoti fra i merli e i blocchi pieni hanno collisioni distinte.
+Materiali e resa sono quelli attuali; il preset definisce la forma, non un nuovo
+stile grafico. Le torri sono ancora quadrate/rettangolari.
+
+Esempio `scenes/dev/square_tower_example.tscn`: seleziona **TorreQuadrata → Play**.
+Una scala esterna laterale porta al tetto; scala e merli restano modificabili.
+Non ci sono ancora scale interne o piani arredati nel preset. La torre è
+indipendente: gli agganci dei corpi accessori alla torre e le torri poligonali
+sono incrementi successivi.

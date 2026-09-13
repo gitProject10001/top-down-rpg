@@ -1,0 +1,71 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/house_builder/volume.gd" id="1_67g3k"]
+[ext_resource type="Script" path="res://addons/house_builder/exterior_stair.gd" id="2_yjy8g"]
+
+[sub_resource type="Environment" id="Environment_4b2rk"]
+background_mode = 1
+background_color = Color(0.16, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rok1e"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_vskof"]
+size = Vector2(50, 50)
+
+[node name="HouseWorkshop" type="Node3D" unique_id=429866922]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=870329832]
+environment = SubResource("Environment_4b2rk")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=1973610833]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=1479124467]
+material_override = SubResource("StandardMaterial3D_rok1e")
+mesh = SubResource("PlaneMesh_vskof")
+
+[node name="TorreQuadrata" type="Node3D" parent="." unique_id=320979233]
+script = ExtResource("1_67g3k")
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1121533_45785024145"
+attached = false
+archetype_id = "tower"
+width = 4.8
+depth = 4.8
+wall_height = 5.6
+roof_height = 1.0
+openings = Array[Dictionary]([{
+"height": 2.1,
+"kind": "door",
+"u": 0.0,
+"wall": 0,
+"width": 1.2
+}, {
+"height": 1.1,
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"width": 0.45,
+"y": 3.6
+}])
+
+[node name="ScalaTetto" type="Node3D" parent="TorreQuadrata" unique_id=1945932968]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 2.45, 5.78, 0)
+script = ExtResource("2_yjy8g")
+component_id = "stair_1141383_47311750836"
+side = 1
+
+[node name="Camera" type="Camera3D" parent="." unique_id=1150482697]
+transform = Transform3D(0.70710677, -0.45028284, 0.5452021, 0, 0.7710322, 0.6367961, -0.70710677, -0.45028284, 0.5452021, 25, 32, 25)
+projection = 1
+current = true
+size = 20.0

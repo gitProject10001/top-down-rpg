@@ -332,6 +332,11 @@ func run(plugin: EditorPlugin) -> void:
 	plugin._set_roof_door(false); assert(not annex.roof_door_enabled)
 	profile_history.undo(); assert(annex.roof_door_enabled)
 	print("ROOF_DOOR_EDITOR_FLOOR_BIND_UNDO_OK")
+	plugin._create_square_tower(); var tower=EditorInterface.get_selection().get_selected_nodes()[0]
+	assert(tower.battlements_enabled and tower.canopy_roof==2 and not tower.attached)
+	profile_history.undo(); assert(tower.get_parent()==null)
+	profile_history.redo(); assert(tower.get_parent()==scene)
+	print("SQUARE_TOWER_EDITOR_CREATE_UNDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

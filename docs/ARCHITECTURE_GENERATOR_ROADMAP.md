@@ -570,6 +570,22 @@ silenziosa di muri, porte o mobili.
 **Uscita:** riconoscere fucina, sala comune e abitazione dalle forme e dall'organizzazione,
 anche con i materiali attuali. Cambiare un componente manualmente non disfa il resto.
 
+### Priorità aggiornata verso il castello — 2026-09-13
+
+Su richiesta, il percorso ora privilegia A07/A08. Le varianti mancanti di A04–A06
+restano nel piano ma non bloccano il primo recinto fortificato. Stima indicativa,
+non scadenza: 2–3 incrementi per una prima torre A07 poligonale con aperture e
+accesso; altri 3–4 per mura, torri, portone e camminamento del primo castello.
+Il castello completo A09, le cupole e i tetti curvi richiederanno altro lavoro.
+
+**Fondazione A08 verificata:** merli parametrici del parapetto piano e preset di
+torre quadrata indipendente, creato dal builder. Passo dei merli, vuoti e collisioni,
+varco della scala, salvataggio e creazione con undo/redo. Esempio
+`square_tower_example.tscn`; test `check_battlements.gd` e
+`check_square_tower_play.gd`. Questo non completa A07: la pianta è ancora rettangolare.
+Il prossimo incremento prioritario è la pianta poligonale della torre, prima di
+aggiungere altro dettaglio a portici e terrazze.
+
 ### A07 — Geometrie non rettangolari
 
 - [ ] Piante poligonali semplici; supporto delle curve con pochi controlli leggibili.
@@ -667,6 +683,4 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Tenere il primo prossimo
-passo su **A01**, poi **A02a: balcone agganciato + porta**, quindi la fucina multi-volume
-di **A02**.
+se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A07: torre poligonale**, poi **A08: recinto fortificato**.
