@@ -1,5 +1,6 @@
 @tool
 extends EditorPlugin
+var court_elevation: SpinBox
 const ExteriorStair=preload("res://addons/house_builder/exterior_stair.gd")
 const Balcony=preload("res://addons/house_builder/balcony.gd")
 var balcony_gizmos: EditorNode3DGizmoPlugin
@@ -1026,6 +1027,9 @@ func _build_fortification_tab() -> void:
 	slope_hint.text="Modifica Floor Height nei piani delle torri e aggiorna l’altezza delle scale; usa Wall Height per torri senza interni. Le cortine senza portone seguono le quote dei tetti. Limiti: rampe 45%; gradini 75% e pedate di almeno 24 cm. Il preset Corte rialzata collega anche basi a quote diverse; il portone resta in piano. Gli errori sono elencati in Recinto."
 	elevations.add_child(slope_hint)
 	var court := Button.new(); court.text="Crea corte posteriore rialzata"; court.pressed.connect(_create_raised_courtyard); elevations.add_child(court)
+	var court_caption := Label.new(); court_caption.text="Nuova quota della corte (m)"; elevations.add_child(court_caption)
+	court_elevation=SpinBox.new(); court_elevation.min_value=0.2; court_elevation.max_value=3; court_elevation.step=0.1; court_elevation.value=1.2; elevations.add_child(court_elevation)
+	var lift := Button.new(); lift.text="Applica quota a corte ed edifici collegati"; lift.pressed.connect(_set_courtyard_height); elevations.add_child(lift)
 	var steps := Button.new(); steps.text="Converti cortina selezionata in gradini"; steps.pressed.connect(_set_walkway_profile.bind(1)); elevations.add_child(steps)
 	var ramp := Button.new(); ramp.text="Converti cortina selezionata in rampa"; ramp.pressed.connect(_set_walkway_profile.bind(0)); elevations.add_child(ramp)
 	var annex := Button.new(); annex.text="Aggiungi corpo accessorio al mastio"; annex.pressed.connect(_add_keep_accessory); edit.add_child(annex)
@@ -1210,3 +1214,16 @@ func _create_raised_courtyard() -> void:
 			undo.add_do_property(wall,"allow_sloped_walkway",true); undo.add_undo_property(wall,"allow_sloped_walkway",wall.allow_sloped_walkway)
 	undo.add_do_method(group,"rebuild"); undo.add_undo_method(group,"rebuild"); undo.commit_action()
 	tabs.current_tab=6; fort_sections.current_tab=2
+
+func _set_courtyard_height() -> void:
+	var group := _selected_fortification()
+	if group==null or not group.has_node("CorteRialzata"):
+		_show_plan_error("Quota corte","Seleziona un castello con corte rialzata."); return
+	var court=group.get_node("CorteRialzata")
+	var after: Dictionary=court.height_proposal(court_elevation.value)
+	if after.has("error"): _show_plan_error("Quota corte",after.error); return
+	var before: Dictionary=court.height_state(after.bindings)
+	if before==after: return
+	var undo := get_undo_redo(); undo.create_action("Quota corte ed edifici",UndoRedo.MERGE_DISABLE,group)
+	undo.add_do_method(court,"apply_height_state",after); undo.add_undo_method(court,"apply_height_state",before)
+	undo.commit_action(); tabs.current_tab=6; fort_sections.current_tab=2

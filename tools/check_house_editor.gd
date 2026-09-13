@@ -466,6 +466,13 @@ func run(plugin: EditorPlugin) -> void:
 	var court_snapshot: PackedScene=plugin._snapshot(enclosure); var court_copy=court_snapshot.instantiate()
 	assert(court_copy.has_node("CorteRialzata")); court_copy.free()
 	print("RAISED_COURT_EDITOR_UNDO_REDO_SNAPSHOT_OK")
+	keep.position.y+=0.15
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(court)
+	plugin.court_elevation.value=1.6; plugin._set_courtyard_height()
+	assert(is_equal_approx(court.elevation,1.6) and is_equal_approx(keep.position.y,1.75))
+	profile_history.undo(); assert(is_equal_approx(court.elevation,1.2) and is_equal_approx(keep.position.y,1.35))
+	profile_history.redo(); assert(is_equal_approx(keep.position.y,1.75))
+	print("COURT_LINKED_HEIGHT_OFFSET_UNDO_REDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

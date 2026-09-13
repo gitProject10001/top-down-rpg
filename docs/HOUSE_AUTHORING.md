@@ -834,3 +834,16 @@ usano il centro degli edifici: controlla anche i loro bordi e le aggiunte manual
 Il portone rimane al terreno iniziale; la rampa conduce alla corte superiore.
 Esempio: `scenes/dev/castle_raised_courtyard_example.tscn`.
 Test: check_raised_courtyard.gd e check_raised_courtyard_play.gd.
+
+
+### Cambiare quota insieme agli edifici (A09.6)
+
+In **Fortificazioni → Quote**, imposta **Nuova quota della corte** e premi
+**Applica quota a corte ed edifici collegati**. L'operazione sposta verticalmente
+la corte e gli edifici elencati in **Linked Buildings**, preservando i loro offset
+manuali, con Undo/Redo. Per corti precedenti la lista viene inizializzata dagli
+edifici con centro sulla piattaforma. Verifica la lista se hai aggiunto edifici.
+Un riferimento mancante o una rampa troppo ripida blocca l'operazione senza
+spostamenti parziali. Modificando direttamente Elevation rimane disponibile il
+comportamento manuale; Size e posizione non trascinano gli edifici.
+Esempio: `scenes/dev/castle_linked_courtyard_example.tscn`.

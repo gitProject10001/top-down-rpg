@@ -718,7 +718,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. A09.2 aggiunge il corpo accessorio collegato. A09.3 introduce raccordi in pendenza. A09.4 aggiunge raccordi a gradini. A09.5 introduce la corte rialzata. Prossimo passo: **editing coordinato della quota e dei bordi della corte**.
+se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. A09.2 aggiunge il corpo accessorio collegato. A09.3 introduce raccordi in pendenza. A09.4 aggiunge raccordi a gradini. A09.5 introduce la corte rialzata. A09.6 coordina la quota con gli edifici. Prossimo passo: **bordi della corte e distribuzione degli accessi**.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -928,3 +928,22 @@ Modificare Elevation/Size/posizione non trascina automaticamente gli edifici:
 la diagnostica evidenzia quote incoerenti; resize del recinto non allarga la corte.
 A09 resta IN CORSO. Prossimo passo: editing coordinato di quota e bordi della
 corte, preservando gli offset manuali degli edifici.
+
+
+### A09.6 — Quota coordinata della corte — 2026-09-14
+
+Comando Quote/Applica quota a corte ed edifici collegati, con lista persistente
+`linked_buildings`. Il delta di quota viene applicato agli edifici conservando
+posizioni X/Z e offset Y manuali; i nodi e gli interni non vengono rigenerati.
+Undo/Redo ripristina quota, posizioni e collegamenti. Le corti precedenti, prive
+di collegamenti, inizializzano la lista dagli edifici con centro sulla piattaforma.
+Link mancanti e pendenza eccessiva producono errore senza applicazione parziale.
+Il preset nuovo salva già i riferimenti degli edifici sollevati.
+Esempio a quota 1.6 m: `castle_linked_courtyard_example.tscn`.
+Verificati offset manuale, Undo/Redo e Play dal portone a mastio/annesso, tre piani
+e ritorno. Suite editor con i messaggi preesistenti del reparenting degli arredi.
+Limiti: il comando riguarda solo la quota; Size, accesso e traslazione della
+piattaforma restano manuali. Modificare direttamente Elevation nell'Inspector
+non sposta gli edifici: usare il comando coordinato. Nessun trascinamento
+implicito degli edifici aggiunti dopo aver creato i collegamenti.
+Prossimo passo: bordi della corte e accessi, mantenendo espliciti i collegamenti.

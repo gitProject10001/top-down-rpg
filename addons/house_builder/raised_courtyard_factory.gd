@@ -22,4 +22,5 @@ static func proposal(group: Node3D) -> Dictionary:
 	var court=preload("res://addons/house_builder/raised_courtyard.gd").new(); court.name="CorteRialzata"
 	court.size=Vector2(high.x-low.x+radius.x*2,front-rear); court.position=Vector3((low.x+high.x)*0.5,0,(front+rear)*0.5)
 	court.access_run=radius.y
+	for path in positions: court.linked_buildings.append(NodePath("../"+str(path)))
 	return {"court":court,"positions":positions}
