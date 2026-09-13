@@ -1,7 +1,9 @@
 @tool
 extends EditorPlugin
+const ExteriorStair=preload("res://addons/house_builder/exterior_stair.gd")
 const Balcony=preload("res://addons/house_builder/balcony.gd")
 var balcony_gizmos: EditorNode3DGizmoPlugin
+var stair_gizmos: EditorNode3DGizmoPlugin
 var balcony_info: Label
 var floor_choice: OptionButton
 var door_choice: OptionButton
@@ -49,6 +51,7 @@ func _enter_tree() -> void:
 	add_node_3d_gizmo_plugin(gizmos)
 	balcony_gizmos=preload("res://addons/house_builder/balcony_gizmo.gd").new()
 	balcony_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(balcony_gizmos)
+	stair_gizmos=preload("res://addons/house_builder/exterior_stair_gizmo.gd").new(); stair_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(stair_gizmos)
 	plan_gizmos=preload("res://addons/house_builder/plan_gizmo.gd").new()
 	plan_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(plan_gizmos)
 	dock=VBoxContainer.new()
@@ -122,6 +125,7 @@ func _exit_tree() -> void:
 	_cancel()
 	remove_node_3d_gizmo_plugin(gizmos)
 	remove_node_3d_gizmo_plugin(balcony_gizmos)
+	remove_node_3d_gizmo_plugin(stair_gizmos)
 	remove_node_3d_gizmo_plugin(plan_gizmos)
 	remove_custom_type("HearthHouse")
 	remove_control_from_docks(scroll)
@@ -157,11 +161,11 @@ func _selection_context() -> void:
 	var selected := EditorInterface.get_selection().get_selected_nodes()
 	var node: Node=selected[0] if not selected.is_empty() else null
 	context_label.text="Selezione: "+str(node.name) if node else "Seleziona una casa o disegnane una."
-	if node is Balcony: tabs.current_tab=4
+	if node is Balcony or node is ExteriorStair: tabs.current_tab=4
 	elif node is Element: tabs.current_tab=3 if node.kind==3 else 2
 	elif node is Plan: tabs.current_tab=2
 	elif node is House and tabs.current_tab>1: tabs.current_tab=0
-	if node is House or node is Plan or node is Element or node is Balcony: _show_context_dock.call_deferred()
+	if node is House or node is Plan or node is Element or node is Balcony or node is ExteriorStair: _show_context_dock.call_deferred()
 	opening_choice.clear()
 	var house := _selected_house()
 	if house:
@@ -181,8 +185,9 @@ func _context_changed(_index: int) -> void:
 func _refresh_context_gizmos() -> void:
 	var house := _selected_house()
 	gizmos.focus=house; gizmos.context=mini(tabs.current_tab,2)
-	balcony_gizmos.focus=null
+	balcony_gizmos.focus=null; stair_gizmos.focus=null
 	for selected in EditorInterface.get_selection().get_selected_nodes():
+		if selected is ExteriorStair and tabs.current_tab==4: stair_gizmos.focus=selected; selected.update_gizmos(); continue
 		if selected is Balcony and tabs.current_tab==4: balcony_gizmos.focus=selected; selected.update_gizmos()
 	plan_gizmos.focus=null
 	for node in EditorInterface.get_selection().get_selected_nodes():
@@ -191,7 +196,9 @@ func _refresh_context_gizmos() -> void:
 	if root:
 		for h in _houses(root):
 			h.update_gizmos()
-			for component in h.attached_components(): component.update_gizmos()
+			for component in h.attached_components():
+				component.update_gizmos()
+				if component.stair_component(): component.stair_component().update_gizmos()
 			var plan=h.get_node_or_null("InteriorPlan")
 			if plan:
 				for e in plan.elements(): e.update_gizmos()
@@ -224,7 +231,7 @@ func _process(_delta: float) -> void:
 	var root := EditorInterface.get_edited_scene_root()
 	if root!=last_root:
 		_cancel(); last_root=root
-func _handles(object: Object) -> bool: return object is Balcony or object is House or object is Plan or object is Element or mode!=0
+func _handles(object: Object) -> bool: return object is ExteriorStair or object is Balcony or object is House or object is Plan or object is Element or mode!=0
 
 func _selected_house() -> Node3D:
 	for selected in EditorInterface.get_selection().get_selected_nodes():
@@ -508,6 +515,10 @@ func _build_component_tab() -> void:
 	var add := Button.new(); add.text="Posiziona balcone + porta"; add.pressed.connect(_set_mode.bind(6)); page.add_child(add)
 	var terrace := Button.new(); terrace.text="Posiziona terrazza + scala"; terrace.pressed.connect(_start_terrace); page.add_child(terrace)
 	var convert := Button.new(); convert.text="Aggiungi pilastri e scala al selezionato"; convert.pressed.connect(_terrace_selected.bind(true)); page.add_child(convert)
+	for side in 3:
+		var side_button := Button.new(); side_button.text="Scala indipendente · "+["frontale","destra","sinistra"][side]
+		side_button.pressed.connect(_attach_stair.bind(side)); page.add_child(side_button)
+	var detach := Button.new(); detach.text="Elimina scala indipendente"; detach.pressed.connect(_delete_stair); page.add_child(detach)
 	var stairs_off := Button.new(); stairs_off.text="Rimuovi scala esterna"; stairs_off.pressed.connect(_terrace_selected.bind(false)); page.add_child(stairs_off)
 	var remove := Button.new(); remove.text="Rimuovi componente selezionato"; remove.pressed.connect(_remove_balcony); page.add_child(remove)
 	floor_choice=OptionButton.new(); page.add_child(floor_choice)
@@ -516,8 +527,11 @@ func _build_component_tab() -> void:
 	var door_button := Button.new(); door_button.text="Applica accesso"; door_button.pressed.connect(_bind_balcony_door); page.add_child(door_button)
 	balcony_info=Label.new(); balcony_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(balcony_info)
 func _selected_balcony() -> Node3D:
-	for node in EditorInterface.get_selection().get_selected_nodes():
-		if node is Balcony: return node
+	for selected in EditorInterface.get_selection().get_selected_nodes():
+		var node: Node=selected
+		while node:
+			if node is Balcony: return node
+			node=node.get_parent()
 	return null
 func _place_balcony(hit: Dictionary) -> void:
 	if hit.wall>=4: _show_plan_error("Balcone","Questo primo componente supporta le quattro facciate del corpo principale."); return
@@ -528,7 +542,9 @@ func _place_balcony(hit: Dictionary) -> void:
 	var component := Balcony.new(); component.name="Balcone"
 	component.host_id=["main/front","main/back","main/right","main/left"][hit.wall]
 	component.along=hit.u; component.elevation=snappedf(hit.y,0.1)
-	if placing_terrace: component.name="Terrazza"; component.support_posts=true; component.exterior_stairs=true; component.projection=2.4
+	if placing_terrace:
+		component.name="Terrazza"; component.support_posts=true; component.projection=2.4
+		var stair := ExteriorStair.new(); stair.name="ScalaEsterna"; component.add_child(stair)
 	container.add_child(component)
 	var error := component.validation_error()
 	container.remove_child(component)
@@ -645,8 +661,41 @@ func _terrace_selected(enabled: bool) -> void:
 	var b := _selected_balcony()
 	if b==null: status.text="Seleziona un balcone o una terrazza."; return
 	var undo := get_undo_redo(); undo.create_action("Configura terrazza e scala",UndoRedo.MERGE_DISABLE,b)
-	undo.add_do_property(b,"exterior_stairs",enabled); undo.add_undo_property(b,"exterior_stairs",b.exterior_stairs)
+	var stair: Node3D=b.stair_component()
+	if stair:
+		undo.add_do_property(stair,"enabled",enabled); undo.add_undo_property(stair,"enabled",stair.enabled)
+	undo.add_do_property(b,"exterior_stairs",enabled if stair==null else false); undo.add_undo_property(b,"exterior_stairs",b.exterior_stairs)
 	if enabled:
 		undo.add_do_property(b,"support_posts",true); undo.add_undo_property(b,"support_posts",b.support_posts)
 		undo.add_do_property(b,"projection",maxf(b.projection,2.4)); undo.add_undo_property(b,"projection",b.projection)
 	undo.commit_action()
+
+func _attach_stair(side: int) -> void:
+	var b := _selected_balcony()
+	if b==null: status.text="Seleziona una terrazza o la sua scala."; return
+	var stair: Node3D=b.stair_component(); var fresh := stair==null
+	if fresh:
+		stair=ExteriorStair.new(); stair.name="ScalaEsterna"; stair.width=b.stair_width; stair.offset=b.stair_offset; stair.ground_level=b.ground_level
+	var undo := get_undo_redo(); undo.create_action("Aggancia scala al bordo",UndoRedo.MERGE_DISABLE,b)
+	if fresh:
+		undo.add_do_method(self,"_attach",b,stair,EditorInterface.get_edited_scene_root())
+		undo.add_do_reference(stair)
+	undo.add_do_property(stair,"side",side); undo.add_undo_property(stair,"side",stair.side)
+	undo.add_do_property(stair,"enabled",true); undo.add_undo_property(stair,"enabled",stair.enabled)
+	undo.add_do_property(b,"exterior_stairs",false); undo.add_undo_property(b,"exterior_stairs",b.exterior_stairs)
+	if fresh: undo.add_undo_method(self,"_detach_stair",b,stair)
+	undo.commit_action()
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(stair); EditorInterface.edit_node(stair); _selection_context()
+func _delete_stair() -> void:
+	var b := _selected_balcony()
+	if b==null or b.stair_component()==null: return
+	var stair: Node3D=b.stair_component(); var undo := get_undo_redo()
+	undo.create_action("Elimina scala indipendente",UndoRedo.MERGE_DISABLE,b)
+	undo.add_do_method(self,"_detach_stair",b,stair); undo.add_undo_method(self,"_attach",b,stair,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(stair)
+	undo.commit_action()
+
+func _detach_stair(host: Node3D,stair: Node3D) -> void:
+	if stair in EditorInterface.get_selection().get_selected_nodes():
+		EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(host); EditorInterface.edit_node(host)
+	stair_gizmos.focus=null
+	host.remove_child(stair); _selection_context()

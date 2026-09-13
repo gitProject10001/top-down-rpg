@@ -245,6 +245,20 @@ func run(plugin: EditorPlugin) -> void:
 	plugin._terrace_selected(false); assert(not balcony.exterior_stairs and balcony.support_posts)
 	profile_history.undo(); assert(balcony.exterior_stairs)
 	print("TERRACE_EDITOR_CONVERT_REMOVE_STAIR_UNDO_REDO_OK")
+	plugin._attach_stair(1); var stair=balcony.stair_component(); assert(stair.side==1 and not balcony.exterior_stairs)
+	profile_history.undo(); assert(balcony.stair_component()==null and balcony.exterior_stairs)
+	profile_history.redo(); assert(balcony.stair_component()==stair and stair.side==1)
+	plugin._attach_stair(2); assert(stair.side==2)
+	profile_history.undo(); assert(stair.side==1)
+	plugin._delete_stair(); assert(not balcony.has_stairs())
+	profile_history.undo(); assert(balcony.stair_component()==stair)
+	print("SIDE_STAIRS_EDITOR_ATTACH_SIDE_DELETE_UNDO_OK")
+	var fresh_house=preload("res://addons/house_builder/house.gd").new(); fresh_house.name="NewTerraceTest"; fresh_house.width=6; fresh_house.wall_height=5.5
+	scene.add_child(fresh_house); fresh_house.owner=scene
+	plugin._start_terrace(); plugin._place_balcony({"house":fresh_house,"wall":0,"u":0.0,"y":2.8})
+	var fresh_terrace=fresh_house.attached_components()[0]
+	assert(fresh_terrace.stair_component()!=null and fresh_terrace.stair_component().owner==scene and not fresh_terrace.exterior_stairs)
+	print("NEW_TERRACE_OWNS_INDEPENDENT_STAIR_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

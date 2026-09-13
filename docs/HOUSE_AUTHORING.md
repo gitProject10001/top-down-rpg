@@ -230,3 +230,26 @@ Per ora la scala è rettilinea e frontale: non gira ad angolo e non si aggancia 
 lati della terrazza. La quota terreno è manuale e uniforme; non vengono ancora
 rilevati terreno irregolare, strade o edifici nell'ingombro della rampa. L'errore
 per una quota terreno incompatibile compare nel pannello Componenti.
+
+## Scala come componente e scelta del bordo
+
+Una nuova terrazza crea ora il nodo `Terrazza/ScalaEsterna`. Nel tab Componenti,
+**Scala indipendente · frontale / destra / sinistra** crea il nodo su una terrazza
+esistente oppure cambia il bordo di quello già presente. Le vecchie scene con
+scala frontale incorporata continuano a funzionare; il comando le converte
+conservando larghezza, offset e quota terreno. Undo ripristina anche il formato
+precedente.
+
+Seleziona **ScalaEsterna**: compaiono solo le sue maniglie di larghezza e posizione
+lungo il bordo. L'Inspector espone lato, larghezza, offset, quota terreno ed
+abilitazione. Il nodo conserva un ID nel salvataggio ed eredita la quota di partenza
+dalla terrazza; la sua quota di arrivo può differire da quella dei pilastri.
+**Elimina scala indipendente** rimuove il nodo e richiude il parapetto. La terrazza
+e la porta rimangono; **Rimuovi scala esterna** la disabilita senza eliminarla.
+
+Esempio: `scenes/dev/side_stairs_example.tscn`, con accesso da destra e Play casa.
+Verificati accessi da destra e sinistra con il giocatore, apertura/chiusura dei
+parapetti, salvataggio e undo/redo. Una sola scala per terrazza in questo incremento;
+rampe a L/U, pianerottoli intermedi e posizionamento libero senza terrazza restano
+successivi. Il nodo è indipendente nei parametri ma rimane agganciato alla terrazza:
+usa le sue maniglie e proprietà invece della trasformazione nativa Godot.

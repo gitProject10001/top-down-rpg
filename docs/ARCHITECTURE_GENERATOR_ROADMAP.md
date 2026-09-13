@@ -340,6 +340,25 @@ La scala resta una parte configurabile del componente, non un nodo agganciabile
 indipendente. Prossimo passo: separare le rampe come componenti con agganci propri,
 consentendo scelta del lato e pianerottoli; poi composizione multi-volume A02.
 
+**A02a.4 verificato — 2026-09-13.** `ExteriorStair` è un nodo dati figlio della
+terrazza con ID persistente, bordo frontale/destro/sinistro, larghezza, offset,
+quota terreno ed abilitazione. Due maniglie contestuali sulla sola scala selezionata.
+I parapetti usano il bordo e l'ingombro del componente; cambio lato, disabilitazione
+e rimozione ripristinano il tratto precedente. Nuove terrazze usano il nodo;
+le vecchie proprietà frontali restano supportate da un adattatore senza riscrivere
+le scene. Conversione esplicita e reversibile tramite il pannello.
+Verifiche: giocatore sale/entra/scende su entrambi i lati; test di collisione
+parapetti, identità/serializzazione, conversione/cambio lato/eliminazione con
+undo/redo editor; regressioni della scala frontale e dei balconi collegati.
+Esempio `side_stairs_example.tscn`, cattura `side_stairs.png`.
+Limiti: una scala per terrazza, terreno uniforme manuale, nessuna collisione
+preventiva con altri edifici; nessuna rampa composta a L/U o libera dal proprio
+host. La cancellazione di una scala selezionata riporta la selezione sulla
+terrazza per evitare riferimenti editor a nodi rimossi.
+Prossimo incremento: pianerottoli e rampe composte, oppure primo volume accessorio
+A02 per verificare la stessa modularità su forme architettoniche più grandi.
+
+
 ### A02 — Volumi, non una lista di eccezioni per ogni edificio
 
 - [ ] Nodi dati `Volume`: pianta rettangolare, quota, altezza, orientamento e ID.
