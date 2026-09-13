@@ -1,5 +1,8 @@
 # House Builder: interni modificabili
 
+Piano aggiornabile per forme, componenti agganciati, interni e castelli:
+[Roadmap dei generatori architettonici](ARCHITECTURE_GENERATOR_ROADMAP.md).
+
 Checkpoint iniziale: `e0a6b08`. GI e lightmap sono rimandati.
 
 Il pannello ora separa **Casa**, **Aperture**, **Interni** e **Arredo**. La selezione
