@@ -361,6 +361,12 @@ func run(plugin: EditorPlugin) -> void:
 	profile_history.undo(); assert(curtain.get_parent()==null)
 	profile_history.redo(); assert(curtain.get_parent()==scene)
 	print("CURTAIN_EDITOR_TAB_CREATE_UNDO_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(polygon)
+	plugin._attach_curtain(); var linked=EditorInterface.get_selection().get_selected_nodes()[0]
+	assert(linked.get_parent()==polygon and linked.connect_to_tower and linked.connection_error().is_empty())
+	profile_history.undo(); assert(linked.get_parent()==null)
+	profile_history.redo(); assert(linked.get_parent()==polygon)
+	print("TOWER_CURTAIN_EDITOR_ATTACH_UNDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

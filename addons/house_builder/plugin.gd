@@ -407,6 +407,7 @@ func _plan_action(label: String) -> void:
 func _play_selected() -> void:
 	var selected := _selected_house()
 	if selected==null: status.text="Seleziona la casa da provare."; return
+	if selected.has_method("fortification_host") and selected.connect_to_tower and selected.fortification_host(): selected=selected.fortification_host()
 	var packed := _snapshot(selected)
 	var error := ResourceSaver.save(packed,"user://house_builder_playtest.tscn") if packed else ERR_CANT_CREATE
 	if error!=OK: status.text="Impossibile preparare la prova: %d"%error; return
@@ -992,6 +993,7 @@ func _build_fortification_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Fortificazioni"; tabs.add_child(page)
 	var label := Label.new(); label.text="Cortina rettilinea con camminamento e portone.\nSeleziona il muro e usa i gizmo per le dimensioni.\nInspector → Portone: larghezza, altezza, posizione."; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(label)
 	var button := Button.new(); button.text="Crea mura con portone"; button.pressed.connect(_create_curtain_wall); page.add_child(button)
+	var attach := Button.new(); attach.text="Collega nuova cortina alla torre"; attach.pressed.connect(_attach_curtain); page.add_child(attach)
 	var play := Button.new(); play.text="Play fortificazione"; play.pressed.connect(_play_selected); page.add_child(play)
 
 func _create_curtain_wall() -> void:
@@ -999,3 +1001,20 @@ func _create_curtain_wall() -> void:
 	if root==null: return
 	var wall=preload("res://addons/house_builder/curtain_wall.gd").new(); wall.name="Cortina"
 	_add_authored(root,wall,"Crea cortina con portone"); _selection_context()
+
+func _attach_curtain() -> void:
+	var tower := _selected_house()
+	if tower==null or not tower.has_method("footprint_vertices"):
+		_show_plan_error("Collega cortina","Seleziona una torre ottagonale."); return
+	var wall=preload("res://addons/house_builder/curtain_wall.gd").new()
+	wall.name="Cortina"; wall.width=8.0; wall.connect_to_tower=true
+	var chosen := -1
+	for face in [2,6,0,4,1,3,5,7]:
+		var occupied := false
+		for child in tower.get_children():
+			if child.has_method("fortification_host") and child.connect_to_tower and child.tower_face==face: occupied=true
+		if not occupied and tower.wall_length(face)>=2.1: chosen=face; break
+	if chosen<0: wall.free(); _show_plan_error("Collega cortina","Nessuna faccia libera abbastanza larga."); return
+	wall.tower_face=chosen; wall.depth=minf(2.8,tower.wall_length(chosen)-0.3)
+	if wall.depth<1.8: wall.free(); _show_plan_error("Collega cortina","La torre è troppo piccola per un camminamento: allarga la pianta."); return
+	_add_authored(tower,wall,"Collega cortina alla torre"); tower.request_rebuild()

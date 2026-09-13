@@ -609,3 +609,31 @@ segmenti. Gli strumenti generici di aperture/interiori delle case non sono il
 flusso di authoring della cortina: usa i parametri Portone. Scala nell’esempio;
 il comando di creazione produce soltanto il muro. Per aggiungerla usa Volumi →
 Accesso tetto sul muro selezionato.
+
+
+### Raccordo torre–cortina (A08.2)
+
+Seleziona la torre ottagonale e usa **Fortificazioni → Collega nuova cortina alla torre**.
+Il comando sceglie una faccia libera e crea Cortina come figlio della torre.
+In Inspector → Raccordo torre, `Tower Face` seleziona la faccia 0–7. Il muro si
+allinea alla normale della faccia; posizione e altezza sono vincolate alla torre,
+mentre lunghezza, spessore, merli e portone restano parametrici.
+
+Il camminamento arriva al tetto della torre: entrambi i parapetti si aprono nel
+punto di raccordo, con collisioni e quote coerenti. Non è una porta verso un
+piano interno a quota diversa. Sono supportate anche le facce oblique.
+Un avviso segnala una cortina troppo larga o due cortine sulla stessa faccia.
+Disattivando Connect To Tower si libera il muro e si richiudono le estremità;
+eliminando il muro si richiude il parapetto della torre.
+
+Play fortificazione su una cortina collegata include anche la torre e gli
+interni. Esempio: `scenes/dev/tower_curtain_example.tscn`. Il giocatore può salire
+dall’ingresso al tetto, passare sul muro e tornare giù; anche il portone della
+cortina è incluso nella ricerca delle porte interattive.
+
+Verificati percorso completo, collisione continua al raccordo, faccia obliqua,
+ridimensionamento, scollegamento/rimozione, salvataggio e Undo/Redo.
+Limiti: una torre all’origine di ogni cortina, estremità opposta ancora chiusa;
+nessun raccordo a una seconda torre, angolo tra muri o recinto automatico.
+Le aperture manuali sottostanti non vengono controllate per interferenze con
+il volume pieno della cortina: scegli una faccia libera.

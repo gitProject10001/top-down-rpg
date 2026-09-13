@@ -106,6 +106,10 @@ func nearest_door() -> Node3D:
 	for volume in house.authored_volumes():
 		for child in volume._generated.get_children():
 			if child is Door: all.append(child)
+	for curtain in house.get_children():
+		if curtain.has_method("fortification_host") and is_instance_valid(curtain._generated):
+			for child in curtain._generated.get_children():
+				if child is Door: all.append(child)
 	all.append_array(interior.doors)
 	if authored_plan: all.append_array(authored_plan.doors())
 	for door in all:

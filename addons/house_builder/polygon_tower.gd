@@ -125,3 +125,15 @@ func cutaway_cutters(floor_base: float,storey_height: float) -> Array:
 		if normal.dot(Vector3(1,0,1))>0.1:
 			cuts.append([Plane(-normal,-normal.dot(wall_point(wall,0,0))+0.4),Plane(Vector3.DOWN,-floor_base-0.8)])
 	return cuts
+
+
+func connection_spans(wall: int,spans: Array[Vector2]) -> Array[Vector2]:
+	for child in get_children():
+		if not child.has_method("fortification_host") or not child.connect_to_tower or child.tower_face!=wall or not child.connection_error().is_empty(): continue
+		var half: float=child.depth*0.5-0.22
+		var remaining: Array[Vector2]=[]
+		for span in spans:
+			if span.x < -half: remaining.append(Vector2(span.x,minf(span.y,-half)))
+			if span.y > half: remaining.append(Vector2(maxf(span.x,half),span.y))
+		spans=remaining
+	return spans

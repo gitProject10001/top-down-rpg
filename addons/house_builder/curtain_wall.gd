@@ -49,7 +49,50 @@ func _gate_changed(value: bool) -> void:
 func _plaster_material() -> ShaderMaterial:
 	return _material(Vector2(0,0.5),Color(0.65,0.63,0.59))
 func _get_configuration_warnings() -> PackedStringArray:
+	var error := connection_error()
+	if not error.is_empty(): return PackedStringArray([error])
 	if gate_enabled and (gate_width>width-0.6 or gate_height>wall_height-0.5):
 		return PackedStringArray(["Portone troppo grande: lascia almeno 60 cm ai lati e 50 cm sotto il camminamento. Le dimensioni effettive sono limitate al muro."])
 	return super._get_configuration_warnings()
 
+
+
+@export_group("Raccordo torre")
+@export var connect_to_tower := false:
+	set(value): connect_to_tower=value; request_rebuild()
+@export_range(0,7,1) var tower_face := 2:
+	set(value): tower_face=value; request_rebuild()
+var _connection_signature := ""
+func fortification_host() -> Node3D:
+	var parent := get_parent()
+	return parent if parent and parent.has_method("footprint_vertices") else null
+func connection_error() -> String:
+	if not connect_to_tower: return ""
+	var host := fortification_host()
+	if host==null: return "Il muro collegato deve essere figlio di una torre ottagonale."
+	if depth>host.wall_length(tower_face)-0.25: return "Il muro è più largo della faccia della torre: aumenta la torre o riduci Depth del muro."
+	for other in host.get_children():
+		if other!=self and other.has_method("fortification_host") and other.connect_to_tower and other.tower_face==tower_face:
+			return "Due cortine occupano la stessa faccia della torre. Cambia Tower Face."
+	return ""
+func prepare_attachment() -> void:
+	if not connect_to_tower: super.prepare_attachment(); return
+	if not connection_error().is_empty(): return
+	var host := fortification_host(); var normal: Vector3=host.wall_normal(tower_face)
+	var tangent: Vector3=(host.wall_point(tower_face,1,0)-host.wall_point(tower_face,0,0)).normalized()
+	transform=Transform3D(Basis(normal,Vector3.UP,-tangent),host.wall_point(tower_face,0,0,width*0.5-0.10))
+	if not is_equal_approx(wall_height,host.wall_height): wall_height=host.wall_height
+func _process(delta: float) -> void:
+	var host := fortification_host()
+	var signature := str(connection_error(),connect_to_tower,tower_face,width,depth,host.dimensions() if host else Vector4.ZERO)
+	if signature!=_connection_signature:
+		_connection_signature=signature; request_rebuild()
+		if host: host.request_rebuild()
+	super._process(delta)
+func _exit_tree() -> void:
+	var host := fortification_host()
+	if host: host.request_rebuild()
+	super._exit_tree()
+func connection_spans(wall: int,spans: Array[Vector2]) -> Array[Vector2]:
+	if wall==3 and connect_to_tower and connection_error().is_empty(): return []
+	return spans

@@ -718,7 +718,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A08: collegamento cortina–torre**, poi angoli e recinto fortificato.
+se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A08: seconda estremità della cortina e recinto con torri**.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -733,3 +733,17 @@ collisioni, salita/discesa, spostamento/disattivazione portone, save e Undo/Redo
 Questo non chiude A08: manca il recinto, i raccordi alle torri e gli angoli.
 Prossimo incremento: collegamento tra cortina e torre con passaggio sul
 camminamento, poi composizione del piccolo recinto fortificato.
+
+
+### A08.2 — Raccordo torre–cortina — 2026-09-13
+
+Cortina agganciata a una delle otto facce della torre, con quota del camminamento
+allineata al tetto e apertura dei due parapetti. Nodo figlio modificabile,
+faccia e dimensioni persistenti, creazione Undo/Redo nel tab Fortificazioni.
+Play include torre, interni e cortina. Esempio `tower_curtain_example.tscn`.
+Test `check_tower_curtain.gd`, `check_tower_curtain_play.gd`, suite editor:
+percorso reale terra→torre→cortina→terra, giunto solido, faccia obliqua,
+ridimensionamento, scollegamento/rimozione e serializzazione.
+Limiti: raccordo al tetto, singola estremità; nessun collegamento alla seconda
+torre, angolo o recinto chiuso. Prossimo incremento: seconda estremità della
+cortina e composizione del primo recinto con torri.

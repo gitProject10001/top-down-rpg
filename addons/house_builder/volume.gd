@@ -215,6 +215,7 @@ func _flat_roof() -> ArrayMesh:
 			if has_roof_access() and wall==stair_wall():
 				var half: float=stair_component().width*0.5+0.05
 				spans=[Vector2(-length*0.5,stair_center()-half),Vector2(stair_center()+half,length*0.5)]
+			spans=connection_spans(wall,spans)
 			for span in spans:
 				if span.y-span.x<0.01: continue
 				_build_parapet_span(wall,span,length)
@@ -307,3 +308,5 @@ func _build_roof_slab() -> void:
 func stair_wall() -> int:
 	var stairs := stair_component()
 	return [0,2,3][stairs.side] if stairs else 0
+
+func connection_spans(_wall: int,spans: Array[Vector2]) -> Array[Vector2]: return spans
