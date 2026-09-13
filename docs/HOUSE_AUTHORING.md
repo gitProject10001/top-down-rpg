@@ -743,3 +743,16 @@ della scala passando intorno all’anta, senza tagliarne la rotazione.
 Test: `check_castle_interiors_play.gd`, suite editor e regressione della torre
 singola. Limiti: piani aperti senza stanze/arredo; nessuna GI/lightmap nuova,
 nessun rifacimento delle texture e nessun parapetto automatico del vano scala.
+
+
+### Parapetti dei vani scala
+
+Le scale generano un parapetto sui tre bordi chiusi del vano al piano superiore;
+lo sbarco resta aperto. Le scale `Roof Exit` lo generano sul tetto della torre.
+Spostamento, rotazione e dimensioni della scala aggiornano anche i parapetti.
+Per una soluzione manuale, seleziona la scala e disattiva **Guardrails Enabled**
+nell'Inspector. I parapetti generati hanno collisioni e seguono la visibilità
+del piano di arrivo; non modificare le mesh interne generate.
+Prova `castle_interiors_example.tscn` con Play dal builder.
+Test: `tools/check_stair_guards.gd`; immagini riproducibili tramite
+`tools/preview_stair_guards.gd`.

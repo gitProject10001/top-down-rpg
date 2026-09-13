@@ -65,7 +65,7 @@ func _process(_dt: float) -> void:
 	if Engine.is_editor_hint(): observe_deletions()
 	var signature := str(house().dimensions(),house().wing_settings(),floor_height,levels().size())
 	for e in elements():
-		if e.kind==2: signature+=str(e.transform,e.dimensions,e.roof_exit)
+		if e.kind==2: signature+=str(e.transform,e.dimensions,e.roof_exit,e.guardrails_enabled)
 	if signature!=_signature:
 		_signature=signature; _pending=true
 		if house().has_method("interior_floor_mesh"):
@@ -97,6 +97,10 @@ func rebuild() -> void:
 			var wing_cuts := cuts.duplicate(true)
 			wing_cuts.append([Plane(Vector3.RIGHT,(house().width-0.4)*0.5),Plane(Vector3.LEFT,(house().width-0.4)*0.5),Plane(Vector3.BACK,(house().depth-0.4)*0.5),Plane(Vector3.FORWARD,(house().depth-0.4)*0.5)])
 			MeshJoin.append(mesh,wing,house().wing_transform(),wing_cuts)
+		if i>0:
+			for e in list[i-1].get_children():
+				if e is Element and e.kind==2 and not e.roof_exit and e.guardrails_enabled:
+					preload("res://addons/house_builder/stair_guard.gd").append(mesh,e,0.05,wood_material())
 		var floor_node := Node3D.new(); floor_node.position.y=i*floor_height; _floors.add_child(floor_node)
 		var visual := MeshInstance3D.new(); visual.mesh=mesh; floor_node.add_child(visual)
 		var body := StaticBody3D.new(); var shape := CollisionShape3D.new(); shape.shape=mesh.create_trimesh_shape(); body.add_child(shape); floor_node.add_child(body)
@@ -155,6 +159,7 @@ func apply_records(index: int,records: Array) -> void:
 			level.add_child(e,true); e.owner=owner
 		e.stable_id=record.id
 		e.roof_exit=record.get("roof_exit",false)
+		e.guardrails_enabled=record.get("guardrails_enabled",true)
 		for key in ["kind","roof_exit","position","rotation","dimensions","room_type","has_door","door_offset","door_width","prop_type","room_ids"]:
 			if record.has(key): e.set(key,record[key])
 		e.asset=load(record.asset) if record.get("asset","")!="" else null

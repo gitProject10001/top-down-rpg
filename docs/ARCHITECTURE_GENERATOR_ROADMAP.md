@@ -809,3 +809,18 @@ e no-op sugli interni esistenti; regressione torre singola.
 Limiti: nessuna suddivisione in stanze o arredo, illuminazione esistente e vani
 scala senza parapetti/botole. Prossimo passo consigliato: proteggere i vani scala
 e rendere gli sbarchi più leggibili, poi avviare il mastio A09.
+
+
+### A08.7 — Parapetti dei vani scala — 2026-09-13
+
+Protezione automatica in legno su tre lati del vano, con sbarco aperto.
+Geometria e collisioni seguono posizione, rotazione e dimensioni della scala.
+Il parapetto appartiene al piano di arrivo (o al tetto), rispettando il cutaway.
+Opzione per scala `guardrails_enabled`, salvata nei record e preservata dalla
+rigenerazione; le scene precedenti ricevono il comportamento predefinito.
+Verificati collisioni, sbarco, toggle, trasformazioni, salvataggio, percorso
+completo in tutte le quattro torri e suite editor. Restano i messaggi preesistenti
+di reparenting degli arredi nella suite editor, che termina HOUSE_EDITOR_ALL_OK.
+Limiti: parapetto pieno in legno, altezza fissa 0.92 m, nessuna botola;
+nessun controllo automatico delle interferenze con elementi manuali adiacenti.
+Prossimo passo: A09, primo mastio modificabile con piani e accesso alla corte.

@@ -73,6 +73,9 @@ func _build_roof() -> ArrayMesh:
 			cuts.append(planes)
 	if cuts.is_empty(): return roof
 	var result := ArrayMesh.new(); MeshJoin.append(result,roof,Transform3D.IDENTITY,cuts)
+	for e in plan.levels().back().get_children():
+		if e.has_method("opening_planes") and e.kind==2 and e.roof_exit and e.guardrails_enabled:
+			preload("res://addons/house_builder/stair_guard.gd").append(result,e,effective_elevation(),plan.wood_material())
 	return result
 func stair_edge_length() -> float:
 	return wall_length(stair_wall())

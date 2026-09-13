@@ -6,6 +6,8 @@ const Door=preload("res://addons/house_builder/door.gd")
 	set(v): kind=v; dirty()
 @export var roof_exit := false:
 	set(v): roof_exit=v; dirty()
+@export var guardrails_enabled := true:
+	set(v): guardrails_enabled=v; dirty()
 @export var dimensions := Vector3(3,2.6,3):
 	set(v): dimensions=Vector3(maxf(v.x,0.12),maxf(v.y,0.12),maxf(v.z,0.12)); dirty()
 @export_enum("ingresso","soggiorno","cucina","camera","ripostiglio") var room_type := "camera":
@@ -70,11 +72,13 @@ func record() -> Dictionary:
 		pose=room.transform*transform; ids=PackedStringArray([room.stable_id])
 	var result := {"kind":kind,"dimensions":dimensions,"room_type":room_type,"position":pose.origin,"rotation":pose.basis.get_euler(),"has_door":has_door,"door_offset":door_offset,"door_width":door_width,"prop_type":prop_type,"asset":asset.resource_path if asset else "","room_ids":ids}
 	if roof_exit: result["roof_exit"]=true
+	if not guardrails_enabled: result["guardrails_enabled"]=false
 	return result
 func protected_edit() -> bool:
 	if locked or not generated: return true
 	if baseline.is_empty(): return false
 	if bool(baseline.get("roof_exit",false))!=roof_exit: return true
+	if bool(baseline.get("guardrails_enabled",true))!=guardrails_enabled: return true
 	var current := record()
 	for key in current:
 		if not baseline.has(key): return true
