@@ -177,6 +177,7 @@ func _selection_context() -> void:
 	var node: Node=selected[0] if not selected.is_empty() else null
 	context_label.text="Selezione: "+str(node.name) if node else "Seleziona una casa o disegnane una."
 	if node is Volume or node is Support or node is FrameLink: tabs.current_tab=5
+	elif node is ExteriorStair and node.terrace() is Volume: tabs.current_tab=5; frame_tabs.current_tab=2
 	elif node is Balcony or node is ExteriorStair: tabs.current_tab=4
 	elif node is Element: tabs.current_tab=3 if node.kind==3 else 2
 	elif node is Plan: tabs.current_tab=2
@@ -211,7 +212,7 @@ func _refresh_context_gizmos() -> void:
 			gizmos.context=2; frame_gizmos.focus=selected if tabs.current_tab==5 else null; selected.update_gizmos()
 		if selected is Support:
 			gizmos.context=2; support_gizmos.focus=selected if tabs.current_tab==5 else null; selected.update_gizmos()
-		if selected is ExteriorStair and tabs.current_tab==4: stair_gizmos.focus=selected; selected.update_gizmos(); continue
+		if selected is ExteriorStair and (tabs.current_tab==4 or (tabs.current_tab==5 and selected.terrace() is Volume)): gizmos.context=2; stair_gizmos.focus=selected; selected.update_gizmos(); continue
 		if selected is Balcony and tabs.current_tab==4: balcony_gizmos.focus=selected; selected.update_gizmos()
 	plan_gizmos.focus=null
 	for node in EditorInterface.get_selection().get_selected_nodes():
@@ -220,6 +221,7 @@ func _refresh_context_gizmos() -> void:
 	if root:
 		for h in _houses(root):
 			h.update_gizmos()
+			if h is Volume and h.stair_component(): h.stair_component().update_gizmos()
 			if h.has_node("FrameLinks"):
 				for link in h.get_node("FrameLinks").get_children(): link.update_gizmos()
 			if h.has_node("Supports"):
@@ -256,6 +258,7 @@ func _process(_delta: float) -> void:
 		if not canopy_roof_choice.disabled: canopy_roof_choice.select(selected_volume.canopy_roof)
 		for button in junction_buttons: button.disabled=not selected_volume is Volume or selected_volume.structure_kind!=0
 		volume_info.text=("VOLUME NON RACCORDATO: "+selected_volume.volume_error() if not selected_volume.volume_error().is_empty() else "Portico aperto: altezza sostegni = Wall Height; colmo = Roof Height. Passo e sezione pali: Struttura. La parete della casa resta intatta." if selected_volume.structure_kind==1 else "Raccordo: "+["passaggio aperto","parete con porta"][selected_volume.junction_mode]+". Dimensioni e posizione porta: Inspector, Raccordo interno. Sgancia per usare la trasformazione libera.") if selected_volume is Volume else "Seleziona una casa e aggiungi un corpo basso. Ogni volume conserva tetto e aperture propri."
+		if selected_volume is Volume and not selected_volume.roof_access_error().is_empty(): volume_info.text+="\nATTENZIONE: "+selected_volume.roof_access_error()
 		if selected_volume is Volume and selected_volume.structure_kind==1:
 			volume_info.text+="\nSostegni: "+("manuali in Supports; le posizioni restano fisse durante il ridimensionamento." if selected_volume.has_node("Supports") else "automatici; usa Rendi editabili per modificarli singolarmente.")
 			for selected in EditorInterface.get_selection().get_selected_nodes():
@@ -764,6 +767,9 @@ func _build_volume_tab() -> void:
 	var hint := Label.new(); hint.text="Seleziona due sostegni dello stesso portico nell'albero (Ctrl + clic)."; hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; links_page.add_child(hint)
 	for entry in [["Collega con trave e controventi",_add_frame_link],["Collega un sostegno alla parete",_add_wall_link],["Rimuovi collegamento selezionato",_remove_frame_link]]:
 		var button := Button.new(); button.text=entry[0]; button.pressed.connect(entry[1]); links_page.add_child(button)
+	var access_page := VBoxContainer.new(); access_page.name="Accesso tetto"; frame_tabs.add_child(access_page)
+	for entry in [["Aggiungi scala al tetto piano",_add_roof_stair],["Rimuovi scala dal tetto",_remove_roof_stair]]:
+		var button := Button.new(); button.text=entry[0]; button.pressed.connect(entry[1]); access_page.add_child(button)
 	var remove := Button.new(); remove.text="Rimuovi volume selezionato"; remove.pressed.connect(_remove_volume); page.add_child(remove)
 	volume_info=Label.new(); volume_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(volume_info)
 func _add_volume_from_ui(side: int) -> void:
@@ -892,3 +898,21 @@ func _remove_frame_link() -> void:
 		undo.create_action("Rimuovi collegamento",UndoRedo.MERGE_DISABLE,volume)
 		undo.add_do_method(self,"_detach_support",volume,container,selected)
 		undo.add_undo_method(self,"_attach",container,selected,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(selected); undo.add_undo_method(volume,"request_rebuild"); undo.commit_action(); return
+
+func _add_roof_stair() -> void:
+	var volume := _selected_house()
+	if not volume is Volume or volume.canopy_roof!=2:
+		status.text="Seleziona un volume con copertura piana."; return
+	if volume.stair_component(): status.text="La scala esiste già: selezionala nell'albero."; return
+	var stairs := ExteriorStair.new(); stairs.name="ScalaTetto"
+	var undo := get_undo_redo(); undo.create_action("Aggiungi scala tetto",UndoRedo.MERGE_DISABLE,volume)
+	undo.add_do_method(self,"_attach",volume,stairs,EditorInterface.get_edited_scene_root()); undo.add_do_reference(stairs); undo.add_do_method(volume,"request_rebuild")
+	undo.add_undo_method(self,"_detach_support",volume,volume,stairs); undo.commit_action()
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(stairs); EditorInterface.edit_node(stairs); _selection_context()
+func _remove_roof_stair() -> void:
+	var volume := _selected_house()
+	if not volume is Volume or volume.stair_component()==null: return
+	var stairs: Node3D=volume.stair_component(); var undo := get_undo_redo()
+	undo.create_action("Rimuovi scala tetto",UndoRedo.MERGE_DISABLE,volume)
+	undo.add_do_method(self,"_detach_support",volume,volume,stairs)
+	undo.add_undo_method(self,"_attach",volume,stairs,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(stairs); undo.add_undo_method(volume,"request_rebuild"); undo.commit_action()

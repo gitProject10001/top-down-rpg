@@ -1,0 +1,110 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/house_builder/house.gd" id="1_2h4e6"]
+[ext_resource type="Script" path="res://addons/house_builder/volume.gd" id="2_jic2e"]
+[ext_resource type="Script" path="res://addons/house_builder/exterior_stair.gd" id="3_p2m2u"]
+
+[sub_resource type="Environment" id="Environment_wxjhf"]
+background_mode = 1
+background_color = Color(0.16, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_c0loc"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_gpuby"]
+size = Vector2(50, 50)
+
+[node name="HouseWorkshop" type="Node3D" unique_id=284329810]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=590666430]
+environment = SubResource("Environment_wxjhf")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=234121932]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=263041386]
+material_override = SubResource("StandardMaterial3D_c0loc")
+mesh = SubResource("PlaneMesh_gpuby")
+
+[node name="CasaComposta" type="Node3D" parent="." unique_id=412896202]
+script = ExtResource("1_2h4e6")
+width = 6.0
+depth = 8.0
+wall_height = 6.0
+roof_height = 2.5
+openings = Array[Dictionary]([{
+"kind": "door",
+"u": -0.35,
+"wall": 0
+}, {
+"kind": "window",
+"u": 0.45,
+"wall": 0,
+"y": 1.5
+}])
+
+[node name="Volumes" type="Node3D" parent="CasaComposta" unique_id=513960043]
+
+[node name="Bottega" type="Node3D" parent="CasaComposta/Volumes" unique_id=61697420]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 4.93, 0, -2)
+script = ExtResource("2_jic2e")
+canopy_roof = 2
+volume_id = "volume_1335774_47076869809"
+host_offset = 0.5
+width = 3.4
+depth = 4.5
+wall_height = 2.8
+roof_height = 0.75
+openings = Array[Dictionary]([{
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 1.5
+}])
+
+[node name="ScalaTetto" type="Node3D" parent="CasaComposta/Volumes/Bottega" unique_id=26529615]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.98, 2.3)
+script = ExtResource("3_p2m2u")
+component_id = "stair_1365984_49073358568"
+
+[node name="Deposito" type="Node3D" parent="CasaComposta/Volumes" unique_id=768712633]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 4.43, 0, 2)
+script = ExtResource("2_jic2e")
+parapet_enabled = false
+canopy_roof = 2
+volume_id = "volume_1351673_48083502797"
+host_offset = -0.5
+junction_mode = 1
+width = 3.0
+depth = 3.5
+wall_height = 2.8
+roof_height = 0.75
+openings = Array[Dictionary]([{
+"kind": "window",
+"u": 0.0,
+"wall": 0,
+"y": 1.5
+}, {
+"kind": "window",
+"u": 0.0,
+"wall": 2,
+"y": 1.5
+}])
+
+[node name="Camera" type="Camera3D" parent="." unique_id=549025598]
+transform = Transform3D(0.70710677, -0.45028284, 0.5452021, 0, 0.7710322, 0.6367961, -0.70710677, -0.45028284, 0.5452021, 25, 32, 25)
+projection = 1
+current = true
+size = 23.0

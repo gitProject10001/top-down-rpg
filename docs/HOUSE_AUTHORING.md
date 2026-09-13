@@ -453,3 +453,24 @@ Esempio `scenes/dev/flat_roof_example.tscn`: bottega con parapetto e deposito se
 Seleziona CasaComposta e premi Play per verificare gli interni. Non viene ancora
 creato un accesso al tetto: scala, porta superiore e varco nel parapetto restano
 un incremento successivo. Non è ancora un piano aggiunto alla planimetria interna.
+
+
+## Scala esterna verso il tetto piano
+
+Seleziona il volume e usa **Volumi → Accesso tetto → Aggiungi scala al tetto piano**.
+Il nodo `ScalaTetto` riusa la scala delle terrazze: **Side** sceglie fronte/destra/
+sinistra, **Width** la larghezza, **Offset** la posizione lungo il bordo e
+**Ground Level** la quota inferiore. Le maniglie della scala modificano larghezza
+e posizione. Il pianerottolo segue la sommità della soletta (Wall Height + 18 cm).
+
+Il parapetto apre un varco corrispondente. Rimozione, disabilitazione o parametri
+invalidi richiudono il varco; cambio di copertura sospende la scala conservandola.
+Aggiunta e rimozione supportano undo/redo. La scala può stare su uno dei tre bordi
+esterni: non sul retro verso la casa. Una sola scala per volume in questa versione.
+La disposizione rispetto ad altre case, strade o ostacoli rimane manuale.
+
+Esempio: `scenes/dev/roof_access_example.tscn`, seleziona CasaComposta e premi Play.
+Raggiungi la scala esterna della bottega, sali sul tetto e ridiscendi. Il tetto resta
+illuminato come esterno e visibile quando il giocatore vi cammina. Non è ancora
+collegato con una porta al piano superiore della casa; la planimetria interna
+non viene modificata. Le texture sono rimaste quelle della versione precedente.

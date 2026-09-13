@@ -313,6 +313,14 @@ func run(plugin: EditorPlugin) -> void:
 	profile_history.undo(); assert(annex.canopy_roof==0)
 	profile_history.redo(); assert(annex.canopy_roof==2)
 	print("FLAT_ROOF_EDITOR_CLOSED_VOLUME_UNDO_OK")
+	plugin._add_roof_stair(); var roof_stair=annex.stair_component()
+	assert(roof_stair!=null and plugin.frame_tabs.current_tab==2 and plugin.stair_gizmos.focus==roof_stair)
+	profile_history.undo(); assert(annex.stair_component()==null)
+	profile_history.redo(); assert(annex.stair_component()==roof_stair)
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(roof_stair)
+	plugin._remove_roof_stair(); assert(annex.stair_component()==null)
+	profile_history.undo(); assert(annex.stair_component()==roof_stair)
+	print("ROOF_ACCESS_EDITOR_ADD_REMOVE_UNDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

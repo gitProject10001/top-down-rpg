@@ -504,6 +504,20 @@ varco nel parapetto e integrazione del tetto praticabile con i piani. Prossimo
 passo: collegare un accesso superiore alla copertura piana, senza cambiare la
 planimetria manuale esistente.
 
+**A03.7 verificato — 2026-09-13.** Accesso esterno al tetto piano mediante lo
+stesso ExteriorStair usato dalle terrazze. Nodo ScalaTetto, tre bordi, offset e
+larghezza; il varco del parapetto segue la scala e si richiude se viene disabilitata,
+rimossa o resa invalida. Quota e rampa seguono la soletta. Nuovo sottotab Accesso
+tetto e gizmo della scala nel contesto Volumi.
+
+Play distingue quota del tetto e interno sottostante: salita, permanenza all'esterno
+e discesa verificati con il giocatore reale (`check_roof_access_play.gd`). Test
+`check_roof_access.gd` su varchi, bordi, disabilitazione, resize, errori e salvataggio;
+suite editor su undo/redo. Esempio `roof_access_example.tscn`; immagine
+`captures/balcony_attachment/roof_access_play.png`. Texture lasciate invariate
+su richiesta. Restano porta verso il piano superiore, controllo degli ingombri
+esterni e integrazione con il piano interno; nessuna planimetria viene riscritta.
+
 - [ ] Ogni copertura ha pianta, colmo, pendenza, quota, sporto e collegamento al volume.
 - [ ] Prima due falde e una falda; poi tetto piano/parapetto e quattro falde.
 - [ ] Raccordi: intersezioni, compluvi/displuvi, bordi e taglio delle parti nascoste.

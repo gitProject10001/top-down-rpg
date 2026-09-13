@@ -118,16 +118,18 @@ func nearest_door() -> Node3D:
 func _process(delta: float) -> void:
 	if not is_instance_valid(player): return
 	var p := player.position
+	var player_shape: CollisionShape3D=player.get_node("Collision")
+	var foot_offset: float=player_shape.position.y-player_shape.shape.height*0.5
 	var margin := -0.12 if inside else 0.12
 	var entered := absf(p.x)<house_width*0.5-margin and absf(p.z)<house_depth*0.5-margin and p.y>-0.5
 	if house.wing_enabled:
 		var q: Vector3=house.wing_transform().affine_inverse()*p
 		entered=entered or (absf(q.x)<house.wing_span()*0.5-margin and absf(q.z)<(house.width*0.5+house.wing_length)*0.5-margin and p.y>-0.5)
-	if house.has_method("volume_host") and house.structure_kind!=0: entered=false
+	if house.has_method("volume_host") and (house.structure_kind!=0 or (house.canopy_roof==2 and p.y+foot_offset>=house.effective_elevation()-0.08)): entered=false
 	for volume in house.authored_volumes():
 		if volume.structure_kind!=0 or not volume.attached or not volume.volume_error().is_empty(): continue
 		var q: Vector3=volume.to_local(player.global_position)
-		entered=entered or (absf(q.x)<volume.width*0.5-margin and absf(q.z)<volume.depth*0.5-margin and q.y>-0.5)
+		entered=entered or (absf(q.x)<volume.width*0.5-margin and absf(q.z)<volume.depth*0.5-margin and q.y>-0.5 and (volume.canopy_roof!=2 or q.y+foot_offset<volume.effective_elevation()-0.08))
 	var collision: CollisionShape3D=player.get_node("Collision")
 	var feet_y: float=p.y+collision.position.y-collision.shape.height*0.5
 	active_floor=clampi(floori((feet_y+0.2)/storey_height),0,storeys-1)

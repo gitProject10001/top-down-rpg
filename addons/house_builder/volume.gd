@@ -55,6 +55,11 @@ func prepare_attachment() -> void:
 func rebuild() -> void:
 	prepare_attachment()
 	super.rebuild()
+	var stairs := stair_component()
+	if stairs:
+		stairs.visible=roof_access_error().is_empty() and stairs.enabled
+		if is_instance_valid(stairs.visual): stairs.visual.free()
+		if stairs.visible: stairs.rebuild(_material(Vector2(0.5,0),Color(0.60,0.53,0.46)))
 	if canopy_roof==2 and is_instance_valid(_generated):
 		var collision := _generated.get_node_or_null("HouseCollision")
 		if collision:
@@ -84,6 +89,8 @@ func volume_error() -> String:
 func _get_configuration_warnings() -> PackedStringArray:
 	var error := volume_error()
 	if not error.is_empty(): return PackedStringArray([error])
+	var access_error := roof_access_error()
+	if not access_error.is_empty(): return PackedStringArray([access_error])
 	return PackedStringArray() if structure_kind==1 else super._get_configuration_warnings()
 
 func junction_record() -> Dictionary:
@@ -189,11 +196,16 @@ func _flat_roof() -> ArrayMesh:
 		var buffer := SurfaceTool.new(); buffer.begin(Mesh.PRIMITIVE_TRIANGLES); _buffers.append(buffer)
 	_box(Vector3(0,wall_height+0.09,0),Vector3(width+0.24,0.18,depth+0.24),2)
 	if parapet_enabled:
-		for side in [-1.0,1.0]:
-			_box(Vector3(side*(width-0.18)*0.5,wall_height+0.18+roof_height*0.5,0),Vector3(0.18,roof_height,depth),0)
-			_box(Vector3(0,wall_height+0.18+roof_height*0.5,side*(depth-0.18)*0.5),Vector3(width-0.36,roof_height,0.18),0)
-			_box(Vector3(side*(width-0.18)*0.5,roof_top(),0),Vector3(0.24,0.08,depth+0.06),2)
-			_box(Vector3(0,roof_top(),side*(depth-0.18)*0.5),Vector3(width+0.06,0.08,0.24),2)
+		for wall in 4:
+			var length := wall_length(wall)
+			var spans: Array[Vector2]=[Vector2(-length*0.5,length*0.5)]
+			if has_roof_access() and wall==[0,2,3][stair_component().side]:
+				var half: float=stair_component().width*0.5+0.05
+				spans=[Vector2(-length*0.5,stair_center()-half),Vector2(stair_center()+half,length*0.5)]
+			for span in spans:
+				if span.y-span.x<0.01: continue
+				_wall_box(wall,(span.x+span.y)*0.5,effective_elevation()+roof_height*0.5,span.y-span.x,roof_height,0.18,-0.09,0)
+				_wall_box(wall,(span.x+span.y)*0.5,roof_top(),span.y-span.x,0.08,0.24,-0.09,2)
 	var mesh := ArrayMesh.new()
 	var materials := [_plaster_material(),_material(Vector2(0.5,0),Color(0.60,0.53,0.46)),_material(Vector2(0,0.5),Color(0.65,0.63,0.59))]
 	for i in 3:
@@ -202,3 +214,40 @@ func _flat_roof() -> ArrayMesh:
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays); mesh.surface_set_material(mesh.get_surface_count()-1,materials[i])
 	_buffers=previous
 	return mesh
+
+# Shared stair interface: terrace and roof access use the same authored stair.
+func changed() -> void: request_rebuild()
+func house() -> Node3D: return self
+func effective_elevation() -> float: return wall_height+0.18
+func stair_component() -> Node3D:
+	for child in get_children():
+		if child.has_method("terrace"): return child
+	return null
+func stair_ground() -> float:
+	var stairs := stair_component()
+	return stairs.ground_level if stairs else 0.0
+func stair_edge_length() -> float:
+	var stairs := stair_component()
+	return width if stairs==null or stairs.side==0 else depth
+func stair_center() -> float:
+	var stairs := stair_component()
+	return stairs.offset*maxf(0,(stair_edge_length()-stairs.width)*0.5-0.2) if stairs else 0.0
+func stair_run() -> float: return (effective_elevation()-stair_ground())/tan(deg_to_rad(32.0))+0.45
+func stair_frame() -> Transform3D:
+	var stairs := stair_component(); var wall: int=[0,2,3][stairs.side] if stairs else 0
+	var tangent := (wall_point(wall,1,0)-wall_point(wall,0,0)).normalized()
+	return Transform3D(Basis(tangent,Vector3.UP,wall_normal(wall)),wall_point(wall,stair_center(),effective_elevation(),0.05))
+func roof_access_error() -> String:
+	var stairs := stair_component()
+	if stairs==null or not stairs.enabled: return ""
+	if canopy_roof!=2: return "Accesso tetto sospeso: scegli una copertura piana."
+	var count := 0
+	for child in get_children():
+		if child.has_method("terrace"): count+=1
+	if count>1: return "Accesso tetto: una sola scala per volume in questa versione."
+	if stairs.width>stair_edge_length()-0.4: return "Scala troppo larga per il bordo del tetto."
+	if effective_elevation()-stair_ground()<0.3: return "La scala deve salire almeno 30 cm dal terreno."
+	return ""
+func has_roof_access() -> bool:
+	var stairs := stair_component()
+	return stairs!=null and stairs.enabled and roof_access_error().is_empty()
