@@ -64,6 +64,9 @@ func diagnostics() -> Array[Dictionary]:
 		if gates==0: issues.append({"node":NodePath("."),"message":"Il recinto non ha un portone di ingresso."})
 	for building in buildings():
 		if building in towers(): continue
+		for volume in building.authored_volumes():
+			var detail: String=volume.volume_error()
+			if not detail.is_empty(): issues.append({"node":get_path_to(volume),"message":str(volume.name)+": "+detail})
 		var error := courtyard_building_error(building)
 		if not error.is_empty(): issues.append({"node":get_path_to(building),"message":str(building.name)+": "+error})
 	return issues
@@ -127,3 +130,13 @@ func apply_layout(state: Dictionary) -> void:
 		var node := get_node_or_null(path)
 		if node: node.position=state.positions[path]
 	entry_position=state.entry; rebuild()
+
+func accessory_error(volume: Node3D) -> String:
+	var host=volume.volume_host()
+	var frame: Transform3D=host.transform*volume.transform
+	var bounds: AABB=frame*AABB(Vector3(-volume.width*0.5,0,-volume.depth*0.5),Vector3(volume.width,1,volume.depth))
+	for obstacle in towers()+curtains():
+		var pose: Transform3D=obstacle.transform if obstacle in towers() else obstacle.get_parent().transform*obstacle.transform
+		var other: AABB=pose*AABB(Vector3(-obstacle.width*0.5,0,-obstacle.depth*0.5),Vector3(obstacle.width,1,obstacle.depth))
+		if bounds.grow(0.5).intersects(other): return "Corpo troppo vicino a torri o mura: spostalo o allarga la corte (margine 0.5 m)."
+	return ""

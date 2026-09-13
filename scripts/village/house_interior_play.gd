@@ -15,6 +15,7 @@ const Door=preload("res://addons/house_builder/door.gd")
 @export_range(0.12,0.35,0.01) var partition_thickness := 0.18
 var house: House
 var interior: Interior
+var accessory_lamps: Array[OmniLight3D]=[]
 var authored_group: Node3D
 var authored_plan: Node3D
 var player: CharacterBody3D
@@ -170,6 +171,7 @@ func _process(delta: float) -> void:
 	ground_material.albedo_color=Color(0.27,0.25,0.17).lerp(Color(0.008,0.009,0.012),blend)
 	camera.focus_height=lerpf(4.0,1.1,blend); camera.ortho_size=12.0 if zoomed else 17.5
 	for i in lamps.size(): lamps[i].visible=inside and i/3==active_floor
+	for light in accessory_lamps: light.visible=inside and active_floor==0
 	entrance_light.visible=inside and active_floor==0
 	var door := nearest_door()
 	if Input.is_action_just_pressed("interact") and door: door.toggle(player.global_position)
@@ -281,6 +283,14 @@ func _capture(label: String) -> void:
 func _activate_tower(tower: Node3D) -> void:
 	house.set_cutaway(false)
 	house=tower; authored_plan=house.get_node_or_null("InteriorPlan")
+	for light in accessory_lamps: light.queue_free()
+	accessory_lamps.clear()
+	for volume in house.authored_volumes():
+		if not volume.attached or volume.structure_kind!=0 or not volume.volume_error().is_empty(): continue
+		var light := OmniLight3D.new(); light.light_color=Color(1,0.79,0.54); light.light_energy=1.8
+		light.omni_range=4; light.shadow_enabled=true; entrance_light.get_parent().add_child(light)
+		light.global_position=volume.to_global(Vector3(0,1.9,0)); accessory_lamps.append(light)
+
 	house_width=house.width; house_depth=house.depth
 	storeys=maxi(1,authored_plan.levels().size()) if authored_plan else 1
 	storey_height=authored_plan.floor_height if authored_plan else house.wall_height

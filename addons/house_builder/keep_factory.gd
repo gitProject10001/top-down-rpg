@@ -30,3 +30,11 @@ static func placement(group: Node3D) -> Dictionary:
 	if high.x-low.x-clearance.x<8 or high.z-low.z-clearance.y<8:
 		return {"error":"Allarga il recinto: servono 8 m liberi centrali per il mastio e i passaggi."}
 	return {"position":Vector3((low.x+high.x)*0.5,0,(low.z+high.z)*0.5)}
+
+static func create_accessory() -> Node3D:
+	var volume=preload("res://addons/house_builder/volume.gd").new()
+	volume.name="CorpoAccessorio"; volume.width=3; volume.depth=2.8; volume.wall_height=2.6
+	volume.canopy_roof=2; volume.parapet_enabled=false; volume.host_wall=3
+	volume.junction_mode=1; volume.junction_width=1.4
+	var records: Array[Dictionary]=[{"kind":"window","wall":0,"u":0.0,"y":1.4}]; volume.openings=records
+	return volume

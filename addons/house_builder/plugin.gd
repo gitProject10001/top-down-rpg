@@ -820,11 +820,13 @@ func _add_volume_from_ui(side: int) -> void:
 	_add_volume(side,volume_kind.selected)
 func _add_volume(side: int,kind: int=0) -> void:
 	var host := _selected_house()
-	if host is Volume: host=host.volume_host()
+	if host is Volume and not host.has_method("supports_accessory_volumes"): host=host.volume_host()
 	if host==null: status.text="Seleziona una casa."; return
 	var container := host.get_node_or_null("Volumes"); var fresh := container==null
 	if fresh: container=Node3D.new(); container.name="Volumes"; host.add_child(container)
 	var volume := Volume.new(); volume.name="Portico" if kind==1 else "CorpoAccessorio"; volume.structure_kind=kind; volume.width=3.0; volume.depth=4.0; volume.wall_height=2.6; volume.roof_height=1.2; volume.host_wall=side
+	if host.has_method("supports_accessory_volumes") and kind==0:
+		volume.depth=2.8; volume.canopy_roof=2; volume.parapet_enabled=false; volume.junction_mode=1; volume.junction_width=1.4
 	if kind==0: volume.openings=[{"kind":"window","wall":0,"u":0.0,"y":1.4}]
 	container.add_child(volume); volume.prepare_attachment(); var error := volume.volume_error()
 	container.remove_child(volume)
@@ -1018,6 +1020,7 @@ func _build_fortification_tab() -> void:
 	for child in page.get_children():
 		if child!=fort_sections: child.reparent(create)
 	var edit := VBoxContainer.new(); edit.name="Recinto"; fort_sections.add_child(edit)
+	var annex := Button.new(); annex.text="Aggiungi corpo accessorio al mastio"; annex.pressed.connect(_add_keep_accessory); edit.add_child(annex)
 	var keep := Button.new(); keep.text="Aggiungi mastio nella corte"; keep.pressed.connect(_add_keep); edit.add_child(keep)
 	var fill := Button.new(); fill.text="Completa interni delle torri mancanti"; fill.pressed.connect(_complete_tower_interiors); edit.add_child(fill)
 	fort_info=Label.new(); fort_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; edit.add_child(fort_info)
@@ -1148,3 +1151,13 @@ func _add_keep() -> void:
 	var keep: Node3D=factory.create(); keep.position=proposal.position
 	_add_authored(group,keep,"Aggiungi mastio"); keep.get_node("InteriorPlan").rebuild(); keep.rebuild()
 	tabs.current_tab=6; fort_sections.current_tab=1
+
+func _add_keep_accessory() -> void:
+	var group := _selected_fortification()
+	if group==null:
+		_show_plan_error("Corpo accessorio","Seleziona un castello con un mastio."); return
+	var candidates: Array=group.buildings().filter(func(n): return n.has_method("supports_accessory_volumes"))
+	if candidates.is_empty(): _show_plan_error("Corpo accessorio","Aggiungi prima un mastio."); return
+	var keep: Node3D=candidates[0]
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(keep)
+	_add_volume(3)

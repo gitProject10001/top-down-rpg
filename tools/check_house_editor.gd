@@ -428,6 +428,18 @@ func run(plugin: EditorPlugin) -> void:
 	assert(enclosure.diagnostics().any(func(issue): return issue.node==enclosure.get_path_to(keep)))
 	keep.position=keep_position
 	print("KEEP_EDITOR_ADD_UNDO_REDO_DUPLICATE_SNAPSHOT_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(keep)
+	var saved_keep_openings: Array=keep.openings.duplicate(true)
+	plugin._add_keep_accessory()
+	var accessory=keep.get_node("Volumes/CorpoAccessorio")
+	assert(accessory.volume_error().is_empty() and accessory.junction_mode==1)
+	assert(keep.openings==saved_keep_openings,"Manual windows preserved")
+	profile_history.undo(); assert(not keep.has_node("Volumes"))
+	profile_history.redo(); assert(keep.get_node("Volumes/CorpoAccessorio")==accessory)
+	var accessory_snapshot: PackedScene=plugin._snapshot(enclosure)
+	var accessory_copy=accessory_snapshot.instantiate()
+	assert(accessory_copy.has_node("Mastio/Volumes/CorpoAccessorio")); accessory_copy.free()
+	print("KEEP_ACCESSORY_EDITOR_UNDO_REDO_SNAPSHOT_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

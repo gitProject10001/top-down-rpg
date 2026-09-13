@@ -718,7 +718,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. Prossimo passo prioritario: **corpi accessori del mastio e collegamenti interni**.
+se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. A09.2 aggiunge il corpo accessorio collegato. Prossimo passo: **editing delle quote e raccordi verticali del complesso**.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -846,3 +846,25 @@ non accessibile; il resize del recinto lascia il mastio nella posizione manuale
 ed evidenzia eventuali ingombri fuori limite. A09 resta IN CORSO.
 Prossimo passo A09.2: corpo accessorio agganciato al mastio con passaggio interno,
 poi corti e quote diverse. Riferimenti: check_keep_play.gd e check_house_editor.gd.
+
+
+### A09.2 — Corpo accessorio del mastio — 2026-09-13
+
+Volume basso chiuso (3 × 2.8 m, altezza 2.6 m), tetto piano e porta di raccordo
+al piano terra. Comando in Fortificazioni/Recinto e strumenti Volumi esistenti.
+Il mastio può ospitare volumi senza abilitare agganci annidati arbitrari.
+Le aperture superiori non bloccano più l'aggancio se restano sopra la copertura;
+quelle interferenti restano protette. Diagnostica conservativa con ingombri AABB
+di torri/cortine e margine 0.5 m. Se invalido, nessun taglio della parete.
+Play: porta apribile, continuità interno/cutaway e luce di prova nel corpo basso,
+con lo stesso sistema di illuminazione esistente. Esempio:
+`castle_keep_accessory_example.tscn`, costruito con i volumi del builder.
+Verificati porta chiusa/aperta, attraversamento e ritorno, successiva salita
+ai tre piani, sgancio/rimozione che ripristinano il muro, stato invalido,
+salvataggio, Undo/Redo e preservazione finestre. Suite editor conclusa con
+HOUSE_EDITOR_ALL_OK; restano i messaggi preesistenti del reparenting arredi.
+Limiti: corpo al piano terra, nessuna pianta indipendente a più piani nell'annesso,
+nessun arredo, illuminazione solo di prova. Le verifiche degli ingombri sono
+conservative per rotazioni oblique e non considerano ogni oggetto manuale.
+Prossimo passo: quote e raccordi verticali del complesso, mantenendo indipendenti
+muri, edifici e interni. A09 resta IN CORSO.

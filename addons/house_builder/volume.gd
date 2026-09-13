@@ -79,17 +79,21 @@ func volume_error() -> String:
 	var host := volume_host()
 	if not attached: return ""
 	if host==null: return "Il corpo accessorio deve stare in Casa / Volumes."
-	if host.has_method("volume_host") or host.wing_enabled or wing_enabled: return "Aggancio supportato al corpo principale senza ala legacy."
+	if (host.has_method("volume_host") and not host.has_method("supports_accessory_volumes")) or host.wing_enabled or wing_enabled: return "Aggancio supportato al corpo principale senza ala legacy."
 	if absf(host_offset*host.wall_length(host_wall)*0.5)+width*0.5>host.wall_length(host_wall)*0.5-0.25: return "Il volume supera il bordo della facciata: riduci larghezza o spostamento."
 	if roof_top()>host.wall_height-0.15: return "Per questo primo raccordo il tetto accessorio deve stare sotto la gronda principale."
 	if structure_kind==0 and junction_mode==1 and (junction_width>width-0.5 or junction_height>wall_height-0.2): return "La porta del raccordo supera il corpo: riduci larghezza o altezza della porta."
 	for record in host.openings:
 		var opening: Dictionary=host.resolved_opening(record)
 		if opening.wall==host_wall and absf(opening.along-host_offset*host.wall_length(host_wall)*0.5)<(width+opening.width)*0.5+0.15:
+			if structure_kind==0 and opening.y-opening.height*0.5>roof_top()+0.15: continue
 			if structure_kind==0: return "Il corpo copre un'apertura manuale della casa. Scegli una zona libera."
 			if opening.y+opening.height*0.5>support_height(-depth*0.5+WALL_THICKNESS+0.08)-0.25: return "La copertura interferisce con un'apertura della casa: alza i sostegni o sposta la tettoia."
 	for record in openings:
 		if structure_kind==0 and int(record.get("wall",0))==1: return "La facciata posteriore è il raccordo: sposta la sua apertura su un lato libero."
+	if host.get_parent() and host.get_parent().has_method("accessory_error"):
+		var error: String=host.get_parent().accessory_error(self)
+		if not error.is_empty(): return error
 	for other in host.authored_volumes():
 		if other==self or not other.attached: continue
 		# Footprints are transformed to host axes for orthogonal attachments.

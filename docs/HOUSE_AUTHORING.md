@@ -774,3 +774,18 @@ ogni interferenza fra aggiunte manuali.
 Apri `scenes/dev/castle_keep_example.tscn`, seleziona Castello/Mastio e usa il
 Play del builder per entrare e salire ai tre piani. La copertura a falde non
 è accessibile. Nessun arredo aggiunto in questa versione.
+
+
+### Corpo accessorio del mastio (A09.2)
+
+In **Fortificazioni → Recinto**, usa **Aggiungi corpo accessorio al mastio**:
+il preset si aggancia al lato sinistro e compare sotto `Mastio/Volumes`.
+Puoi rinominare il mastio. Per scegliere un altro lato usa il tab **Volumi**,
+oppure Host Wall e Host Offset nell'Inspector. La copertura bassa lascia libere
+le finestre del mastio. Ridimensionando, controlla le segnalazioni del raccordo.
+**Raccordo interno** permette porta oppure passaggio aperto. La porta si apre
+con E nel Play. Sganciando o eliminando il volume si ripristina il muro del mastio.
+Le geometrie interne generate non vanno modificate direttamente.
+La luce dell'annesso nel Play è una luce di prova, non un impianto salvato o GI.
+Esempio: `scenes/dev/castle_keep_accessory_example.tscn`.
+Verifiche: `check_keep_accessory.gd`, `check_keep_accessory_play.gd` e suite editor.
