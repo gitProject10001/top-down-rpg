@@ -103,22 +103,26 @@ func _ready() -> void:
 	snap.camera_path=NodePath("../IsoCam"); snap.targets=targets; world.add_child(snap)
 	var ui := CanvasLayer.new(); add_child(ui)
 	prompt=Label.new(); prompt.position=Vector2(22,20); prompt.add_theme_font_size_override("font_size",18); ui.add_child(prompt)
+	if authored_group: _activate_tower(house)
 	if "--house-play-test" in OS.get_cmdline_user_args(): _test.call_deferred()
 	if authored_test: _test_authored.call_deferred()
 func nearest_door() -> Node3D:
 	var best: Node3D=null; var distance := 2.2
 	var all: Array=[]
-	for child in house._generated.get_children():
-		if child is Door: all.append(child)
-	for volume in house.authored_volumes():
-		for child in volume._generated.get_children():
+	var buildings: Array=authored_group.towers() if authored_group else [house]
+	for building in buildings:
+		for child in building._generated.get_children():
 			if child is Door: all.append(child)
+		for volume in building.authored_volumes():
+			for child in volume._generated.get_children():
+				if child is Door: all.append(child)
+		var plan=building.get_node_or_null("InteriorPlan")
+		if plan: all.append_array(plan.doors())
 	for curtain in (authored_group.curtains() if authored_group else house.get_children()):
 		if curtain.has_method("fortification_host") and is_instance_valid(curtain._generated):
 			for child in curtain._generated.get_children():
 				if child is Door: all.append(child)
 	all.append_array(interior.doors)
-	if authored_plan: all.append_array(authored_plan.doors())
 	for door in all:
 		var center: Vector3=(door.get_parent() as Node3D).to_global(door.closed_frame*Vector3(door.door_width*0.5,0,0))
 		var delta := player.global_position-center
@@ -128,7 +132,12 @@ func nearest_door() -> Node3D:
 	return best
 func _process(delta: float) -> void:
 	if not is_instance_valid(player): return
-	var p := player.position
+	if authored_group:
+		for tower in authored_group.towers():
+			if tower.contains_footprint(tower.to_local(player.global_position),0.12):
+				if tower!=house: _activate_tower(tower)
+				break
+	var p := house.to_local(player.global_position)
 	var player_shape: CollisionShape3D=player.get_node("Collision")
 	var foot_offset: float=player_shape.position.y-player_shape.shape.height*0.5
 	var margin := -0.12 if inside else 0.12
@@ -150,7 +159,11 @@ func _process(delta: float) -> void:
 		house.set_cutaway(inside,active_floor*storey_height,storey_height)
 	interior.show_level(active_floor,inside)
 	if inside: interior.reveal_room(player.global_position,camera.global_position)
-	if authored_plan: authored_plan.runtime_view(inside,active_floor,player.global_position,camera.global_position)
+	if authored_group:
+		for tower in authored_group.towers():
+			var plan=tower.get_node_or_null("InteriorPlan")
+			if plan: plan.runtime_view(inside and tower==house,active_floor,player.global_position,camera.global_position)
+	elif authored_plan: authored_plan.runtime_view(inside,active_floor,player.global_position,camera.global_position)
 	blend=move_toward(blend,1.0 if inside else 0.0,delta*4)
 	sun.light_energy=lerpf(1.15,0.025,blend)
 	environment.ambient_light_energy=lerpf(0.408,0.10,blend)
@@ -160,7 +173,7 @@ func _process(delta: float) -> void:
 	entrance_light.visible=inside and active_floor==0
 	var door := nearest_door()
 	if Input.is_action_just_pressed("interact") and door: door.toggle(player.global_position)
-	prompt.text="WASD / stick: muovi  ·  E / Y: porta  ·  F7: zoom confronto\n%s · Piano %d/%d%s"%["Interno" if inside else "Esterno",active_floor+1,storeys,"  —  E: "+("chiudi" if door.opened else "apri") if door else ""]
+	prompt.text="WASD / stick: muovi  ·  E / Y: porta  ·  F7: zoom confronto\n%s · Piano %d/%d%s"%[("Interno · "+str(house.name) if authored_group else "Interno") if inside else "Esterno",active_floor+1,storeys,"  —  E: "+("chiudi" if door.opened else "apri") if door else ""]
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.keycode==KEY_F7: zoomed=not zoomed
 func _test() -> void:
@@ -263,3 +276,21 @@ func _capture(label: String) -> void:
 	await RenderingServer.frame_post_draw
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures/house_interior"))
 	get_viewport().get_texture().get_image().save_png("res://captures/house_interior/"+label+".png")
+
+
+func _activate_tower(tower: Node3D) -> void:
+	house.set_cutaway(false)
+	house=tower; authored_plan=house.get_node_or_null("InteriorPlan")
+	house_width=house.width; house_depth=house.depth
+	storeys=maxi(1,authored_plan.levels().size()) if authored_plan else 1
+	storey_height=authored_plan.floor_height if authored_plan else house.wall_height
+	inside=false; _last_floor=-1
+	while lamps.size()<storeys*3:
+		var light := OmniLight3D.new(); light.light_color=Color(1,0.79,0.54); light.light_energy=2.4
+		light.omni_range=5; light.shadow_enabled=true; entrance_light.get_parent().add_child(light); lamps.append(light)
+	var offsets := [Vector3(-2,2,-2.5),Vector3(-2,2,2.5),Vector3(1.8,2,0)]
+	for i in lamps.size(): lamps[i].global_position=house.to_global(offsets[i%3]+Vector3.UP*(i/3)*storey_height)
+	for record in house.all_openings():
+		var opening: Dictionary=house.resolved_opening(record)
+		if opening.door:
+			entrance_light.global_position=house.to_global(house.wall_point(opening.wall,opening.along,1.9,-0.7)); break

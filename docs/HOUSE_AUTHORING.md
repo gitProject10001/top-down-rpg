@@ -717,3 +717,29 @@ Esempio ridimensionato: `scenes/dev/castle_enclosure_resized_example.tscn`.
 Verifiche: `check_enclosure_editing.gd` e suite editor, con preservazione delle
 modifiche, Undo/Redo e selezione tramite diagnostica. La diagnostica non è ancora
 una verifica di tutte le collisioni con dettagli o arredi personalizzati.
+
+
+### Interni delle torri secondarie (A08.6)
+
+I nuovi recinti vengono creati con interni in tutte e quattro le torri. Per un
+recinto esistente, seleziona il gruppo e usa **Fortificazioni → Recinto →
+Completa interni delle torri mancanti**. Il comando salta ogni torre che ha già
+InteriorPlan, conserva le aperture manuali e aggiunge una porta verso il cortile
+solo dove manca una porta. Se il nuovo ingresso interferisce con un’apertura,
+segnala il problema prima di modificare la scena.
+
+Il preset richiede almeno 7 × 7 m e pareti alte 4.8–7 m: due piani, scala
+rettilinea e accesso al tetto. Mantiene l’altezza della torre dividendo la quota
+fra i due piani. Nessun arredo aggiunto. Creazione e completamento sono annullabili.
+
+Nel Play il riconoscimento dell’interno usa la pianta e la posizione di ciascuna
+torre. Cambiano insieme piano visibile, nome nell’HUD, porte interattive e posizione
+delle luci interne; le altre torri restano esterne. Salendo al tetto si ripristina
+la vista esterna, ridiscendendo viene mostrato l’interno della torre corretta.
+
+Esempio: `scenes/dev/castle_interiors_example.tscn`. Dal cortile sono raggiungibili
+i quattro ingressi. Le ante aperte occupano spazio reale: avvicinati alla base
+della scala passando intorno all’anta, senza tagliarne la rotazione.
+Test: `check_castle_interiors_play.gd`, suite editor e regressione della torre
+singola. Limiti: piani aperti senza stanze/arredo; nessuna GI/lightmap nuova,
+nessun rifacimento delle texture e nessun parapetto automatico del vano scala.

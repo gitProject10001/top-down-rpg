@@ -1,0 +1,290 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/house_builder/fortification.gd" id="1_3og6i"]
+[ext_resource type="Script" path="res://addons/house_builder/polygon_tower.gd" id="2_gtwlo"]
+[ext_resource type="Script" path="res://addons/house_builder/plan.gd" id="3_7rgia"]
+[ext_resource type="Script" path="res://addons/house_builder/plan_element.gd" id="4_5urhr"]
+[ext_resource type="Script" path="res://addons/house_builder/curtain_wall.gd" id="5_2joom"]
+
+[sub_resource type="Environment" id="Environment_2skir"]
+background_mode = 1
+background_color = Color(0.16, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_i8f6y"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_1y2ad"]
+size = Vector2(50, 50)
+
+[node name="HouseWorkshop" type="Node3D" unique_id=1352928225]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=914166128]
+environment = SubResource("Environment_2skir")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=1932839329]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=698352592]
+material_override = SubResource("StandardMaterial3D_i8f6y")
+mesh = SubResource("PlaneMesh_1y2ad")
+
+[node name="Castello" type="Node3D" parent="." unique_id=1612059850]
+script = ExtResource("1_3og6i")
+courtyard_entry = true
+
+[node name="TorreOvest" type="Node3D" parent="Castello" unique_id=1473396810]
+script = ExtResource("2_gtwlo")
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1286741_48771368602"
+attached = false
+archetype_id = "tower"
+width = 8.0
+depth = 8.0
+wall_height = 5.6
+roof_height = 1.0
+openings = Array[Dictionary]([{
+"height": 2.1,
+"kind": "door",
+"wall": 3,
+"width": 1.2
+}])
+
+[node name="InteriorPlan" type="Node3D" parent="Castello/TorreOvest" unique_id=1085696993]
+script = ExtResource("3_7rgia")
+floor_height = 2.8
+
+[node name="PianoTerra" type="Node3D" parent="Castello/TorreOvest/InteriorPlan" unique_id=1827365236]
+metadata/floor_id = "tower_ground"
+
+[node name="ScalaPrimoPiano" type="Node3D" parent="Castello/TorreOvest/InteriorPlan/PianoTerra" unique_id=1020085251]
+script = ExtResource("4_5urhr")
+kind = 2
+dimensions = Vector3(1.2, 2.8, 4.2)
+stable_id = "tower_stair_0"
+room_ids = PackedStringArray()
+
+[node name="PrimoPiano" type="Node3D" parent="Castello/TorreOvest/InteriorPlan" unique_id=1482112169]
+metadata/floor_id = "tower_upper"
+
+[node name="ScalaTetto" type="Node3D" parent="Castello/TorreOvest/InteriorPlan/PrimoPiano" unique_id=1868951511]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.5, 0, 0)
+script = ExtResource("4_5urhr")
+kind = 2
+roof_exit = true
+dimensions = Vector3(1.2, 2.93, 4.2)
+stable_id = "tower_roof_stair"
+room_ids = PackedStringArray()
+
+[node name="Cortina" type="Node3D" parent="Castello/TorreOvest" unique_id=743537837]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 8, 0, 0)
+script = ExtResource("5_2joom")
+connect_to_tower = true
+target_tower = NodePath("../../TorreEst")
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1286746_48888809121"
+attached = false
+width = 8.2
+depth = 2.8
+wall_height = 5.6
+roof_height = 1.0
+
+[node name="TorreEst" type="Node3D" parent="Castello" unique_id=1566888877]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, 0)
+script = ExtResource("2_gtwlo")
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1286747_48872031904"
+attached = false
+archetype_id = "tower"
+width = 8.0
+depth = 8.0
+wall_height = 5.6
+roof_height = 1.0
+openings = Array[Dictionary]([{
+"height": 2.1,
+"kind": "door",
+"wall": 5,
+"width": 1.2
+}])
+
+[node name="Cortina" type="Node3D" parent="Castello/TorreEst" unique_id=2098708808]
+transform = Transform3D(0, 0, 1, 0, 1, 0, -1, 0, 0, 0, 0, -8)
+script = ExtResource("5_2joom")
+gate_enabled = false
+connect_to_tower = true
+tower_face = 4
+target_tower = NodePath("../../TorreNordEst")
+target_face = 0
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1286748_48939140772"
+attached = false
+width = 8.2
+depth = 2.8
+wall_height = 5.6
+roof_height = 1.0
+
+[node name="InteriorPlan" type="Node3D" parent="Castello/TorreEst" unique_id=1508912465]
+script = ExtResource("3_7rgia")
+floor_height = 2.8
+
+[node name="PianoTerra" type="Node3D" parent="Castello/TorreEst/InteriorPlan" unique_id=1534799720]
+metadata/floor_id = "tower_ground"
+
+[node name="ScalaPrimoPiano" type="Node3D" parent="Castello/TorreEst/InteriorPlan/PianoTerra" unique_id=624145376]
+script = ExtResource("4_5urhr")
+kind = 2
+dimensions = Vector3(1.2, 2.8, 4.2)
+stable_id = "tower_stair_0"
+room_ids = PackedStringArray()
+
+[node name="PrimoPiano" type="Node3D" parent="Castello/TorreEst/InteriorPlan" unique_id=1254868195]
+metadata/floor_id = "tower_upper"
+
+[node name="ScalaTetto" type="Node3D" parent="Castello/TorreEst/InteriorPlan/PrimoPiano" unique_id=599901002]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.5, 0, 0)
+script = ExtResource("4_5urhr")
+kind = 2
+roof_exit = true
+dimensions = Vector3(1.2, 2.93, 4.2)
+stable_id = "tower_roof_stair"
+room_ids = PackedStringArray()
+
+[node name="TorreNordEst" type="Node3D" parent="Castello" unique_id=775603496]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16, 0, -16)
+script = ExtResource("2_gtwlo")
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1286752_48905586338"
+attached = false
+archetype_id = "tower"
+width = 8.0
+depth = 8.0
+wall_height = 5.6
+roof_height = 1.0
+openings = Array[Dictionary]([{
+"height": 2.1,
+"kind": "door",
+"wall": 7,
+"width": 1.2
+}])
+
+[node name="Cortina" type="Node3D" parent="Castello/TorreNordEst" unique_id=1952313752]
+transform = Transform3D(-1, 0, 0, 0, 1, 0, 0, 0, -1, -8, 0, 0)
+script = ExtResource("5_2joom")
+gate_enabled = false
+connect_to_tower = true
+tower_face = 6
+target_tower = NodePath("../../TorreNordOvest")
+target_face = 2
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1286753_48955917989"
+attached = false
+width = 8.2
+depth = 2.8
+wall_height = 5.6
+roof_height = 1.0
+
+[node name="InteriorPlan" type="Node3D" parent="Castello/TorreNordEst" unique_id=1471921188]
+script = ExtResource("3_7rgia")
+floor_height = 2.8
+
+[node name="PianoTerra" type="Node3D" parent="Castello/TorreNordEst/InteriorPlan" unique_id=1619790150]
+metadata/floor_id = "tower_ground"
+
+[node name="ScalaPrimoPiano" type="Node3D" parent="Castello/TorreNordEst/InteriorPlan/PianoTerra" unique_id=81246168]
+script = ExtResource("4_5urhr")
+kind = 2
+dimensions = Vector3(1.2, 2.8, 4.2)
+stable_id = "tower_stair_0"
+room_ids = PackedStringArray()
+
+[node name="PrimoPiano" type="Node3D" parent="Castello/TorreNordEst/InteriorPlan" unique_id=1702474618]
+metadata/floor_id = "tower_upper"
+
+[node name="ScalaTetto" type="Node3D" parent="Castello/TorreNordEst/InteriorPlan/PrimoPiano" unique_id=834415257]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.5, 0, 0)
+script = ExtResource("4_5urhr")
+kind = 2
+roof_exit = true
+dimensions = Vector3(1.2, 2.93, 4.2)
+stable_id = "tower_roof_stair"
+room_ids = PackedStringArray()
+
+[node name="TorreNordOvest" type="Node3D" parent="Castello" unique_id=120799513]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -16)
+script = ExtResource("2_gtwlo")
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1286756_48922363555"
+attached = false
+archetype_id = "tower"
+width = 8.0
+depth = 8.0
+wall_height = 5.6
+roof_height = 1.0
+openings = Array[Dictionary]([{
+"height": 2.1,
+"kind": "door",
+"wall": 1,
+"width": 1.2
+}])
+
+[node name="Cortina" type="Node3D" parent="Castello/TorreNordOvest" unique_id=1209100194]
+transform = Transform3D(0, 0, -1, 0, 1, 0, 1, 0, 0, 0, 0, 8)
+script = ExtResource("5_2joom")
+gate_enabled = false
+connect_to_tower = true
+tower_face = 0
+target_tower = NodePath("../../TorreOvest")
+target_face = 4
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1286757_48972695206"
+attached = false
+width = 8.2
+depth = 2.8
+wall_height = 5.6
+roof_height = 1.0
+
+[node name="InteriorPlan" type="Node3D" parent="Castello/TorreNordOvest" unique_id=1011069064]
+script = ExtResource("3_7rgia")
+floor_height = 2.8
+
+[node name="PianoTerra" type="Node3D" parent="Castello/TorreNordOvest/InteriorPlan" unique_id=560643239]
+metadata/floor_id = "tower_ground"
+
+[node name="ScalaPrimoPiano" type="Node3D" parent="Castello/TorreNordOvest/InteriorPlan/PianoTerra" unique_id=898586059]
+script = ExtResource("4_5urhr")
+kind = 2
+dimensions = Vector3(1.2, 2.8, 4.2)
+stable_id = "tower_stair_0"
+room_ids = PackedStringArray()
+
+[node name="PrimoPiano" type="Node3D" parent="Castello/TorreNordOvest/InteriorPlan" unique_id=1145392895]
+metadata/floor_id = "tower_upper"
+
+[node name="ScalaTetto" type="Node3D" parent="Castello/TorreNordOvest/InteriorPlan/PrimoPiano" unique_id=386785767]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.5, 0, 0)
+script = ExtResource("4_5urhr")
+kind = 2
+roof_exit = true
+dimensions = Vector3(1.2, 2.93, 4.2)
+stable_id = "tower_roof_stair"
+room_ids = PackedStringArray()
+
+[node name="Camera" type="Camera3D" parent="." unique_id=489606778]
+transform = Transform3D(0.70710677, -0.45028284, 0.5452021, 0, 0.7710322, 0.6367961, -0.70710677, -0.45028284, 0.5452021, 33, 32, 17)
+projection = 1
+current = true
+size = 38.0

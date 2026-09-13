@@ -1018,6 +1018,7 @@ func _build_fortification_tab() -> void:
 	for child in page.get_children():
 		if child!=fort_sections: child.reparent(create)
 	var edit := VBoxContainer.new(); edit.name="Recinto"; fort_sections.add_child(edit)
+	var fill := Button.new(); fill.text="Completa interni delle torri mancanti"; fill.pressed.connect(_complete_tower_interiors); edit.add_child(fill)
 	fort_info=Label.new(); fort_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; edit.add_child(fort_info)
 	for axis in ["X","Z"]:
 		var caption := Label.new(); caption.text="Distanza tra i centri delle torri "+axis+" (m)"; edit.add_child(caption)
@@ -1061,7 +1062,7 @@ func _create_fortification() -> void:
 func _create_enclosure() -> void:
 	var root := EditorInterface.get_edited_scene_root()
 	if root==null: return
-	var group=preload("res://addons/house_builder/fortification_factory.gd").create_enclosure()
+	var group=preload("res://addons/house_builder/fortification_factory.gd").create_inhabitable_enclosure()
 	_add_authored(root,group,"Crea recinto fortificato"); group.rebuild(); tabs.current_tab=6
 
 func _selected_fortification() -> Node3D:
@@ -1114,3 +1115,25 @@ func _resize_fortification() -> void:
 	undo.add_do_method(group,"apply_layout",after); undo.add_undo_method(group,"apply_layout",before)
 	undo.add_do_method(self,"_refresh_fortification_ui",true); undo.add_undo_method(self,"_refresh_fortification_ui",true)
 	undo.commit_action()
+
+func _complete_tower_interiors() -> void:
+	var group := _selected_fortification()
+	if group==null: _show_plan_error("Interni torri","Seleziona una fortificazione."); return
+	var missing: Array=[]
+	var factory=preload("res://addons/house_builder/fortification_factory.gd")
+	for tower in group.towers():
+		if tower.has_node("InteriorPlan"): continue
+		if tower.width<7 or tower.depth<7 or tower.wall_height<4.8 or tower.wall_height>7:
+			_show_plan_error("Interni torri",str(tower.name)+": il preset richiede almeno 7 × 7 m e altezza fra 4.8 e 7 m."); return
+		var records: Array[Dictionary]=factory.courtyard_openings(group,tower)
+		if not records.any(func(r): return r.get("kind","")=="door"):
+			_show_plan_error("Interni torri",str(tower.name)+": la porta verso il cortile interferisce con un’apertura manuale. Posiziona prima una porta libera."); return
+		missing.append({"tower":tower,"openings":records})
+	if missing.is_empty(): status.text="Tutte le torri hanno già interni modificabili."; return
+	var undo := get_undo_redo(); undo.create_action("Completa interni delle torri",UndoRedo.MERGE_DISABLE,group)
+	for item in missing:
+		var plan: Node3D=factory.tower_plan(item.tower)
+		undo.add_do_method(self,"_attach",item.tower,plan,EditorInterface.get_edited_scene_root())
+		undo.add_undo_method(item.tower,"remove_child",plan); undo.add_do_reference(plan)
+		undo.add_do_property(item.tower,"openings",item.openings); undo.add_undo_property(item.tower,"openings",item.tower.openings.duplicate(true))
+	undo.add_do_method(group,"rebuild"); undo.add_undo_method(group,"rebuild"); undo.commit_action()

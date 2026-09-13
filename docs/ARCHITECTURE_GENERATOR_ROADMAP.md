@@ -718,7 +718,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. Prossimo passo prioritario: **interni e cambio vista nelle torri secondarie**.
+se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. Prossimo passo prioritario: **parapetti e sbarchi dei vani scala**, poi mastio A09.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -795,3 +795,17 @@ Test `check_enclosure_editing.gd`; esempio `castle_enclosure_resized_example.tsc
 Limiti: niente gizmo dedicato ai lati del gruppo, resize di rettangoli soltanto,
 nessun controllo esaustivo delle collisioni con arredi manuali. Prossimo passo:
 interni e cambio vista nelle torri secondarie del gruppo.
+
+
+### A08.6 — Interni delle torri secondarie — 2026-09-13
+
+Preset del recinto con quattro interni distinti e ingressi rivolti alla corte.
+Comando per completare soltanto le torri senza InteriorPlan, con preflight e
+Undo/Redo; piani esistenti e aperture manuali preservati. Il Play attiva la torre
+in base alla pianta locale e aggiorna cutaway, piani, porte e luci. Esempio
+`castle_interiors_example.tscn`; `check_castle_interiors_play.gd` percorre ingresso,
+primo piano, tetto e ritorno in ogni torre. Suite editor: preservazione, Undo/Redo
+e no-op sugli interni esistenti; regressione torre singola.
+Limiti: nessuna suddivisione in stanze o arredo, illuminazione esistente e vani
+scala senza parapetti/botole. Prossimo passo consigliato: proteggere i vani scala
+e rendere gli sbarchi più leggibili, poi avviare il mastio A09.
