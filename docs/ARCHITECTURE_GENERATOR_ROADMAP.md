@@ -983,3 +983,10 @@ Implementazione: `architecture_sections.gd` viene coordinato da `architecture_vi
 Copertura attuale: mesh Walls dei generatori esistenti e copertura/camminamento delle cortine. Tegole, infissi mobili e asset esterni non ricevono nuove sezioni. La classificazione deriva dal generatore (cortina piena / edificio cavo); non è ancora un attributo liberamente assegnabile a ogni materiale. Geometrie aperte o con orientamenti incoerenti non garantiscono una sezione chiusa. Il materiale interno è una convenzione grafica scura, non una simulazione della frattura o della luce nell'intercapedine.
 
 Validazione: `check_architecture_sections.gd` verifica spazio vuoto fra pareti, passaggio libero e spessore della sezione (`ARCHITECTURE_SECTION_ROOM_VOID_DOORWAY_THICKNESS_OK`). `check_open_castle_play.gd` verifica presenza di sezioni piene e cave, disattivazione, ingresso, collisioni e supporto dei camminamenti (`OPEN_CASTLE_REVEAL_RESTORE_COLLISION_WALKWAY_OK`). Prova grafica D3D12 completata; screenshot aggiornati in captures/balcony_attachment. Nell'ultimo campione il rebuild delle sezioni ha richiesto circa 3,9 ms: misura puntuale, non benchmark di un villaggio completo.
+
+
+#### A09.8 correzione — attivazione su occlusione del personaggio
+
+Il reveal non rimane più attivo per semplice vicinanza alle mura. Due raggi verso la camera, all'altezza del busto e della testa, verificano se la geometria visibile del builder copre il personaggio. Per la camera ortografica i raggi sono paralleli. Il controllo usa la mesh originale, indipendentemente dal ritaglio dello shader, per evitare oscillazioni. Quando entrambi i raggi sono liberi, dopo 120 ms di stabilità il taglio si richiude gradualmente. F8 abilita/disabilita questo comportamento automatico. Gli ostacoli esterni al gruppo del castello non sono inclusi.
+
+Validazione Play: giocatore nascosto → reveal con sezioni; giocatore visibile nel cortile → raggio zero e nessuna sezione; ritorno dietro le mura → riattivazione. Screenshot: `captures/balcony_attachment/open_castle_visible_uncut.png`.

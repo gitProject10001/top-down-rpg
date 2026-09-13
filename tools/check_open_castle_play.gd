@@ -34,6 +34,16 @@ func run() -> void:
 	assert(not space.intersect_ray(query).is_empty(),"Visual cut preserves wall collision")
 	await play._walk(Vector3(19,0,-10),220)
 	assert(not play.inside and play.player.position.z<-9.5)
+	for i in 90: await physics_frame
+	assert(not visibility.occluded and is_zero_approx(visibility._radius),"Visible player must restore the complete walls")
+	assert(visibility.sections.solid_sections==0 and visibility.sections.hollow_sections==0)
+	if DisplayServer.get_name()!="headless":
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://captures/balcony_attachment/open_castle_visible_uncut.png")
+	print("VISIBLE_PLAYER_NO_REVEAL_OK")
+	await play._walk(Vector3(19,0,-3),220)
+	for i in 45: await physics_frame
+	assert(visibility.occluded and visibility._radius>3.5,"Returning behind walls must reactivate the reveal")
 	# On the walkway the reveal threshold stays above the player's feet.
 	play.player.position=Vector3(13,6.7,0); play.player.velocity=Vector3.ZERO
 	for i in 40: await physics_frame

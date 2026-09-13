@@ -865,3 +865,10 @@ builder, non automaticamente con shader esterni o vegetazione.
 #### Sezioni nel Play del castello (A09.8)
 
 Con la visibilità attiva (F8), il bordo del taglio mostra ora lo spessore: pietrame scuro nelle cortine piene, sezione nera nelle pareti degli edifici cavi. La svasatura rende il bordo visibile dalla camera fissa. Il sistema segue le aperture della mesh finale e lascia liberi cortile e passaggi; resta un effetto temporaneo di visualizzazione. Non modifica i nodi salvati, le collisioni o gli strumenti del builder. Per ora le sezioni riguardano la muratura generata, non ogni oggetto o tegola.
+
+
+#### A09.8 correzione — attivazione su occlusione del personaggio
+
+Il reveal non rimane più attivo per semplice vicinanza alle mura. Due raggi verso la camera, all'altezza del busto e della testa, verificano se la geometria visibile del builder copre il personaggio. Per la camera ortografica i raggi sono paralleli. Il controllo usa la mesh originale, indipendentemente dal ritaglio dello shader, per evitare oscillazioni. Quando entrambi i raggi sono liberi, dopo 120 ms di stabilità il taglio si richiude gradualmente. F8 abilita/disabilita questo comportamento automatico. Gli ostacoli esterni al gruppo del castello non sono inclusi.
+
+Validazione Play: giocatore nascosto → reveal con sezioni; giocatore visibile nel cortile → raggio zero e nessuna sezione; ritorno dietro le mura → riattivazione. Screenshot: `captures/balcony_attachment/open_castle_visible_uncut.png`.
