@@ -40,6 +40,15 @@ var opening_index := -1
 var restore_openings: Array[Dictionary]=[]
 var last_root: Node
 var _test_runner: RefCounted
+var fort_sections: TabContainer
+var fort_info: Label
+var fort_issues: ItemList
+var fort_width: SpinBox
+var fort_depth: SpinBox
+var _fort_current: Node3D
+var _fort_poll := 0.0
+var _fort_issue_key := ""
+var _fort_size := Vector2.ZERO
 var tabs: TabContainer
 var opening_choice: OptionButton
 var context_label: Label
@@ -125,6 +134,7 @@ func _enter_tree() -> void:
 		action.pressed.connect(_apply_architecture_profile.bind(adopt)); tabs.get_child(0).add_child(action)
 	architecture_choice.item_selected.connect(func(_index): _architecture_details())
 	_architecture_details()
+	_refresh_fortification_ui()
 	add_control_to_dock(DOCK_SLOT_RIGHT_UL,scroll)
 	set_input_event_forwarding_always_enabled()
 	scene_changed.connect(_scene_changed)
@@ -177,7 +187,7 @@ func _selection_context() -> void:
 	var selected := EditorInterface.get_selection().get_selected_nodes()
 	var node: Node=selected[0] if not selected.is_empty() else null
 	context_label.text="Selezione: "+str(node.name) if node else "Seleziona una casa o disegnane una."
-	if node and node.has_method("is_curtain_wall"): tabs.current_tab=6
+	if node and (node.has_method("is_curtain_wall") or node.has_method("primary_tower")): tabs.current_tab=6
 	elif node is Volume or node is Support or node is FrameLink: tabs.current_tab=5
 	elif node is ExteriorStair and node.terrace() is Volume: tabs.current_tab=5; frame_tabs.current_tab=2
 	elif node is Balcony or node is ExteriorStair: tabs.current_tab=4
@@ -253,6 +263,9 @@ func _apply_changes() -> void:
 		for house in _houses(root):
 			if house._pending: house.rebuild()
 func _process(_delta: float) -> void:
+	_fort_poll+=_delta
+	if _fort_poll>0.4:
+		_fort_poll=0; _refresh_fortification_ui()
 	if volume_info:
 		var selected_volume := _selected_house()
 		canopy_roof_choice.disabled=not selected_volume is Volume
@@ -1000,6 +1013,21 @@ func _build_fortification_tab() -> void:
 	var pair := Button.new(); pair.text="Crea due torri collegate"; pair.pressed.connect(_create_fortification); page.add_child(pair)
 	var attach := Button.new(); attach.text="Collega nuova cortina alla torre"; attach.pressed.connect(_attach_curtain); page.add_child(attach)
 	var play := Button.new(); play.text="Play fortificazione"; play.pressed.connect(_play_selected); page.add_child(play)
+	fort_sections=TabContainer.new(); page.add_child(fort_sections)
+	var create := VBoxContainer.new(); create.name="Crea"; fort_sections.add_child(create)
+	for child in page.get_children():
+		if child!=fort_sections: child.reparent(create)
+	var edit := VBoxContainer.new(); edit.name="Recinto"; fort_sections.add_child(edit)
+	fort_info=Label.new(); fort_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; edit.add_child(fort_info)
+	for axis in ["X","Z"]:
+		var caption := Label.new(); caption.text="Distanza tra i centri delle torri "+axis+" (m)"; edit.add_child(caption)
+		var spin := SpinBox.new(); spin.min_value=4; spin.max_value=40; spin.step=0.5; edit.add_child(spin)
+		if axis=="X": fort_width=spin
+		else: fort_depth=spin
+	var resize := Button.new(); resize.text="Applica dimensioni al recinto"; resize.pressed.connect(_resize_fortification); edit.add_child(resize)
+	fort_issues=ItemList.new(); fort_issues.custom_minimum_size=Vector2(0,150); fort_issues.item_selected.connect(_select_fortification_issue); edit.add_child(fort_issues)
+	var hint := Label.new(); hint.text="Clicca un problema per selezionare il nodo.\nIl ridimensionamento sposta le torri: aperture e dettagli restano tuoi."; hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; edit.add_child(hint)
+
 
 func _create_curtain_wall() -> void:
 	var root := EditorInterface.get_edited_scene_root()
@@ -1035,3 +1063,54 @@ func _create_enclosure() -> void:
 	if root==null: return
 	var group=preload("res://addons/house_builder/fortification_factory.gd").create_enclosure()
 	_add_authored(root,group,"Crea recinto fortificato"); group.rebuild(); tabs.current_tab=6
+
+func _selected_fortification() -> Node3D:
+	for node in EditorInterface.get_selection().get_selected_nodes():
+		var current: Node=node
+		while current:
+			if current.has_method("primary_tower"): return current
+			current=current.get_parent()
+	return null
+func _refresh_fortification_ui(force: bool=false) -> void:
+	if fort_info==null: return
+	var group := _selected_fortification()
+	var current_size: Vector2=group.layout_size() if group else Vector2.ZERO
+	if group!=_fort_current or force or not current_size.is_equal_approx(_fort_size):
+		_fort_size=current_size
+		_fort_current=group
+		if group:
+			var size: Vector2=group.layout_size(); fort_width.value=size.x; fort_depth.value=size.y
+	fort_width.editable=group!=null; fort_depth.editable=group!=null
+	if group==null:
+		fort_issues.clear(); _fort_issue_key=""
+		fort_info.text="Seleziona un gruppo fortificazione o uno dei suoi elementi."; return
+	var issues: Array=group.diagnostics()
+	fort_info.text=str(group.name)+" · "+str(group.towers().size())+" torri · "+str(group.curtains().size())+" cortine"
+	var issue_key := str(group.get_instance_id(),issues)
+	if issue_key==_fort_issue_key: return
+	_fort_issue_key=issue_key; fort_issues.clear()
+	if issues.is_empty(): fort_issues.add_item("Nessun problema rilevato"); fort_issues.set_item_disabled(0,true)
+	for issue in issues:
+		fort_issues.add_item(issue.message); var index := fort_issues.item_count-1
+		fort_issues.set_item_metadata(index,issue.node); fort_issues.set_item_tooltip(index,issue.message)
+		fort_issues.set_item_custom_fg_color(index,Color(1,0.45,0.3))
+func _select_fortification_issue(index: int) -> void:
+	var group := _selected_fortification()
+	if group==null: return
+	var path=fort_issues.get_item_metadata(index)
+	if path==null: return
+	var node=group.get_node_or_null(path)
+	if node:
+		EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(node); EditorInterface.edit_node(node)
+		tabs.current_tab=6; fort_sections.current_tab=1
+func _resize_fortification() -> void:
+	var group := _selected_fortification()
+	if group==null: _show_plan_error("Ridimensiona recinto","Seleziona una fortificazione."); return
+	var after: Dictionary=group.resize_proposal(Vector2(fort_width.value,fort_depth.value))
+	if after.has("error"): _show_plan_error("Ridimensiona recinto",after.error); return
+	var before: Dictionary=group.layout_state()
+	if before==after: return
+	var undo := get_undo_redo(); undo.create_action("Ridimensiona recinto",UndoRedo.MERGE_DISABLE,group)
+	undo.add_do_method(group,"apply_layout",after); undo.add_undo_method(group,"apply_layout",before)
+	undo.add_do_method(self,"_refresh_fortification_ui",true); undo.add_undo_method(self,"_refresh_fortification_ui",true)
+	undo.commit_action()

@@ -693,3 +693,27 @@ salvataggio dei quattro collegamenti, Undo/Redo e snapshot per Play.
 Limiti: recinto iniziale rettangolare e quote uniformi; niente mastio, arredi,
 terreno adattivo o interni delle torri secondarie. Questo è il primo castello
 percorribile, non la chiusura di tutte le varianti del Castle Builder.
+
+
+### Editing e diagnostica del recinto (A08.5)
+
+Il tab Fortificazioni contiene ora **Crea** e **Recinto**. Seleziona il gruppo o
+un suo elemento e apri Recinto: i due campi indicano la distanza fra i centri
+delle torri sugli assi X/Z, non la dimensione esterna comprendente le torri.
+**Applica dimensioni al recinto** sposta le torri del rettangolo e aggiorna le
+cortine; non rigenera aperture, scale, dettagli o parametri del portone.
+L’operazione è annullabile. Il bordo anteriore e quello sinistro restano fissi;
+lo spawn di prova viene riposizionato proporzionalmente lungo X.
+
+L’elenco diagnostico segnala collegamenti mancanti/disallineati, quote errate,
+facce occupate più volte, torri non collegate correttamente, parti separate e
+assenza di portone. **Clicca una voce per selezionare il nodo**; il tooltip
+mostra il messaggio completo. Si aggiorna durante le modifiche manuali.
+
+Il ridimensionamento assistito riguarda rettangoli di quattro torri senza
+rotazioni locali. Una pianta modificata liberamente o dimensioni incompatibili
+producono un errore prima di cambiare la scena; l’editing manuale rimane disponibile.
+Esempio ridimensionato: `scenes/dev/castle_enclosure_resized_example.tscn`.
+Verifiche: `check_enclosure_editing.gd` e suite editor, con preservazione delle
+modifiche, Undo/Redo e selezione tramite diagnostica. La diagnostica non è ancora
+una verifica di tutte le collisioni con dettagli o arredi personalizzati.

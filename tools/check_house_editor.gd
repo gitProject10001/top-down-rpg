@@ -383,6 +383,19 @@ func run(plugin: EditorPlugin) -> void:
 	assert(enclosure_copy.curtains().size()==4)
 	for wall in enclosure_copy.curtains(): assert(wall.destination()!=null)
 	enclosure_copy.free(); print("ENCLOSURE_EDITOR_UNDO_SNAPSHOT_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(enclosure)
+	plugin._refresh_fortification_ui(true); plugin.fort_sections.current_tab=1
+	plugin.fort_width.value=20; plugin.fort_depth.value=18; plugin._resize_fortification()
+	assert(enclosure.layout_size()==Vector2(20,18))
+	profile_history.undo(); assert(enclosure.layout_size()==Vector2(16,16))
+	profile_history.redo(); assert(enclosure.layout_size()==Vector2(20,18))
+	var wall=enclosure.curtains()[0]; var saved_target: NodePath=wall.target_tower
+	wall.target_tower=NodePath("../../Missing")
+	plugin._refresh_fortification_ui(true); assert(plugin.fort_issues.item_count>0)
+	plugin._select_fortification_issue(0)
+	assert(EditorInterface.get_selection().get_selected_nodes()[0]==wall)
+	wall.target_tower=saved_target; plugin._refresh_fortification_ui(true)
+	print("ENCLOSURE_UI_RESIZE_UNDO_DIAGNOSTIC_SELECTION_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

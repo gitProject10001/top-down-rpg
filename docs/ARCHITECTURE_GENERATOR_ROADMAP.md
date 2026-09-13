@@ -718,7 +718,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. Prossimo passo prioritario: **editing contestuale e validazione del recinto**, poi interni delle torri secondarie.
+se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. Prossimo passo prioritario: **interni e cambio vista nelle torri secondarie**.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -780,3 +780,18 @@ consolidare editing e varianti. Limiti: rettangolo, quote uniformi, interni e
 cambio vista sulla torre principale soltanto. Mastio e castelli multilivello
 restano A09. Prossimo passo consigliato: editing contestuale del recinto e
 validazione complessiva, poi interni delle torri secondarie.
+
+
+### A08.5 — Editing contestuale e diagnostica — 2026-09-13
+
+Sottotab Crea/Recinto. Ridimensionamento assistito del rettangolo tramite distanza
+fra centri delle torri; stato applicato e annullato senza rigenerare i nodi.
+Elenco dinamico degli errori con selezione del nodo interessato: riferimenti,
+allineamento/quote, occupazione facce, grado delle torri, componenti separate e
+portone. Le piante manuali non rettangolari vengono preservate e segnalate.
+Verificati preservazione di scala/portone modificati, rifiuto senza mutazioni,
+resize/Undo/Redo e selezione diagnostica nella suite editor.
+Test `check_enclosure_editing.gd`; esempio `castle_enclosure_resized_example.tscn`.
+Limiti: niente gizmo dedicato ai lati del gruppo, resize di rettangoli soltanto,
+nessun controllo esaustivo delle collisioni con arredi manuali. Prossimo passo:
+interni e cambio vista nelle torri secondarie del gruppo.
