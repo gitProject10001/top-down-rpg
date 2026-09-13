@@ -491,6 +491,19 @@ offset, sgancio, valori invalidi e salvataggio. Suite editor e Play verificano
 creazione annullabile e attraversamento della porta con due soli pali anteriori.
 Limiti: parete ospitante, quota derivata; nessun estremo libero o solver strutturale.
 
+**A03.6 verificato — 2026-09-13.** Copertura piana sui volumi accessori aperti e
+chiusi: soletta con parapetto opzionale, materiali esistenti, collisione dedicata.
+Cambio reversibile senza perdita di aperture o sostegni; il corpo chiuso non
+genera timpani sotto il tetto piano. Altezza parapetto dalla maniglia superiore.
+Il taglio del raccordo mantiene la parete ospitante sopra la soletta.
+
+Esempio `flat_roof_example.tscn`, render `captures/balcony_attachment/flat_roof.png`.
+Test `check_flat_roof.gd` su collisione, parapetto, conversione, salvataggio e muro
+sopra il raccordo; editor e Play degli interni superati. Restano accesso al tetto,
+varco nel parapetto e integrazione del tetto praticabile con i piani. Prossimo
+passo: collegare un accesso superiore alla copertura piana, senza cambiare la
+planimetria manuale esistente.
+
 - [ ] Ogni copertura ha pianta, colmo, pendenza, quota, sporto e collegamento al volume.
 - [ ] Prima due falde e una falda; poi tetto piano/parapetto e quattro falde.
 - [ ] Raccordi: intersezioni, compluvi/displuvi, bordi e taglio delle parti nascoste.

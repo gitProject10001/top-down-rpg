@@ -433,3 +433,23 @@ ancora di scegliere una parete diversa o un punto libero in altezza.
 Esempio `scenes/dev/wall_frame_example.tscn`: due pali anteriori, una trave frontale
 e due travi verso la parete. Seleziona **CasaComposta → Play** per attraversare
 l'ingresso. `wall_frame_detail.png` mostra il telaio da vicino.
+
+
+## Copertura piana e parapetto
+
+Seleziona un volume accessorio e scegli **Volumi → Copertura selezionata: piana /
+parapetto**. Funziona sia sul corpo chiuso sia sul portico; la casa principale
+conserva la copertura esistente. **Parapet Enabled** nell'Inspector abilita il
+parapetto perimetrale, **Roof Height** ne regola l'altezza. La soletta è spessa
+18 cm sopra Wall Height. Porte, finestre, pali e collegamenti vengono conservati.
+La maniglia superiore modifica il parapetto; con il parapetto disabilitato la
+sua altezza rimane memorizzata ma non influisce sulla copertura.
+
+Il tetto piano usa i materiali già presenti per intonaco e pietra. Soletta e
+parapetto hanno collisione; la vista interna nasconde la copertura senza rimuovere
+le collisioni. Il raccordo non taglia la parete della casa sopra la soletta.
+
+Esempio `scenes/dev/flat_roof_example.tscn`: bottega con parapetto e deposito senza.
+Seleziona CasaComposta e premi Play per verificare gli interni. Non viene ancora
+creato un accesso al tetto: scala, porta superiore e varco nel parapetto restano
+un incremento successivo. Non è ancora un piano aggiunto alla planimetria interna.

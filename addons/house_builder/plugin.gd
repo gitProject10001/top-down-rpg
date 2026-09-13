@@ -251,7 +251,8 @@ func _apply_changes() -> void:
 func _process(_delta: float) -> void:
 	if volume_info:
 		var selected_volume := _selected_house()
-		canopy_roof_choice.disabled=not selected_volume is Volume or selected_volume.structure_kind!=1
+		canopy_roof_choice.disabled=not selected_volume is Volume
+		canopy_roof_choice.set_item_disabled(1,not selected_volume is Volume or selected_volume.structure_kind!=1)
 		if not canopy_roof_choice.disabled: canopy_roof_choice.select(selected_volume.canopy_roof)
 		for button in junction_buttons: button.disabled=not selected_volume is Volume or selected_volume.structure_kind!=0
 		volume_info.text=("VOLUME NON RACCORDATO: "+selected_volume.volume_error() if not selected_volume.volume_error().is_empty() else "Portico aperto: altezza sostegni = Wall Height; colmo = Roof Height. Passo e sezione pali: Struttura. La parete della casa resta intatta." if selected_volume.structure_kind==1 else "Raccordo: "+["passaggio aperto","parete con porta"][selected_volume.junction_mode]+". Dimensioni e posizione porta: Inspector, Raccordo interno. Sgancia per usare la trasformazione libera.") if selected_volume is Volume else "Seleziona una casa e aggiungi un corpo basso. Ogni volume conserva tetto e aperture propri."
@@ -748,7 +749,7 @@ func _detach_stair(host: Node3D,stair: Node3D) -> void:
 func _build_volume_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Volumi"; tabs.add_child(page)
 	volume_kind=OptionButton.new(); volume_kind.add_item("Nuovo: corpo chiuso"); volume_kind.add_item("Nuovo: portico / tettoia aperta"); page.add_child(volume_kind)
-	canopy_roof_choice=OptionButton.new(); canopy_roof_choice.add_item("Copertura selezionata: due falde"); canopy_roof_choice.add_item("Copertura selezionata: falda singola"); canopy_roof_choice.item_selected.connect(_set_canopy_roof); page.add_child(canopy_roof_choice)
+	canopy_roof_choice=OptionButton.new(); canopy_roof_choice.add_item("Copertura selezionata: due falde"); canopy_roof_choice.add_item("Copertura selezionata: falda singola"); canopy_roof_choice.add_item("Copertura selezionata: piana / parapetto"); canopy_roof_choice.item_selected.connect(_set_canopy_roof); page.add_child(canopy_roof_choice)
 	for side in 4:
 		var button := Button.new(); button.text="Aggiungi corpo · "+["davanti","dietro","destra","sinistra"][side]; button.pressed.connect(_add_volume_from_ui.bind(side)); page.add_child(button)
 	for attached in [false,true]:
@@ -818,8 +819,8 @@ func _set_volume_junction(kind: int) -> void:
 
 func _set_canopy_roof(kind: int) -> void:
 	var volume := _selected_house()
-	if not volume is Volume or volume.structure_kind!=1: return
-	var undo := get_undo_redo(); undo.create_action("Copertura portico",UndoRedo.MERGE_DISABLE,volume)
+	if not volume is Volume or (kind==1 and volume.structure_kind!=1): return
+	var undo := get_undo_redo(); undo.create_action("Copertura volume",UndoRedo.MERGE_DISABLE,volume)
 	undo.add_do_property(volume,"canopy_roof",kind); undo.add_undo_property(volume,"canopy_roof",volume.canopy_roof); undo.commit_action()
 
 func _edit_supports() -> void:

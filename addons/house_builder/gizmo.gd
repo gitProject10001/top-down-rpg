@@ -21,6 +21,7 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 	var points := PackedVector3Array([Vector3(w,h*0.5,0),Vector3(-w,h*0.5,0),Vector3(0,h*0.5,d),Vector3(0,h*0.5,-d),Vector3(0,h,0),Vector3(0,h+n.roof_height,0)])
 	if n.has_method("support_height") and n.structure_kind==1 and n.canopy_roof==1:
 		points[4].z=d; points[5].z=-d
+	if n.has_method("roof_top") and n.canopy_roof==2: points[5].y=n.roof_top()
 	var ids := PackedInt32Array([0,1,2,3,4,5])
 	if n.wing_enabled:
 		var frame: Transform3D=n.wing_transform()
@@ -59,6 +60,8 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 		for child in n._generated.get_children():
 			if child is MeshInstance3D: gizmo.add_collision_triangles(child.mesh.generate_triangle_mesh())
 func _get_handle_name(_gizmo: EditorNode3DGizmo,id: int,_secondary: bool) -> String:
+	var node=_gizmo.get_node_3d()
+	if id==5 and node.has_method("roof_top") and node.canopy_roof==2: return "Altezza parapetto"
 	if id>=10000: return "Larghezza apertura" if id%2==0 else "Altezza apertura"
 	return "Sposta apertura" if id>=100 else ["Larghezza +","Larghezza −","Lunghezza +","Lunghezza −","Altezza pareti","Altezza tetto","Lunghezza ala","Larghezza ala"][id]
 func _get_handle_value(gizmo: EditorNode3DGizmo,_id: int,_secondary: bool) -> Variant:
@@ -112,7 +115,7 @@ func _set_handle(gizmo: EditorNode3DGizmo,id: int,_secondary: bool,camera: Camer
 	if id<2: value.x=snappedf(absf(amount)*2.0,0.1)
 	elif id<4: value.y=snappedf(absf(amount)*2.0,0.1)
 	elif id==4: value.z=snappedf(amount,0.1)
-	else: value.w=snappedf(amount-n.wall_height,0.1)
+	else: value.w=snappedf(amount-n.wall_height-(0.18 if n.has_method("roof_top") and n.canopy_roof==2 else 0.0),0.1)
 	n.set_dimensions(value)
 func _commit_handle(gizmo: EditorNode3DGizmo,_id: int,_secondary: bool,restore: Variant,cancel: bool) -> void:
 	var n=gizmo.get_node_3d()

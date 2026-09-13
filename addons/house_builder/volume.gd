@@ -4,9 +4,11 @@ extends "res://addons/house_builder/house.gd"
 @export_group("Struttura")
 @export_enum("Corpo chiuso", "Portico / tettoia aperta") var structure_kind := 0:
 	set(value): structure_kind=value; request_rebuild()
+@export var parapet_enabled := true:
+	set(value): parapet_enabled=value; request_rebuild()
 @export var automatic_frame := true:
 	set(value): automatic_frame=value; request_rebuild()
-@export_enum("Due falde", "Falda singola verso esterno") var canopy_roof := 0:
+@export_enum("Due falde", "Falda singola verso esterno", "Piana con parapetto") var canopy_roof := 0:
 	set(value): canopy_roof=value; request_rebuild()
 @export_range(0.12,0.4,0.01) var post_size := 0.18:
 	set(value): post_size=value; request_rebuild()
@@ -39,7 +41,7 @@ func _exit_tree() -> void:
 	var host := volume_host()
 	if host: host.request_rebuild()
 func _process(delta: float) -> void:
-	var signature := str(dimensions(),automatic_frame,canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
+	var signature := str(dimensions(),parapet_enabled,automatic_frame,canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
 	if signature!=_observed:
 		_observed=signature
 		var host := volume_host()
@@ -53,13 +55,17 @@ func prepare_attachment() -> void:
 func rebuild() -> void:
 	prepare_attachment()
 	super.rebuild()
+	if canopy_roof==2 and is_instance_valid(_generated):
+		var collision := _generated.get_node_or_null("HouseCollision")
+		if collision:
+			var shape := CollisionShape3D.new(); shape.shape=_generated.get_node("Roof").mesh.create_trimesh_shape(); collision.add_child(shape)
 func volume_error() -> String:
 	var host := volume_host()
 	if host==null: return "Il corpo accessorio deve stare in Casa / Volumes."
 	if not attached: return ""
 	if host.has_method("volume_host") or host.wing_enabled or wing_enabled: return "Aggancio supportato al corpo principale senza ala legacy."
 	if absf(host_offset*host.wall_length(host_wall)*0.5)+width*0.5>host.wall_length(host_wall)*0.5-0.25: return "Il volume supera il bordo della facciata: riduci larghezza o spostamento."
-	if wall_height+roof_height>host.wall_height-0.15: return "Per questo primo raccordo il tetto accessorio deve stare sotto la gronda principale."
+	if roof_top()>host.wall_height-0.15: return "Per questo primo raccordo il tetto accessorio deve stare sotto la gronda principale."
 	if structure_kind==0 and junction_mode==1 and (junction_width>width-0.5 or junction_height>wall_height-0.2): return "La porta del raccordo supera il corpo: riduci larghezza o altezza della porta."
 	for record in host.openings:
 		var opening: Dictionary=host.resolved_opening(record)
@@ -96,7 +102,7 @@ func opening_fits(record: Dictionary,ignore_index: int=-1) -> bool:
 func _build_shell() -> void:
 	if structure_kind==0:
 		super._build_shell(); return
-	if canopy_roof==1:
+	if canopy_roof!=0:
 		_build_shed_supports(); return
 	_build_posts()
 	_build_links()
@@ -114,6 +120,7 @@ func support_height(z: float) -> float:
 	return wall_height+roof_height*(0.5-z/depth) if structure_kind==1 and canopy_roof==1 else wall_height
 
 func _build_roof() -> ArrayMesh:
+	if canopy_roof==2: return _flat_roof()
 	return RoofMesh.new().generate(width,depth,wall_height,roof_height,house_seed,weathered,structure_kind==1 and canopy_roof==1)
 
 func _build_shed_supports() -> void:
@@ -150,7 +157,7 @@ func _build_posts() -> void:
 			_box(point+Vector3.UP*h*0.5,Vector3(post_size,h,post_size),1)
 
 func post_top(point: Vector3) -> float:
-	return support_height(point.z) if canopy_roof==1 else wall_height+roof_height*(1.0-absf(point.x)/(width*0.5))
+	return support_height(point.z) if canopy_roof!=0 else wall_height+roof_height*(1.0-absf(point.x)/(width*0.5))
 
 func _build_links() -> void:
 	var links := get_node_or_null("FrameLinks")
@@ -160,3 +167,38 @@ func _build_links() -> void:
 		link.update_gizmos()
 		if Engine.is_editor_hint(): link.update_configuration_warnings()
 		for segment in link.segments(): _beam(segment[0],segment[1],segment[2])
+
+func roof_top() -> float:
+	return wall_height+0.18+(roof_height if parapet_enabled else 0.0) if canopy_roof==2 else wall_height+roof_height
+
+func _build_gables() -> void:
+	if canopy_roof!=2: super._build_gables()
+
+func _volume_planes(size: Vector2,rise: float,frame: Transform3D,padding: float=0.0) -> Array:
+	if canopy_roof!=2: return super._volume_planes(size,rise,frame,padding)
+	var result: Array=[]
+	for pair in [[Vector3.RIGHT,size.x*0.5],[Vector3.LEFT,size.x*0.5],[Vector3.BACK,size.y*0.5],[Vector3.FORWARD,size.y*0.5],[Vector3.DOWN,0.0],[Vector3.UP,wall_height+0.18]]:
+		var axis: Vector3=frame.basis*pair[0]
+		result.append(Plane(axis,axis.dot(frame.origin)+float(pair[1])+padding))
+	return result
+
+func _flat_roof() -> ArrayMesh:
+	var previous := _buffers
+	_buffers=[]
+	for i in 4:
+		var buffer := SurfaceTool.new(); buffer.begin(Mesh.PRIMITIVE_TRIANGLES); _buffers.append(buffer)
+	_box(Vector3(0,wall_height+0.09,0),Vector3(width+0.24,0.18,depth+0.24),2)
+	if parapet_enabled:
+		for side in [-1.0,1.0]:
+			_box(Vector3(side*(width-0.18)*0.5,wall_height+0.18+roof_height*0.5,0),Vector3(0.18,roof_height,depth),0)
+			_box(Vector3(0,wall_height+0.18+roof_height*0.5,side*(depth-0.18)*0.5),Vector3(width-0.36,roof_height,0.18),0)
+			_box(Vector3(side*(width-0.18)*0.5,roof_top(),0),Vector3(0.24,0.08,depth+0.06),2)
+			_box(Vector3(0,roof_top(),side*(depth-0.18)*0.5),Vector3(width+0.06,0.08,0.24),2)
+	var mesh := ArrayMesh.new()
+	var materials := [_plaster_material(),_material(Vector2(0.5,0),Color(0.60,0.53,0.46)),_material(Vector2(0,0.5),Color(0.65,0.63,0.59))]
+	for i in 3:
+		var arrays := _buffers[i].commit_to_arrays()
+		if arrays[Mesh.ARRAY_VERTEX]==null: continue
+		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays); mesh.surface_set_material(mesh.get_surface_count()-1,materials[i])
+	_buffers=previous
+	return mesh

@@ -262,6 +262,9 @@ func _build_shell() -> void:
 		for i in posts+1:
 			var along := -length*0.5+i*length/posts
 			for span in _post_segments(wall,along): _wall_box(wall,along,(span.x+span.y)*0.5,0.13,span.y-span.x,0.14,0.055,1)
+	_build_gables()
+
+func _build_gables() -> void:
 	for side in [-1.0,1.0]:
 		var a := Vector3(-width*0.5,wall_height,side*depth*0.5)
 		var b := Vector3(width*0.5,wall_height,side*depth*0.5)
