@@ -3,6 +3,9 @@ extends EditorPlugin
 const ExteriorStair=preload("res://addons/house_builder/exterior_stair.gd")
 const Balcony=preload("res://addons/house_builder/balcony.gd")
 var balcony_gizmos: EditorNode3DGizmoPlugin
+const FrameLink=preload("res://addons/house_builder/frame_link.gd")
+var frame_gizmos: EditorNode3DGizmoPlugin
+var frame_tabs: TabContainer
 const Support=preload("res://addons/house_builder/support.gd")
 var support_gizmos: EditorNode3DGizmoPlugin
 var stair_gizmos: EditorNode3DGizmoPlugin
@@ -59,6 +62,7 @@ func _enter_tree() -> void:
 	balcony_gizmos=preload("res://addons/house_builder/balcony_gizmo.gd").new()
 	balcony_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(balcony_gizmos)
 	stair_gizmos=preload("res://addons/house_builder/exterior_stair_gizmo.gd").new(); stair_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(stair_gizmos)
+	frame_gizmos=preload("res://addons/house_builder/frame_link_gizmo.gd").new(); add_node_3d_gizmo_plugin(frame_gizmos)
 	support_gizmos=preload("res://addons/house_builder/support_gizmo.gd").new(); add_node_3d_gizmo_plugin(support_gizmos)
 	plan_gizmos=preload("res://addons/house_builder/plan_gizmo.gd").new()
 	plan_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(plan_gizmos)
@@ -136,6 +140,7 @@ func _exit_tree() -> void:
 	remove_node_3d_gizmo_plugin(balcony_gizmos)
 	remove_node_3d_gizmo_plugin(stair_gizmos)
 	remove_node_3d_gizmo_plugin(support_gizmos)
+	remove_node_3d_gizmo_plugin(frame_gizmos)
 	remove_node_3d_gizmo_plugin(plan_gizmos)
 	remove_custom_type("HearthHouse")
 	remove_control_from_docks(scroll)
@@ -171,12 +176,14 @@ func _selection_context() -> void:
 	var selected := EditorInterface.get_selection().get_selected_nodes()
 	var node: Node=selected[0] if not selected.is_empty() else null
 	context_label.text="Selezione: "+str(node.name) if node else "Seleziona una casa o disegnane una."
-	if node is Volume or node is Support: tabs.current_tab=5
+	if node is Volume or node is Support or node is FrameLink: tabs.current_tab=5
 	elif node is Balcony or node is ExteriorStair: tabs.current_tab=4
 	elif node is Element: tabs.current_tab=3 if node.kind==3 else 2
 	elif node is Plan: tabs.current_tab=2
 	elif node is House and tabs.current_tab>1: tabs.current_tab=0
-	if node is House or node is Plan or node is Element or node is Balcony or node is ExteriorStair or node is Support: _show_context_dock.call_deferred()
+	if node is House or node is Plan or node is Element or node is Balcony or node is ExteriorStair or node is Support or node is FrameLink: _show_context_dock.call_deferred()
+	if node is FrameLink: frame_tabs.current_tab=1
+	elif node is Support: frame_tabs.current_tab=0
 	opening_choice.clear()
 	var house := _selected_house()
 	if house:
@@ -196,9 +203,12 @@ func _context_changed(_index: int) -> void:
 func _refresh_context_gizmos() -> void:
 	var house := _selected_house()
 	gizmos.focus=house; gizmos.context=0 if house is Volume and tabs.current_tab==5 else mini(tabs.current_tab,2)
+	frame_gizmos.focus=null
 	support_gizmos.focus=null
 	balcony_gizmos.focus=null; stair_gizmos.focus=null
 	for selected in EditorInterface.get_selection().get_selected_nodes():
+		if selected is FrameLink:
+			gizmos.context=2; frame_gizmos.focus=selected if tabs.current_tab==5 else null; selected.update_gizmos()
 		if selected is Support:
 			gizmos.context=2; support_gizmos.focus=selected if tabs.current_tab==5 else null; selected.update_gizmos()
 		if selected is ExteriorStair and tabs.current_tab==4: stair_gizmos.focus=selected; selected.update_gizmos(); continue
@@ -210,6 +220,8 @@ func _refresh_context_gizmos() -> void:
 	if root:
 		for h in _houses(root):
 			h.update_gizmos()
+			if h.has_node("FrameLinks"):
+				for link in h.get_node("FrameLinks").get_children(): link.update_gizmos()
 			if h.has_node("Supports"):
 				for post in h.get_node("Supports").get_children(): post.update_gizmos()
 			for component in h.attached_components():
@@ -246,6 +258,9 @@ func _process(_delta: float) -> void:
 		if selected_volume is Volume and selected_volume.structure_kind==1:
 			volume_info.text+="\nSostegni: "+("manuali in Supports; le posizioni restano fisse durante il ridimensionamento." if selected_volume.has_node("Supports") else "automatici; usa Rendi editabili per modificarli singolarmente.")
 			for selected in EditorInterface.get_selection().get_selected_nodes():
+				if selected is FrameLink:
+					volume_info.text="Trave tra sostegni: modifica Section, Roof Offset e Braces nell'Inspector. Gli estremi seguono i pali."
+					if not selected.validation_error().is_empty(): volume_info.text+="\nATTENZIONE: "+selected.validation_error()
 				if selected is Support:
 					volume_info.text="Sostegno: "+str(selected.name)+". Sposta con il gizmo Godot; Section cambia la sezione."
 					var warnings=selected._get_configuration_warnings()
@@ -740,8 +755,14 @@ func _build_volume_tab() -> void:
 		var button := Button.new(); button.text="Riaggancia volume" if attached else "Sgancia volume"; button.pressed.connect(_toggle_volume.bind(attached)); page.add_child(button)
 	for kind in 2:
 		var button := Button.new(); button.text=["Raccordo · passaggio aperto","Raccordo · parete con porta"][kind]; button.pressed.connect(_set_volume_junction.bind(kind)); page.add_child(button); junction_buttons.append(button)
-	for entry in [["Sostegni: rendi editabili",_edit_supports],["Aggiungi sostegno",_add_support],["Rimuovi sostegno selezionato",_remove_support],["Ripristina sostegni automatici",_automatic_supports]]:
-		var button := Button.new(); button.text=entry[0]; button.pressed.connect(entry[1]); page.add_child(button)
+	frame_tabs=TabContainer.new(); page.add_child(frame_tabs)
+	var posts_page := VBoxContainer.new(); posts_page.name="Sostegni"; frame_tabs.add_child(posts_page)
+	for entry in [["Rendi sostegni editabili",_edit_supports],["Aggiungi sostegno",_add_support],["Rimuovi sostegno selezionato",_remove_support],["Ripristina sostegni automatici",_automatic_supports]]:
+		var button := Button.new(); button.text=entry[0]; button.pressed.connect(entry[1]); posts_page.add_child(button)
+	var links_page := VBoxContainer.new(); links_page.name="Collegamenti"; frame_tabs.add_child(links_page)
+	var hint := Label.new(); hint.text="Seleziona due sostegni dello stesso portico nell'albero (Ctrl + clic)."; hint.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; links_page.add_child(hint)
+	for entry in [["Collega con trave e controventi",_add_frame_link],["Rimuovi collegamento selezionato",_remove_frame_link]]:
+		var button := Button.new(); button.text=entry[0]; button.pressed.connect(entry[1]); links_page.add_child(button)
 	var remove := Button.new(); remove.text="Rimuovi volume selezionato"; remove.pressed.connect(_remove_volume); page.add_child(remove)
 	volume_info=Label.new(); volume_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(volume_info)
 func _add_volume_from_ui(side: int) -> void:
@@ -839,3 +860,32 @@ func _automatic_supports() -> void:
 	undo.create_action("Ripristina sostegni automatici",UndoRedo.MERGE_DISABLE,volume)
 	undo.add_do_method(self,"_detach_support",volume,volume,container)
 	undo.add_undo_method(self,"_attach",volume,container,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(container); undo.add_undo_method(volume,"request_rebuild"); undo.commit_action()
+
+func _add_frame_link() -> void:
+	var posts: Array=[]
+	for selected in EditorInterface.get_selection().get_selected_nodes():
+		if selected is Support: posts.append(selected)
+	if posts.size()!=2 or posts[0].volume()!=posts[1].volume():
+		status.text="Seleziona due sostegni dello stesso portico (Ctrl + clic nell'albero)."; return
+	var volume: Node3D=posts[0].volume()
+	var container := volume.get_node_or_null("FrameLinks"); var fresh := container==null
+	if fresh: container=Node3D.new(); container.name="FrameLinks"
+	else:
+		for existing in container.get_children():
+			if existing is FrameLink and posts[0].support_id in [existing.support_a,existing.support_b] and posts[1].support_id in [existing.support_a,existing.support_b]:
+				status.text="Questi sostegni sono già collegati."; return
+	var link := FrameLink.new(); link.name="Trave_"+str(posts[0].name)+"_"+str(posts[1].name); link.support_a=posts[0].support_id; link.support_b=posts[1].support_id
+	var undo := get_undo_redo(); undo.create_action("Collega sostegni",UndoRedo.MERGE_DISABLE,volume)
+	if fresh: undo.add_do_method(self,"_attach",volume,container,EditorInterface.get_edited_scene_root()); undo.add_do_reference(container)
+	undo.add_do_method(self,"_attach",container,link,EditorInterface.get_edited_scene_root()); undo.add_do_reference(link); undo.add_do_method(volume,"request_rebuild")
+	undo.add_undo_method(self,"_detach_support",volume,container,link)
+	if fresh: undo.add_undo_method(volume,"remove_child",container)
+	undo.add_undo_method(volume,"request_rebuild"); undo.commit_action()
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(link); EditorInterface.edit_node(link); _selection_context()
+func _remove_frame_link() -> void:
+	for selected in EditorInterface.get_selection().get_selected_nodes():
+		if not selected is FrameLink: continue
+		var volume: Node3D=selected.volume(); var container := selected.get_parent(); var undo := get_undo_redo()
+		undo.create_action("Rimuovi collegamento",UndoRedo.MERGE_DISABLE,volume)
+		undo.add_do_method(self,"_detach_support",volume,container,selected)
+		undo.add_undo_method(self,"_attach",container,selected,EditorInterface.get_edited_scene_root()); undo.add_undo_reference(selected); undo.add_undo_method(volume,"request_rebuild"); undo.commit_action(); return

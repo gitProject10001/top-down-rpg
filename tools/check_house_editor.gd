@@ -293,6 +293,15 @@ func run(plugin: EditorPlugin) -> void:
 	plugin._automatic_supports(); assert(not porch.has_node("Supports"))
 	profile_history.undo(); assert(porch.get_node("Supports")==supports)
 	print("SUPPORTS_EDITOR_CONVERT_ADD_REMOVE_RESET_UNDO_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(supports.get_child(0)); EditorInterface.get_selection().add_node(supports.get_child(1))
+	plugin._add_frame_link(); var links=porch.get_node("FrameLinks"); var link=links.get_child(0); var link_id=link.link_id
+	assert(plugin.frame_tabs.current_tab==1 and plugin.frame_gizmos.focus==link and plugin.gizmos.context==2)
+	profile_history.undo(); assert(not porch.has_node("FrameLinks"))
+	profile_history.redo(); assert(porch.get_node("FrameLinks").get_child(0).link_id==link_id)
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(link)
+	plugin._remove_frame_link(); assert(links.get_child_count()==0)
+	profile_history.undo(); assert(links.get_child(0)==link)
+	print("FRAME_LINK_EDITOR_ADD_REMOVE_UNDO_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 

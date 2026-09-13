@@ -178,7 +178,8 @@ func _wall_box(wall: int,along: float,y: float,w: float,h: float,thick: float,of
 	_box(wall_point(wall,along,y,offset),Vector3(thick,h,w) if normal.x>0.5 else Vector3(w,h,thick),mat)
 func _beam(a: Vector3,b: Vector3,thick: float) -> void:
 	var axis := (b-a).normalized()
-	var right := axis.cross(Vector3.FORWARD).normalized()*thick*0.5
+	var reference := Vector3.UP if absf(axis.dot(Vector3.FORWARD))>0.99 else Vector3.FORWARD
+	var right := axis.cross(reference).normalized()*thick*0.5
 	var back := axis.cross(right).normalized()*thick*0.5
 	var p := [a-right-back,a+right-back,a+right+back,a-right+back,b-right-back,b+right-back,b+right+back,b-right+back]
 	for face in [[0,3,2,1],[4,5,6,7],[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7]]:

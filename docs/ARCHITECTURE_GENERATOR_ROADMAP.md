@@ -461,6 +461,24 @@ Limiti: sezione quadrata, pali verticali; niente ridistribuzione automatica dopo
 la conversione, né adattamento delle travi alle posizioni manuali. Prossimo passo:
 controventi e travi di collegamento editabili per completare il telaio dei portici.
 
+**A03.4 verificato — 2026-09-13.** Collegamenti `FrameLinks` fra due sostegni
+manuali, con sezione, abbassamento dal tetto e due controventi regolabili.
+Riferimenti tramite ID: rename e movimento dei pali preservano la connessione;
+sostegni mancanti o invalidi sospendono la geometria senza eliminare i dati.
+Sottotab Sostegni/Collegamenti, gizmo contestuale, creazione/rimozione con undo/redo.
+Il telaio automatico può essere disabilitato esplicitamente sul volume.
+
+Verifiche: `check_frame_links.gd` (movimento, rename, collisione, salvataggio,
+sostegno mancante), suite editor e Play portico. Corretto anche il riferimento
+geometrico delle travi parallele all'asse Z, che prima poteva collassare.
+Esempio porch_canopy aggiornato; vista ravvicinata in
+`captures/balcony_attachment/frame_links_detail.png`. Restano i messaggi editor
+sull'arredo descritti in A03.3, indipendenti da questi test superati.
+
+Limiti: estremi su due pali, controventi simmetrici, nessun aggancio libero o alla
+parete; nessuna verifica strutturale. Prossimo passo: aggancio di un estremo alla
+parete per costruire telai completi dei portici con soli pali esterni.
+
 - [ ] Ogni copertura ha pianta, colmo, pendenza, quota, sporto e collegamento al volume.
 - [ ] Prima due falde e una falda; poi tetto piano/parapetto e quattro falde.
 - [ ] Raccordi: intersezioni, compluvi/displuvi, bordi e taglio delle parti nascoste.

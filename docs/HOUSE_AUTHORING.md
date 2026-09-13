@@ -384,3 +384,33 @@ quelle del telaio automatico: non è un controllo di stabilità strutturale.
 L'esempio porch_canopy ora ha due pali anteriori più spessi e spostati verso
 l'interno. Verificati persistenza dopo ridimensionamento, collisioni, cancellazione,
 salvataggio, undo/redo e Play.
+
+
+## Travi collegate e controventi
+
+Il tab **Volumi** ora separa **Sostegni** e **Collegamenti**. Rendi i sostegni
+editabili, selezionane due dello stesso portico nell'albero con Ctrl + clic,
+poi premi **Collegamenti → Collega con trave e controventi**. Il nodo risultante
+è sotto `FrameLinks`; selezionandolo compare solo il suo gizmo.
+
+Gli estremi seguono gli ID dei pali: spostamenti, rinomine e variazioni del tetto
+aggiornano trave e collisione. Nell'Inspector: **Section** regola la sezione,
+**Roof Offset** la distanza verticale sotto la sommità dei pali, **Braces** abilita
+i due controventi, **Brace Drop** la discesa sul palo e **Brace Fraction** la
+lunghezza relativa lungo la trave. **Enabled** sospende l'intero collegamento.
+Sposta i pali per cambiare gli estremi; la trasformazione del nodo collegamento
+non posiziona la geometria.
+
+**Rimuovi collegamento selezionato** conserva i pali. Creazione e rimozione
+supportano undo/redo. Un palo mancante, disabilitato o fuori copertura sospende
+la geometria del collegamento e mostra un errore, senza cancellare i riferimenti.
+Annullando la rimozione del palo il collegamento torna valido. Ripristinare tutti
+i sostegni automatici sospende i collegamenti manuali finché non si recuperano
+i pali originali tramite Undo o si ricreano i collegamenti.
+
+Il telaio automatico della copertura resta attivo per compatibilità; puoi
+disabilitare **Automatic Frame** sul volume e costruire i collegamenti manuali.
+Questo non rimuove né tetto né pali. Per ora si collegano due sostegni: non ci
+sono estremi liberi o agganci diretti alla parete e non viene verificata la
+stabilità strutturale. L'esempio include tre travi con controventi, frontale e
+laterali. La cattura `frame_links_detail.png` mostra il telaio da vicino.

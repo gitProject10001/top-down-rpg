@@ -4,6 +4,8 @@ extends "res://addons/house_builder/house.gd"
 @export_group("Struttura")
 @export_enum("Corpo chiuso", "Portico / tettoia aperta") var structure_kind := 0:
 	set(value): structure_kind=value; request_rebuild()
+@export var automatic_frame := true:
+	set(value): automatic_frame=value; request_rebuild()
 @export_enum("Due falde", "Falda singola verso esterno") var canopy_roof := 0:
 	set(value): canopy_roof=value; request_rebuild()
 @export_range(0.12,0.4,0.01) var post_size := 0.18:
@@ -37,7 +39,7 @@ func _exit_tree() -> void:
 	var host := volume_host()
 	if host: host.request_rebuild()
 func _process(delta: float) -> void:
-	var signature := str(dimensions(),canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
+	var signature := str(dimensions(),automatic_frame,canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
 	if signature!=_observed:
 		_observed=signature
 		var host := volume_host()
@@ -97,6 +99,8 @@ func _build_shell() -> void:
 	if canopy_roof==1:
 		_build_shed_supports(); return
 	_build_posts()
+	_build_links()
+	if not automatic_frame: return
 	for side in [-1.0,1.0]:
 		var x: float=side*(width-post_size)*0.5
 		_box(Vector3(x,wall_height-0.10,0),Vector3(post_size+0.04,0.20,depth),1)
@@ -114,6 +118,8 @@ func _build_roof() -> ArrayMesh:
 
 func _build_shed_supports() -> void:
 	_build_posts()
+	_build_links()
+	if not automatic_frame: return
 	for side in [-1.0,1.0]:
 		var x: float=side*(width-post_size)*0.5
 		_beam(Vector3(x,support_height(-depth*0.5)-0.10,-depth*0.5),Vector3(x,support_height(depth*0.5)-0.10,depth*0.5),post_size)
@@ -145,3 +151,12 @@ func _build_posts() -> void:
 
 func post_top(point: Vector3) -> float:
 	return support_height(point.z) if canopy_roof==1 else wall_height+roof_height*(1.0-absf(point.x)/(width*0.5))
+
+func _build_links() -> void:
+	var links := get_node_or_null("FrameLinks")
+	if links==null: return
+	for link in links.get_children():
+		if not link.has_method("segments"): continue
+		link.update_gizmos()
+		if Engine.is_editor_hint(): link.update_configuration_warnings()
+		for segment in link.segments(): _beam(segment[0],segment[1],segment[2])

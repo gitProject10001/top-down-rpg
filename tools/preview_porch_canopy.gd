@@ -47,6 +47,12 @@ func run() -> void:
 		post.section=0.32 if point.z>0.5 else 0.18
 		if point.z>0.5: post.position.x*=0.85
 		supports.add_child(post); post.owner=world
+	var links := Node3D.new(); links.name="FrameLinks"; porch.add_child(links); links.owner=world
+	for pair in [[1,3],[0,1],[2,3]]:
+		var link=preload("res://addons/house_builder/frame_link.gd").new(); link.name="Trave_%02d"%(links.get_child_count()+1)
+		link.support_a=supports.get_child(pair[0]).support_id; link.support_b=supports.get_child(pair[1]).support_id
+		link.section=0.24; link.brace_drop=0.75
+		links.add_child(link); link.owner=world
 	house.rebuild()
 	var camera := Camera3D.new(); camera.name="Camera"; camera.projection=Camera3D.PROJECTION_ORTHOGONAL; camera.size=23
 	camera.position=Vector3(25,32,25); world.add_child(camera); camera.owner=world; camera.look_at(Vector3(0,2.8,0))
@@ -59,8 +65,13 @@ func run() -> void:
 	for frame in 30: await process_frame
 	for layer in root.find_children("*","CanvasLayer",true,false): layer.hide()
 	var ui := CanvasLayer.new(); root.add_child(ui)
-	var label := Label.new(); label.text="PORTICO + TETTOIA\nSostegni anteriori spostati e ingrossati · tettoia automatica"; label.position=Vector2(30,30); label.add_theme_font_size_override("font_size",20); ui.add_child(label)
+	var label := Label.new(); label.text="PORTICO + TETTOIA\nTravi e controventi collegati ai sostegni · telaio editabile"; label.position=Vector2(30,30); label.add_theme_font_size_override("font_size",20); ui.add_child(label)
 	await process_frame; await RenderingServer.frame_post_draw
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures/balcony_attachment"))
 	root.get_texture().get_image().save_png("res://captures/balcony_attachment/porch_canopy.png")
+	camera.size=10; camera.position=Vector3(8,6,16); camera.look_at(Vector3(0,2,5))
+	label.text="DETTAGLIO TELAIO\nTravi e controventi seguono i sostegni"
+	for frame in 4: await process_frame
+	await RenderingServer.frame_post_draw
+	root.get_texture().get_image().save_png("res://captures/balcony_attachment/frame_links_detail.png")
 	quit()

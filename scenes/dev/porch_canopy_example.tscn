@@ -1,10 +1,11 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://addons/house_builder/house.gd" id="1_817b2"]
-[ext_resource type="Script" path="res://addons/house_builder/volume.gd" id="2_b3ngs"]
-[ext_resource type="Script" path="res://addons/house_builder/support.gd" id="3_ur3ua"]
+[ext_resource type="Script" path="res://addons/house_builder/house.gd" id="1_b3ngs"]
+[ext_resource type="Script" path="res://addons/house_builder/volume.gd" id="2_ur3ua"]
+[ext_resource type="Script" path="res://addons/house_builder/support.gd" id="3_j66yl"]
+[ext_resource type="Script" path="res://addons/house_builder/frame_link.gd" id="4_7ckxd"]
 
-[sub_resource type="Environment" id="Environment_j66yl"]
+[sub_resource type="Environment" id="Environment_vf71k"]
 background_mode = 1
 background_color = Color(0.16, 0.18, 0.2, 1)
 ambient_light_source = 2
@@ -12,29 +13,29 @@ ambient_light_color = Color(0.65, 0.72, 0.85, 1)
 ambient_light_energy = 0.4
 ssao_enabled = true
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7ckxd"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oocvb"]
 albedo_color = Color(0.25, 0.28, 0.2, 1)
 
-[sub_resource type="PlaneMesh" id="PlaneMesh_vf71k"]
+[sub_resource type="PlaneMesh" id="PlaneMesh_gfife"]
 size = Vector2(50, 50)
 
-[node name="HouseWorkshop" type="Node3D" unique_id=230043723]
+[node name="HouseWorkshop" type="Node3D" unique_id=116024758]
 
-[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=1762882466]
-environment = SubResource("Environment_j66yl")
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=1266072039]
+environment = SubResource("Environment_vf71k")
 
-[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=1886737631]
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=30638845]
 transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
 light_color = Color(1, 0.93, 0.84, 1)
 light_energy = 1.2
 shadow_enabled = true
 
-[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=161682437]
-material_override = SubResource("StandardMaterial3D_7ckxd")
-mesh = SubResource("PlaneMesh_vf71k")
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=1969182731]
+material_override = SubResource("StandardMaterial3D_oocvb")
+mesh = SubResource("PlaneMesh_gfife")
 
-[node name="CasaComposta" type="Node3D" parent="." unique_id=1262463757]
-script = ExtResource("1_817b2")
+[node name="CasaComposta" type="Node3D" parent="." unique_id=1415309129]
+script = ExtResource("1_b3ngs")
 width = 6.0
 depth = 8.0
 wall_height = 6.0
@@ -50,50 +51,76 @@ openings = Array[Dictionary]([{
 "y": 1.5
 }])
 
-[node name="Volumes" type="Node3D" parent="CasaComposta" unique_id=921020475]
+[node name="Volumes" type="Node3D" parent="CasaComposta" unique_id=1098780866]
 
-[node name="Portico" type="Node3D" parent="CasaComposta/Volumes" unique_id=570074217]
+[node name="Portico" type="Node3D" parent="CasaComposta/Volumes" unique_id=1450205439]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5.48)
-script = ExtResource("2_b3ngs")
+script = ExtResource("2_ur3ua")
 structure_kind = 1
 canopy_roof = 1
 post_spacing = 2.5
-volume_id = "volume_1264476_47076869809"
+volume_id = "volume_1406072_47462745780"
 host_wall = 0
 depth = 3.6
 wall_height = 2.8
 roof_height = 1.2
 
-[node name="Supports" type="Node3D" parent="CasaComposta/Volumes/Portico" unique_id=1150828311]
+[node name="Supports" type="Node3D" parent="CasaComposta/Volumes/Portico" unique_id=541552730]
 
-[node name="Sostegno_01" type="Node3D" parent="CasaComposta/Volumes/Portico/Supports" unique_id=485120298]
+[node name="Sostegno_01" type="Node3D" parent="CasaComposta/Volumes/Portico/Supports" unique_id=1419319366]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.01, 0, 0)
-script = ExtResource("3_ur3ua")
-support_id = "post_1429647_48335161036"
+script = ExtResource("3_j66yl")
+support_id = "post_1593328_48721037007"
 
-[node name="Sostegno_02" type="Node3D" parent="CasaComposta/Volumes/Portico/Supports" unique_id=1658909183]
+[node name="Sostegno_02" type="Node3D" parent="CasaComposta/Volumes/Portico/Supports" unique_id=93323784]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.7085, 0, 1.71)
-script = ExtResource("3_ur3ua")
-support_id = "post_1429659_48351938250"
+script = ExtResource("3_j66yl")
+support_id = "post_1593345_48737814221"
 section = 0.32
 
-[node name="Sostegno_03" type="Node3D" parent="CasaComposta/Volumes/Portico/Supports" unique_id=319556367]
+[node name="Sostegno_03" type="Node3D" parent="CasaComposta/Volumes/Portico/Supports" unique_id=1147116531]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.01, 0, 0)
-script = ExtResource("3_ur3ua")
-support_id = "post_1429666_48368715480"
+script = ExtResource("3_j66yl")
+support_id = "post_1593353_48754591451"
 
-[node name="Sostegno_04" type="Node3D" parent="CasaComposta/Volumes/Portico/Supports" unique_id=934345691]
+[node name="Sostegno_04" type="Node3D" parent="CasaComposta/Volumes/Portico/Supports" unique_id=1347280914]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.7085, 0, 1.71)
-script = ExtResource("3_ur3ua")
-support_id = "post_1429672_48385492697"
+script = ExtResource("3_j66yl")
+support_id = "post_1593360_48771368668"
 section = 0.32
 
-[node name="Tettoia" type="Node3D" parent="CasaComposta/Volumes" unique_id=2083768095]
+[node name="FrameLinks" type="Node3D" parent="CasaComposta/Volumes/Portico" unique_id=494733267]
+
+[node name="Trave_01" type="Node3D" parent="CasaComposta/Volumes/Portico/FrameLinks" unique_id=809519272]
+script = ExtResource("4_7ckxd")
+link_id = "link_1593382_48804923102"
+support_a = "post_1593345_48737814221"
+support_b = "post_1593360_48771368668"
+section = 0.24
+brace_drop = 0.75
+
+[node name="Trave_02" type="Node3D" parent="CasaComposta/Volumes/Portico/FrameLinks" unique_id=1162983098]
+script = ExtResource("4_7ckxd")
+link_id = "link_1593391_48821700319"
+support_a = "post_1593328_48721037007"
+support_b = "post_1593345_48737814221"
+section = 0.24
+brace_drop = 0.75
+
+[node name="Trave_03" type="Node3D" parent="CasaComposta/Volumes/Portico/FrameLinks" unique_id=449996878]
+script = ExtResource("4_7ckxd")
+link_id = "link_1593400_48838477536"
+support_a = "post_1593353_48754591451"
+support_b = "post_1593360_48771368668"
+section = 0.24
+brace_drop = 0.75
+
+[node name="Tettoia" type="Node3D" parent="CasaComposta/Volumes" unique_id=1626751839]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 1)
-script = ExtResource("2_b3ngs")
+script = ExtResource("2_ur3ua")
 structure_kind = 1
 post_spacing = 2.5
-volume_id = "volume_1392639_47731181243"
+volume_id = "volume_1552104_48117057214"
 attached = false
 host_wall = 0
 width = 3.2
@@ -101,7 +128,7 @@ depth = 4.0
 wall_height = 2.8
 roof_height = 1.2
 
-[node name="Camera" type="Camera3D" parent="." unique_id=176307661]
+[node name="Camera" type="Camera3D" parent="." unique_id=171089733]
 transform = Transform3D(0.70710677, -0.45028284, 0.5452021, 0, 0.7710322, 0.6367961, -0.70710677, -0.45028284, 0.5452021, 25, 32, 25)
 projection = 1
 current = true
