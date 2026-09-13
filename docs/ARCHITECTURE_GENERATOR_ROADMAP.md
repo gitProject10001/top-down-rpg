@@ -246,7 +246,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | ID | Stato | Incremento | Dipendenze | Esempio / criterio di uscita |
 |---|---|---|---|---|
 | A00 | FATTO | Analisi delle 21 immagini e roadmap | — | Inventario e vincolo: architettura, resa attuale invariata |
-| A01 | TODO | Profilo architettonico minimo e contratto versionato | A00 | Casa esistente con label architettonica, vecchie scene riapribili |
+| A01 | IN CORSO | Profilo architettonico minimo e contratto versionato | A00 | A01.1 verificato: preset, editing preservato, esempio salvato; restano gli ID dei componenti |
 | A02a | TODO | Componenti agganciati: balcone + porta | A01 | Vano, collisione e aggancio aggiornati senza perdere le modifiche manuali |
 | A02 | TODO | Composizione di più volumi rettangolari | A01 | Fucina R04 con corpo e tettoie modificabili indipendentemente |
 | A03 | TODO | Coperture indipendenti e parti aperte | A02 | Falde a quote diverse, portico e tetto piano; raccordi senza geometria interna superflua |
@@ -261,19 +261,34 @@ un lungo refactoring senza qualcosa da provare nel builder.
 
 ### A01 — Prima implementazione consigliata
 
-- [ ] Introdurre una risorsa `ArchitectureProfile` minimale con ID, nome e parametri
+- [x] Introdurre una risorsa `ArchitectureProfile` minimale con ID, nome e parametri
   geometrici già supportati; nessun framework di regole generale in questo passo.
-- [ ] Separare il ruolo dell'edificio dal profilo. Migrare l'enum attuale con un
+- [x] Separare il ruolo dell'edificio dal profilo. Migrare l'enum attuale con un
   adattatore compatibile, conservando la scelta esistente.
-- [ ] Versionare i nuovi dati e preservare i vecchi salvataggi.
-- [ ] Rendere visibile nell'UI cosa eredita il profilo e cosa è manuale.
-- [ ] Dimostrare che cambiare profilo non cancella un'apertura modificata.
+- [x] Versionare i nuovi dati e preservare i vecchi salvataggi.
+- [x] Rendere visibile nell'UI cosa eredita il profilo e cosa è manuale.
+- [x] Dimostrare che cambiare profilo non cancella un'apertura modificata.
 - [ ] Preparare il contenitore per componenti con ID, senza riscrivere subito tutto
   `house.gd`: il vecchio generatore resta il primo backend.
 
 **Uscita:** due preset geometrici distinguibili usando il vocabolario già disponibile,
 stessa resa attuale; una vecchia casa e il villaggio di esempio funzionano ancora.
 Il supporto architettonico completo dei riferimenti non viene dichiarato in A01.
+
+**A01.1 verificato — 2026-09-13.** Due risorse di proporzioni: compatta a graticcio
+e corpo nordico allungato. Esempio editabile in
+`scenes/dev/architecture_profiles_example.tscn`, con terza casa allungata manualmente
+a 14 m. Materiali e vocabolario costruttivo restano quelli esistenti: il secondo
+preset non implementa ancora l'architettura nordica completa.
+Il pannello Casa distingue adozione esplicita delle quattro proporzioni e cambio
+che conserva quelle manuali. Il riconoscimento usa il confronto con i valori
+precedentemente ereditati, non blocchi espliciti per proprietà. Le richieste del
+villaggio conservano impronta e altezza assegnate; possono ereditare il tetto.
+Verificati riapertura, aperture conservate, undo/redo editor e regressioni villaggio
+con `check_architecture_profiles.gd`, `check_house_editor.gd` e
+`check_village_builder.gd`. Il ruolo separato è un dato: non aggiunge ancora nuove
+regole di distribuzione per sala o fucina.
+Prossimo incremento: identità/agganci dei componenti, poi balcone con porta (A02a).
 
 ### A02 — Volumi, non una lista di eccezioni per ogni edificio
 

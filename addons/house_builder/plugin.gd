@@ -24,6 +24,10 @@ var _test_runner: RefCounted
 var tabs: TabContainer
 var opening_choice: OptionButton
 var context_label: Label
+var architecture_choice: OptionButton
+var architecture_info: Label
+var _architecture_ui_key := ""
+var architecture_profiles: Array=[preload("res://addons/house_builder/profiles/compact_timber.tres"),preload("res://addons/house_builder/profiles/nordic_longhouse.tres")]
 
 func _enter_tree() -> void:
 	error_dialog=AcceptDialog.new()
@@ -85,6 +89,15 @@ func _enter_tree() -> void:
 	play.pressed.connect(_play_selected)
 	dock.add_child(play)
 	_build_context_tabs()
+	architecture_choice=OptionButton.new()
+	for profile in architecture_profiles: architecture_choice.add_item(profile.display_name)
+	tabs.get_child(0).add_child(architecture_choice)
+	architecture_info=Label.new(); architecture_info.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; tabs.get_child(0).add_child(architecture_info)
+	for adopt in [false,true]:
+		var action := Button.new(); action.text="Cambia profilo · conserva modifiche" if not adopt else "Usa proporzioni del profilo"
+		action.pressed.connect(_apply_architecture_profile.bind(adopt)); tabs.get_child(0).add_child(action)
+	architecture_choice.item_selected.connect(func(_index): _architecture_details())
+	_architecture_details()
 	add_control_to_dock(DOCK_SLOT_RIGHT_UL,scroll)
 	set_input_event_forwarding_always_enabled()
 	scene_changed.connect(_scene_changed)
@@ -143,6 +156,7 @@ func _selection_context() -> void:
 		for i in house.openings.size(): opening_choice.add_item(("Porta" if house.resolved_opening(house.openings[i]).door else "Finestra")+" %d"%(i+1))
 		if opening_choice.item_count>0: opening_choice.select(clampi(gizmos.active_opening,0,opening_choice.item_count-1)); gizmos.active_opening=opening_choice.selected
 	_refresh_context_gizmos()
+	_architecture_details()
 func _show_context_dock() -> void:
 	var ancestor: Node=scroll.get_parent()
 	while ancestor!=null:
@@ -184,6 +198,9 @@ func _apply_changes() -> void:
 		for house in _houses(root):
 			if house._pending: house.rebuild()
 func _process(_delta: float) -> void:
+	var selected_house := _selected_house()
+	var key := str(selected_house.dimensions(),selected_house.architecture_profile,selected_house.profile_baseline) if selected_house else ""
+	if key!=_architecture_ui_key: _architecture_ui_key=key; _architecture_details()
 	var root := EditorInterface.get_edited_scene_root()
 	if root!=last_root:
 		_cancel(); last_root=root
@@ -439,3 +456,25 @@ func _forward_3d_gui_input(camera: Camera3D,event: InputEvent) -> int:
 				changed.remove_at(index)
 				_commit_openings(house,records,changed,"Rimuovi apertura")
 	return AFTER_GUI_INPUT_STOP
+
+func _architecture_details() -> void:
+	if architecture_info==null: return
+	var house := _selected_house()
+	if house==null: architecture_info.text="Seleziona una casa. I profili cambiano le proporzioni, non i materiali."; return
+	var inherited := PackedStringArray(); var manual := PackedStringArray()
+	for key in ["width","depth","wall_height","roof_height"]:
+		var label: String={"width":"larghezza","depth":"lunghezza","wall_height":"pareti","roof_height":"tetto"}[key]
+		if house.inherited_dimension(key): inherited.append(label)
+		else: manual.append(label)
+	architecture_info.text="Attivo: %s
+Ereditato: %s
+Manuale: %s
+Usa proporzioni sostituisce queste quattro dimensioni. Aperture e dettagli restano conservati."%[house.architecture_profile.display_name if house.architecture_profile else "Legacy / manuale",", ".join(inherited),", ".join(manual)]
+func _apply_architecture_profile(adopt: bool) -> void:
+	var house := _selected_house()
+	if house==null: status.text="Seleziona una casa."; return
+	var before: Dictionary=house.architecture_state(); var after: Dictionary=house.architecture_proposal(architecture_profiles[architecture_choice.selected],adopt)
+	var undo := get_undo_redo(); undo.create_action("Profilo architettonico",UndoRedo.MERGE_DISABLE,house)
+	undo.add_do_method(house,"apply_architecture",after); undo.add_undo_method(house,"apply_architecture",before)
+	undo.add_do_method(self,"_architecture_details"); undo.add_undo_method(self,"_architecture_details"); undo.commit_action()
+	status.text="Profilo aggiornato. Materiali, aperture e dettagli conservati."

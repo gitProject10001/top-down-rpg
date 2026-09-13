@@ -199,6 +199,15 @@ func run(plugin: EditorPlugin) -> void:
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(authored); plugin._selection_context()
 	assert(plugin.tabs.current_tab==2 and plugin.plan_gizmos.focus==authored and plugin.gizmos.context==2)
 	print("HOUSE_CONTEXT_TABS_FOCUSED_GIZMOS_OK")
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house); plugin._selection_context()
+	var old_architecture: Dictionary=house.architecture_state(); var old_openings=house.openings.duplicate(true)
+	plugin.architecture_choice.select(0); plugin._apply_architecture_profile(true)
+	assert(house.architecture_profile.profile_id=="compact_timber" and house.openings==old_openings)
+	var profile_history=plugin.get_undo_redo().get_history_undo_redo(plugin.get_undo_redo().get_object_history_id(scene))
+	profile_history.undo(); assert(house.architecture_state()==old_architecture)
+	profile_history.redo(); assert(house.architecture_profile.profile_id=="compact_timber")
+	print("HOUSE_ARCHITECTURE_PROFILE_EDITOR_UNDO_OK")
+
 	house.update_gizmos()
 	for i in 10: await plugin.get_tree().process_frame
 	print("HOUSE_GIZMO_NATIVE redraws=",plugin.gizmos.redraw_count," attached=",house.get_gizmos().size())

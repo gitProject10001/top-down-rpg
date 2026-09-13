@@ -1,0 +1,145 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/house_builder/house.gd" id="1_75d82"]
+[ext_resource type="Resource" path="res://addons/house_builder/profiles/compact_timber.tres" id="2_ykdq8"]
+[ext_resource type="Resource" path="res://addons/house_builder/profiles/nordic_longhouse.tres" id="3_acaqe"]
+
+[sub_resource type="Environment" id="Environment_m38u5"]
+background_mode = 1
+background_color = Color(0.16, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ik7yf"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_wcxuo"]
+size = Vector2(50, 50)
+
+[node name="HouseWorkshop" type="Node3D" unique_id=1529486437]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=1658645440]
+environment = SubResource("Environment_m38u5")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=1509400196]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=727386221]
+material_override = SubResource("StandardMaterial3D_ik7yf")
+mesh = SubResource("PlaneMesh_wcxuo")
+
+[node name="Compatta" type="Node3D" parent="." unique_id=247176706]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -9, 0, 9)
+script = ExtResource("1_75d82")
+architecture_profile = ExtResource("2_ykdq8")
+authoring_version = 2
+profile_baseline = {
+"depth": 6.0,
+"roof_height": 2.8,
+"wall_height": 4.0,
+"width": 5.0
+}
+width = 5.0
+depth = 6.0
+wall_height = 4.0
+roof_height = 2.8
+openings = Array[Dictionary]([{
+"kind": "door",
+"u": -0.35,
+"wall": 0
+}, {
+"kind": "window",
+"u": 0.45,
+"wall": 0,
+"y": 1.55
+}, {
+"kind": "window",
+"u": -0.45,
+"wall": 2,
+"y": 1.55
+}, {
+"kind": "window",
+"u": 0.35,
+"wall": 2,
+"y": 1.55
+}])
+
+[node name="Nordica" type="Node3D" parent="." unique_id=244898246]
+script = ExtResource("1_75d82")
+architecture_profile = ExtResource("3_acaqe")
+authoring_version = 2
+profile_baseline = {
+"depth": 11.0,
+"roof_height": 3.2,
+"wall_height": 2.6,
+"width": 5.0
+}
+width = 5.0
+depth = 11.0
+roof_height = 3.2
+openings = Array[Dictionary]([{
+"kind": "door",
+"u": -0.35,
+"wall": 0
+}, {
+"kind": "window",
+"u": 0.45,
+"wall": 0,
+"y": 1.55
+}, {
+"kind": "window",
+"u": -0.45,
+"wall": 2,
+"y": 1.55
+}, {
+"kind": "window",
+"u": 0.35,
+"wall": 2,
+"y": 1.55
+}])
+
+[node name="NordicaLunghezzaManuale" type="Node3D" parent="." unique_id=2133796998]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 9, 0, -9)
+script = ExtResource("1_75d82")
+architecture_profile = ExtResource("3_acaqe")
+authoring_version = 2
+profile_baseline = {
+"depth": 11.0,
+"roof_height": 3.2,
+"wall_height": 2.6,
+"width": 5.0
+}
+width = 5.0
+depth = 14.0
+roof_height = 3.2
+openings = Array[Dictionary]([{
+"kind": "door",
+"u": -0.35,
+"wall": 0
+}, {
+"kind": "window",
+"u": 0.45,
+"wall": 0,
+"y": 1.55
+}, {
+"kind": "window",
+"u": -0.45,
+"wall": 2,
+"y": 1.55
+}, {
+"kind": "window",
+"u": 0.35,
+"wall": 2,
+"y": 1.55
+}])
+
+[node name="Camera" type="Camera3D" parent="." unique_id=1602580393]
+transform = Transform3D(0.70710677, -0.45749572, 0.5391638, 0, 0.7624928, 0.6469967, -0.70710677, -0.45749572, 0.5391638, 25, 32, 25)
+projection = 1
+current = true
+size = 36.0

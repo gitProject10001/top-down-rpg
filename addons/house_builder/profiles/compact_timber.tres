@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="" load_steps=2 format=3]
+[ext_resource type="Script" path="res://addons/house_builder/architecture_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+profile_id = "compact_timber"
+display_name = "Casa a graticcio · compatta"
+description = "Corpo compatto e sviluppo verticale. Primo preset di proporzioni: facciate e coperture mantengono il vocabolario attuale."
+default_width = 5.0
+default_depth = 6.0
+default_wall_height = 4.0
+default_roof_height = 2.8

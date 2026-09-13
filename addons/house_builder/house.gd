@@ -4,6 +4,13 @@ extends Node3D
 const RoofMesh=preload("res://addons/house_builder/roof_mesh.gd")
 const MeshJoin=preload("res://addons/house_builder/mesh_join.gd")
 const Door=preload("res://addons/house_builder/door.gd")
+const ArchitectureProfile=preload("res://addons/house_builder/architecture_profile.gd")
+@export_group("Architettura")
+@export var architecture_profile: ArchitectureProfile
+@export_enum("dwelling","shop","hall","forge") var archetype_id := "dwelling"
+@export_storage var authoring_version := 1
+@export_storage var profile_baseline: Dictionary={}
+@export_group("Dimensioni")
 var _is_wing_part := false
 const WALL_THICKNESS := 0.24
 @export_range(1.8,20.0,0.1) var width := 4.2:
@@ -406,3 +413,22 @@ func set_cutaway(enabled: bool,floor_base: float=0.0,storey_height: float=-1.0) 
 	for child in _generated.get_children():
 		if child is Door: child.set_cutaway(enabled)
 
+
+func architecture_state() -> Dictionary:
+	return {"profile":architecture_profile,"version":authoring_version,"baseline":profile_baseline.duplicate(true),"values":{"width":width,"depth":depth,"wall_height":wall_height,"roof_height":roof_height}}
+func inherited_dimension(key: String) -> bool:
+	return profile_baseline.has(key) and is_equal_approx(float(get(key)),float(profile_baseline[key]))
+func architecture_proposal(profile: ArchitectureProfile,adopt_proportions: bool=false) -> Dictionary:
+	var state := architecture_state()
+	state.profile=profile; state.version=2
+	if profile==null: return state
+	for key in profile.proportions():
+		if adopt_proportions or inherited_dimension(key):
+			state.values[key]=profile.proportions()[key]
+			state.baseline[key]=state.values[key]
+	return state
+func apply_architecture(state: Dictionary) -> void:
+	architecture_profile=state.profile; authoring_version=state.version
+	profile_baseline=state.baseline.duplicate(true)
+	for key in state.values: set(key,state.values[key])
+	request_rebuild()

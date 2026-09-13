@@ -11,6 +11,26 @@ sono visibili in Casa; in Aperture scegli dall'elenco la singola porta o finestr
 da modificare. Negli interni vengono mostrate solo le maniglie del nodo selezionato.
 Il [Village Builder](VILLAGE_BUILDER.md) ha un pannello separato per area, strade e lotti.
 
+## Profili architettonici: primo incremento
+
+Apri `scenes/dev/architecture_profiles_example.tscn` per confrontare una casa
+compatta, un corpo allungato e una variante con lunghezza manuale di 14 m.
+Sono preset di proporzioni; materiali e resa restano quelli attuali.
+
+Seleziona la casa nel tab **Casa**, scegli il profilo e usa:
+
+- **Cambia profilo · conserva modifiche**: aggiorna solo le dimensioni ancora
+  uguali all'ultimo valore ereditato. Su una casa legacy conserva tutte le dimensioni.
+- **Usa proporzioni del profilo**: adotta esplicitamente larghezza, profondità,
+  altezza delle pareti e altezza del tetto. Aperture e dettagli restano conservati.
+
+Entrambe le operazioni supportano undo/redo. Il testo nel pannello mostra profilo
+attivo e dimensioni ereditate/manuali. Un valore riportato esattamente alla precedente
+proporzione del profilo viene considerato ereditato. Assegnare la risorsa direttamente
+nell'Inspector cambia l'associazione; usa i pulsanti per applicarne le proporzioni.
+Le risorse sono in `addons/house_builder/profiles/`. Il ruolo dell'edificio è
+separato dal profilo; nuovi ruoli non implicano ancora nuovi generatori di stanze.
+
 ## Passaggio 1: dati dell'editor
 
 Seleziona una casa e premi **Interni: crea / mostra**. `InteriorPlan` contiene

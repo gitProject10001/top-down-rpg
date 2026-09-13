@@ -27,7 +27,10 @@ func _process(_dt: float) -> void:
 func house_state() -> Dictionary:
 	var h := get_node_or_null("Edificio")
 	if h==null: return {}
-	return {"dimensions":h.dimensions(),"openings":h.openings.duplicate(true),"wing":h.wing_settings(),"seed":h.house_seed,"transform":h.transform,"weathered":h.weathered}
+	var result := {"dimensions":h.dimensions(),"openings":h.openings.duplicate(true),"wing":h.wing_settings(),"seed":h.house_seed,"transform":h.transform,"weathered":h.weathered}
+	if h.architecture_profile!=null or h.authoring_version>=2:
+		result["architecture"]={"profile_id":h.architecture_profile.profile_id if h.architecture_profile else "","proportions":h.architecture_profile.proportions() if h.architecture_profile else {},"baseline":h.profile_baseline.duplicate(true),"role":h.archetype_id}
+	return result
 static func equivalent(a: Variant,b: Variant) -> bool:
 	if a is float or a is int:
 		return (b is float or b is int) and is_equal_approx(float(a),float(b))
