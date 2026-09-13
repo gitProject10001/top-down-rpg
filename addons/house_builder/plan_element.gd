@@ -4,6 +4,8 @@ extends Node3D
 const Door=preload("res://addons/house_builder/door.gd")
 @export_enum("Stanza","Muro","Scala","Oggetto") var kind := 0:
 	set(v): kind=v; dirty()
+@export var roof_exit := false:
+	set(v): roof_exit=v; dirty()
 @export var dimensions := Vector3(3,2.6,3):
 	set(v): dimensions=Vector3(maxf(v.x,0.12),maxf(v.y,0.12),maxf(v.z,0.12)); dirty()
 @export_enum("ingresso","soggiorno","cucina","camera","ripostiglio") var room_type := "camera":
@@ -66,10 +68,13 @@ func record() -> Dictionary:
 	var ids := room_ids
 	if kind==3 and room!=null and room.get_script()==get_script() and room.kind==0:
 		pose=room.transform*transform; ids=PackedStringArray([room.stable_id])
-	return {"kind":kind,"dimensions":dimensions,"room_type":room_type,"position":pose.origin,"rotation":pose.basis.get_euler(),"has_door":has_door,"door_offset":door_offset,"door_width":door_width,"prop_type":prop_type,"asset":asset.resource_path if asset else "","room_ids":ids}
+	var result := {"kind":kind,"dimensions":dimensions,"room_type":room_type,"position":pose.origin,"rotation":pose.basis.get_euler(),"has_door":has_door,"door_offset":door_offset,"door_width":door_width,"prop_type":prop_type,"asset":asset.resource_path if asset else "","room_ids":ids}
+	if roof_exit: result["roof_exit"]=true
+	return result
 func protected_edit() -> bool:
 	if locked or not generated: return true
 	if baseline.is_empty(): return false
+	if bool(baseline.get("roof_exit",false))!=roof_exit: return true
 	var current := record()
 	for key in current:
 		if not baseline.has(key): return true
@@ -129,11 +134,11 @@ func rebuild() -> void:
 				door.configure(Transform3D(Basis.IDENTITY,Vector3(center-w*0.5,0,0)),w,dh,wood)
 		2:
 			for i in 18:
-				var rise := (i+1)*dimensions.y/18.0
+				var rise := (i+1)*stair_height()/18.0
 				box(Vector3(0,rise*0.5,dimensions.z*0.5-(i+0.5)*dimensions.z/18.0),Vector3(dimensions.x,rise,dimensions.z/18.0),wood,false)
 			var hull := ConvexPolygonShape3D.new(); var points := PackedVector3Array()
 			for x in [-dimensions.x*0.5,dimensions.x*0.5]:
-				points.append(Vector3(x,0,dimensions.z*0.5)); points.append(Vector3(x,0,-dimensions.z*0.5)); points.append(Vector3(x,dimensions.y+0.05,-dimensions.z*0.5))
+				points.append(Vector3(x,0,dimensions.z*0.5)); points.append(Vector3(x,0,-dimensions.z*0.5)); points.append(Vector3(x,stair_height()+0.05,-dimensions.z*0.5))
 			hull.points=points
 			var body := StaticBody3D.new(); var shape := CollisionShape3D.new(); shape.shape=hull; body.add_child(shape); _visual.add_child(body)
 		3:
@@ -188,10 +193,24 @@ func runtime_view(inside: bool,actor: Vector3,camera: Vector3) -> void:
 func _get_configuration_warnings() -> PackedStringArray:
 	var p=plan()
 	if kind!=2 or p==null or not p.house().has_method("contains_footprint"): return PackedStringArray()
-	if not is_equal_approx(dimensions.y,p.floor_height):
+	if roof_exit and get_parent()!=p.levels().back():
+		return PackedStringArray(["La scala al tetto deve appartenere all’ultimo piano dell’InteriorPlan."])
+	if not roof_exit and not is_equal_approx(dimensions.y,p.floor_height):
 		return PackedStringArray(["La scala non raggiunge il piano: imposta Dimensions Y uguale a Floor Height dell’InteriorPlan."])
 	for x in [-dimensions.x*0.5-0.2,dimensions.x*0.5+0.2]:
 		for z in [-dimensions.z*0.5-0.5,dimensions.z*0.5+0.5]:
 			if not p.house().contains_footprint(transform*Vector3(x,0,z),0.25):
 				return PackedStringArray(["Scala o spazio di sbarco fuori dalla torre: sposta/riduci la scala oppure allarga la pianta."])
 	return PackedStringArray()
+
+func stair_height() -> float:
+	var p=plan()
+	if roof_exit and p and p.house().has_method("effective_elevation"):
+		return p.house().effective_elevation()-get_parent().position.y-0.05
+	return dimensions.y
+
+func opening_planes() -> Array:
+	var planes: Array=[]
+	for pair in [[Vector3.RIGHT,dimensions.x*0.5+0.08],[Vector3.LEFT,dimensions.x*0.5+0.08],[Vector3.BACK,dimensions.z*0.5-0.10],[Vector3.FORWARD,dimensions.z*0.5+0.08]]:
+		var n: Vector3=basis*pair[0]; planes.append(Plane(n,float(pair[1])+n.dot(position)))
+	return planes

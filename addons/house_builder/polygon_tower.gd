@@ -61,7 +61,19 @@ func _build_shell() -> void:
 			_wall_box(wall,sign_value*length*0.5,wall_height*0.5,0.13,wall_height,0.14,0.04,1)
 
 func _build_roof_slab() -> void: _polygon_slab(wall_height,wall_height+0.18,2)
-func _build_roof() -> ArrayMesh: return _flat_roof()
+func _build_roof() -> ArrayMesh:
+	var roof := _flat_roof(); var plan=get_node_or_null("InteriorPlan")
+	if plan==null or plan.levels().is_empty(): return roof
+	var cuts: Array=[]
+	for e in plan.levels().back().get_children():
+		if e.has_method("opening_planes") and e.kind==2 and e.roof_exit:
+			var planes: Array=e.opening_planes()
+			planes.append(Plane(Vector3.UP,effective_elevation()+0.01))
+			planes.append(Plane(Vector3.DOWN,-wall_height+0.01))
+			cuts.append(planes)
+	if cuts.is_empty(): return roof
+	var result := ArrayMesh.new(); MeshJoin.append(result,roof,Transform3D.IDENTITY,cuts)
+	return result
 func stair_edge_length() -> float:
 	return wall_length(stair_wall())
 

@@ -106,7 +106,7 @@ func _enter_tree() -> void:
 	opening_help.text="Aperture: maniglia centrale per spostare; laterale per larghezza; superiore per altezza. Le porte restano a terra."
 	opening_help.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	dock.add_child(opening_help)
-	for label in ["Interni: crea / mostra", "Torre: due piani e scala", "Vista esterna", "Aggiungi piano", "Piano successivo", "Aggiungi stanza", "Integra stanza e genera muri", "Aggiungi muro", "Aggiungi scala", "Aggiungi dettaglio", "Genera stanze (piano attivo)", "Rigenera muri dalle stanze", "Blocca / sblocca elemento", "Arreda piano", "Arreda stanza selezionata", "Rimuovi arredo generato"]:
+	for label in ["Interni: crea / mostra", "Torre: due piani e scala", "Torre: scala interna al tetto", "Vista esterna", "Aggiungi piano", "Piano successivo", "Aggiungi stanza", "Integra stanza e genera muri", "Aggiungi muro", "Aggiungi scala", "Aggiungi dettaglio", "Genera stanze (piano attivo)", "Rigenera muri dalle stanze", "Blocca / sblocca elemento", "Arreda piano", "Arreda stanza selezionata", "Rimuovi arredo generato"]:
 		var action := Button.new(); action.text=label; action.pressed.connect(_plan_action.bind(label)); dock.add_child(action)
 	var play := Button.new()
 	play.text="▶ Play casa selezionata"
@@ -322,6 +322,17 @@ func _plan_action(label: String) -> void:
 	var selected := _selected_house()
 	if selected==null: _show_plan_error(label,"Seleziona una casa o uno dei suoi elementi."); return
 	var plan=selected.get_node_or_null("InteriorPlan")
+	if label=="Torre: scala interna al tetto":
+		if not selected.has_method("interior_floor_mesh") or plan==null or plan.levels().size()<2:
+			_show_plan_error(label,"Seleziona una torre ottagonale con almeno due piani interni."); return
+		if selected.width<7.0 or selected.depth<7.0:
+			_show_plan_error(label,"Per questa disposizione iniziale servono almeno 7 × 7 metri. Puoi poi modificare la scala manualmente."); return
+		var top: Node3D=plan.levels().back()
+		for e in top.get_children():
+			if e is Element and e.kind==2 and e.roof_exit:
+				_show_plan_error(label,"Una scala al tetto esiste già sul piano superiore."); return
+		var stairs=preload("res://addons/house_builder/tower_interior_factory.gd").roof_stair()
+		_add_authored(top,stairs,label); return
 	if label=="Torre: due piani e scala":
 		if not selected.has_method("interior_floor_mesh"):
 			_show_plan_error(label,"Seleziona una torre ottagonale."); return

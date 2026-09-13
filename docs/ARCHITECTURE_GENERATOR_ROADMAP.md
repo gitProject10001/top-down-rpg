@@ -588,6 +588,17 @@ aggiungere altro dettaglio a portici e terrazze.
 
 ### A07 — Geometrie non rettangolari
 
+**A07.3 verificata — 2026-09-13:** scala interna al tetto come elemento
+modificabile dell’ultimo piano, quota derivata dalla copertura e apertura
+sincronizzata anche su spostamento, disattivazione e rimozione. Preset nel tab
+Interni con Undo/Redo; niente sovrascrittura degli elementi esistenti.
+Esempio `tower_roof_stair_example.tscn`; test `check_tower_roof_stair.gd`,
+`check_tower_roof_stair_play.gd`, suite editor. Percorso reale completo
+terra→primo piano→tetto→terra verificato, con cambio interno/esterno e discesa.
+Restano parapetti del vano/botola, scale compatte e stanze poligonali.
+Prossimo incremento prioritario: A08, cortina parametrica e primo portone.
+
+
 **A07.2 verificata — 2026-09-13:** due piani interni con lo stesso InteriorPlan
 modificabile delle case, solai ottagonali e scala rettilinea tra i piani. Il vano
 segue le modifiche manuali della scala; il taglio visivo segue le facce rivolte
@@ -707,4 +718,4 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A07: accesso interno al tetto**, poi **A08: recinto fortificato**.
+se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A08: cortina parametrica e portone**, poi collegamento alle torri e recinto fortificato.

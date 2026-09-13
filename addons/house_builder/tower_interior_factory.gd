@@ -9,3 +9,9 @@ static func create() -> Node3D:
 	stairs.name="ScalaPrimoPiano"; stairs.kind=2; stairs.stable_id="tower_stair_0"
 	stairs.dimensions=Vector3(1.2,2.8,4.2); ground.add_child(stairs)
 	return plan
+
+static func roof_stair() -> Node3D:
+	var stairs=preload("res://addons/house_builder/plan_element.gd").new()
+	stairs.name="ScalaTetto"; stairs.kind=2; stairs.roof_exit=true; stairs.stable_id="tower_roof_stair"
+	stairs.dimensions=Vector3(1.2,2.93,4.2); stairs.position.x=1.5; stairs.rotation.y=PI
+	return stairs

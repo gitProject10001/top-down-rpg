@@ -65,8 +65,13 @@ func _process(_dt: float) -> void:
 	if Engine.is_editor_hint(): observe_deletions()
 	var signature := str(house().dimensions(),house().wing_settings(),floor_height,levels().size())
 	for e in elements():
-		if e.kind==2: signature+=str(e.transform,e.dimensions)
-	if signature!=_signature: _signature=signature; _pending=true
+		if e.kind==2: signature+=str(e.transform,e.dimensions,e.roof_exit)
+	if signature!=_signature:
+		_signature=signature; _pending=true
+		if house().has_method("interior_floor_mesh"):
+			house().request_rebuild()
+			for e in elements():
+				if e.kind==2 and e.roof_exit: e.dirty()
 	if _pending: rebuild()
 func rebuild() -> void:
 	if not is_inside_tree(): return
@@ -83,10 +88,7 @@ func rebuild() -> void:
 		if i>0:
 			for e in list[i-1].get_children():
 				if e is Element and e.kind==2:
-					var planes: Array=[]
-					for pair in [[Vector3.RIGHT,e.dimensions.x*0.5+0.08],[Vector3.LEFT,e.dimensions.x*0.5+0.08],[Vector3.BACK,e.dimensions.z*0.5-0.10],[Vector3.FORWARD,e.dimensions.z*0.5+0.08]]:
-						var n: Vector3=e.basis*pair[0]; planes.append(Plane(n,float(pair[1])+n.dot(e.position)))
-					cuts.append(planes)
+					cuts.append(e.opening_planes())
 		var slab := BoxMesh.new(); slab.size=Vector3(house().width-0.4,0.10,house().depth-0.4); slab.material=wood_material()
 		var floor_mesh: Mesh=house().interior_floor_mesh(wood_material()) if house().has_method("interior_floor_mesh") else slab
 		MeshJoin.append(mesh,floor_mesh,Transform3D.IDENTITY,cuts)
@@ -105,7 +107,12 @@ func editor_view() -> void:
 	if is_instance_valid(_floors):
 		for i in _floors.get_child_count(): _floors.get_child(i).visible=not preview_inside or i<=active_floor
 func runtime_view(inside: bool,index: int,actor: Vector3,camera: Vector3) -> void:
-	for i in levels().size(): levels()[i].visible=inside and i<=index
+	var on_roof: bool=not inside and house().has_method("interior_floor_mesh") and house().to_local(actor).y>house().wall_height-0.3
+	for i in levels().size():
+		var level := levels()[i]
+		level.visible=(inside and i<=index) or (on_roof and i==levels().size()-1)
+		for e in level.get_children():
+			if e is Element: e.visible=not on_roof or (e.kind==2 and e.roof_exit)
 	if is_instance_valid(_floors):
 		for i in _floors.get_child_count(): _floors.get_child(i).visible=inside and i<=index
 	for e in elements(): e.runtime_view(inside,actor,camera)
@@ -147,7 +154,8 @@ func apply_records(index: int,records: Array) -> void:
 			else: e=Element.new(); e.name=["Stanza_","Muro_","Scala_","Oggetto_"][record.kind]+str(record.id)
 			level.add_child(e,true); e.owner=owner
 		e.stable_id=record.id
-		for key in ["kind","position","rotation","dimensions","room_type","has_door","door_offset","door_width","prop_type","room_ids"]:
+		e.roof_exit=record.get("roof_exit",false)
+		for key in ["kind","roof_exit","position","rotation","dimensions","room_type","has_door","door_offset","door_width","prop_type","room_ids"]:
 			if record.has(key): e.set(key,record[key])
 		e.asset=load(record.asset) if record.get("asset","")!="" else null
 		e.generated=record.get("generated",true); e.locked=record.get("locked",false)
@@ -287,3 +295,7 @@ func _notification(what: int) -> void:
 	if what==NOTIFICATION_PREDELETE:
 		for e in _retired.values():
 			if is_instance_valid(e): e.free()
+
+func _exit_tree() -> void:
+	var host := house()
+	if host and host.has_method("interior_floor_mesh"): host.request_rebuild()

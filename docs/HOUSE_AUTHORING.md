@@ -556,7 +556,31 @@ quota del giocatore. Esempio salvato: `scenes/dev/tower_interior_example.tscn`.
 Verificati ingresso, salita, discesa e uscita con il giocatore reale; taglio del
 solaio dopo spostamento manuale della scala; salvataggio e Undo/Redo.
 
-Limiti: scala rettilinea tra i due piani, nessun accesso interno al tetto ancora;
+Limiti di A07.2: scala rettilinea tra i due piani; accesso al tetto aggiunto in A07.3;
 nessuna generazione automatica di stanze poligonali (il comando espone un errore
 esplicito). Il vano scala non ha ancora parapetti automatici. Muri e dettagli
 manuali restano disponibili; non vengono adattati automaticamente alle facce oblique.
+
+
+### Accesso interno al tetto (A07.3)
+
+Su una torre ottagonale con InteriorPlan e almeno due piani, usa
+**Interni → Torre: scala interna al tetto**. La disposizione iniziale richiede
+almeno 7 × 7 metri; aggiunge `ScalaTetto` al piano superiore senza sostituire le
+scale esistenti. Il preset va controllato se hai già modificato il layout.
+
+`Roof Exit` distingue la scala verso il tetto. La sua altezza segue automaticamente
+la quota della copertura; posizione, rotazione e larghezza/lunghezza rimangono
+modificabili. Il vano nel tetto segue questi dati e si richiude disattivando
+Roof Exit o eliminando la scala. Deve appartenere all’ultimo piano; un avviso
+segnala l’uso su un piano inferiore o uno sbarco esterno alla pianta.
+
+Esempio: `scenes/dev/tower_roof_stair_example.tscn`. Seleziona TorreOttagonale e
+Play: entra, sali la prima scala, gira sul pianerottolo e percorri la seconda.
+Il tetto torna visibile all’uscita e la scala resta visibile per ridiscendere.
+Il cambio vista e illuminazione usa il comportamento già presente nel gioco.
+
+Verificati percorso completo in entrambe le direzioni, collisioni, spostamento,
+disattivazione/eliminazione del foro, salvataggio e Undo/Redo. Restano botola e
+parapetti automatici del vano; la prima disposizione non risolve automaticamente
+interferenze con muri o arredi aggiunti manualmente.
