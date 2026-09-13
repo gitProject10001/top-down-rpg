@@ -718,7 +718,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il prossimo passo prioritario è **A08: recinto chiuso con quattro torri**.
+se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. Prossimo passo prioritario: **editing contestuale e validazione del recinto**, poi interni delle torri secondarie.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -763,3 +763,20 @@ Verificati percorso completo, spostamento origine/destinazione, errori,
 scollegamento, riferimenti serializzati e Undo/Redo.
 Prossimo passo: quattro torri e recinto chiuso, mantenendo le cortine come
 collegamenti fra nodi distinti. A08 non è ancora conclusa.
+
+
+### A08.4 — Primo recinto chiuso giocabile — 2026-09-13
+
+Raggiunto il primo esempio di piccolo castello: quattro torri, quattro cortine,
+portone e cortile, accesso dalla corte alla torre principale e anello di
+camminamenti percorribile. Comando dedicato nel tab Fortificazioni. Tutti i
+nodi restano parametrici e i collegamenti sono gli stessi introdotti in A08.3.
+Esempio `castle_enclosure_example.tscn`; test `check_enclosure.gd`,
+`check_enclosure_play.gd` e suite editor. Verificati portone/collisioni perimetrali,
+percorso completo ingresso→corte→torre→intero anello→uscita, ridimensionamento
+di un lato, riferimenti salvati, Undo/Redo e snapshot. Nessun arredo aggiunto.
+La milestone del primo castello giocabile è raggiunta; A08 resta aperta per
+consolidare editing e varianti. Limiti: rettangolo, quote uniformi, interni e
+cambio vista sulla torre principale soltanto. Mastio e castelli multilivello
+restano A09. Prossimo passo consigliato: editing contestuale del recinto e
+validazione complessiva, poi interni delle torri secondarie.

@@ -1,6 +1,9 @@
 @tool
 extends Node3D
 ## Group of independently authored towers; links are stored on curtains.
+@export var courtyard_entry := false
+@export var entry_position := Vector3(8,0.15,4)
+
 func primary_tower() -> Node3D:
 	for child in get_children():
 		if child.has_method("footprint_vertices"): return child

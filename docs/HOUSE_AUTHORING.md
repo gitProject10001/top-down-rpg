@@ -665,3 +665,31 @@ spostamento di entrambe le torri, errore di disallineamento, scollegamento,
 riferimenti dopo salvataggio, creazione/Undo/Redo e snapshot del gruppo.
 Limiti: nessun recinto automatico o risolutore per facce disallineate; nessuna
 migrazione automatica degli interni su tutte le torri del gruppo.
+
+
+### Primo recinto chiuso (A08.4)
+
+**Fortificazioni → Crea recinto con quattro torri** crea Castello: quattro torri
+ottagonali e quattro cortine collegate, un solo portone anteriore e cortile vuoto.
+Sono tutti gli stessi nodi modificabili del builder. Nessun muro o torre è una
+mesh scollegata dai parametri. L’esempio è in
+`scenes/dev/castle_enclosure_example.tscn`.
+
+Play fortificazione parte fuori dal portone. Aprilo, entra nel cortile e raggiungi
+la porta obliqua della torre principale, rivolta verso il cortile. Le due scale
+portano ai merli; il camminamento forma un anello percorribile fino al ritorno
+alla torre di partenza. Le altre tre torri hanno il tetto percorribile ma non
+ancora interni configurati per Play.
+
+Per allargare il rettangolo, seleziona insieme le due torri dello stesso lato e
+traslale lungo l’asse del collegamento: le cortine adiacenti cambiano lunghezza.
+Spostare un solo angolo fuori allineamento produce l’avviso già previsto per i
+raccordi. I parametri del portone restano su TorreOvest/Cortina.
+`Courtyard Entry` ed `Entry Position` sul gruppo controllano lo spawn di prova.
+
+Verificati portone chiuso/aperto, cortile confinato sugli altri lati, percorso
+reale completo di tutti i camminamenti e uscita, ridimensionamento di un lato,
+salvataggio dei quattro collegamenti, Undo/Redo e snapshot per Play.
+Limiti: recinto iniziale rettangolare e quote uniformi; niente mastio, arredi,
+terreno adattivo o interni delle torri secondarie. Questo è il primo castello
+percorribile, non la chiusura di tutte le varianti del Castle Builder.

@@ -996,6 +996,7 @@ func _build_fortification_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Fortificazioni"; tabs.add_child(page)
 	var label := Label.new(); label.text="Cortina rettilinea con camminamento e portone.\nSeleziona il muro e usa i gizmo per le dimensioni.\nInspector → Portone: larghezza, altezza, posizione."; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART; page.add_child(label)
 	var button := Button.new(); button.text="Crea mura con portone"; button.pressed.connect(_create_curtain_wall); page.add_child(button)
+	var enclosure := Button.new(); enclosure.text="Crea recinto con quattro torri"; enclosure.pressed.connect(_create_enclosure); page.add_child(enclosure)
 	var pair := Button.new(); pair.text="Crea due torri collegate"; pair.pressed.connect(_create_fortification); page.add_child(pair)
 	var attach := Button.new(); attach.text="Collega nuova cortina alla torre"; attach.pressed.connect(_attach_curtain); page.add_child(attach)
 	var play := Button.new(); play.text="Play fortificazione"; play.pressed.connect(_play_selected); page.add_child(play)
@@ -1028,3 +1029,9 @@ func _create_fortification() -> void:
 	if root==null: return
 	var group=preload("res://addons/house_builder/fortification_factory.gd").create()
 	_add_authored(root,group,"Crea due torri collegate"); group.rebuild(); tabs.current_tab=6
+
+func _create_enclosure() -> void:
+	var root := EditorInterface.get_edited_scene_root()
+	if root==null: return
+	var group=preload("res://addons/house_builder/fortification_factory.gd").create_enclosure()
+	_add_authored(root,group,"Crea recinto fortificato"); group.rebuild(); tabs.current_tab=6

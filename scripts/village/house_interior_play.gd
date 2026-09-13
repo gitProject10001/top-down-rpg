@@ -73,7 +73,7 @@ func _ready() -> void:
 		house.openings=[{"kind":"door","wall":0,"u":entry_x/(house_width*0.5),"width":1.5,"height":2.3},{"kind":"window","wall":1,"u":-0.45,"y":1.5},{"kind":"window","wall":2,"u":-0.6,"y":1.5}]
 	if authored_group: world.add_child(authored_group)
 	else: world.add_child(house)
-	interior.box(world,Vector3(0,-0.14,0),Vector3(64 if authored_group else 30,0.2,40 if authored_group else 30),ground_material)
+	interior.box(world,Vector3(0,-0.14,0),Vector3(64 if authored_group else 30,0.2,64 if authored_group else 30),ground_material)
 	world.add_child(interior)
 	if not selected_source: interior.build(house_width,house_depth,storey_height,storeys,room_split_x,room_split_z,partition_thickness,house._material(Vector2(0.5,0),Color(0.60,0.53,0.46)),house._plaster_material())
 	for floor_index in storeys:
@@ -93,6 +93,7 @@ func _ready() -> void:
 			var opening: Dictionary=house.resolved_opening(record)
 			if opening.door and house.wall_exposed(opening.wall,opening.along):
 				player.position=house.to_global(house.wall_point(opening.wall,opening.along,0.15,1.5)); break
+	if authored_group and authored_group.courtyard_entry: player.position=authored_group.to_global(authored_group.entry_position)
 	camera=Camera3D.new(); camera.set_script(load("res://scripts/village/iso_cam.gd")); camera.name="IsoCam"
 	camera.target_path=NodePath("../Player"); camera.pitch_deg=48; camera.ortho_size=17.5
 	camera.focus_height=4.0; camera.pixel_rows=450; camera.add_to_group("camera_rig"); world.add_child(camera)

@@ -375,6 +375,14 @@ func run(plugin: EditorPlugin) -> void:
 	var fort_snapshot: PackedScene=plugin._snapshot(fort); var fort_copy=fort_snapshot.instantiate()
 	assert(fort_copy.curtains()[0].destination()==fort_copy.get_node("TorreEst")); fort_copy.free()
 	print("TWO_TOWERS_EDITOR_UNDO_SNAPSHOT_OK")
+	plugin._create_enclosure(); var enclosure=EditorInterface.get_selection().get_selected_nodes()[0]
+	assert(enclosure.courtyard_entry and enclosure.curtains().size()==4)
+	profile_history.undo(); assert(enclosure.get_parent()==null)
+	profile_history.redo(); assert(enclosure.get_parent()==scene)
+	var enclosure_snapshot: PackedScene=plugin._snapshot(enclosure); var enclosure_copy=enclosure_snapshot.instantiate()
+	assert(enclosure_copy.curtains().size()==4)
+	for wall in enclosure_copy.curtains(): assert(wall.destination()!=null)
+	enclosure_copy.free(); print("ENCLOSURE_EDITOR_UNDO_SNAPSHOT_OK")
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(house)
 
 
