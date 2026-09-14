@@ -266,6 +266,15 @@ func propose_insert_room(index: int,id: String) -> Array:
 	return checked_proposal(index,rooms+preserved)
 func checked_proposal(index: int,records: Array) -> Array:
 	generation_failed=true
+	for element in level_elements(levels()[index]):
+		if element is Element and element.protected_edit():
+			var authored_issue: String=element.containment_error()
+			if not authored_issue.is_empty(): generation_report=authored_issue; return level_records(index)
+	for record in records:
+		var frame := house().global_transform.affine_inverse()*levels()[index].global_transform*Transform3D(Basis.from_euler(record.get("rotation",Vector3.ZERO)),record.get("position",Vector3.ZERO))
+		var issue := polygon_footprint_error(record,frame)
+		if not issue.is_empty():
+			generation_report=issue; return level_records(index)
 	var rooms: Array=records.filter(func(r): return r.kind==0)
 	var main := Rect2(Vector2(-house().width*0.5+0.2,-house().depth*0.5+0.2),Vector2(house().width-0.4,house().depth-0.4))
 	var allowed: Array[Rect2]=[main]
@@ -304,3 +313,17 @@ func _notification(what: int) -> void:
 func _exit_tree() -> void:
 	var host := house()
 	if host and host.has_method("interior_floor_mesh"): host.request_rebuild()
+
+## Convex tower footprint: checking every transformed corner covers the entire box.
+## This validates rectangular authoring elements; it does not clip or rewrite them.
+func polygon_footprint_error(record: Dictionary,actual_frame: Variant=null) -> String:
+	var host := house()
+	if host==null or not host.has_method("footprint_vertices") or int(record.get("kind",-1)) not in [0,1]: return ""
+	var size: Vector3=record.dimensions
+	var frame: Transform3D=actual_frame if actual_frame!=null else Transform3D(Basis.from_euler(record.get("rotation",Vector3.ZERO)),record.get("position",Vector3.ZERO))
+	for x in [-size.x*0.5,size.x*0.5]:
+		for y in [0.0,size.y]:
+			for z in [-size.z*0.5,size.z*0.5]:
+				if not host.contains_footprint(frame*Vector3(x,y,z),0.2):
+					return "%s '%s' fuori dal perimetro poligonale (margine interno 20 cm). Sposta o riduci l'elemento; nessuna modifica automatica."%["Stanza" if record.kind==0 else "Muro",record.get("id","senza ID")]
+	return ""

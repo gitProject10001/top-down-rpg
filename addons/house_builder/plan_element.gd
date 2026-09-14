@@ -47,11 +47,11 @@ func _process(_dt: float) -> void:
 		_pose=transform
 		if is_inside_tree(): update_gizmos()
 	if _pending: rebuild()
-	if Engine.is_editor_hint() and kind==2:
+	if Engine.is_editor_hint() and kind in [0,1,2]:
 		var p=plan()
 		var signature := str(transform,dimensions,p.floor_height if p else 0,p.house().dimensions() if p else Vector4.ZERO)
 		if signature!=_warning_signature:
-			_warning_signature=signature; update_configuration_warnings()
+			_warning_signature=signature; update_configuration_warnings(); update_gizmos()
 func refresh_room_name() -> void:
 	if not is_inside_tree(): return
 	var legacy := str(name).begins_with("Stanza_") or str(name)=="Stanza" or str(name).begins_with("@")
@@ -194,7 +194,14 @@ func runtime_view(inside: bool,actor: Vector3,camera: Vector3) -> void:
 			child.visible=shown>0.001; child.scale.y=maxf(0.001,shown/h); child.position.y=bottom+shown*0.5
 		elif child is Door: child.set_cutaway(cut)
 
+func containment_error() -> String:
+	var p=plan()
+	if p==null or not is_inside_tree(): return ""
+	var record_value := record(); record_value["id"]=str(name)
+	return p.polygon_footprint_error(record_value,p.house().global_transform.affine_inverse()*global_transform)
 func _get_configuration_warnings() -> PackedStringArray:
+	var issue := containment_error()
+	if not issue.is_empty(): return PackedStringArray([issue])
 	var p=plan()
 	if kind!=2 or p==null or not p.house().has_method("contains_footprint"): return PackedStringArray()
 	if roof_exit and get_parent()!=p.levels().back():

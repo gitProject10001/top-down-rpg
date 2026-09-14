@@ -71,7 +71,7 @@ La città illustrata mescola una fortezza dominante, edifici subordinati, corti,
 
 ## Ordine pratico
 
-Verifica G01.3b.2b completata; disponibili R01.1, R02.1–R02.3 e R03.1–R03.2. Prossimo incremento prioritario A07.7b (stanze e contenimento nella pianta poligonale), poi completamento A07 prima di B01.1; R03.3 resta il prossimo del ramo ambientale quando verrà ripreso. Alternare G01.4–G01.5 e R02–R03 senza fondere i due sistemi. W01 precede W02, e l'idrologia stabile precede i ponti e il posizionamento definitivo delle città. C01 precede la generazione degli interni delle grotte. V01 resta una consegna esplicita richiesta dall'utente.
+Verifica G01.3b.2b completata; disponibili R01.1, R02.1–R02.3 e R03.1–R03.2. Prossimo incremento prioritario A07.8 (sagome oltre i prismi regolari), poi completamento A07 prima di B01.1; R03.3 resta il prossimo del ramo ambientale quando verrà ripreso. Alternare G01.4–G01.5 e R02–R03 senza fondere i due sistemi. W01 precede W02, e l'idrologia stabile precede i ponti e il posizionamento definitivo delle città. C01 precede la generazione degli interni delle grotte. V01 resta una consegna esplicita richiesta dall'utente.
 
 
 ## R01.1 — Roccia parametrica disponibile

@@ -276,9 +276,10 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A07.6 | FATTO | Cupola e profilo curvo | A07.5 | Edificio terrazzato con cupola; controlli leggibili e copertura separata |
 | A07.6a | FATTO | Profilo a cupola sulle torri | A07.5 | Cupole basse/slanciate, tegole e collisioni; salvataggio e regressione cono |
 | A07.6b | FATTO | Cupola su edificio terrazzato | A07.6a | Esempio con terrazza accessibile e volume coperto separato, raccordi e percorso verificati |
-| A07.7 | IN CORSO | Consolidamento A07 e percorso giocabile | A07.4–A07.6 | Aperture, interni e raccordi coerenti con la pianta; verificare limiti delle stanze e accessi |
+| A07.7 | FATTO | Consolidamento A07 e percorso giocabile | A07.4–A07.6 | Aperture, interni e raccordi coerenti con la pianta; verificare limiti delle stanze e accessi |
 | A07.7a | FATTO | Percorsi nelle torri 12/16 e diagnostica raccordi | A07.4–A07.6 | Giocatore terra→piani→tetto→terra; facce oltre 7 e coperture incompatibili diagnosticate |
-| A07.7b | TODO | Stanze e contenimento nella pianta poligonale | A07.7a | Stanze/muri manuali verificati rispetto al perimetro reale; errori evidenti senza perdita di editing |
+| A07.7b | FATTO | Stanze e contenimento nella pianta poligonale | A07.7a | Stanze/muri manuali verificati rispetto al perimetro reale; errori evidenti senza perdita di editing |
+| A07.8 | TODO | Piante poligonali oltre i prismi regolari | A07.7 | Controlli di sagoma, validazione della pianta e conservazione degli agganci; prima poligoni convessi |
 | A08 | IN CORSO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
 | A09 | IN CORSO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
 | G01 | RIMANDATO | Composizione da metadati, separata dai builder | A01, A08, A09 | Piano riproducibile, varianti strutturali, editing protetto |
@@ -1282,3 +1283,14 @@ Verificato con il controller reale il percorso ingresso→primo piano→tetto→
 Le cortine consentono Tower Face / Target Face fino a 15 e verificano il conteggio effettivo della torre. Gli indici fuori intervallo non vengono più accettati implicitamente tramite il wrapping delle pareti. Un collegamento da/a una torre con cono o cupola restituisce un errore: serve una terrazza praticabile. Rimane attivo il controllo della larghezza: più facce significano facce più strette, quindi alcuni collegamenti richiedono torri più larghe. Test check_segmented_connections.gd e regressione check_tower_curtain.gd superati. Terminologia del plugin aggiornata da ottagonale a poligonale; parser verificato.
 
 A07.7 e A07 restano IN CORSO. Prossimo A07.7b: verificare stanze e muri rispetto alla pianta reale e rendere espliciti i limiti di authoring; i percorsi sulle torri non dimostrano ancora la validità di stanze poligonali generiche. Non riprendere B01 prima di questo consolidamento.
+
+
+### A07.7b — Contenimento di stanze e muri
+
+Le proposte degli interni verificano stanze e muri rispetto alla pianta convessa della torre, con margine interno di 20 cm. Controllano gli otto vertici del volume trasformato: muri ruotati e parti inclinate non passano solo perché il centro è interno. Le trasformazioni del piano sono considerate. Prima della proposta vengono inoltre verificati i nodi manuali/protetti nella trasformazione reale, inclusa la scala; in caso di errore si restituisce il piano corrente, senza cancellare o spostare nodi.
+
+Nell'editor, stanza/muro fuori perimetro mostra un avviso di configurazione con nome dell'elemento e rimedio; il suo contorno selezionato diventa rosso. Correggere posizione/dimensioni elimina l'errore. La generazione usa il pannello di errore già esistente. Il controllo è geometrico: non crea stanze con pareti curve e non ritaglia automaticamente i rettangoli. Il generatore di stanze resta rettangolare e una sua proposta che invade gli angoli della torre viene rifiutata; usare authoring manuale valido finché non esisterà un planner poligonale.
+
+Test check_polygon_room_bounds.gd su 8/12/16 facce: angoli fuori pianta, muri ruotati, trasformazione della torre, piano traslato, scala manuale, errore che si risolve e preservazione della scena. Regressione check_house_room_insert.gd superata. Parser gizmo verificato; il contorno rosso non è stato verificato tramite interazione manuale nell'editor in questo incremento.
+
+A07.7 concluso; A07 complessivo resta IN CORSO rispetto alla richiesta originaria di piante poligonali e controlli liberi. Prossimo A07.8: estendere le sagome oltre i prismi regolari, mantenendo espliciti i limiti di aggancio. B01 resta dopo A07, come richiesto.
