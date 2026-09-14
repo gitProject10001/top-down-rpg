@@ -33,11 +33,13 @@ columns = {"TODO": [], "DOING": [], "DONE": []}
 for source, items in [("ARCHITECTURE_GENERATOR_ROADMAP.md", arch_rows), ("WORLD_GENERATION_ROADMAP.md", world_rows)]:
     for row in items:
         id_, state, title = row[:3]
-        status = "DONE" if state == "FATTO" else "TODO" if state == "TODO" else "DOING"
+        status = "DONE" if state == "FATTO" else "TODO" if state in ("TODO", "RIMANDATO") else "DOING"
         columns[status].append(f"**[{id_}]({source})** — {title}<br>{state}")
 output = """# Kanban dei generatori
 
 Board locale versionata, generata dalle tabelle delle roadmap. DOING include le macrofasi parziali; non significa che ci siano più agenti al lavoro. DONE riguarda il criterio della singola card, non l'intero sistema.
+
+**Priorità: B01.1 — facciata assistita.** Generazione globale da seed e V01 rimandati; R03.3 in backlog. Le card RIMANDATO restano in TODO con stato esplicito.
 
 Le card mantengono gli stati delle roadmap. Il criterio di uscita e le dipendenze sono nelle tabelle collegate; prima di iniziare una card TODO, verificare quelle dipendenze.
 

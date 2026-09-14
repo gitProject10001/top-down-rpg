@@ -2,6 +2,10 @@
 
 Il concept delle quattro fazioni è un riferimento **di composizione**, non un risultato finale da copiare. Guida densità, masse, percorsi, spazi liberi e rapporti dimensionali. Non impone texture, colori, città identiche al disegno o un terreno scolpito a mano per imitarlo.
 
+## Priorità attuale — 2026-09-14
+
+Priorità al builder architettonico e all'editing assistito (B01.1 nella roadmap architettonica). Utente e assistente costruiranno gli insediamenti da reference usando gli strumenti. Generazione globale da seed e confronto V01 rimandati; i sistemi esistenti restano disponibili. Il ramo ambientale è fermo al completamento R03.2, con R03.3 e acqua/grotte in backlog. Non iniziare automaticamente R03.3 solo perché segue l'ultima card conclusa.
+
 ## Punto di ripartenza
 
 G01.3b.2b: diagnostica degli ingombri e verifica della rigenerazione nell'editor/Play. Sono disponibili edifici parametrici, torri/cortine, corte singola generata, editing protetto delle posizioni e validazione degli accessori. Non sono ancora disponibili la varietà delle città del concept o una generazione completa di paesaggio roccioso/idrologia/grotte.
@@ -51,10 +55,10 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 | C01 | TODO | Ingressi di grotta | Apertura reale nel blocco roccioso, soglia percorribile, collisione coerente e leggibilità alla camera fissa |
 | C02 | TODO | Piano di grotta | Stanze/cunicoli con anelli e diramazioni, quote e collegamenti; editing manuale separato dall'involucro esterno |
 | G01.4 | TODO | Catalogo architettonico | Ruoli del piano associati a profili/componenti; famiglie sostituibili senza cambiare il planner |
-| G01.5 | TODO | Varietà compositiva del castello | Recinti segmentati, più torri/corpi, corti e gerarchie differenti; preservazione manuale |
-| S01 | TODO | Composizione urbana organica | Strade principali e secondarie, piazze, porte, edifici gerarchizzati, addensamenti e vuoti; insediamenti su piani/terrazze, collegamenti ai vincoli del paesaggio |
+| G01.5 | RIMANDATO | Varietà compositiva del castello | Recinti segmentati, più torri/corpi, corti e gerarchie differenti; preservazione manuale |
+| S01 | RIMANDATO | Composizione urbana organica | Strade principali e secondarie, piazze, porte, edifici gerarchizzati, addensamenti e vuoti; insediamenti su piani/terrazze, collegamenti ai vincoli del paesaggio |
 | S02 | TODO | Edifici urbani più articolati | Volumi aggregati, tetti collegati, facciate e accessori; le città cambiano forma oltre al colore |
-| V01 | TODO | Confronto dei quattro castelli | Quattro richieste/seed tramite tool, scene editabili e stessa camera; almeno due organizzazioni strutturali distinte |
+| V01 | RIMANDATO | Confronto dei quattro castelli | Quattro richieste/seed tramite tool, scene editabili e stessa camera; almeno due organizzazioni strutturali distinte |
 | V02 | TODO | Vertical slice città–villaggio–POI | Tempi reali di cammino, incontri, visibilità e streaming; aggiornamento delle distanze proposte dal concept |
 
 ## Come ottenere le rocce del concept
@@ -67,7 +71,7 @@ La città illustrata mescola una fortezza dominante, edifici subordinati, corti,
 
 ## Ordine pratico
 
-Verifica G01.3b.2b completata; disponibili R01.1, R02.1–R02.3 e R03.1–R03.2. Prossimo incremento ambientale R03.3. Alternare G01.4–G01.5 e R02–R03 senza fondere i due sistemi. W01 precede W02, e l'idrologia stabile precede i ponti e il posizionamento definitivo delle città. C01 precede la generazione degli interni delle grotte. V01 resta una consegna esplicita richiesta dall'utente.
+Verifica G01.3b.2b completata; disponibili R01.1, R02.1–R02.3 e R03.1–R03.2. Prossimo incremento prioritario B01.1 (builder assistito); R03.3 resta il prossimo del ramo ambientale quando verrà ripreso. Alternare G01.4–G01.5 e R02–R03 senza fondere i due sistemi. W01 precede W02, e l'idrologia stabile precede i ponti e il posizionamento definitivo delle città. C01 precede la generazione degli interni delle grotte. V01 resta una consegna esplicita richiesta dall'utente.
 
 
 ## R01.1 — Roccia parametrica disponibile

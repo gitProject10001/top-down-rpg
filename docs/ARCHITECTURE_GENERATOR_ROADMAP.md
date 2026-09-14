@@ -1,9 +1,21 @@
 # Piano evolutivo dei generatori architettonici
 
-Aggiornato: **2026-09-13**. Baseline del codice esaminato: `e0c9cd5`.
-Stato: **analisi dei riferimenti completata; implementazione delle nuove fasi da iniziare**.
+Aggiornato: **2026-09-14**. Baseline iniziale: `e0c9cd5`; incrementi successivi documentati sotto.
+Stato: **builder in sviluppo; priorità alla costruzione architettonica assistita**.
 Questo documento è il registro da aggiornare a ogni incremento, non una lista di
 funzionalità già disponibili.
+
+## Direzione attuale — costruzione assistita prima della generazione globale
+
+Il numero di villaggi/case/castelli è contenuto: per ora non serve moltiplicare layout completi tramite seed. Priorità alle geometrie architettoniche e agli strumenti con cui utente e assistente costruiscono una scena da disegno, cartina o screenshot. Le quantità citate (quattro villaggi, circa cento case, quattro castelli) sono una motivazione della scelta, non un budget definitivo approvato.
+
+L'interazione desiderata è quella di un builder reattivo: l'utente modifica un volume e regole locali propongono/adattano finestre, campate e dettagli. La reference Tiny Glade descrive questo obiettivo d'interazione; non richiede di copiarne il rendering. Conservare i generatori e i seed esistenti come infrastruttura, ma rimandare varietà del planner, città automatiche e confronto dei quattro castelli generati. Il confronto potrà tornare quando utile allo strumento.
+
+**Prossimo incremento: B01.1, facciata assistita su una casa rettangolare.** Il ramo ambientale si ferma dopo R03.2; R03.3 rimane in backlog. Gli step B si affiancano alle geometrie A, non le sostituiscono. Riprendere geometrie A02/A03/A07 per ciò che serve all'esempio, senza attendere un generatore globale.
+
+Contratto di editing da implementare: modalità Manuale/Assistita per edificio, elementi derivati con ID e provenienza, promozione a manuale quando modificati, soppressione persistente quando eliminati. Gli elementi manuali e le porte scelte dall'utente hanno precedenza. Un ridimensionamento impossibile deve mostrare il conflitto; non deve spostare o cancellare in silenzio gli elementi protetti. Aggiornamento locale durante il drag con limite di frequenza; rilascio come singola operazione Undo che ripristina volume e dettagli. Nessun rimescolamento casuale durante il trascinamento.
+
+Nel codice attuale `all_openings()` combina aperture esplicite e aperture derivate dai componenti; il plugin inizializza una porta e una finestra. Questa è una base riutilizzabile, non una facciata adattiva già implementata.
 
 ## Obiettivo e vincolo concordato
 
@@ -247,6 +259,11 @@ un lungo refactoring senza qualcosa da provare nel builder.
 |---|---|---|---|---|
 | A00 | FATTO | Analisi delle 21 immagini e roadmap | — | Inventario e vincolo: architettura, resa attuale invariata |
 | A01 | FATTO | Profilo architettonico minimo e contratto versionato | A00 | Preset, editing preservato, container Components e ID persistenti |
+| B01.1 | TODO | Facciata assistita: finestre su volume rettangolare | A01, aperture esistenti | Allarga/restringi: numero e spaziatura si adattano; porte e finestre manuali preservate; Undo completo |
+| B01.2 | TODO | Editing e diagnostica degli elementi automatici | B01.1 | Seleziona, rendi manuale, elimina senza ricomparsa; conflitti e modalità evidenti nell'UI |
+| B02 | TODO | Campate e dettagli coerenti | B01.2, A03, A05 | Travi, davanzali e cornici seguono facciata e aperture senza ostruire i vani |
+| B03 | TODO | Assistenza nei raccordi fra volumi e accessori | B01.2, A02, A03 | Balcone/portico/volume agganciato aggiorna aperture e struttura; override preservati |
+| B04 | TODO | Esempio costruito da reference tramite builder | B01.2, geometrie A necessarie | Casa o piccolo complesso editabile, costruito con gli strumenti senza mesh ad hoc |
 | A02a | IN CORSO | Componenti agganciati: balcone + porta | A01 | Vano, collisione e aggancio aggiornati senza perdere le modifiche manuali |
 | A02 | IN CORSO | Composizione di più volumi rettangolari | A01 | Fucina R04 con corpo e tettoie modificabili indipendentemente |
 | A03 | IN CORSO | Coperture indipendenti e parti aperte | A02 | Falde a quote diverse, portico e tetto piano; raccordi senza geometria interna superflua |
@@ -256,7 +273,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A07 | IN CORSO | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
 | A08 | IN CORSO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
 | A09 | IN CORSO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
-| G01 | IN CORSO | Composizione da metadati, separata dai builder | A01, A08, A09 | Piano riproducibile, varianti strutturali, editing protetto |
+| G01 | RIMANDATO | Composizione da metadati, separata dai builder | A01, A08, A09 | Piano riproducibile, varianti strutturali, editing protetto |
 | A10 | TODO | Rovine strutturali controllabili | A03, A04, A07 | R07: togli una porzione di tetto/muro, interno e collisione coerenti |
 | A11 | TODO | Integrazione insediamento e consolidamento | Incrementale; chiusura dopo A08 | Case e castello nello stesso villaggio, rigenerazione locale e budget misurati |
 <!-- WORLD_PIPELINE_START -->
@@ -280,10 +297,10 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | C01 | TODO | Ingressi di grotta | Pipeline mondo | Apertura reale nel blocco roccioso, soglia percorribile, collisione coerente e leggibilità alla camera fissa |
 | C02 | TODO | Piano di grotta | Pipeline mondo | Stanze/cunicoli con anelli e diramazioni, quote e collegamenti; editing manuale separato dall'involucro esterno |
 | G01.4 | TODO | Catalogo architettonico | Pipeline mondo | Ruoli del piano associati a profili/componenti; famiglie sostituibili senza cambiare il planner |
-| G01.5 | TODO | Varietà compositiva del castello | Pipeline mondo | Recinti segmentati, più torri/corpi, corti e gerarchie differenti; preservazione manuale |
-| S01 | TODO | Composizione urbana organica | Pipeline mondo | Strade principali e secondarie, piazze, porte, edifici gerarchizzati, addensamenti e vuoti; insediamenti su piani/terrazze, collegamenti ai vincoli del paesaggio |
+| G01.5 | RIMANDATO | Varietà compositiva del castello | Pipeline mondo | Recinti segmentati, più torri/corpi, corti e gerarchie differenti; preservazione manuale |
+| S01 | RIMANDATO | Composizione urbana organica | Pipeline mondo | Strade principali e secondarie, piazze, porte, edifici gerarchizzati, addensamenti e vuoti; insediamenti su piani/terrazze, collegamenti ai vincoli del paesaggio |
 | S02 | TODO | Edifici urbani più articolati | Pipeline mondo | Volumi aggregati, tetti collegati, facciate e accessori; le città cambiano forma oltre al colore |
-| V01 | TODO | Confronto dei quattro castelli | Pipeline mondo | Quattro richieste/seed tramite tool, scene editabili e stessa camera; almeno due organizzazioni strutturali distinte |
+| V01 | RIMANDATO | Confronto dei quattro castelli | Pipeline mondo | Quattro richieste/seed tramite tool, scene editabili e stessa camera; almeno due organizzazioni strutturali distinte |
 | V02 | TODO | Vertical slice città–villaggio–POI | Pipeline mondo | Tempi reali di cammino, incontri, visibilità e streaming; aggiornamento delle distanze proposte dal concept |
 <!-- WORLD_PIPELINE_END -->
 
