@@ -801,6 +801,8 @@ func _detach_stair(host: Node3D,stair: Node3D) -> void:
 func _build_volume_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Volumi"; tabs.add_child(page)
 	var tower_button := Button.new(); tower_button.text="Crea torre quadrata merlata"; tower_button.pressed.connect(_create_square_tower); page.add_child(tower_button)
+	var domed_button := Button.new(); domed_button.text="Crea edificio terrazzato con cupola"
+	domed_button.pressed.connect(_create_domed_terrace); page.add_child(domed_button)
 	var polygon_button := Button.new(); polygon_button.text="Crea torre ottagonale"; polygon_button.pressed.connect(_create_polygon_tower); page.add_child(polygon_button)
 	for sides in [12,16]:
 		var button := Button.new(); button.text="Crea torre a %d facce"%sides
@@ -1365,3 +1367,9 @@ func _layout_footprint_dialog(dialog: AcceptDialog, diagram: Control) -> void:
 	var box := VBoxContainer.new(); box.custom_minimum_size.x=560
 	var label := Label.new(); label.text=dialog.dialog_text; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
 	dialog.dialog_text=""; box.add_child(label); box.add_child(diagram); dialog.add_child(box)
+
+func _create_domed_terrace() -> void:
+	var root := EditorInterface.get_edited_scene_root()
+	if root==null: return
+	var group=preload("res://addons/house_builder/domed_terrace_factory.gd").create()
+	_add_authored(root,group,"Crea edificio terrazzato con cupola"); _selection_context()

@@ -2,7 +2,7 @@
 
 Board locale versionata, generata dalle tabelle delle roadmap. DOING include le macrofasi parziali; non significa che ci siano più agenti al lavoro. DONE riguarda il criterio della singola card, non l'intero sistema.
 
-**Priorità: A07 — geometrie architettoniche, prima di B01.1. Prossimo A07.6b: cupola su edificio terrazzato.** Generazione globale da seed e V01 rimandati; R03.3 in backlog. Le card RIMANDATO restano in TODO con stato esplicito.
+**Priorità: A07 — geometrie architettoniche, prima di B01.1. Prossimo A07.7: consolidamento geometrie e percorsi.** Generazione globale da seed e V01 rimandati; R03.3 in backlog. Le card RIMANDATO restano in TODO con stato esplicito.
 
 Le card mantengono gli stati delle roadmap. Il criterio di uscita e le dipendenze sono nelle tabelle collegate; prima di iniziare una card TODO, verificare quelle dipendenze.
 
@@ -14,17 +14,16 @@ Aggiornare stati e criteri nelle tabelle, poi eseguire `python tools/update_gene
 | **[B01.2](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Editing e diagnostica degli elementi automatici<br>TODO | **[A02](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Composizione di più volumi rettangolari<br>IN CORSO | **[A01](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Profilo architettonico minimo e contratto versionato<br>FATTO |
 | **[B02](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Campate e dettagli coerenti<br>TODO | **[A03](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Coperture indipendenti e parti aperte<br>IN CORSO | **[A07.4](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Torri segmentate a 8/12/16 facce<br>FATTO |
 | **[B03](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Assistenza nei raccordi fra volumi e accessori<br>TODO | **[A07](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Piante poligonali, torri e coperture curve<br>IN CORSO | **[A07.5](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Copertura conica della torre<br>FATTO |
-| **[B04](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Esempio costruito da reference tramite builder<br>TODO | **[A07.6](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Cupola e profilo curvo<br>IN CORSO | **[A07.6a](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Profilo a cupola sulle torri<br>FATTO |
-| **[A04](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Piani e interni coerenti con i volumi<br>TODO | **[A08](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Primo Castle Builder: cortina, torri e porta<br>IN CORSO | **[G01.3b.2b](WORLD_GENERATION_ROADMAP.md)** — Diagnostica ingombri e verifica editor/Play<br>FATTO |
-| **[A05](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Facciate e strutture per campate<br>TODO | **[A09](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Complessi articolati e castelli multilivello<br>IN CORSO | **[R01.1](WORLD_GENERATION_ROADMAP.md)** — Roccia parametrica<br>FATTO |
-| **[A06](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Due archetipi completi con profili architettonici<br>TODO | **[R01](WORLD_GENERATION_ROADMAP.md)** — Generatore di singola roccia/affioramento<br>IN CORSO — prototipo disponibile | **[R02.1](WORLD_GENERATION_ROADMAP.md)** — Gruppi su guida<br>FATTO |
-| **[A07.6b](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Cupola su edificio terrazzato<br>TODO | **[R02](WORLD_GENERATION_ROADMAP.md)** — Composizione di gruppi rocciosi<br>IN CORSO — R02.1–R02.3 verificati | **[R02.2](WORLD_GENERATION_ROADMAP.md)** — Fascia libera<br>FATTO |
-| **[A07.7](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Consolidamento A07 e percorso giocabile<br>TODO | **[R03](WORLD_GENERATION_ROADMAP.md)** — Pareti e creste montuose<br>IN CORSO — R03.1–R03.2 verificati | **[R02.3](WORLD_GENERATION_ROADMAP.md)** — Addensamenti e raccordi<br>FATTO |
-| **[G01](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Composizione da metadati, separata dai builder<br>RIMANDATO |  | **[R03.1](WORLD_GENERATION_ROADMAP.md)** — Terrazza piana<br>FATTO |
-| **[A10](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Rovine strutturali controllabili<br>TODO |  | **[R03.2](WORLD_GENERATION_ROADMAP.md)** — Accesso alla terrazza<br>FATTO |
-| **[A11](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Integrazione insediamento e consolidamento<br>TODO |  |  |
-| **[R03.3](WORLD_GENERATION_ROADMAP.md)** — Ciglio e sagoma della terrazza<br>TODO |  |  |
-| **[W01](WORLD_GENERATION_ROADMAP.md)** — Laghi editabili<br>TODO |  |  |
+| **[B04](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Esempio costruito da reference tramite builder<br>TODO | **[A08](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Primo Castle Builder: cortina, torri e porta<br>IN CORSO | **[A07.6](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Cupola e profilo curvo<br>FATTO |
+| **[A04](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Piani e interni coerenti con i volumi<br>TODO | **[A09](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Complessi articolati e castelli multilivello<br>IN CORSO | **[A07.6a](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Profilo a cupola sulle torri<br>FATTO |
+| **[A05](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Facciate e strutture per campate<br>TODO | **[R01](WORLD_GENERATION_ROADMAP.md)** — Generatore di singola roccia/affioramento<br>IN CORSO — prototipo disponibile | **[A07.6b](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Cupola su edificio terrazzato<br>FATTO |
+| **[A06](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Due archetipi completi con profili architettonici<br>TODO | **[R02](WORLD_GENERATION_ROADMAP.md)** — Composizione di gruppi rocciosi<br>IN CORSO — R02.1–R02.3 verificati | **[G01.3b.2b](WORLD_GENERATION_ROADMAP.md)** — Diagnostica ingombri e verifica editor/Play<br>FATTO |
+| **[A07.7](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Consolidamento A07 e percorso giocabile<br>TODO | **[R03](WORLD_GENERATION_ROADMAP.md)** — Pareti e creste montuose<br>IN CORSO — R03.1–R03.2 verificati | **[R01.1](WORLD_GENERATION_ROADMAP.md)** — Roccia parametrica<br>FATTO |
+| **[G01](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Composizione da metadati, separata dai builder<br>RIMANDATO |  | **[R02.1](WORLD_GENERATION_ROADMAP.md)** — Gruppi su guida<br>FATTO |
+| **[A10](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Rovine strutturali controllabili<br>TODO |  | **[R02.2](WORLD_GENERATION_ROADMAP.md)** — Fascia libera<br>FATTO |
+| **[A11](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Integrazione insediamento e consolidamento<br>TODO |  | **[R02.3](WORLD_GENERATION_ROADMAP.md)** — Addensamenti e raccordi<br>FATTO |
+| **[R03.3](WORLD_GENERATION_ROADMAP.md)** — Ciglio e sagoma della terrazza<br>TODO |  | **[R03.1](WORLD_GENERATION_ROADMAP.md)** — Terrazza piana<br>FATTO |
+| **[W01](WORLD_GENERATION_ROADMAP.md)** — Laghi editabili<br>TODO |  | **[R03.2](WORLD_GENERATION_ROADMAP.md)** — Accesso alla terrazza<br>FATTO |
 | **[W02](WORLD_GENERATION_ROADMAP.md)** — Fiumi editabili<br>TODO |  |  |
 | **[W03](WORLD_GENERATION_ROADMAP.md)** — Attraversamenti e rive<br>TODO |  |  |
 | **[C01](WORLD_GENERATION_ROADMAP.md)** — Ingressi di grotta<br>TODO |  |  |

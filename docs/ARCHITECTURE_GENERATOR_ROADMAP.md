@@ -273,9 +273,9 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A07 | IN CORSO | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
 | A07.4 | FATTO | Torri segmentate a 8/12/16 facce | A07.1 | Vani obliqui, collisioni, parapetti e salvataggio coerenti; campionario editabile |
 | A07.5 | FATTO | Copertura conica della torre | A07.4 | Tetto indipendente e parametrico, gronda e raccordo al corpo, gestione accesso al tetto |
-| A07.6 | IN CORSO | Cupola e profilo curvo | A07.5 | Edificio terrazzato con cupola; controlli leggibili e copertura separata |
+| A07.6 | FATTO | Cupola e profilo curvo | A07.5 | Edificio terrazzato con cupola; controlli leggibili e copertura separata |
 | A07.6a | FATTO | Profilo a cupola sulle torri | A07.5 | Cupole basse/slanciate, tegole e collisioni; salvataggio e regressione cono |
-| A07.6b | TODO | Cupola su edificio terrazzato | A07.6a | Esempio con terrazza accessibile e volume coperto separato, raccordi e percorso verificati |
+| A07.6b | FATTO | Cupola su edificio terrazzato | A07.6a | Esempio con terrazza accessibile e volume coperto separato, raccordi e percorso verificati |
 | A07.7 | TODO | Consolidamento A07 e percorso giocabile | A07.4–A07.6 | Aperture, interni e raccordi coerenti con la pianta; verificare limiti delle stanze e accessi |
 | A08 | IN CORSO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
 | A09 | IN CORSO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
@@ -1260,3 +1260,14 @@ Inspector della torre → Tower Roof → Cupola. Roof Height regola la rise; il 
 Cupola e cono condividono protezione degli accessi, collisione e ritorno alla terrazza. Non vengono cambiati numero di facce, aperture o dettagli manuali. Esempio scenes/dev/domed_towers_example.tscn con altezze 1.8, 3.5 e 5 m; capture captures/balcony_attachment/domed_towers.png. Test check_domed_towers.gd: tre topologie, geometria finita/non degenere, determinismo, budget del campione, collisione, salvataggio e scala protetta. Regressione check_conical_towers.gd superata. Render GPU ispezionato; nessun nuovo test di cammino in questo incremento.
 
 A07.6 resta IN CORSO: la sua uscita include un edificio terrazzato con volume a cupola, non solo tre torri. Prossimo A07.6b prima di A07.7. Il passo rifinisce forme e strumenti, non riapre la generazione globale da seed.
+
+
+### A07.6b — Edificio terrazzato con padiglione a cupola
+
+Nel tab Volumi: **Crea edificio terrazzato con cupola**. La factory compone un volume rettangolare a tetto piano (14 × 12 m, quota tetto 3.18 m), scala esterna centrale con varco nel parapetto e padiglione a 12 facce sulla terrazza. Cupola, pareti, porta e finestra usano i builder esistenti. Il comando crea nodi editabili con l'azione Undo/Redo di authoring condivisa; non produce una mesh monolitica né richiede un seed di composizione.
+
+La scala è agganciata alla terrazza; il padiglione è un volume indipendente posizionato sulla sua quota iniziale. Se si cambia altezza del basamento, occorre aggiornare manualmente la quota del padiglione: questo esempio non implementa ancora un vincolo verticale fra corpi. Il basamento non ha ingresso o interni arredati. La porta del padiglione parte aperta; il Play consente di azionarla con E vicino alla soglia.
+
+Esempio salvato: scenes/dev/domed_terrace_example.tscn. Prova F6: scenes/dev/domed_terrace_playable.tscn (WASD / E), che carica la scena salvata e usa player3. Il test check_domed_terrace_play.gd guida il vero controller terreno→scala→terrazza→padiglione→terreno e verifica le quote, il passaggio della soglia e il ripristino della cupola all'uscita. Il taglio visivo è attivato solo entrando nel padiglione; collisioni restano fisiche. Render esterno domed_terrace.png e interno domed_terrace_inside.png ispezionati. Parser plugin verificato; il click del nuovo comando/Undo in editor non è stato provato interattivamente in questo incremento.
+
+A07.6 è concluso secondo il suo esempio di uscita; A07 generale resta IN CORSO. Prossimo A07.7: consolidamento degli interni sulle topologie 12/16, raccordi e diagnostica delle combinazioni non supportate, prima della modalità B01.
