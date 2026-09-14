@@ -11,7 +11,7 @@ Il numero di villaggi/case/castelli è contenuto: per ora non serve moltiplicare
 
 L'interazione desiderata è quella di un builder reattivo: l'utente modifica un volume e regole locali propongono/adattano finestre, campate e dettagli. La reference Tiny Glade descrive questo obiettivo d'interazione; non richiede di copiarne il rendering. Conservare i generatori e i seed esistenti come infrastruttura, ma rimandare varietà del planner, città automatiche e confronto dei quattro castelli generati. Il confronto potrà tornare quando utile allo strumento.
 
-**Prossimo incremento: B01.1, facciata assistita su una casa rettangolare.** Il ramo ambientale si ferma dopo R03.2; R03.3 rimane in backlog. Gli step B si affiancano alle geometrie A, non le sostituiscono. Riprendere geometrie A02/A03/A07 per ciò che serve all'esempio, senza attendere un generatore globale.
+**Priorità richiesta: completare prima A07; poi B01.1, facciata assistita su una casa rettangolare.** Il ramo ambientale si ferma dopo R03.2; R03.3 rimane in backlog. Gli step B seguono il consolidamento di A07, senza sostituire le geometrie A. Riprendere geometrie A02/A03/A07 per ciò che serve all'esempio, senza attendere un generatore globale.
 
 Contratto di editing da implementare: modalità Manuale/Assistita per edificio, elementi derivati con ID e provenienza, promozione a manuale quando modificati, soppressione persistente quando eliminati. Gli elementi manuali e le porte scelte dall'utente hanno precedenza. Un ridimensionamento impossibile deve mostrare il conflitto; non deve spostare o cancellare in silenzio gli elementi protetti. Aggiornamento locale durante il drag con limite di frequenza; rilascio come singola operazione Undo che ripristina volume e dettagli. Nessun rimescolamento casuale durante il trascinamento.
 
@@ -259,7 +259,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 |---|---|---|---|---|
 | A00 | FATTO | Analisi delle 21 immagini e roadmap | — | Inventario e vincolo: architettura, resa attuale invariata |
 | A01 | FATTO | Profilo architettonico minimo e contratto versionato | A00 | Preset, editing preservato, container Components e ID persistenti |
-| B01.1 | TODO | Facciata assistita: finestre su volume rettangolare | A01, aperture esistenti | Allarga/restringi: numero e spaziatura si adattano; porte e finestre manuali preservate; Undo completo |
+| B01.1 | TODO | Facciata assistita: finestre su volume rettangolare | A07 prima, A01 e aperture esistenti | Allarga/restringi: numero e spaziatura si adattano; porte e finestre manuali preservate; Undo completo |
 | B01.2 | TODO | Editing e diagnostica degli elementi automatici | B01.1 | Seleziona, rendi manuale, elimina senza ricomparsa; conflitti e modalità evidenti nell'UI |
 | B02 | TODO | Campate e dettagli coerenti | B01.2, A03, A05 | Travi, davanzali e cornici seguono facciata e aperture senza ostruire i vani |
 | B03 | TODO | Assistenza nei raccordi fra volumi e accessori | B01.2, A02, A03 | Balcone/portico/volume agganciato aggiorna aperture e struttura; override preservati |
@@ -271,6 +271,10 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A05 | TODO | Facciate e strutture per campate | A03, A04 | Graticcio e portico: travi e aperture seguono la struttura senza invadere i vani |
 | A06 | TODO | Due archetipi completi con profili architettonici | A04, A05 | Fucina e sala nordica: differenze leggibili nelle forme e negli interni |
 | A07 | IN CORSO | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
+| A07.4 | FATTO | Torri segmentate a 8/12/16 facce | A07.1 | Vani obliqui, collisioni, parapetti e salvataggio coerenti; campionario editabile |
+| A07.5 | TODO | Copertura conica della torre | A07.4 | Tetto indipendente e parametrico, gronda e raccordo al corpo, gestione accesso al tetto |
+| A07.6 | TODO | Cupola e profilo curvo | A07.5 | Edificio terrazzato con cupola; controlli leggibili e copertura separata |
+| A07.7 | TODO | Consolidamento A07 e percorso giocabile | A07.4–A07.6 | Aperture, interni e raccordi coerenti con la pianta; verificare limiti delle stanze e accessi |
 | A08 | IN CORSO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
 | A09 | IN CORSO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
 | G01 | RIMANDATO | Composizione da metadati, separata dai builder | A01, A08, A09 | Piano riproducibile, varianti strutturali, editing protetto |
@@ -1223,3 +1227,14 @@ Verifiche: `check_castle_composer_editor.gd`, avviato tramite --castle-composer-
 - [x] G01.3b.2b Diagnostica visuale, percorso reale editor e prova mirata Play.
 
 Prossimo prototipo ambientale: R01 (roccia parametrica); sviluppo compositivo successivo G01.4–G01.5. Il terreno resta prevalentemente piano con quote discrete, secondo WORLD_GENERATION_ROADMAP.md.
+
+
+### A07.4 — Ripresa prioritaria: torri segmentate
+
+Su richiesta dell'utente A07 viene prima della modalità assistita B01. Disponibili nel tab Volumi: torre ottagonale, torre a 12 facce e torre a 16 facce. Le nuove torri più arrotondate hanno diametro iniziale 8 m, modificabile come larghezza/profondità; conservano il linguaggio materiale esistente. Non sono cilindri matematici: pareti planari segmentate consentono di usare i vani e le collisioni del builder.
+
+Il numero di facce si sceglie alla creazione. Nell'editor, cambiarlo su una torre con aperture, interni o figli è rifiutato con avviso per evitare di riassegnare i riferimenti numerici delle pareti; usare una nuova torre. Ridimensionare larghezza e profondità resta disponibile. Questo limite è intenzionale e non costituisce ancora un remapping generale della topologia.
+
+Corretta la risoluzione delle aperture condivisa, che limitava gli indici a 7: usa ora wall_count(). I test controllano tutte le facce nelle tre varianti, porta aperta sull'ultima faccia, collisione del tetto e round-trip PackedScene. Superata anche la regressione della torre ottagonale con porta obliqua e scala. Parser del plugin verificato; prova interattiva delle nuove varianti e interni a 12/16 facce ancora da eseguire, prima di chiudere A07.
+
+Esempio: scenes/dev/segmented_towers_example.tscn. Screenshot reale: captures/balcony_attachment/segmented_towers.png. Script: tools/preview_segmented_towers.gd, tools/check_segmented_towers.gd. Prossimo A07.5: copertura conica, poi cupola; A07 complessivo resta IN CORSO.

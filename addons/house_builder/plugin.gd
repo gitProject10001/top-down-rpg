@@ -800,6 +800,9 @@ func _build_volume_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Volumi"; tabs.add_child(page)
 	var tower_button := Button.new(); tower_button.text="Crea torre quadrata merlata"; tower_button.pressed.connect(_create_square_tower); page.add_child(tower_button)
 	var polygon_button := Button.new(); polygon_button.text="Crea torre ottagonale"; polygon_button.pressed.connect(_create_polygon_tower); page.add_child(polygon_button)
+	for sides in [12,16]:
+		var button := Button.new(); button.text="Crea torre a %d facce"%sides
+		button.pressed.connect(_create_polygon_tower.bind(sides)); page.add_child(button)
 	volume_kind=OptionButton.new(); volume_kind.add_item("Nuovo: corpo chiuso"); volume_kind.add_item("Nuovo: portico / tettoia aperta"); page.add_child(volume_kind)
 	canopy_roof_choice=OptionButton.new(); canopy_roof_choice.add_item("Copertura selezionata: due falde"); canopy_roof_choice.add_item("Copertura selezionata: falda singola"); canopy_roof_choice.add_item("Copertura selezionata: piana / parapetto"); canopy_roof_choice.item_selected.connect(_set_canopy_roof); page.add_child(canopy_roof_choice)
 	for side in 4:
@@ -1003,11 +1006,11 @@ func _create_square_tower() -> void:
 	var tower=preload("res://addons/house_builder/tower_factory.gd").create()
 	_add_authored(root,tower,"Crea torre quadrata"); _selection_context()
 
-func _create_polygon_tower() -> void:
+func _create_polygon_tower(sides: int=8) -> void:
 	var root := EditorInterface.get_edited_scene_root()
 	if root==null: return
 	var tower=preload("res://addons/house_builder/polygon_tower.gd").new()
-	tower.name="TorreOttagonale"; tower.width=6.0; tower.depth=6.0; tower.wall_height=5.6; tower.roof_height=1.0
+	tower.face_count=sides; tower.name="Torre_%d"%sides; tower.width=6.0 if sides==8 else 8.0; tower.depth=tower.width; tower.wall_height=5.6; tower.roof_height=1.0
 	var records: Array[Dictionary]=[{"kind":"door","wall":0,"width":1.2,"height":2.1},{"kind":"window","wall":7,"width":0.5,"height":1.1,"y":3.6}]
 	tower.openings=records
 	_add_authored(root,tower,"Crea torre ottagonale"); _selection_context()

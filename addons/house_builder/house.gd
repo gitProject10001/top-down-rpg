@@ -137,7 +137,7 @@ func _post_segments(wall: int,along: float) -> Array[Vector2]:
 		spans=next
 	return spans
 func resolved_opening(record: Dictionary) -> Dictionary:
-	var wall := clampi(int(record.get("wall",0)),0,7)
+	var wall := clampi(int(record.get("wall",0)),0,wall_count()-1)
 	var door: bool=record.get("kind","window")=="door"
 	var w := clampf(float(record.get("width",0.85 if not door else 1.0)),0.35,wall_length(wall)-0.4)
 	var h := clampf(float(record.get("height",1.0 if not door else 2.0)),0.35,wall_height-0.25)

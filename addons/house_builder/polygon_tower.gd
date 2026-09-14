@@ -1,32 +1,40 @@
 @tool
 extends "res://addons/house_builder/volume.gd"
-## First A07 footprint: eight planar faces, sharing the House opening pipeline.
+## Segmented round/prismatic footprint, sharing the House opening pipeline.
+@export_enum("8 facce:8", "12 facce:12", "16 facce:16") var face_count := 8:
+	set(value):
+		if value not in [8,12,16] or value==face_count: return
+		# Face indices are attachment anchors: never silently reassign authored openings.
+		if is_inside_tree() and (not openings.is_empty() or not attached_components().is_empty() or get_node_or_null("InteriorPlan")!=null or get_child_count()>0):
+			push_warning("Scegli il numero di facce prima di aggiungere aperture, interni o componenti. Usa una nuova torre per cambiare topologia.")
+			return
+		face_count=value; request_rebuild()
 func _init() -> void:
 	attached=false; canopy_roof=2; battlements_enabled=true; archetype_id="tower"
 
-func wall_count() -> int: return 8
+func wall_count() -> int: return face_count
 
 func footprint_vertices() -> Array[Vector3]:
 	var points: Array[Vector3]=[]
-	for i in 8:
-		var angle := (i-0.5)*TAU/8.0
-		points.append(Vector3(sin(angle)*width*0.5/cos(PI/8),0,cos(angle)*depth*0.5/cos(PI/8)))
+	for i in wall_count():
+		var angle := (i-0.5)*TAU/float(wall_count())
+		points.append(Vector3(sin(angle)*width*0.5/cos(PI/float(wall_count())),0,cos(angle)*depth*0.5/cos(PI/float(wall_count()))))
 	return points
 
 func wall_length(wall: int) -> float:
 	var points := footprint_vertices()
-	return points[posmod(wall,8)].distance_to(points[posmod(wall+1,8)])
+	return points[posmod(wall,wall_count())].distance_to(points[posmod(wall+1,wall_count())])
 
 func wall_normal(wall: int) -> Vector3:
 	var points := footprint_vertices()
-	return (points[posmod(wall+1,8)]-points[posmod(wall,8)]).normalized().cross(Vector3.UP)
+	return (points[posmod(wall+1,wall_count())]-points[posmod(wall,wall_count())]).normalized().cross(Vector3.UP)
 
 func wall_point(wall: int,along: float,y: float,outset: float=0.0) -> Vector3:
-	var points := footprint_vertices(); var a := points[posmod(wall,8)]; var b := points[posmod(wall+1,8)]
+	var points := footprint_vertices(); var a := points[posmod(wall,wall_count())]; var b := points[posmod(wall+1,wall_count())]
 	return (a+b)*0.5+(b-a).normalized()*along+Vector3.UP*y+wall_normal(wall)*outset
 
 func wall_exposed(wall: int,along: float,margin: float=0.0) -> bool:
-	return wall>=0 and wall<8 and absf(along)+margin<=wall_length(wall)*0.5+0.001
+	return wall>=0 and wall<wall_count() and absf(along)+margin<=wall_length(wall)*0.5+0.001
 
 func _wall_box(wall: int,along: float,y: float,w: float,h: float,thick: float,offset: float,mat: int) -> void:
 	var tangent := (wall_point(wall,1,0)-wall_point(wall,0,0)).normalized()
@@ -40,11 +48,11 @@ func _wall_box(wall: int,along: float,y: float,w: float,h: float,thick: float,of
 
 func _polygon_slab(bottom: float,top: float,mat: int,inset: float=0.0) -> void:
 	var points := footprint_vertices()
-	for i in 8:
-		var a_normal := wall_normal(i); var b_normal := wall_normal(posmod(i-1,8))
+	for i in wall_count():
+		var a_normal := wall_normal(i); var b_normal := wall_normal(posmod(i-1,wall_count()))
 		points[i]-=(a_normal+b_normal)*inset/(1.0+a_normal.dot(b_normal))
-	for i in 8:
-		var a := points[i]; var b := points[(i+1)%8]
+	for i in wall_count():
+		var a := points[i]; var b := points[(i+1)%wall_count()]
 		_tri(Vector3.UP*top,a+Vector3.UP*top,b+Vector3.UP*top,mat)
 		_tri(Vector3.UP*bottom,b+Vector3.UP*bottom,a+Vector3.UP*bottom,mat)
 		_tri(a+Vector3.UP*bottom,b+Vector3.UP*bottom,b+Vector3.UP*top,mat)
@@ -52,7 +60,7 @@ func _polygon_slab(bottom: float,top: float,mat: int,inset: float=0.0) -> void:
 
 func _build_shell() -> void:
 	_polygon_slab(-0.09,0,3)
-	for wall in 8:
+	for wall in wall_count():
 		var length := wall_length(wall)
 		_wall_box(wall,0,wall_height*0.5,length+0.1,wall_height,WALL_THICKNESS,-WALL_THICKNESS*0.5,0)
 		for y in [0.14,wall_height-0.08]:
@@ -83,7 +91,7 @@ func stair_edge_length() -> float:
 func hit_wall(world_origin: Vector3,world_direction: Vector3) -> Dictionary:
 	var origin := to_local(world_origin); var direction := global_basis.inverse()*world_direction
 	var result := {}; var closest := INF
-	for wall in 8:
+	for wall in wall_count():
 		var normal := wall_normal(wall)
 		if normal.dot(direction)>=-0.0001: continue
 		var p=Plane(normal,wall_point(wall,0,0)).intersects_ray(origin,direction)
@@ -99,17 +107,17 @@ func hit_wall(world_origin: Vector3,world_direction: Vector3) -> Dictionary:
 
 func _get_configuration_warnings() -> PackedStringArray:
 	if attached or wing_enabled or canopy_roof!=2 or structure_kind!=0:
-		return PackedStringArray(["Torre ottagonale: usare corpo indipendente chiuso, tetto piano e nessuna ala. Le altre configurazioni non sono ancora supportate."])
+		return PackedStringArray(["Torre poligonale: usare corpo indipendente chiuso, tetto piano e nessuna ala. Le altre configurazioni non sono ancora supportate."])
 	return super._get_configuration_warnings()
 
 func contains_footprint(point: Vector3,margin: float=0.0) -> bool:
-	for wall in 8:
+	for wall in wall_count():
 		if wall_normal(wall).dot(point-wall_point(wall,0,0))>=-margin: return false
 	return true
 
 func stair_wall() -> int:
 	var stairs := stair_component()
-	return [0,2,6][stairs.side] if stairs else 0
+	return [0,wall_count()/4,wall_count()*3/4][stairs.side] if stairs else 0
 
 func interior_floor_mesh(material: Material) -> ArrayMesh:
 	var previous := _buffers
@@ -123,7 +131,7 @@ func interior_floor_mesh(material: Material) -> ArrayMesh:
 
 func cutaway_cutters(floor_base: float,storey_height: float) -> Array:
 	var cuts: Array=[[Plane(Vector3.DOWN,-floor_base-storey_height)]]
-	for wall in 8:
+	for wall in wall_count():
 		var normal := wall_normal(wall)
 		if normal.dot(Vector3(1,0,1))>0.1:
 			cuts.append([Plane(-normal,-normal.dot(wall_point(wall,0,0))+0.4),Plane(Vector3.DOWN,-floor_base-0.8)])
