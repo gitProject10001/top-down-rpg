@@ -198,10 +198,20 @@ func _material(quadrant: Vector2,tint: Color) -> ShaderMaterial:
 	m.set_shader_parameter("tint",tint)
 	m.set_shader_parameter("metres",2.5)
 	m.set_shader_parameter("detail_lod",1.0)
+	m.set_shader_parameter("plain_vertical_stone",preload("res://addons/house_builder/masonry_cladding.gd").supported(self))
 	return m
 
+func _mortar_material() -> ShaderMaterial:
+	var material := ShaderMaterial.new()
+	material.shader=preload("res://shaders/pixelart/solid_masonry.gdshader")
+	material.set_shader_parameter("use_vertex_color",false)
+	material.set_shader_parameter("base_color",Vector3(0.16,0.155,0.14))
+	return material
+
 func _plaster_material() -> ShaderMaterial:
-	if wall_finish==1: return _material(Vector2(0,0.5),Color(0.65,0.63,0.59))
+	if wall_finish==1:
+		if preload("res://addons/house_builder/masonry_cladding.gd").supported(self): return _mortar_material()
+		return _material(Vector2(0,0.5),Color(0.65,0.63,0.59))
 	var material := ShaderMaterial.new()
 	material.shader=preload("res://addons/house_builder/plaster.gdshader")
 	var random := RandomNumberGenerator.new()

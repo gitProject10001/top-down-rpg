@@ -333,4 +333,3 @@ func stair_wall() -> int:
 	return [0,2,3][stairs.side] if stairs else 0
 
 func connection_spans(_wall: int,spans: Array[Vector2]) -> Array[Vector2]: return spans
-

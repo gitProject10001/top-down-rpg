@@ -47,6 +47,7 @@ func _finish_openings(body: MeshInstance3D,materials: Array) -> void:
 func _gate_changed(value: bool) -> void:
 	_gate_event=true; gate_open=value; _gate_event=false
 func _plaster_material() -> ShaderMaterial:
+	if preload("res://addons/house_builder/masonry_cladding.gd").supported(self): return _mortar_material()
 	return _material(Vector2(0,0.5),Color(0.65,0.63,0.59))
 func _get_configuration_warnings() -> PackedStringArray:
 	var error := connection_error()

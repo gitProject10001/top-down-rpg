@@ -29,6 +29,10 @@ func run() -> void:
     if color.a<0.6: has_contact=true; break
  assert(has_contact,"Stone vertices carry joint occlusion")
  assert(stone_surfaces>=4,"Stone exists beneath each rendered facade")
+ for building in group.towers()+group.curtains():
+  var substrate: ShaderMaterial=building._generated.get_node("Walls").mesh.surface_get_material(0)
+  assert(substrate.shader.resource_path=="res://shaders/pixelart/solid_masonry.gdshader","Substrate must not use the old atlas")
+  assert(substrate.get_shader_parameter("use_vertex_color")==false)
  for tower in group.towers(): assert(tower.wall_finish==1)
  print("MASONRY_INTEGRATION_OK house_render_triangles=",triangles(walls.mesh)," collision_triangles=",triangles(house._collision_shell))
  if DisplayServer.get_name()!="headless":
