@@ -17,9 +17,18 @@ func run() -> void:
  for node in world.get_children(): node.owner=world
  var scene := PackedScene.new(); assert(scene.pack(world)==OK); assert(ResourceSaver.save(scene,"res://scenes/dev/solid_masonry_comparison.tscn")==OK)
  root.msaa_3d=Viewport.MSAA_4X
- for mode in ["comparison","detail","raking"]:
+ var detailed_triangles: int=sample.triangle_count
+ var detailed_stones: int=sample.stone_count
+ for mode in ["comparison","detail","raking","economical"]:
   if mode!="comparison": camera.size=9; camera.position=Vector3(11,7,12); camera.look_at(Vector3(3.6,1.5,0))
-  if mode=="raking": sun.rotation_degrees=Vector3(-18,65,0)
+  sun.rotation_degrees=Vector3(-18,65,0) if mode=="raking" else Vector3(-42,-30,0)
+  if mode=="economical":
+   sample.detail_mode=1; sample.rebuild()
+   assert(sample.stone_count==detailed_stones)
+   assert(sample.triangle_count<detailed_triangles*0.8)
+   print("MASONRY_TRIANGLES detail=",detailed_triangles," economical=",sample.triangle_count," stones=",sample.stone_count)
+   var reduced := PackedScene.new(); assert(reduced.pack(world)==OK)
+   assert(ResourceSaver.save(reduced,"res://scenes/dev/solid_masonry_economical.tscn")==OK)
   for i in 120: await process_frame
   await RenderingServer.frame_post_draw
   root.get_texture().get_image().save_png("res://captures/balcony_attachment/solid_masonry_%s.png"%mode)

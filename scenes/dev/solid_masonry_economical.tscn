@@ -1,8 +1,8 @@
 [gd_scene format=3]
 
-[ext_resource type="Shader" path="res://shaders/pixelart/painted_architecture.gdshader" id="1_5s16f"]
-[ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/architecture_clear_v2.png" id="2_qwe1r"]
-[ext_resource type="Script" path="res://addons/house_builder/stone_wall_sample.gd" id="3_8f6ba"]
+[ext_resource type="Shader" path="res://shaders/pixelart/painted_architecture.gdshader" id="1_aksq2"]
+[ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/architecture_clear_v2.png" id="2_lbe4b"]
+[ext_resource type="Script" path="res://addons/house_builder/stone_wall_sample.gd" id="3_r1og0"]
 
 [sub_resource type="Environment" id="Environment_r3jr5"]
 background_mode = 1
@@ -20,8 +20,8 @@ size = Vector2(30, 16)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_c6xw5"]
 render_priority = 0
-shader = ExtResource("1_5s16f")
-shader_parameter/atlas = ExtResource("2_qwe1r")
+shader = ExtResource("1_aksq2")
+shader_parameter/atlas = ExtResource("2_lbe4b")
 shader_parameter/quadrant = Vector2(0, 0.5)
 shader_parameter/tint = Color(0.65, 0.63, 0.59, 1)
 shader_parameter/metres = 2.5
@@ -53,10 +53,11 @@ mesh = SubResource("BoxMesh_58wje")
 
 [node name="ModeledStoneSample" type="Node3D" parent="." unique_id=717607715]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, 0, 0)
-script = ExtResource("3_8f6ba")
+script = ExtResource("3_r1og0")
+detail_mode = 1
 
 [node name="Camera" type="Camera3D" parent="." unique_id=157532532]
-transform = Transform3D(0.87157553, -0.18963201, 0.45210147, 0, 0.9221645, 0.38679793, -0.4902612, -0.3371236, 0.80373603, 9, 9, 16)
+transform = Transform3D(0.8511709, -0.19076675, 0.48899508, 0, 0.9316167, 0.3634423, -0.5248887, -0.3093515, 0.79296505, 11, 7, 12)
 projection = 1
 current = true
-size = 17.5
+size = 9.0

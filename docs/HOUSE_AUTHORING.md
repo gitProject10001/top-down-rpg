@@ -905,3 +905,14 @@ Il campione comprende 71 blocchi, ciascuno con facce frontali leggermente irrego
 Validazione grafica D3D12: camera ortografica 17.5 per confronto alla scala di gioco, camera 9 per dettaglio, seconda direzione di luce radente. `tools/preview_solid_masonry.gd` salva la scena e tre screenshot solid_masonry_comparison/detail/raking.png. Esecuzione conclusa con SOLID_MASONRY_SAMPLE_OK.
 
 È un prototipo visivo separato: non sostituisce ancora la muratura di case e castelli, non ha collisioni né integrazione con porte/reveal. Dopo la valutazione visiva, il lavoro successivo è adattare la generazione alle superfici del builder, preservando aperture, angoli e sezioni del cutaway. Il confronto cambia anche la palette: non è una misura isolata dell'effetto della sola geometria.
+
+
+#### A09.12 — Coesione della muratura e variante economica
+
+Campione aggiornato: nucleo di malta più vicino alle facce, variazioni ridotte di sporgenza e colore, fughe variabili, smussi diversi lungo lo stesso blocco. Una variazione cromatica continua attraversa più pietre, con lieve deposito nella fascia bassa. Rimane un campione separato, non un aggiornamento dei muri di produzione.
+
+Inspector del campione: Detail Mode = Dettaglio / Economica. La modalità economica mantiene seed, numero e disposizione delle pietre; conserva i blocchi di bordo completi e semplifica quelli interni, omettendo le superfici posteriori coperte dal nucleo e riducendo la triangolazione delle facce. Il nucleo chiude il retro; non usare questo prototipo per generare aperture o sezioni senza adattare la geometria nascosta.
+
+Confronto misurato sulle mesh: 72 pietre, 4.608 triangoli in dettaglio e 2.802 in economica (-39,2%), più 12 triangoli del nucleo in entrambi i casi. Due mesh/materiali per pannello, non un nodo per pietra. Questa riduzione non implica lo stesso guadagno in FPS: manca ancora una misura su un castello completo e non è presente selezione LOD automatica.
+
+Scena di confronto `solid_masonry_comparison.tscn` e variante salvata `solid_masonry_economical.tscn`. Preview GPU completata con luce frontale e radente; la prova controlla uguaglianza del numero di pietre e riduzione dei triangoli superiore al 20%. Screenshot detail/economical usano stessa camera e luce. Il materiale con normali per distanze maggiori resta un passaggio futuro.
