@@ -61,3 +61,31 @@ static func apply(group: Node3D, positions: Dictionary, plan: Dictionary, baseli
  group.set_meta("composition_plan",plan.duplicate(true))
  group.set_meta("composition_baseline",baseline.duplicate(true))
  group.rebuild()
+
+static func baseline_for(group: Node3D) -> Dictionary:
+ var baseline: Dictionary=group.get_meta("composition_baseline",{}).duplicate(true)
+ if baseline.is_empty():
+  for record in group.get_meta("composition_plan",{}).get("buildings",[]): baseline[record.id]=record.position
+ return baseline
+
+static func describe(group: Node3D) -> Array[Dictionary]:
+ var result: Array[Dictionary]=[]
+ var baseline := baseline_for(group)
+ for node in group.buildings():
+  var id: String=node.get_meta("composition_id","")
+  var supported := baseline.has(id)
+  var locked: bool=node.get_meta("composition_locked",false)
+  var manual: bool=supported and not node.position.is_equal_approx(baseline[id])
+  var label := "Posizione bloccata" if locked else ("Posizione manuale" if manual else "Posizione automatica")
+  if not supported: label="Recinto · rigenerazione non disponibile"
+  result.append({"id":id,"name":str(node.name),"status":label,"supported":supported,"locked":locked,"manual":manual})
+ return result
+
+static func release_baseline(group: Node3D, id: String) -> Dictionary:
+ var baseline := baseline_for(group)
+ if not baseline.has(id): return {}
+ for node in group.buildings():
+  if node.get_meta("composition_id","")==id:
+   baseline[id]=node.position
+   return baseline
+ return {}

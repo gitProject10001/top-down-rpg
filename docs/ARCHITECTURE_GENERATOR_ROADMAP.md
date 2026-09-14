@@ -1129,3 +1129,17 @@ Test check_castle_regeneration: porta modificata e nodo manuale preservati, over
 - [ ] G01.3c Rigenerazione delle dimensioni e della struttura con protezione per proprietà, aggiunte/rimozioni e migrazioni degli ID.
 
 Il confronto dei quattro castelli resta previsto dopo l'ampliamento della varietà architettonica/compositiva; questo passo non lo sostituisce.
+
+
+#### G01.3b.1 — Stato degli elementi e ritorno al controllo automatico
+
+Genera ora contiene due sotto-schede, Proposta ed Elementi. La lista contestuale del castello selezionato mostra posizione automatica/manuale/bloccata; cliccare una riga seleziona il nodo nell'editor. Le torri riportano che la rigenerazione del recinto non è disponibile. Lo stato riguarda la posizione, non pretende di classificare ogni dettaglio dell'edificio.
+
+Rendi posizione automatica aggiorna la baseline alla posizione corrente e rimuove il lock: non muove il nodo e non cancella porte/dettagli. Alla prossima proposta la sua posizione torna disponibile al generatore. L'azione è annullabile; sbloccare soltanto un nodo mantiene invece l'eventuale override manuale della posizione. UI aggiornata ogni 0,4 secondi con la selezione e le modifiche dell'editor.
+
+Verifica: check_castle_element_ui testa stato, rilascio, Undo/Redo, nessuno spostamento immediato, porte preservate, torri non supportate e assenza di selezione; cattura Godot castle_element_states.png. Rieseguiti check_castle_regeneration e check_castle_composition_ui. Plugin verificato sintatticamente. Non ancora test end-to-end della selezione e del comando Undo nell'editor interattivo.
+
+- [x] G01.3b.1 UI stato per elemento e reset esplicito dell'override di posizione.
+- [ ] G01.3b.2 Ingombri orientati/accessori e verifica editor/Play: rimane il prossimo incremento della protezione.
+
+Il confronto dei quattro castelli rimane nel TODO G01.4–G01.5, subordinato alla varietà strutturale.

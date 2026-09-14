@@ -1,5 +1,6 @@
 @tool
 extends EditorPlugin
+var composition_panel: VBoxContainer
 var court_elevation: SpinBox
 const ExteriorStair=preload("res://addons/house_builder/exterior_stair.gd")
 const Balcony=preload("res://addons/house_builder/balcony.gd")
@@ -266,7 +267,7 @@ func _apply_changes() -> void:
 func _process(_delta: float) -> void:
 	_fort_poll+=_delta
 	if _fort_poll>0.4:
-		_fort_poll=0; _refresh_fortification_ui()
+		_fort_poll=0; _refresh_fortification_ui(); _refresh_composition_elements()
 	if volume_info:
 		var selected_volume := _selected_house()
 		canopy_roof_choice.disabled=not selected_volume is Volume
@@ -1028,7 +1029,10 @@ func _build_fortification_tab() -> void:
 	var composition=preload("res://addons/castle_generator/editor_panel.gd").new()
 	composition.name="Genera"; composition.create_requested.connect(_create_composed_castle)
 	composition.regenerate_requested.connect(_preview_castle_regeneration)
-	composition.lock_requested.connect(_toggle_composition_lock); creation_tabs.add_child(composition)
+	composition.lock_requested.connect(_toggle_composition_lock)
+	composition.reset_requested.connect(_release_composition_position)
+	composition.element_selected.connect(_select_composition_element)
+	composition_panel=composition; creation_tabs.add_child(composition)
 	var edit := VBoxContainer.new(); edit.name="Recinto"; fort_sections.add_child(edit)
 	var elevations := VBoxContainer.new(); elevations.name="Quote"; fort_sections.add_child(elevations)
 	var visibility := VBoxContainer.new(); visibility.name="Vista"; fort_sections.add_child(visibility)
@@ -1301,3 +1305,35 @@ func _preview_castle_regeneration(candidate: Dictionary) -> void:
 		undo.commit_action(); dialog.queue_free())
 	dialog.canceled.connect(dialog.queue_free)
 	EditorInterface.get_base_control().add_child(dialog); dialog.popup_centered()
+
+func _composition_element() -> Node:
+	for selected in EditorInterface.get_selection().get_selected_nodes():
+		var node: Node=selected
+		while node and not node.has_meta("composition_id"): node=node.get_parent()
+		if node: return node
+	return null
+
+func _refresh_composition_elements() -> void:
+	if not is_instance_valid(composition_panel): return
+	var node := _composition_element()
+	composition_panel.update_elements(_selected_fortification(),str(node.get_meta("composition_id","")) if node else "")
+
+func _select_composition_element(id: String) -> void:
+	var group := _selected_fortification()
+	if group==null: return
+	for node in group.buildings():
+		if node.get_meta("composition_id","")==id:
+			EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(node)
+			EditorInterface.edit_node(node); _refresh_composition_elements(); return
+
+func _release_composition_position() -> void:
+	var group := _selected_fortification(); var node := _composition_element()
+	if group==null or node==null: return
+	var baseline: Dictionary=preload("res://addons/castle_generator/regeneration.gd").release_baseline(group,node.get_meta("composition_id",""))
+	if baseline.is_empty(): _show_plan_error("Posizione automatica","Seleziona un corpo interno del castello generato."); return
+	var undo := get_undo_redo(); undo.create_action("Restituisci posizione al generatore",UndoRedo.MERGE_DISABLE,group)
+	undo.add_do_method(group,"set_meta","composition_baseline",baseline)
+	undo.add_do_method(node,"set_meta","composition_locked",false)
+	undo.add_undo_method(group,"set_meta","composition_baseline",group.get_meta("composition_baseline",{}).duplicate(true))
+	undo.add_undo_method(node,"set_meta","composition_locked",node.get_meta("composition_locked",false))
+	undo.commit_action(); _refresh_composition_elements()
