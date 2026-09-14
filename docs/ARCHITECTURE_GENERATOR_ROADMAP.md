@@ -256,6 +256,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A07 | IN CORSO | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
 | A08 | IN CORSO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
 | A09 | IN CORSO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
+| G01 | IN CORSO | Composizione da metadati, separata dai builder | A01, A08, A09 | Piano riproducibile, varianti strutturali, editing protetto |
 | A10 | TODO | Rovine strutturali controllabili | A03, A04, A07 | R07: togli una porzione di tetto/muro, interno e collisione coerenti |
 | A11 | TODO | Integrazione insediamento e consolidamento | Incrementale; chiusura dopo A08 | Case e castello nello stesso villaggio, rigenerazione locale e budget misurati |
 
@@ -718,7 +719,7 @@ Prossimo passo concreto:
 
 Aggiornare le checkbox solo dopo la verifica; dividere una fase in sottofasi se
 necessario senza perdere gli ID. Una scena che “sembra giusta” non chiude una fase
-se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. A09.2 aggiunge il corpo accessorio collegato. A09.3 introduce raccordi in pendenza. A09.4 aggiunge raccordi a gradini. A09.5 introduce la corte rialzata. A09.6 coordina la quota con gli edifici. Prossimo passo: **bordi della corte e distribuzione degli accessi**.
+se editing, salvataggio o Play richiesti non funzionano. Il primo recinto A08 è percorribile. A08.7 protegge i vani scala; A09.1 introduce il primo mastio. A09.2 aggiunge il corpo accessorio collegato. A09.3 introduce raccordi in pendenza. A09.4 aggiunge raccordi a gradini. A09.5 introduce la corte rialzata. A09.6 coordina la quota con gli edifici. Priorità aggiornata: **G01, scheletro del compositore e protezione delle modifiche manuali**. Bordi della corte e distribuzione degli accessi restano nel backlog A09.
 
 
 ### A08.1 — Cortina rettilinea e portone — 2026-09-13
@@ -1081,3 +1082,26 @@ Verifica GPU ravvicinata e check_masonry_integration: materiale di fondo solid_m
 Le collisioni sono costruite prima del rivestimento e rimangono semplici. Il rilievo è inferiore a 3 cm. Le cortine inclinate/a gradini conservano per ora il profilo e il materiale dedicati precedenti.
 
 Verifica: check_masonry_integration supera il confronto verticale fra pavimento originale e decorato su torri e cortine (bordi, vuoti delle scale e altezza); screenshot GPU integrated_masonry_castle.png aggiornato. check_open_castle_play supera porte, reveal/ripristino e supporto del giocatore sul camminamento.
+
+
+### G01 — Compositore da metadati (priorità attuale)
+
+Obiettivo: separare evoluzione del vocabolario architettonico ed evoluzione delle regole di composizione. A02–A09 restano il backlog dei componenti; non vengono dichiarati completi da questa fase. Le rifiniture dei materiali non sono il prossimo passo principale.
+
+Pipeline: **Request → regole della famiglia → piano validato → adapter → builder esistenti → scena editabile**. Il planner non costruisce mesh e non conosce proporzioni o materiali delle case. Le regole implementano `request_errors`, `propose`, `validate`. L'adapter associa i ruoli del piano ai builder. `ArchitectureProfile` e `BuildingRequest` esistenti restano contratti dei singoli edifici; le regole di composizione non li sostituiscono.
+
+- [x] G01.1 Scheletro: richiesta Resource con seed, intervallo dimensioni e quota minima scoperta; piano schema 1, ID semantici, seed locali; validazione e tentativi limitati.
+- [x] G01.1 Prima famiglia single_court: quattro torri ottagonali, un mastio, un corpo servizi; variazioni di dimensioni, proporzioni del recinto, lato del mastio e posizione arretrata. Adapter tramite Fortification Factory, Keep Factory e BuildingRequest.
+- [x] G01.1 Esempio editabile `scenes/dev/castle_generated_seed17.tscn`; test 100 seed e diagnostica del builder su seed 17.
+- [ ] G01.2 UI contestuale Composizione: richiesta/piano/diagnostica, anteprima leggera di più seed, conferma come nuovo gruppo; nessuna sostituzione implicita.
+- [ ] G01.3 Persistenza delle modifiche: baseline, override e lock per ID, rigenerazione locale con Undo/Redo; test che porte spostate e torri bloccate sopravvivano. Gli ID attuali sono solo la fondazione, non implementano questa protezione.
+- [ ] G01.4 Catalogo ruoli → componenti/profili architettonici. Nuove forme estendono catalogo/adapter; nuove disposizioni estendono regole. Segnalare capacità mancanti, mai sostituire silenziosamente una forma.
+- [ ] G01.5 Recinti più grandi con cortine segmentate, numero variabile di torri, perimetri non rettangolari; validazione dei collegamenti e degli accessi.
+- [ ] G01.6 Più corti e quote, metadati di funzione/ricchezza separati dalla famiglia architettonica, vincoli terreno; integrazione insediamento A11.
+- [ ] G01.7 Validazione navigabilità/visibilità in Play per una matrice di seed, budget mesh e tempi; preservazione manuale end-to-end.
+
+Limiti G01.1: distanza fra centri delle torri 26–27 m su ciascun asse, per rispettare le cortine attuali; altezza e topologia delle torri rimangono fisse. La percentuale scoperta usa il rettangolo interno conservativo con margine di 5 m, sottraendo gli ingombri dei due edifici. Verifica geometrica dei passaggi, non prova di navigabilità. Niente terreno o rigenerazione in-place. Il piano viene conservato nei metadata del nuovo gruppo; gli elementi restano nodi parametrici modificabili. Materializer supporta esplicitamente solo schema/famiglia iniziali, non promette un adattatore universale.
+
+Uso: `tools/preview_generated_castle.gd` genera e salva l'esempio seed 17 e una cattura Godot; `tools/check_castle_generator.gd` verifica determinismo, 100 piante distinte, vincoli, richiesta impossibile e raccordi del gruppo realizzato. Il test non certifica 100 castelli in Play.
+
+**Prossimo incremento: G01.2, anteprima contestuale dei piani.** Poi G01.3 prima di introdurre qualsiasi comando che rigeneri un gruppo editato.
