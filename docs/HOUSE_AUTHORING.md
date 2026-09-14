@@ -936,3 +936,12 @@ Le superfici orizzontali della pietra usano un disegno distinto dalle pareti: la
 I blocchi geometrici portano valori di occlusione sui vertici: contatti e basi degli smussi più scuri, facce quasi libere dall'occlusione aggiuntiva. Il dato è conservato anche nel rivestimento del castello dopo le sottrazioni per aperture. Aumentata l'influenza dell'AO dei materiali; non sono state scurite globalmente le luci né modificata la risoluzione delle shadow map. Le ombre proiettate restano quelle della geometria esistente.
 
 Validazione: check_masonry_integration verifica presenza dei valori AO, muratura sotto l'intonaco, collisioni semplici e produce viste frontale/radente in integrated_masonry_castle/raking.png. Numero di triangoli invariato: per la casa campione 10.075 visivi e 546 nella collisione. Il pavimento conserva il rilievo shader, non aggiunge geometria alle lastre.
+
+
+#### A09.15 — Merli geometrici e conci d'angolo
+
+Merli, parapetti e copertine del tetto piano ora usano blocchi geometrici in corsi, con il materiale solid_masonry e smussi proporzionati alle dimensioni. Non riutilizzano il vecchio motivo di mattoni proiettato sui blocchi piccoli. I tagli per accesso alle scale e i raccordi fra torri/cortine conservano gli intervalli del generatore esistente; il camminamento mantiene le lastre.
+
+`corner_masonry.gd` individua estremità coincidenti delle facce e aggiunge conci che avvolgono lo spigolo, con bracci lunghi/corti alternati per corso. Il profilo segue l'angolo fra le facce, inclusi gli spigoli ottagonali; le sottrazioni di porte e volumi vengono applicate successivamente. I conci si aggiungono al rivestimento visivo, senza aumentare il collision shell. Nelle torri ottagonali con Wall Finish = Pietra i montanti lignei agli spigoli sono rimossi; restano sulle torri intonacate.
+
+Verifica GPU completata: screenshot integrated_masonry_corner.png, test integrazione e test Play con porte, reveal e supporto dei camminamenti. Il test Play è passato prima dell'ultima rimozione dei montanti lignei; la vista GPU e il test d'integrazione sono stati rieseguiti dopo. Aumenta la geometria del coronamento; non è un benchmark di villaggio e non è presente LOD automatico.

@@ -27,13 +27,13 @@ func triangle(a: Vector3,b: Vector3,c: Vector3,color: Color) -> void:
  for p in [a,c,b]:
   _surface.set_normal(normal); _surface.set_color(Color(color.r,color.g,color.b,float(_contact.get(p,1.0)))); _surface.add_vertex(p)
 func stone(center: Vector3,w: float,h: float) -> void:
- var corner := _rng.randf_range(0.012,0.046)
+ var corner := minf(_rng.randf_range(0.012,0.046),minf(w,h)*0.22)
  var outline: Array[Vector2]=[Vector2(-w/2+corner,-h/2),Vector2(w/2-corner,-h/2),Vector2(w/2,-h/2+corner),Vector2(w/2,h/2-corner),Vector2(w/2-corner,h/2),Vector2(-w/2+corner,h/2),Vector2(-w/2,h/2-corner),Vector2(-w/2,-h/2+corner)]
  for i in outline.size(): outline[i]+=Vector2(_rng.randf_range(-0.012,0.012),_rng.randf_range(-0.012,0.012))
  var rings: Array=[]
  var projection := _rng.randf_range(0.258,0.278)
  var tilt := _rng.randf_range(-0.013,0.013)
- var bevel := _rng.randf_range(0.018,0.035)
+ var bevel := minf(_rng.randf_range(0.018,0.035),minf(w,h)*0.16)
  var bevel_weights: Array[float]=[]
  for i in 8: bevel_weights.append(_rng.randf_range(0.35,1.25))
  var shade := _rng.randf_range(0.18,0.23)

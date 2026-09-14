@@ -58,7 +58,7 @@ func _build_shell() -> void:
 		for y in [0.14,wall_height-0.08]:
 			_wall_box(wall,0,y,length+0.12,0.16,0.30,-0.12,2)
 		for sign_value in [-1.0,1.0]:
-			_wall_box(wall,sign_value*length*0.5,wall_height*0.5,0.13,wall_height,0.14,0.04,1)
+			if wall_finish==0: _wall_box(wall,sign_value*length*0.5,wall_height*0.5,0.13,wall_height,0.14,0.04,1)
 
 func _build_roof_slab() -> void: _polygon_slab(wall_height,wall_height+0.18,2)
 func _build_roof() -> ArrayMesh:

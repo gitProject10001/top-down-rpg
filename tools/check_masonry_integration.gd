@@ -34,9 +34,10 @@ func run() -> void:
  if DisplayServer.get_name()!="headless":
   var camera: Camera3D=world.get_node("Camera")
   root.msaa_3d=Viewport.MSAA_4X
-  for mode in ["castle","plaster","raking"]:
+  for mode in ["castle","plaster","raking","corner"]:
    if mode!="plaster": camera.size=17.5; camera.position=Vector3(35,18,14); camera.look_at(Vector3(22,3,-1))
    else: camera.size=12; camera.position=Vector3(17,10,-7); camera.look_at(Vector3(8,3,-18))
+   if mode=="corner": camera.size=8; camera.position=Vector3(34,10,11); camera.look_at(Vector3(26,3.5,0))
    if mode=="raking":
     for node in world.get_children():
      if node is DirectionalLight3D: node.rotation_degrees=Vector3(-22,55,0)

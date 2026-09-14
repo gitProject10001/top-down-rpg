@@ -225,8 +225,9 @@ func _flat_roof() -> ArrayMesh:
 				_build_parapet_span(wall,span,length)
 
 	var mesh := ArrayMesh.new()
-	var materials := [_plaster_material(),_material(Vector2(0.5,0),Color(0.60,0.53,0.46)),_material(Vector2(0,0.5),Color(0.65,0.63,0.59))]
-	for i in 3:
+	var stone_material := ShaderMaterial.new(); stone_material.shader=preload("res://shaders/pixelart/solid_masonry.gdshader")
+	var materials := [_plaster_material(),_material(Vector2(0.5,0),Color(0.60,0.53,0.46)),_material(Vector2(0,0.5),Color(0.65,0.63,0.59)),stone_material]
+	for i in 4:
 		var arrays := _buffers[i].commit_to_arrays()
 		if arrays[Mesh.ARRAY_VERTEX]==null: continue
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays); mesh.surface_set_material(mesh.get_surface_count()-1,materials[i])
@@ -290,21 +291,39 @@ func roof_door_error() -> String:
 		if opening.wall==candidate.wall and absf(opening.along-candidate.along)<(opening.width+candidate.width)*0.5+0.16 and absf(opening.y-candidate.y)<(opening.height+candidate.height)*0.5+0.16: return "Porta tetto sovrapposta a un'apertura manuale: spostala."
 	return ""
 
+func _parapet_block(wall: int,along: float,y: float,w: float,h: float,thick: float,offset: float,_mat: int) -> void:
+	var count := maxi(1,ceili(w/0.8)); var rows := maxi(1,ceili(h/0.38))
+	var sample=preload("res://addons/house_builder/stone_wall_sample.gd").new()
+	var tangent := (wall_point(wall,1,0)-wall_point(wall,0,0)).normalized()
+	for row in rows:
+		for i in count:
+			sample._rng.seed=house_seed+wall*131+i*17+row*359+int(along*97+y*53)
+			sample._surface=SurfaceTool.new(); sample._surface.begin(Mesh.PRIMITIVE_TRIANGLES)
+			sample.stone(Vector3.ZERO,maxf(0.01,w/count-0.009),maxf(0.01,h/rows-0.006))
+			var arrays: Array=sample._surface.commit_to_arrays()
+			var vertices: PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+			var colors: PackedColorArray=arrays[Mesh.ARRAY_COLOR]
+			var frame := Transform3D(Basis(tangent,Vector3.UP,wall_normal(wall)*thick/0.53),wall_point(wall,along-w*0.5+(i+0.5)*w/count,y-h*0.5+(row+0.5)*h/rows,offset))
+			for t in range(0,vertices.size(),3):
+				_buffers[3].set_color(colors[t])
+				_tri(frame*vertices[t],frame*vertices[t+2],frame*vertices[t+1],3)
+	sample.free()
+
 func _build_parapet_span(wall: int,span: Vector2,length: float) -> void:
 	if not battlements_enabled:
-		_wall_box(wall,(span.x+span.y)*0.5,effective_elevation()+roof_height*0.5,span.y-span.x,roof_height,0.18,-0.09,0)
-		_wall_box(wall,(span.x+span.y)*0.5,roof_top(),span.y-span.x,0.08,0.24,-0.09,2)
+		_parapet_block(wall,(span.x+span.y)*0.5,effective_elevation()+roof_height*0.5,span.y-span.x,roof_height,0.18,-0.09,0)
+		_parapet_block(wall,(span.x+span.y)*0.5,roof_top(),span.y-span.x,0.08,0.24,-0.09,2)
 		return
 	var base := roof_height*0.45
-	_wall_box(wall,(span.x+span.y)*0.5,effective_elevation()+base*0.5,span.y-span.x,base,0.22,-0.11,0)
-	_wall_box(wall,(span.x+span.y)*0.5,effective_elevation()+base,span.y-span.x,0.06,0.26,-0.11,2)
+	_parapet_block(wall,(span.x+span.y)*0.5,effective_elevation()+base*0.5,span.y-span.x,base,0.22,-0.11,0)
+	_parapet_block(wall,(span.x+span.y)*0.5,effective_elevation()+base,span.y-span.x,0.06,0.26,-0.11,2)
 	var count := maxi(2,roundi(length/battlement_spacing)); var step := length/count
 	for i in count+1:
 		var center: float=-length*0.5+i*step
 		var low := maxf(span.x,center-step*0.27); var high := minf(span.y,center+step*0.27)
 		if high-low<0.01: continue
-		_wall_box(wall,(low+high)*0.5,effective_elevation()+base+(roof_height-base)*0.5,high-low,roof_height-base,0.22,-0.11,0)
-		_wall_box(wall,(low+high)*0.5,roof_top(),high-low,0.08,0.28,-0.11,2)
+		_parapet_block(wall,(low+high)*0.5,effective_elevation()+base+(roof_height-base)*0.5,high-low,roof_height-base,0.22,-0.11,0)
+		_parapet_block(wall,(low+high)*0.5,roof_top(),high-low,0.08,0.28,-0.11,2)
 
 func _build_roof_slab() -> void:
 	_box(Vector3(0,wall_height+0.09,0),Vector3(width+0.24,0.18,depth+0.24),2)
@@ -314,3 +333,4 @@ func stair_wall() -> int:
 	return [0,2,3][stairs.side] if stairs else 0
 
 func connection_spans(_wall: int,spans: Array[Vector2]) -> Array[Vector2]: return spans
+

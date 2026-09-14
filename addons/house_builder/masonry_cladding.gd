@@ -28,4 +28,5 @@ static func append_to(house: Node3D, body: MeshInstance3D) -> void:
    material.set_shader_parameter("use_vertex_color",false); backing.surface_set_material(0,material)
    Join.append(result,backing,frame*mortar.transform,[])
   sample.free()
+ if stone: preload("res://addons/house_builder/corner_masonry.gd").append_to(house,result)
  body.mesh=result
