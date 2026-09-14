@@ -1047,3 +1047,12 @@ Collisioni separate: `_collision_shell` conserva la mesh semplice del muro e ric
 Verifica GPU: `check_masonry_integration.gd` conferma muratura sotto ogni facciata, parametri dell'intonaco e finitura delle torri. Nella casa di prova: 10.075 triangoli visivi contro 546 nella collisione del muro. `check_open_castle_play.gd` passa ingresso, cortile libero, riattivazione reveal, porte e camminamenti. Screenshot integrated_masonry_castle/plaster.png. Non c'è ancora LOD automatico: aumenta la geometria visiva e il tempo di rigenerazione nell'editor; non è una validazione prestazionale di un villaggio completo.
 
 Validazione aggiuntiva A09.13: suite editor completata con HOUSE_EDITOR_ALL_OK (restano gli avvisi preesistenti di ownership degli arredi). Il test di integrazione controlla anche la separazione fra mesh visiva e collisione per una casa con ala laterale.
+
+
+#### A09.14 — Lastre del camminamento e occlusione nei giunti
+
+Le superfici orizzontali della pietra usano un disegno distinto dalle pareti: lastre rettangolari di dimensioni miste, suddivisioni variabili e giunti sfalsati. Smussi e fughe sono generati nello shader in scala metrica, con rilievo più contenuto rispetto alla muratura verticale. La variazione dipende dalla posizione e non ripete una singola immagine di mattoni. Nessun ornamento moderno è stato trasferito dalle referenze.
+
+I blocchi geometrici portano valori di occlusione sui vertici: contatti e basi degli smussi più scuri, facce quasi libere dall'occlusione aggiuntiva. Il dato è conservato anche nel rivestimento del castello dopo le sottrazioni per aperture. Aumentata l'influenza dell'AO dei materiali; non sono state scurite globalmente le luci né modificata la risoluzione delle shadow map. Le ombre proiettate restano quelle della geometria esistente.
+
+Validazione: check_masonry_integration verifica presenza dei valori AO, muratura sotto l'intonaco, collisioni semplici e produce viste frontale/radente in integrated_masonry_castle/raking.png. Numero di triangoli invariato: per la casa campione 10.075 visivi e 546 nella collisione. Il pavimento conserva il rilievo shader, non aggiunge geometria alle lastre.

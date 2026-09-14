@@ -17,5 +17,5 @@ void fragment() {
  vec3 pigment=mix(stone_color,stone_color*vec3(0.74,0.79,0.70),damp*0.55);
  ALBEDO=pigment*(0.84+0.22*cloud+0.04*grain+0.035*mottling);
  ROUGHNESS=0.9; SPECULAR=0.06;
- AO=COLOR.a; AO_LIGHT_AFFECT=0.35;
+ AO=use_vertex_color?COLOR.a:0.48; AO_LIGHT_AFFECT=0.65;
 }

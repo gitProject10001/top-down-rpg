@@ -13,6 +13,7 @@ var triangle_count := 0
 var build_usec := 0
 var _generated: Node3D
 var _pending := false
+var _contact: Dictionary={}
 var _surface: SurfaceTool
 var _rng := RandomNumberGenerator.new()
 var stone_count := 0
@@ -24,7 +25,7 @@ func triangle(a: Vector3,b: Vector3,c: Vector3,color: Color) -> void:
  triangle_count+=1
  var normal := (b-a).cross(c-a).normalized()
  for p in [a,c,b]:
-  _surface.set_normal(normal); _surface.set_color(color); _surface.add_vertex(p)
+  _surface.set_normal(normal); _surface.set_color(Color(color.r,color.g,color.b,float(_contact.get(p,1.0)))); _surface.add_vertex(p)
 func stone(center: Vector3,w: float,h: float) -> void:
  var corner := _rng.randf_range(0.012,0.046)
  var outline: Array[Vector2]=[Vector2(-w/2+corner,-h/2),Vector2(w/2-corner,-h/2),Vector2(w/2,-h/2+corner),Vector2(w/2,h/2-corner),Vector2(w/2-corner,h/2),Vector2(-w/2+corner,h/2),Vector2(-w/2,h/2-corner),Vector2(-w/2,-h/2+corner)]
@@ -47,13 +48,16 @@ func stone(center: Vector3,w: float,h: float) -> void:
    var z: float=[-0.25,-0.19,projection-bevel,projection][band]
    ring.append(center+Vector3(xy.x,xy.y,z+tilt*xy.x))
   rings.append(ring)
+ _contact.clear()
+ for band in 4:
+  for point in rings[band]: _contact[point]=[0.45,0.45,0.52,0.93][band]
  # Keep deterministic stone layout identical between detail settings.
  var crown := center+Vector3(0,0,projection+_rng.randf_range(-0.005,0.009))
  var edge_stone := absf(center.x)+w*0.5>width*0.5-0.08 or center.y+h*0.5>height-0.06 or center.y-h*0.5<0.06
  var reduced := detail_mode==1 and not edge_stone
  if reduced:
   # Core hides the back/sides: carry the bevel down into the mortar, never leave a slit.
-  for i in 8: rings[2][i].z=minf(rings[2][i].z,0.221)
+  for i in 8: rings[2][i].z=minf(rings[2][i].z,0.221); _contact[rings[2][i]]=0.52
  for band in range(2 if reduced else 0,3):
   for i in 8:
    var j := (i+1)%8
