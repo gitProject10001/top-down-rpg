@@ -952,3 +952,6 @@ Verifica GPU completata: screenshot integrated_masonry_corner.png, test integraz
 Il corpo di torri in pietra e cortine rivestite usa ora un materiale di malta neutro, senza atlante a mattoni. Anche le fasce verticali di pietra del materiale condiviso eliminano il reticolo precedente quando è disponibile il rivestimento geometrico; le superfici orizzontali conservano le lastre del camminamento. Le cortine inclinate non rivestite mantengono il materiale precedente come fallback.
 
 Verifica GPU ravvicinata e check_masonry_integration: materiale di fondo solid_masonry con colore uniforme sulle torri/cortine, nessun atlante sul substrato; geometria e collisioni restano invariate. Screenshot integrated_masonry_corner.png aggiornato.
+
+
+I camminamenti piani e i tetti piani delle torri generano lastre geometriche durante Rebuild, con variazione ripetibile dal seed della casa. La malta di fondo non mostra più il vecchio pattern. Vani scala e raccordi restano aperti; le collisioni conservano il piano semplice. I camminamenti inclinati/a gradini usano ancora la finitura precedente.

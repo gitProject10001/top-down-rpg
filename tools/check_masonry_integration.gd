@@ -33,6 +33,19 @@ func run() -> void:
   var substrate: ShaderMaterial=building._generated.get_node("Walls").mesh.surface_get_material(0)
   assert(substrate.shader.resource_path=="res://shaders/pixelart/solid_masonry.gdshader","Substrate must not use the old atlas")
   assert(substrate.get_shader_parameter("use_vertex_color")==false)
+ for building in group.towers()+group.curtains():
+  var roof: ArrayMesh=building._generated.get_node("Roof").mesh
+  var original: ArrayMesh=building._build_roof()
+  assert(triangles(roof)>triangles(original),"Walkways must contain geometric slabs")
+  var before := original.generate_triangle_mesh(); var after := roof.generate_triangle_mesh()
+  for x in range(-8,9):
+   for z in range(-8,9):
+    var point := Vector3(x*building.width/16.0,building.wall_height+0.3,z*building.depth/16.0)
+    var old_hit := before.intersect_ray(point,Vector3.DOWN)
+    var new_hit := after.intersect_ray(point,Vector3.DOWN)
+    assert(old_hit.is_empty()==new_hit.is_empty(),"Slabs must preserve floor boundaries and stair voids")
+    if not old_hit.is_empty(): assert(absf(old_hit.position.y-new_hit.position.y)<0.03,"Slab relief must remain close to the simple collision floor")
+ print("FLAGSTONE_BOUNDARIES_STAIR_VOIDS_HEIGHT_OK")
  for tower in group.towers(): assert(tower.wall_finish==1)
  print("MASONRY_INTEGRATION_OK house_render_triangles=",triangles(walls.mesh)," collision_triangles=",triangles(house._collision_shell))
  if DisplayServer.get_name()!="headless":

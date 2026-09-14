@@ -1072,3 +1072,12 @@ Verifica GPU completata: screenshot integrated_masonry_corner.png, test integraz
 Il corpo di torri in pietra e cortine rivestite usa ora un materiale di malta neutro, senza atlante a mattoni. Anche le fasce verticali di pietra del materiale condiviso eliminano il reticolo precedente quando è disponibile il rivestimento geometrico; le superfici orizzontali conservano le lastre del camminamento. Le cortine inclinate non rivestite mantengono il materiale precedente come fallback.
 
 Verifica GPU ravvicinata e check_masonry_integration: materiale di fondo solid_masonry con colore uniforme sulle torri/cortine, nessun atlante sul substrato; geometria e collisioni restano invariate. Screenshot integrated_masonry_corner.png aggiornato.
+
+
+#### A09.17 — Pavimenti geometrici dei camminamenti
+
+`flagstone_floor.gd` riveste i tetti piani con lastre di larghezza variabile, smussi, colore e occlusione ai contatti della muratura geometrica. Il fondo usa malta neutra senza il precedente pattern shader. Le lastre vengono ritagliate sulle facce finali del pavimento: rispettano profili poligonali, raccordi e aperture delle scale. Una sola superficie aggiuntiva per camminamento, senza nodi per lastra; aumenta comunque il numero di triangoli e non introduce LOD automatico.
+
+Le collisioni sono costruite prima del rivestimento e rimangono semplici. Il rilievo è inferiore a 3 cm. Le cortine inclinate/a gradini conservano per ora il profilo e il materiale dedicati precedenti.
+
+Verifica: check_masonry_integration supera il confronto verticale fra pavimento originale e decorato su torri e cortine (bordi, vuoti delle scale e altezza); screenshot GPU integrated_masonry_castle.png aggiornato. check_open_castle_play supera porte, reveal/ripristino e supporto del giocatore sul camminamento.

@@ -75,6 +75,8 @@ func rebuild() -> void:
 		var collision := _generated.get_node_or_null("HouseCollision")
 		if collision:
 			var shape := CollisionShape3D.new(); shape.shape=_generated.get_node("Roof").mesh.create_trimesh_shape(); collision.add_child(shape)
+		var roof: MeshInstance3D=_generated.get_node("Roof")
+		roof.mesh=preload("res://addons/house_builder/flagstone_floor.gd").apply(self,roof.mesh)
 func volume_error() -> String:
 	var host := volume_host()
 	if not attached: return ""

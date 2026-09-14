@@ -8,6 +8,7 @@ uniform float metres=2.5;
 uniform float detail_lod=1.0;
 uniform bool masonry_relief = true;
 uniform bool plain_vertical_stone = false;
+uniform bool plain_horizontal_stone = false;
 uniform float masonry_depth : hint_range(0.0,0.09) = 0.07;
 float stone_hash(vec2 v) { return fract(sin(dot(v,vec2(127.1,311.7)))*43758.5453); }
 // Metre-scale joints and bevels; no directional lighting baked into pigment.
@@ -87,7 +88,7 @@ void fragment(){ architecture_reveal(FRAGCOORD.xy);
   NORMAL=normalize(abs(det)*NORMAL-sign(det)*(dFdx(height)*r1+dFdy(height)*r2));
   AO=mix(0.24,1.0,stone.y); AO_LIGHT_AFFECT=0.65;
   ROUGHNESS=mix(0.98,0.83,stone.y); SPECULAR=0.18;
-  if(plain_vertical_stone && !horizontal) {
+  if((plain_vertical_stone && !horizontal) || (plain_horizontal_stone && horizontal)) {
    ALBEDO=vec3(0.16,0.155,0.14)*(0.97+0.04*stone_hash(floor(stone_uv*48.0)));
    NORMAL=surface_normal; AO=0.62; ROUGHNESS=0.96; SPECULAR=0.06;
   }
