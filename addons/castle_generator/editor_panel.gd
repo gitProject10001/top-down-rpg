@@ -1,6 +1,8 @@
 @tool
 extends VBoxContainer
 signal create_requested(plan: Dictionary)
+signal regenerate_requested(plan: Dictionary)
+signal lock_requested()
 const Request=preload("res://addons/castle_generator/request.gd")
 const Planner=preload("res://addons/castle_generator/planner.gd")
 var seed_input: SpinBox
@@ -28,6 +30,11 @@ func _ready() -> void:
  create_button=Button.new(); create_button.text="Crea come nuovo castello"; create_button.pressed.connect(func():
   if not current_plan.is_empty(): create_requested.emit(current_plan.duplicate(true)))
  add_child(create_button)
+ var regenerate := Button.new(); regenerate.text="Anteprima rigenerazione del selezionato"
+ regenerate.pressed.connect(func():
+  if not current_plan.is_empty(): regenerate_requested.emit(current_plan.duplicate(true)))
+ add_child(regenerate)
+ var lock := Button.new(); lock.text="Blocca / sblocca elemento selezionato"; lock.pressed.connect(func(): lock_requested.emit()); add_child(lock)
  refresh()
 func refresh() -> void:
  if not is_instance_valid(create_button): return
@@ -36,6 +43,7 @@ func refresh() -> void:
  request.minimum_open_fraction=open_input.value/100.0
  var result=Planner.generate(request)
  current_plan=result.get("plan",{})
+ if not current_plan.is_empty(): current_plan["minimum_open_fraction"]=request.minimum_open_fraction
  preview.plan=current_plan; preview.queue_redraw()
  create_button.disabled=current_plan.is_empty()
  info.text="\n".join(result.errors) if current_plan.is_empty() else "Piano valido · seed %d. La creazione aggiunge un nuovo gruppo editabile."%request.seed_value

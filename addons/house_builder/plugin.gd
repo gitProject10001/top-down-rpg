@@ -1026,7 +1026,9 @@ func _build_fortification_tab() -> void:
 	for child in create.get_children():
 		if child!=creation_tabs: child.reparent(presets)
 	var composition=preload("res://addons/castle_generator/editor_panel.gd").new()
-	composition.name="Genera"; composition.create_requested.connect(_create_composed_castle); creation_tabs.add_child(composition)
+	composition.name="Genera"; composition.create_requested.connect(_create_composed_castle)
+	composition.regenerate_requested.connect(_preview_castle_regeneration)
+	composition.lock_requested.connect(_toggle_composition_lock); creation_tabs.add_child(composition)
 	var edit := VBoxContainer.new(); edit.name="Recinto"; fort_sections.add_child(edit)
 	var elevations := VBoxContainer.new(); elevations.name="Quote"; fort_sections.add_child(elevations)
 	var visibility := VBoxContainer.new(); visibility.name="Vista"; fort_sections.add_child(visibility)
@@ -1264,3 +1266,38 @@ func _create_composed_castle(plan: Dictionary) -> void:
 	if group==null:
 		_show_plan_error("Genera castello","Piano non supportato o non valido."); return
 	_add_authored(root,group,"Crea castello generato"); group.rebuild()
+
+func _toggle_composition_lock() -> void:
+	for selected in EditorInterface.get_selection().get_selected_nodes():
+		var node: Node=selected
+		while node and not node.has_meta("composition_id"): node=node.get_parent()
+		if node==null: continue
+		var locked: bool=node.get_meta("composition_locked",false)
+		var undo := get_undo_redo(); undo.create_action("Protezione elemento del compositore",UndoRedo.MERGE_DISABLE,node)
+		undo.add_do_method(node,"set_meta","composition_locked",not locked)
+		undo.add_undo_method(node,"set_meta","composition_locked",locked); undo.commit_action()
+		status.text=("Bloccato: " if not locked else "Sbloccato: ")+str(node.name)
+		return
+	_show_plan_error("Protezione","Seleziona un elemento del castello generato.")
+
+func _preview_castle_regeneration(candidate: Dictionary) -> void:
+	var group := _selected_fortification()
+	if group==null: _show_plan_error("Rigenerazione","Seleziona il castello generato."); return
+	var service=preload("res://addons/castle_generator/regeneration.gd")
+	var proposal: Dictionary=service.propose(group,candidate)
+	if proposal.has("error"): _show_plan_error("Rigenerazione",proposal.error); return
+	var dialog := ConfirmationDialog.new(); dialog.title="Rigenerazione · disposizione interna"
+	dialog.dialog_text="Posizioni automatiche: "+", ".join(proposal.updates.keys())+"\nPreservati: "+", ".join(proposal.preserved)+"\nDimensioni, porte, interni e dettagli restano invariati."
+	for id in proposal.updates:
+		dialog.dialog_text+="\n%s: %s → %s"%[id,str(proposal.snapshot[id].transform.origin),str(proposal.updates[id])]
+	dialog.confirmed.connect(func():
+		if not is_instance_valid(group) or service.state(group)!=proposal.snapshot or service.propose(group,candidate)!=proposal:
+			_show_plan_error("Rigenerazione","La scena è cambiata dopo l'anteprima: genera una nuova proposta."); dialog.queue_free(); return
+		var before := {}
+		for id in proposal.updates: before[id]=proposal.snapshot[id].transform.origin
+		var undo := get_undo_redo(); undo.create_action("Rigenera disposizione castello",UndoRedo.MERGE_DISABLE,group)
+		undo.add_do_method(service,"apply",group,proposal.updates,proposal.plan,proposal.baseline)
+		undo.add_undo_method(service,"apply",group,before,proposal.original,group.get_meta("composition_baseline",{}).duplicate(true))
+		undo.commit_action(); dialog.queue_free())
+	dialog.canceled.connect(dialog.queue_free)
+	EditorInterface.get_base_control().add_child(dialog); dialog.popup_centered()

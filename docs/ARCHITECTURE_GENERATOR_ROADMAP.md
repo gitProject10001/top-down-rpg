@@ -1114,3 +1114,18 @@ Il pannello separa Preset e Genera sotto Crea, mantenendo gli strumenti Recinto/
 - [ ] **Confronto di quattro castelli richiesto dall'utente:** produrli esclusivamente con il generatore, salvare richiesta/seed e scene editabili; catture alla stessa camera e scala. Attivare quando la varietà supera il semplice cambio dimensioni/posizioni della corte rettangolare: almeno due organizzazioni del complesso e differenze leggibili in numero/disposizione dei corpi o torri. Non selezionare quattro seed quasi identici per dichiarare completata la varietà.
 
 Questa consegna resta nel backlog ed è collegata a G01.4–G01.5. La prima famiglia attuale non soddisfa ancora il criterio; nessuna promessa che quattro stili architettonici siano già disponibili.
+
+
+#### G01.3a — Rigenerazione conservativa della disposizione
+
+Implementato il primo passo di G01.3. In Genera: Anteprima rigenerazione del selezionato e Blocca/sblocca elemento selezionato. Le posizioni dei corpi interni vengono confrontate con la baseline, associata agli ID; un corpo spostato manualmente resta dov'è anche dopo rigenerazioni ripetute. I lock sono metadata persistenti. La proposta mostra posizioni prima/dopo ed elementi preservati; alla conferma viene ricalcolata per rifiutare una scena modificata nel frattempo. Applicazione tramite Undo/Redo senza sostituzione dei nodi.
+
+Questa fase muove solo i corpi interni automatici. Non cambia dimensioni, dettagli, seed locali, porte, arredi o interni. La richiesta viene ricalcolata sulle dimensioni del recinto selezionato. Recinti modificati, edifici ruotati/scalati, quote diverse, ID mancanti/duplicati e volumi aggiuntivi richiedono un'estensione della validazione e vengono segnalati. Sovrapposizioni con corpi preservati bloccano l'operazione. La baseline mantiene il riferimento precedente per gli override manuali; sbloccare un elemento non cancella una modifica manuale alla posizione.
+
+Test check_castle_regeneration: porta modificata e nodo manuale preservati, override ripetuto, lock, conflitto senza applicazione, Undo/Redo e round-trip PackedScene con baseline/lock. Test di modello senza mesh in scena; controllo sintattico plugin. Non è ancora la verifica interattiva completa del comando nell'editor.
+
+- [x] G01.3a Disposizione interna conservativa, baseline/lock persistenti, anteprima e Undo/Redo.
+- [ ] G01.3b UI dello stato per elemento e reset esplicito degli override; validazione degli ingombri orientati/accessori e prova editor/Play.
+- [ ] G01.3c Rigenerazione delle dimensioni e della struttura con protezione per proprietà, aggiunte/rimozioni e migrazioni degli ID.
+
+Il confronto dei quattro castelli resta previsto dopo l'ampliamento della varietà architettonica/compositiva; questo passo non lo sostituisce.
