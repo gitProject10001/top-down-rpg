@@ -21,6 +21,8 @@ const WALL_THICKNESS := 0.24
 	set(value): wall_height=clampf(value,1.8,10.5); request_rebuild()
 @export_range(0.5,6.0,0.1) var roof_height := 2.1:
 	set(value): roof_height=clampf(value,0.01 if _is_wing_part else 0.5,6.0); request_rebuild()
+@export_enum("Intonaco", "Pietra") var wall_finish := 0:
+	set(value): wall_finish=value; request_rebuild()
 @export var weathered := true:
 	set(value): weathered=value; request_rebuild()
 @export var house_seed := 416522:
@@ -198,6 +200,7 @@ func _material(quadrant: Vector2,tint: Color) -> ShaderMaterial:
 	return m
 
 func _plaster_material() -> ShaderMaterial:
+	if wall_finish==1: return _material(Vector2(0,0.5),Color(0.65,0.63,0.59))
 	var material := ShaderMaterial.new()
 	material.shader=preload("res://addons/house_builder/plaster.gdshader")
 	var random := RandomNumberGenerator.new()

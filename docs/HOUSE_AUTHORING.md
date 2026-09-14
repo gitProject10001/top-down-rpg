@@ -883,3 +883,14 @@ L'occlusione viene registrata per singola mesh: solo quelle attraversate dai rag
 Le ante e i dettagli delle aperture sono esclusi dal reveal e dai suoi trigger. Le porte restano a tutta altezza anche nel cutaway interno. La porta utilizzabile più vicina riceve un contorno dorato con normale test di profondità, coerente con il prompt E: apri/chiudi; il contorno scompare allontanandosi. Non è un indicatore attraverso muri opachi.
 
 Validazione: Play GPU con passaggio attraverso il portone, ripristino nel cortile aperto, riattivazione dietro il muro, collisioni e camminamento. Aggiunti controlli per raggio nullo sulle mesh non ostruenti, porta esclusa e a piena altezza, highlight della porta vicina. Test delle sezioni: vuoti delle stanze, porte, spessori e orientamento di un volume ruotato. Screenshot: open_castle_revealed.png e open_castle_door_highlight.png in captures/balcony_attachment.
+
+
+#### A09.10 — Prima passata di rilievo della muratura
+
+La porzione pietra del materiale painted_architecture usa un campo di altezza metrico: blocchi con larghezza variabile, file sfalsate, angoli smussati e fughe arretrate. Il gradiente del campo modifica la normale in illuminazione; AO e pigmento mantengono leggibili i giunti senza dipingere una direzione del sole. La palette deriva ancora dall'atlante esistente. Legno e tegole mantengono i loro materiali.
+
+House espone Wall Finish: Intonaco / Pietra, disponibile anche sui volumi derivati e sulle torri. Le cortine continuano a usare la finitura in pietra. La scena separata `scenes/dev/masonry_relief_example.tscn` conserva il castello del builder, con torri in pietra e camera ortografica di dimensione 17.5. Si può modificare normalmente e confrontare con l'esempio precedente. Gli edifici già salvati non cambiano automaticamente finitura d'intonaco.
+
+Limite: questa è una passata di bump procedurale, non displacement geometrico o parallax. Lo spessore apparente delle fughe reagisce alla luce, ma non proietta nuove ombre geometriche e non cambia la silhouette dei singoli blocchi. Angoli e merli conservano la geometria esistente; pietre d'angolo modellate e raccordi del pattern fra facce restano da sviluppare.
+
+Verifica GPU D3D12 tramite `tools/preview_masonry_relief.gd`: confronto prima/dopo a luce invariata e seconda direzione radente, screenshot masonry_before/front/raking.png. Il test Play del castello passa ancora per reveal selettivo, porte, collisioni e camminamenti. Non è un benchmark prestazionale su scala villaggio.
