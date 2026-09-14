@@ -894,3 +894,14 @@ House espone Wall Finish: Intonaco / Pietra, disponibile anche sui volumi deriva
 Limite: questa è una passata di bump procedurale, non displacement geometrico o parallax. Lo spessore apparente delle fughe reagisce alla luce, ma non proietta nuove ombre geometriche e non cambia la silhouette dei singoli blocchi. Angoli e merli conservano la geometria esistente; pietre d'angolo modellate e raccordi del pattern fra facce restano da sviluppare.
 
 Verifica GPU D3D12 tramite `tools/preview_masonry_relief.gd`: confronto prima/dopo a luce invariata e seconda direzione radente, screenshot masonry_before/front/raking.png. Il test Play del castello passa ancora per reveal selettivo, porte, collisioni e camminamenti. Non è un benchmark prestazionale su scala villaggio.
+
+
+#### A09.11 — Campione di muratura con pietre modellate
+
+Scena di confronto: `scenes/dev/solid_masonry_comparison.tscn`. A sinistra il materiale attuale; a destra il campione geometrico generato da `stone_wall_sample.gd`. Width, Height e Stone Seed restano modificabili nell'Inspector. La geometria interna si rigenera senza salvare un nodo per ogni pietra.
+
+Il campione comprende 71 blocchi, ciascuno con facce frontali leggermente irregolari, smussi, sporgenza e inclinazione variabili. La malta è arretrata. Il materiale usa una palette grigia poco satura, con variazioni calde/fredde e superficie opaca. Le ombre nelle fughe e il profilo dei blocchi derivano dalla geometria, non dal bump. Tutti i blocchi condividono una mesh e un materiale (circa 4.544 triangoli per le pietre del campione, oltre al nucleo).
+
+Validazione grafica D3D12: camera ortografica 17.5 per confronto alla scala di gioco, camera 9 per dettaglio, seconda direzione di luce radente. `tools/preview_solid_masonry.gd` salva la scena e tre screenshot solid_masonry_comparison/detail/raking.png. Esecuzione conclusa con SOLID_MASONRY_SAMPLE_OK.
+
+È un prototipo visivo separato: non sostituisce ancora la muratura di case e castelli, non ha collisioni né integrazione con porte/reveal. Dopo la valutazione visiva, il lavoro successivo è adattare la generazione alle superfici del builder, preservando aperture, angoli e sezioni del cutaway. Il confronto cambia anche la palette: non è una misura isolata dell'effetto della sola geometria.

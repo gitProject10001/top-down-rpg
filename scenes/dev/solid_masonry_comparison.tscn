@@ -1,0 +1,62 @@
+[gd_scene format=3]
+
+[ext_resource type="Shader" path="res://shaders/pixelart/painted_architecture.gdshader" id="1_5s16f"]
+[ext_resource type="Texture2D" path="res://assets/textures/hearth_painted/architecture_clear_v2.png" id="2_qwe1r"]
+[ext_resource type="Script" path="res://addons/house_builder/stone_wall_sample.gd" id="3_8f6ba"]
+
+[sub_resource type="Environment" id="Environment_r3jr5"]
+background_mode = 1
+background_color = Color(0.18, 0.2, 0.21, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.72, 0.78, 0.9, 1)
+ambient_light_energy = 0.35
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sw8h1"]
+albedo_color = Color(0.23, 0.26, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_tlgx5"]
+size = Vector2(30, 16)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_c6xw5"]
+render_priority = 0
+shader = ExtResource("1_5s16f")
+shader_parameter/atlas = ExtResource("2_qwe1r")
+shader_parameter/quadrant = Vector2(0, 0.5)
+shader_parameter/tint = Color(0.65, 0.63, 0.59, 1)
+shader_parameter/metres = 2.5
+shader_parameter/detail_lod = 1.0
+shader_parameter/masonry_relief = true
+shader_parameter/masonry_depth = 0.07
+
+[sub_resource type="BoxMesh" id="BoxMesh_58wje"]
+size = Vector3(6, 3.1, 0.56)
+
+[node name="StoneWallComparison" type="Node3D" unique_id=1462304247]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=755913996]
+environment = SubResource("Environment_r3jr5")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=57799100]
+transform = Transform3D(0.8660254, 0.3345653, -0.3715724, 0, 0.7431448, 0.6691306, 0.5, -0.5794841, 0.6435823, 0, 0, 0)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=486377652]
+material_override = SubResource("StandardMaterial3D_sw8h1")
+mesh = SubResource("PlaneMesh_tlgx5")
+
+[node name="CurrentShader" type="MeshInstance3D" parent="." unique_id=798377833]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.6, 1.55, 0)
+material_override = SubResource("ShaderMaterial_c6xw5")
+mesh = SubResource("BoxMesh_58wje")
+
+[node name="ModeledStoneSample" type="Node3D" parent="." unique_id=891723353]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.6, 0, 0)
+script = ExtResource("3_8f6ba")
+
+[node name="Camera" type="Camera3D" parent="." unique_id=1115493986]
+transform = Transform3D(0.87157553, -0.18963201, 0.45210147, 0, 0.9221645, 0.38679793, -0.4902612, -0.3371236, 0.80373603, 9, 9, 16)
+projection = 1
+current = true
+size = 17.5
