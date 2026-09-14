@@ -1,0 +1,102 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/house_builder/polygon_tower.gd" id="1_byeuk"]
+
+[sub_resource type="Environment" id="Environment_4g1vu"]
+background_mode = 1
+background_color = Color(0.16, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_r7uvu"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_e8h0k"]
+size = Vector2(50, 50)
+
+[node name="HouseWorkshop" type="Node3D" unique_id=538127585]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=806719210]
+environment = SubResource("Environment_4g1vu")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=606218949]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=885073865]
+material_override = SubResource("StandardMaterial3D_r7uvu")
+mesh = SubResource("PlaneMesh_e8h0k")
+
+[node name="Torre_8" type="Node3D" parent="." unique_id=235386799]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -11, 0, 0)
+script = ExtResource("1_byeuk")
+tower_roof = 2
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1193324_49325016732"
+attached = false
+archetype_id = "tower"
+width = 8.0
+depth = 8.0
+wall_height = 6.0
+roof_height = 1.8
+wall_finish = 1
+openings = Array[Dictionary]([{
+"height": 2.1,
+"kind": "door",
+"wall": 0,
+"width": 1.1
+}])
+
+[node name="Torre_12" type="Node3D" parent="." unique_id=177623421]
+script = ExtResource("1_byeuk")
+face_count = 12
+tower_roof = 2
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1996371_55482255048"
+attached = false
+archetype_id = "tower"
+width = 8.0
+depth = 8.0
+wall_height = 6.0
+roof_height = 3.5
+wall_finish = 1
+openings = Array[Dictionary]([{
+"height": 2.1,
+"kind": "door",
+"wall": 0,
+"width": 1.1
+}])
+
+[node name="Torre_16" type="Node3D" parent="." unique_id=859828816]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 11, 0, 0)
+script = ExtResource("1_byeuk")
+face_count = 16
+tower_roof = 2
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_2846757_62646126326"
+attached = false
+archetype_id = "tower"
+width = 8.0
+depth = 8.0
+wall_height = 6.0
+roof_height = 5.0
+wall_finish = 1
+openings = Array[Dictionary]([{
+"height": 2.1,
+"kind": "door",
+"wall": 0,
+"width": 1.1
+}])
+
+[node name="Camera" type="Camera3D" parent="." unique_id=1432526814]
+transform = Transform3D(0.70710677, -0.45028284, 0.5452021, 0, 0.7710322, 0.6367961, -0.70710677, -0.45028284, 0.5452021, 25, 32, 25)
+projection = 1
+current = true
+size = 40.0

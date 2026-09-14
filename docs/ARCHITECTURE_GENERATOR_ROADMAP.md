@@ -273,7 +273,9 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A07 | IN CORSO | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
 | A07.4 | FATTO | Torri segmentate a 8/12/16 facce | A07.1 | Vani obliqui, collisioni, parapetti e salvataggio coerenti; campionario editabile |
 | A07.5 | FATTO | Copertura conica della torre | A07.4 | Tetto indipendente e parametrico, gronda e raccordo al corpo, gestione accesso al tetto |
-| A07.6 | TODO | Cupola e profilo curvo | A07.5 | Edificio terrazzato con cupola; controlli leggibili e copertura separata |
+| A07.6 | IN CORSO | Cupola e profilo curvo | A07.5 | Edificio terrazzato con cupola; controlli leggibili e copertura separata |
+| A07.6a | FATTO | Profilo a cupola sulle torri | A07.5 | Cupole basse/slanciate, tegole e collisioni; salvataggio e regressione cono |
+| A07.6b | TODO | Cupola su edificio terrazzato | A07.6a | Esempio con terrazza accessibile e volume coperto separato, raccordi e percorso verificati |
 | A07.7 | TODO | Consolidamento A07 e percorso giocabile | A07.4–A07.6 | Aperture, interni e raccordi coerenti con la pianta; verificare limiti delle stanze e accessi |
 | A08 | IN CORSO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
 | A09 | IN CORSO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
@@ -1249,3 +1251,12 @@ Il tetto conico ha collisione ma non è un piano di accesso. Il passaggio al con
 Test check_conical_towers.gd: tre topologie, triangoli finiti e non degeneri, determinismo, una superficie e meno di 30000 triangoli per ciascun esempio provato, collisione inclinata, salvataggio, ritorno a terrazza e protezione scala. Regressione torre ottagonale superata; parser plugin verificato. Nessun benchmark su molti edifici, nessun nuovo Play degli interni in questo incremento. Copertura ancora segmentata; colmi speciali, danni delle tegole e aperture/abbaini sul cono non implementati.
 
 Esempio editabile scenes/dev/conical_towers_example.tscn; render GPU captures/balcony_attachment/conical_towers.png. Prossimo A07.6: cupola e profilo curvo, poi consolidamento A07.7. B01 resta successivo ad A07.
+
+
+### A07.6a — Profilo a cupola disponibile
+
+Inspector della torre → Tower Roof → Cupola. Roof Height regola la rise; il profilo verticale è un quarto d'ellisse, campionato in fasce e raccordato alle 8/12/16 facce del corpo. Non è una curva libera né un profilo a cipolla. Il backend delle coperture ha una funzione di profilo condivisa: cono lineare e cupola curva usano lo stesso emettitore di tegole. Il sottofondo segue la curvatura, le tegole sono sollevate lungo la normale locale. Restano una mesh/superficie e il materiale roof_clay esistente.
+
+Cupola e cono condividono protezione degli accessi, collisione e ritorno alla terrazza. Non vengono cambiati numero di facce, aperture o dettagli manuali. Esempio scenes/dev/domed_towers_example.tscn con altezze 1.8, 3.5 e 5 m; capture captures/balcony_attachment/domed_towers.png. Test check_domed_towers.gd: tre topologie, geometria finita/non degenere, determinismo, budget del campione, collisione, salvataggio e scala protetta. Regressione check_conical_towers.gd superata. Render GPU ispezionato; nessun nuovo test di cammino in questo incremento.
+
+A07.6 resta IN CORSO: la sua uscita include un edificio terrazzato con volume a cupola, non solo tre torri. Prossimo A07.6b prima di A07.7. Il passo rifinisce forme e strumenti, non riapre la generazione globale da seed.

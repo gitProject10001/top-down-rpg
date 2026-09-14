@@ -9,26 +9,26 @@ extends "res://addons/house_builder/volume.gd"
 			push_warning("Scegli il numero di facce prima di aggiungere aperture, interni o componenti. Usa una nuova torre per cambiare topologia.")
 			return
 		face_count=value; request_rebuild()
-@export_enum("Terrazza", "Conico") var tower_roof := 0:
+@export_enum("Terrazza", "Conico", "Cupola") var tower_roof := 0:
 	set(value):
-		if value==1 and is_inside_tree() and not conical_access_error().is_empty():
+		if value!=0 and is_inside_tree() and not conical_access_error().is_empty():
 			push_warning(conical_access_error()); return
 		tower_roof=value; request_rebuild()
 func conical_access_error() -> String:
 	var stairs := stair_component()
-	if stairs and stairs.enabled: return "Disattiva la scala esterna al tetto prima di scegliere il cono."
+	if stairs and stairs.enabled: return "Disattiva la scala esterna al tetto prima di scegliere una copertura chiusa."
 	var plan=get_node_or_null("InteriorPlan")
 	if plan:
 		for level in plan.levels():
 			for element in level.get_children():
-				if element.get("roof_exit")==true: return "Rimuovi o disattiva l'uscita sul tetto della scala interna prima di scegliere il cono."
+				if element.get("roof_exit")==true: return "Rimuovi o disattiva l'uscita sul tetto della scala interna prima di scegliere una copertura chiusa."
 	return ""
 func roof_is_walkable() -> bool: return tower_roof==0
 func roof_access_error() -> String:
-	if tower_roof==1: return "La copertura conica non è una terrazza praticabile."
+	if tower_roof!=0: return "La copertura chiusa non è una terrazza praticabile."
 	return super.roof_access_error()
 func roof_top() -> float:
-	return wall_height+roof_height if tower_roof==1 else super.roof_top()
+	return wall_height+roof_height if tower_roof!=0 else super.roof_top()
 
 func _init() -> void:
 	attached=false; canopy_roof=2; battlements_enabled=true; archetype_id="tower"
@@ -91,7 +91,7 @@ func _build_shell() -> void:
 
 func _build_roof_slab() -> void: _polygon_slab(wall_height,wall_height+0.18,2)
 func _build_roof() -> ArrayMesh:
-	if tower_roof==1: return preload("res://addons/house_builder/conical_roof.gd").new().generate(footprint_vertices(),wall_height,maxf(roof_height,0.3),house_seed)
+	if tower_roof!=0: return preload("res://addons/house_builder/conical_roof.gd").new().generate(footprint_vertices(),wall_height,maxf(roof_height,0.3),house_seed,tower_roof==2)
 	var roof := _flat_roof(); var plan=get_node_or_null("InteriorPlan")
 	if plan==null or plan.levels().is_empty(): return roof
 	var cuts: Array=[]
@@ -128,7 +128,7 @@ func hit_wall(world_origin: Vector3,world_direction: Vector3) -> Dictionary:
 	return result
 
 func _get_configuration_warnings() -> PackedStringArray:
-	if tower_roof==1 and not conical_access_error().is_empty(): return PackedStringArray([conical_access_error()])
+	if tower_roof!=0 and not conical_access_error().is_empty(): return PackedStringArray([conical_access_error()])
 	if attached or wing_enabled or canopy_roof!=2 or structure_kind!=0:
 		return PackedStringArray(["Torre poligonale: usare corpo indipendente chiuso, tetto piano e nessuna ala. Le altre configurazioni non sono ancora supportate."])
 	return super._get_configuration_warnings()
