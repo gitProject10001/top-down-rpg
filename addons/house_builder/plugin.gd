@@ -1021,6 +1021,12 @@ func _build_fortification_tab() -> void:
 	var create := VBoxContainer.new(); create.name="Crea"; fort_sections.add_child(create)
 	for child in page.get_children():
 		if child!=fort_sections: child.reparent(create)
+	var creation_tabs := TabContainer.new(); create.add_child(creation_tabs)
+	var presets := VBoxContainer.new(); presets.name="Preset"; creation_tabs.add_child(presets)
+	for child in create.get_children():
+		if child!=creation_tabs: child.reparent(presets)
+	var composition=preload("res://addons/castle_generator/editor_panel.gd").new()
+	composition.name="Genera"; composition.create_requested.connect(_create_composed_castle); creation_tabs.add_child(composition)
 	var edit := VBoxContainer.new(); edit.name="Recinto"; fort_sections.add_child(edit)
 	var elevations := VBoxContainer.new(); elevations.name="Quote"; fort_sections.add_child(elevations)
 	var visibility := VBoxContainer.new(); visibility.name="Vista"; fort_sections.add_child(visibility)
@@ -1249,3 +1255,12 @@ func _set_castle_visibility(enabled: bool) -> void:
 	var undo := get_undo_redo(); undo.create_action("Visibilità castello",UndoRedo.MERGE_DISABLE,group)
 	undo.add_do_property(group,"courtyard_visibility",enabled); undo.add_undo_property(group,"courtyard_visibility",group.courtyard_visibility); undo.commit_action()
 	tabs.current_tab=6; fort_sections.current_tab=3
+
+func _create_composed_castle(plan: Dictionary) -> void:
+	var root := EditorInterface.get_edited_scene_root()
+	if root==null:
+		_show_plan_error("Genera castello","Apri una scena prima di creare il castello."); return
+	var group=preload("res://addons/castle_generator/materializer.gd").create(plan)
+	if group==null:
+		_show_plan_error("Genera castello","Piano non supportato o non valido."); return
+	_add_authored(root,group,"Crea castello generato"); group.rebuild()

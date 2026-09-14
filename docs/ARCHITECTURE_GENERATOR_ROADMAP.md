@@ -1093,7 +1093,7 @@ Pipeline: **Request → regole della famiglia → piano validato → adapter →
 - [x] G01.1 Scheletro: richiesta Resource con seed, intervallo dimensioni e quota minima scoperta; piano schema 1, ID semantici, seed locali; validazione e tentativi limitati.
 - [x] G01.1 Prima famiglia single_court: quattro torri ottagonali, un mastio, un corpo servizi; variazioni di dimensioni, proporzioni del recinto, lato del mastio e posizione arretrata. Adapter tramite Fortification Factory, Keep Factory e BuildingRequest.
 - [x] G01.1 Esempio editabile `scenes/dev/castle_generated_seed17.tscn`; test 100 seed e diagnostica del builder su seed 17.
-- [ ] G01.2 UI contestuale Composizione: richiesta/piano/diagnostica, anteprima leggera di più seed, conferma come nuovo gruppo; nessuna sostituzione implicita.
+- [x] G01.2 UI contestuale in Fortificazioni → Crea → Genera: seed, dimensioni, quota scoperta, pianta leggera, diagnostica e creazione di un nuovo gruppo tramite Undo/Redo. Confronto sequenziale con seed successivo; nessuna sostituzione implicita.
 - [ ] G01.3 Persistenza delle modifiche: baseline, override e lock per ID, rigenerazione locale con Undo/Redo; test che porte spostate e torri bloccate sopravvivano. Gli ID attuali sono solo la fondazione, non implementano questa protezione.
 - [ ] G01.4 Catalogo ruoli → componenti/profili architettonici. Nuove forme estendono catalogo/adapter; nuove disposizioni estendono regole. Segnalare capacità mancanti, mai sostituire silenziosamente una forma.
 - [ ] G01.5 Recinti più grandi con cortine segmentate, numero variabile di torri, perimetri non rettangolari; validazione dei collegamenti e degli accessi.
@@ -1104,4 +1104,13 @@ Limiti G01.1: distanza fra centri delle torri 26–27 m su ciascun asse, per ris
 
 Uso: `tools/preview_generated_castle.gd` genera e salva l'esempio seed 17 e una cattura Godot; `tools/check_castle_generator.gd` verifica determinismo, 100 piante distinte, vincoli, richiesta impossibile e raccordi del gruppo realizzato. Il test non certifica 100 castelli in Play.
 
-**Prossimo incremento: G01.2, anteprima contestuale dei piani.** Poi G01.3 prima di introdurre qualsiasi comando che rigeneri un gruppo editato.
+**Prossimo incremento: G01.3, override e lock**, prima di introdurre qualsiasi comando che rigeneri un gruppo editato.
+
+
+#### G01.2 — Anteprima contestuale e confronto richiesto
+
+Il pannello separa Preset e Genera sotto Crea, mantenendo gli strumenti Recinto/Quote/Vista. Il contenitore scrollabile esistente resta attivo. L'anteprima disegna il piano 2D senza istanziare edifici; richieste impossibili cancellano la vecchia anteprima e disabilitano la creazione. La creazione passa per `_add_authored`, con la normale azione Undo/Redo del plugin. Test automatico del pannello: cambio seed, riproducibilità, segnale con il piano esatto, errore e recupero. Controllo sintattico del plugin; Undo/Redo non ancora provato interattivamente per questo nuovo comando.
+
+- [ ] **Confronto di quattro castelli richiesto dall'utente:** produrli esclusivamente con il generatore, salvare richiesta/seed e scene editabili; catture alla stessa camera e scala. Attivare quando la varietà supera il semplice cambio dimensioni/posizioni della corte rettangolare: almeno due organizzazioni del complesso e differenze leggibili in numero/disposizione dei corpi o torri. Non selezionare quattro seed quasi identici per dichiarare completata la varietà.
+
+Questa consegna resta nel backlog ed è collegata a G01.4–G01.5. La prima famiglia attuale non soddisfa ancora il criterio; nessuna promessa che quattro stili architettonici siano già disponibili.
