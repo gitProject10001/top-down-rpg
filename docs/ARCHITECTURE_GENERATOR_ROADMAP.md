@@ -1143,3 +1143,19 @@ Verifica: check_castle_element_ui testa stato, rilascio, Undo/Redo, nessuno spos
 - [ ] G01.3b.2 Ingombri orientati/accessori e verifica editor/Play: rimane il prossimo incremento della protezione.
 
 Il confronto dei quattro castelli rimane nel TODO G01.4–G01.5, subordinato alla varietà strutturale.
+
+
+#### G01.3b.2a — Ingombri orientati e accessori dei corpi interni
+
+`castle_generator/footprints.gd` legge l'authoring e produce poligoni XZ, senza mesh e senza modificare transform durante la proposta. Supporta rotazione sul piano Y e volumi accessori rettangolari, anche annidati; per gli agganci calcola il transform dalle stesse proprietà del builder. Le proposte traslano gli ingombri mantenendo orientamento e dimensioni correnti.
+
+La validazione usa separazione dei poligoni e distanza fra segmenti per riservare almeno 1 m fra edifici differenti. Gli accessori dello stesso edificio possono intersecarsi con il corpo principale. Tutti i vertici devono restare nel rettangolo interno con margine dalle mura. La superficie occupata è una somma conservativa: eventuali sovrapposizioni interne possono ridurre la stima di spazio scoperto e produrre un rifiuto prudenziale. Non è un calcolo dell'unione esatta né una prova di navigabilità delle porte.
+
+Snapshot di rigenerazione esteso agli ingombri: spostare o ridimensionare un accessorio invalida una proposta aperta prima della conferma. Restano rifiutati scala, inclinazione, ali integrate legacy e accessori delle torri; tetti sporgenti e props arbitrari non fanno parte di questi ingombri di authoring.
+
+Test `check_castle_footprints`: corpi orientati separati con AABB sovrapposti, sovrapposizione reale, accessorio fuori recinto, passaggio ostruito, raccolta agganci senza mutazioni, modifica accessorio rilevata nello snapshot, scala non supportata. Rieseguiti test rigenerazione e UI stati, con Undo/Redo e round-trip. Verifica geometrica automatica; prova end-to-end editor/Play ancora pendente.
+
+- [x] G01.3b.2a Validazione orientata di corpi e volumi accessori.
+- [ ] G01.3b.2b Verifica editor/Play della rigenerazione con accessori e rotazioni; diagnostica visuale degli ingombri.
+
+Prossimo incremento: G01.3b.2b, prima di ampliare il catalogo per il confronto dei quattro castelli.

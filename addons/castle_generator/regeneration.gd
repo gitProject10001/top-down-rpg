@@ -6,7 +6,7 @@ static func state(group: Node3D) -> Dictionary:
  for node in group.buildings():
   var id: String=node.get_meta("composition_id","")
   if id.is_empty() or result.has(id): return {}
-  result[id]={"transform":node.transform,"size":Vector2(node.width,node.depth),"locked":node.get_meta("composition_locked",false)}
+  result[id]={"transform":node.transform,"size":Vector2(node.width,node.depth),"locked":node.get_meta("composition_locked",false),"footprints":preload("res://addons/castle_generator/footprints.gd").collect(node,node.transform)}
  return result
 
 static func propose(group: Node3D, candidate: Dictionary) -> Dictionary:
@@ -32,7 +32,7 @@ static func propose(group: Node3D, candidate: Dictionary) -> Dictionary:
   known[record.id]=true
   if not snapshot.has(record.id) or not baseline.has(record.id): return {"error":"Edifici aggiunti o rimossi: rigenerazione strutturale non ancora supportata."}
   var current: Dictionary=snapshot[record.id]
-  if not current.transform.basis.is_equal_approx(Basis.IDENTITY): return {"error":"Un edificio è ruotato o scalato: serve la futura validazione degli ingombri orientati."}
+  if current.footprints.has("error"): return current.footprints
   if not is_zero_approx(current.transform.origin.y): return {"error":"La prima rigenerazione supporta edifici a quota zero."}
   record.size=current.size
   if current.locked or not current.transform.origin.is_equal_approx(baseline[record.id]):
@@ -48,9 +48,18 @@ static func propose(group: Node3D, candidate: Dictionary) -> Dictionary:
   if not tower.position.is_equal_approx(expected) or not tower.basis.is_equal_approx(Basis.IDENTITY) or not is_equal_approx(tower.width,8) or not is_equal_approx(tower.depth,8):
    return {"error":"Il recinto è stato modificato: viene preservato, ma non è ancora supportato dalla rigenerazione."}
  for node in group.buildings():
-  if not node.authored_volumes().is_empty(): return {"error":"Sono presenti volumi accessori: la rigenerazione dei loro ingombri non è ancora supportata."}
+  if node in group.towers() and not node.authored_volumes().is_empty(): return {"error":"Accessori delle torri non ancora supportati dalla rigenerazione."}
   if node not in group.towers() and not known.has(node.get_meta("composition_id","")): return {"error":"Sono presenti corpi aggiunti manualmente: la rigenerazione richiede un controllo degli ingombri aggiuntivi."}
- var errors=preload("res://addons/castle_generator/single_court_rules.gd").new().validate(merged,candidate.get("minimum_open_fraction",0.65))
+ var footprints := {}
+ for record in merged.buildings:
+  var shapes: Array=[]
+  var offset: Vector3=record.position-snapshot[record.id].transform.origin
+  for polygon in snapshot[record.id].footprints.shapes:
+   var shifted := PackedVector2Array()
+   for point in polygon: shifted.append(point+Vector2(offset.x,offset.z))
+   shapes.append(shifted)
+  footprints[record.id]=shapes
+ var errors=preload("res://addons/castle_generator/footprints.gd").validate(footprints,merged.span,candidate.get("minimum_open_fraction",0.65))
  if not errors.is_empty(): return {"error":"La proposta entra in conflitto con gli elementi preservati: "+"; ".join(errors)+" Prova un altro seed."}
  return {"snapshot":snapshot,"original":original.duplicate(true),"updates":updates,"baseline":baseline,"plan":merged,"preserved":preserved}
 
