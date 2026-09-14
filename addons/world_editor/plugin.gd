@@ -2,6 +2,8 @@
 extends EditorPlugin
 const RockFormation=preload("res://addons/rock_builder/formation.gd")
 
+var rock_formation_gizmo=preload("res://addons/rock_builder/formation_gizmo.gd").new()
+
 var map_export_busy := false
 var panel: VBoxContainer
 var scroll: ScrollContainer
@@ -21,6 +23,7 @@ var seed_input: SpinBox
 var stroke_method := "apply_edits"
 
 func _enter_tree() -> void:
+	add_node_3d_gizmo_plugin(rock_formation_gizmo)
 	add_tool_menu_item("Crea gruppo roccioso su guida",_create_rock_formation)
 	add_tool_menu_item("Rigenera gruppo roccioso selezionato",_regenerate_rock_formation)
 	add_custom_type("ProceduralRock","Node3D",preload("res://addons/rock_builder/rock.gd"),EditorInterface.get_base_control().get_theme_icon("MeshInstance3D","EditorIcons"))
@@ -83,6 +86,7 @@ func _enter_tree() -> void:
 	set_process(true)
 
 func _exit_tree() -> void:
+	remove_node_3d_gizmo_plugin(rock_formation_gizmo)
 	remove_tool_menu_item("Crea gruppo roccioso su guida"); remove_tool_menu_item("Rigenera gruppo roccioso selezionato")
 	remove_custom_type("ProceduralRock"); remove_tool_menu_item("Crea roccia parametrica")
 	remove_tool_menu_item("Esporta mappa PNG · dall'alto")

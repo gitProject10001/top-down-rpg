@@ -24,27 +24,27 @@ _data = {
 }
 point_count = 3
 
-[node name="HouseWorkshop" type="Node3D" unique_id=1422963494]
+[node name="HouseWorkshop" type="Node3D" unique_id=664531695]
 
-[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=122300559]
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=592514964]
 environment = SubResource("Environment_tdlgg")
 
-[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=199126389]
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=925375601]
 transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
 light_color = Color(1, 0.93, 0.84, 1)
 light_energy = 1.2
 shadow_enabled = true
 
-[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=376362657]
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=1443886297]
 material_override = SubResource("StandardMaterial3D_jofr6")
 mesh = SubResource("PlaneMesh_4bdhl")
 
-[node name="PareteRocciosa" type="Path3D" parent="." unique_id=1982257291]
+[node name="PareteRocciosa" type="Path3D" parent="." unique_id=875841833]
 curve = SubResource("Curve3D_kk6y7")
 script = ExtResource("1_k41ke")
 generation_ids = PackedStringArray("0_0", "0_1", "0_2", "1_0", "1_1", "1_2", "2_0", "2_1", "2_2", "3_0", "3_1", "3_2", "4_0", "4_1", "4_2", "5_0", "5_1", "5_2", "6_0", "6_1", "6_2")
 
-[node name="Roccia_0_0" type="Node3D" parent="PareteRocciosa" unique_id=368594214]
+[node name="Roccia_0_0" type="Node3D" parent="PareteRocciosa" unique_id=1398578121]
 transform = Transform3D(0.9950372, 0, 0.09950392, 0, 1, 0, -0.09950392, 0, 0.9950372, -10.920309, 0, -4.974949)
 script = ExtResource("2_286og")
 rock_seed = 2016309660
@@ -66,52 +66,52 @@ metadata/formation_baseline = {
 }
 metadata/formation_locked = false
 
-[node name="Roccia_0_1" type="Node3D" parent="PareteRocciosa" unique_id=1239349657]
-transform = Transform3D(0.9950372, 0, 0.09950392, 0, 1, 0, -0.09950392, 0, 0.9950372, -9.320394, 0, -3.1794834)
+[node name="Roccia_0_1" type="Node3D" parent="PareteRocciosa" unique_id=929721947]
+transform = Transform3D(0.9950372, 0, 0.09950392, 0, 1, 0, -0.09950392, 0, 0.9950372, -11.217246, 0, -3.5000682)
 script = ExtResource("2_286og")
-rock_seed = 4076190671
-dimensions = Vector3(3.6079686, 2.7816715, 2.4349282)
+rock_seed = 2919995733
+dimensions = Vector3(4.323405, 3.4458363, 2.4349282)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "0_1"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(3.6079686, 2.7816715, 2.4349282),
+"dimensions": Vector3(4.323405, 3.4458363, 2.4349282),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 4076190671,
+"rock_seed": 2919995733,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9950372, 0, 0.09950392, 0, 1, 0, -0.09950392, 0, 0.9950372, -9.320394, 0, -3.1794834)
+"transform": Transform3D(0.9950372, 0, 0.09950392, 0, 1, 0, -0.09950392, 0, 0.9950372, -11.217246, 0, -3.5000682)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_0_2" type="Node3D" parent="PareteRocciosa" unique_id=1526301104]
-transform = Transform3D(0.9950372, 0, 0.09950392, 0, 1, 0, -0.09950392, 0, 0.9950372, -9.808432, 0, -1.41387)
+[node name="Roccia_0_2" type="Node3D" parent="PareteRocciosa" unique_id=524592727]
+transform = Transform3D(0.9950372, 0, 0.09950392, 0, 1, 0, -0.09950392, 0, 0.9950372, -10.46239, 0, -1.397018)
 script = ExtResource("2_286og")
-rock_seed = 971713662
-dimensions = Vector3(1.662419, 0.9016931, 1.1632618)
+rock_seed = 4077120696
+dimensions = Vector3(1.8460073, 0.73871803, 1.1632618)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "0_2"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(1.662419, 0.9016931, 1.1632618),
+"dimensions": Vector3(1.8460073, 0.73871803, 1.1632618),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 971713662,
+"rock_seed": 4077120696,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9950372, 0, 0.09950392, 0, 1, 0, -0.09950392, 0, 0.9950372, -9.808432, 0, -1.41387)
+"transform": Transform3D(0.9950372, 0, 0.09950392, 0, 1, 0, -0.09950392, 0, 0.9950372, -10.46239, 0, -1.397018)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_1_0" type="Node3D" parent="PareteRocciosa" unique_id=1533000608]
-transform = Transform3D(0.9950372, 0, 0.09950366, 0, 1, 0, -0.09950366, 0, 0.9950372, -5.622851, 0, -5.258232)
+[node name="Roccia_1_0" type="Node3D" parent="PareteRocciosa" unique_id=378432409]
+transform = Transform3D(0.9950372, 0, 0.099503905, 0, 1, 0, -0.099503905, 0, 0.9950372, -5.8223743, 0, -5.23828)
 script = ExtResource("2_286og")
 rock_seed = 3858325558
 dimensions = Vector3(5.084262, 4.294323, 3.2536664)
@@ -128,56 +128,56 @@ metadata/formation_baseline = {
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9950372, 0, 0.09950366, 0, 1, 0, -0.09950366, 0, 0.9950372, -5.622851, 0, -5.258232)
+"transform": Transform3D(0.9950372, 0, 0.099503905, 0, 1, 0, -0.099503905, 0, 0.9950372, -5.8223743, 0, -5.23828)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_1_1" type="Node3D" parent="PareteRocciosa" unique_id=1098050347]
-transform = Transform3D(0.9950372, 0, 0.09950366, 0, 1, 0, -0.09950366, 0, 0.9950372, -6.394505, 0, -3.283926)
+[node name="Roccia_1_1" type="Node3D" parent="PareteRocciosa" unique_id=725104752]
+transform = Transform3D(0.9950372, 0, 0.099503905, 0, 1, 0, -0.099503905, 0, 0.9950372, -5.8429074, 0, -3.247671)
 script = ExtResource("2_286og")
-rock_seed = 2041884498
-dimensions = Vector3(3.6214843, 2.0596623, 2.469028)
+rock_seed = 1681821160
+dimensions = Vector3(3.4384859, 2.009913, 2.469028)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "1_1"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(3.6214843, 2.0596623, 2.469028),
+"dimensions": Vector3(3.4384859, 2.009913, 2.469028),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 2041884498,
+"rock_seed": 1681821160,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9950372, 0, 0.09950366, 0, 1, 0, -0.09950366, 0, 0.9950372, -6.394505, 0, -3.283926)
+"transform": Transform3D(0.9950372, 0, 0.099503905, 0, 1, 0, -0.099503905, 0, 0.9950372, -5.8429074, 0, -3.247671)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_1_2" type="Node3D" parent="PareteRocciosa" unique_id=166399818]
-transform = Transform3D(0.9950372, 0, 0.09950366, 0, 1, 0, -0.09950366, 0, 0.9950372, -5.4012957, 0, -1.8490038)
+[node name="Roccia_1_2" type="Node3D" parent="PareteRocciosa" unique_id=2013737542]
+transform = Transform3D(0.9950372, 0, 0.099503905, 0, 1, 0, -0.099503905, 0, 0.9950372, -6.6744485, 0, -1.7825937)
 script = ExtResource("2_286og")
-rock_seed = 470091978
-dimensions = Vector3(1.4851125, 1.2617553, 1.043965)
+rock_seed = 2963523861
+dimensions = Vector3(1.861274, 0.89786357, 1.043965)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "1_2"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(1.4851125, 1.2617553, 1.043965),
+"dimensions": Vector3(1.861274, 0.89786357, 1.043965),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 470091978,
+"rock_seed": 2963523861,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9950372, 0, 0.09950366, 0, 1, 0, -0.09950366, 0, 0.9950372, -5.4012957, 0, -1.8490038)
+"transform": Transform3D(0.9950372, 0, 0.099503905, 0, 1, 0, -0.099503905, 0, 0.9950372, -6.6744485, 0, -1.7825937)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_2_0" type="Node3D" parent="PareteRocciosa" unique_id=1605493951]
-transform = Transform3D(0.9950372, 0, 0.09950384, 0, 1, 0, -0.09950384, 0, 0.9950372, -2.0956414, 0, -5.9299207)
+[node name="Roccia_2_0" type="Node3D" parent="PareteRocciosa" unique_id=1742510611]
+transform = Transform3D(0.9950372, 0, 0.099503785, 0, 1, 0, -0.099503785, 0, 0.9950372, -1.3940606, 0, -6.0000787)
 script = ExtResource("2_286og")
 rock_seed = 3764220997
 dimensions = Vector3(4.9986005, 5.16706, 3.405828)
@@ -194,56 +194,56 @@ metadata/formation_baseline = {
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9950372, 0, 0.09950384, 0, 1, 0, -0.09950384, 0, 0.9950372, -2.0956414, 0, -5.9299207)
+"transform": Transform3D(0.9950372, 0, 0.099503785, 0, 1, 0, -0.099503785, 0, 0.9950372, -1.3940606, 0, -6.0000787)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_2_1" type="Node3D" parent="PareteRocciosa" unique_id=2061051008]
-transform = Transform3D(0.9950372, 0, 0.09950384, 0, 1, 0, -0.09950384, 0, 0.9950372, -2.8265088, 0, -3.7158391)
+[node name="Roccia_2_1" type="Node3D" parent="PareteRocciosa" unique_id=2144757332]
+transform = Transform3D(0.9950372, 0, 0.099503785, 0, 1, 0, -0.099503785, 0, 0.9950372, -1.956384, 0, -3.5869224)
 script = ExtResource("2_286og")
-rock_seed = 4099547140
-dimensions = Vector3(3.6286263, 2.4653978, 2.339462)
+rock_seed = 2142473763
+dimensions = Vector3(3.1046786, 2.4616685, 2.339462)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "2_1"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(3.6286263, 2.4653978, 2.339462),
+"dimensions": Vector3(3.1046786, 2.4616685, 2.339462),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 4099547140,
+"rock_seed": 2142473763,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9950372, 0, 0.09950384, 0, 1, 0, -0.09950384, 0, 0.9950372, -2.8265088, 0, -3.7158391)
+"transform": Transform3D(0.9950372, 0, 0.099503785, 0, 1, 0, -0.099503785, 0, 0.9950372, -1.956384, 0, -3.5869224)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_2_2" type="Node3D" parent="PareteRocciosa" unique_id=1669909097]
-transform = Transform3D(0.9950372, 0, 0.09950384, 0, 1, 0, -0.09950384, 0, 0.9950372, -2.7911057, 0, -2.015733)
+[node name="Roccia_2_2" type="Node3D" parent="PareteRocciosa" unique_id=412044419]
+transform = Transform3D(0.9950372, 0, 0.099503785, 0, 1, 0, -0.099503785, 0, 0.9950372, -1.4851695, 0, -2.0451653)
 script = ExtResource("2_286og")
-rock_seed = 2371126873
-dimensions = Vector3(1.548031, 0.9126773, 0.98437995)
+rock_seed = 3886997334
+dimensions = Vector3(1.2248491, 1.0237359, 0.98437995)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "2_2"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(1.548031, 0.9126773, 0.98437995),
+"dimensions": Vector3(1.2248491, 1.0237359, 0.98437995),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 2371126873,
+"rock_seed": 3886997334,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9950372, 0, 0.09950384, 0, 1, 0, -0.09950384, 0, 0.9950372, -2.7911057, 0, -2.015733)
+"transform": Transform3D(0.9950372, 0, 0.099503785, 0, 1, 0, -0.099503785, 0, 0.9950372, -1.4851695, 0, -2.0451653)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_3_0" type="Node3D" parent="PareteRocciosa" unique_id=124951001]
-transform = Transform3D(0.9805807, 0, -0.19611602, 0, 1, 0, 0.19611602, 0, 0.9805807, 2.879769, 0, -5.6435986)
+[node name="Roccia_3_0" type="Node3D" parent="PareteRocciosa" unique_id=374182735]
+transform = Transform3D(0.9805807, 0, -0.19611616, 0, 1, 0, 0.19611616, 0, 0.9805807, 3.4779832, 0, -5.5239563)
 script = ExtResource("2_286og")
 rock_seed = 521791432
 dimensions = Vector3(5.09764, 4.6977234, 3.9173076)
@@ -260,56 +260,56 @@ metadata/formation_baseline = {
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9805807, 0, -0.19611602, 0, 1, 0, 0.19611602, 0, 0.9805807, 2.879769, 0, -5.6435986)
+"transform": Transform3D(0.9805807, 0, -0.19611616, 0, 1, 0, 0.19611616, 0, 0.9805807, 3.4779832, 0, -5.5239563)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_3_1" type="Node3D" parent="PareteRocciosa" unique_id=1481447527]
-transform = Transform3D(0.9805807, 0, -0.19611602, 0, 1, 0, 0.19611602, 0, 0.9805807, 3.2978427, 0, -3.1131685)
+[node name="Roccia_3_1" type="Node3D" parent="PareteRocciosa" unique_id=676238205]
+transform = Transform3D(0.9805807, 0, -0.19611616, 0, 1, 0, 0.19611616, 0, 0.9805807, 3.6296732, 0, -3.3854961)
 script = ExtResource("2_286og")
-rock_seed = 3901831676
-dimensions = Vector3(2.9581308, 2.3260953, 2.4953878)
+rock_seed = 3684943546
+dimensions = Vector3(3.4605012, 2.7722142, 2.4953878)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "3_1"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(2.9581308, 2.3260953, 2.4953878),
+"dimensions": Vector3(3.4605012, 2.7722142, 2.4953878),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 3901831676,
+"rock_seed": 3684943546,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9805807, 0, -0.19611602, 0, 1, 0, 0.19611602, 0, 0.9805807, 3.2978427, 0, -3.1131685)
+"transform": Transform3D(0.9805807, 0, -0.19611616, 0, 1, 0, 0.19611616, 0, 0.9805807, 3.6296732, 0, -3.3854961)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_3_2" type="Node3D" parent="PareteRocciosa" unique_id=1894048179]
-transform = Transform3D(0.9805807, 0, -0.19611602, 0, 1, 0, 0.19611602, 0, 0.9805807, 3.1650317, 0, -1.8030993)
+[node name="Roccia_3_2" type="Node3D" parent="PareteRocciosa" unique_id=2135857564]
+transform = Transform3D(0.9805807, 0, -0.19611616, 0, 1, 0, 0.19611616, 0, 0.9805807, 2.6641536, 0, -2.0632424)
 script = ExtResource("2_286og")
-rock_seed = 197755396
-dimensions = Vector3(1.631462, 1.2255992, 0.96110874)
+rock_seed = 3627828748
+dimensions = Vector3(2.1730766, 0.85712886, 0.96110874)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "3_2"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(1.631462, 1.2255992, 0.96110874),
+"dimensions": Vector3(2.1730766, 0.85712886, 0.96110874),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 197755396,
+"rock_seed": 3627828748,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9805807, 0, -0.19611602, 0, 1, 0, 0.19611602, 0, 0.9805807, 3.1650317, 0, -1.8030993)
+"transform": Transform3D(0.9805807, 0, -0.19611616, 0, 1, 0, 0.19611616, 0, 0.9805807, 2.6641536, 0, -2.0632424)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_4_0" type="Node3D" parent="PareteRocciosa" unique_id=1725624419]
-transform = Transform3D(0.9805806, 0, -0.19611637, 0, 1, 0, 0.19611637, 0, 0.9805806, 7.6133904, 0, -4.385105)
+[node name="Roccia_4_0" type="Node3D" parent="PareteRocciosa" unique_id=1641571129]
+transform = Transform3D(0.9805806, 0, -0.19611631, 0, 1, 0, 0.19611631, 0, 0.9805806, 7.921911, 0, -4.3234015)
 script = ExtResource("2_286og")
 rock_seed = 756990865
 dimensions = Vector3(4.7975745, 4.66651, 3.2389429)
@@ -326,56 +326,56 @@ metadata/formation_baseline = {
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9805806, 0, -0.19611637, 0, 1, 0, 0.19611637, 0, 0.9805806, 7.6133904, 0, -4.385105)
+"transform": Transform3D(0.9805806, 0, -0.19611631, 0, 1, 0, 0.19611631, 0, 0.9805806, 7.921911, 0, -4.3234015)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_4_1" type="Node3D" parent="PareteRocciosa" unique_id=2030165385]
-transform = Transform3D(0.9805806, 0, -0.19611637, 0, 1, 0, 0.19611637, 0, 0.9805806, 6.87996, 0, -2.2865043)
+[node name="Roccia_4_1" type="Node3D" parent="PareteRocciosa" unique_id=1709416921]
+transform = Transform3D(0.9805806, 0, -0.19611631, 0, 1, 0, 0.19611631, 0, 0.9805806, 6.903437, 0, -2.4204795)
 script = ExtResource("2_286og")
-rock_seed = 3688910994
-dimensions = Vector3(2.91321, 2.2264543, 2.301292)
+rock_seed = 484124641
+dimensions = Vector3(3.1892428, 2.314601, 2.301292)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "4_1"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(2.91321, 2.2264543, 2.301292),
+"dimensions": Vector3(3.1892428, 2.314601, 2.301292),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 3688910994,
+"rock_seed": 484124641,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9805806, 0, -0.19611637, 0, 1, 0, 0.19611637, 0, 0.9805806, 6.87996, 0, -2.2865043)
+"transform": Transform3D(0.9805806, 0, -0.19611631, 0, 1, 0, 0.19611631, 0, 0.9805806, 6.903437, 0, -2.4204795)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_4_2" type="Node3D" parent="PareteRocciosa" unique_id=813525614]
-transform = Transform3D(0.9805806, 0, -0.19611637, 0, 1, 0, 0.19611637, 0, 0.9805806, 5.991891, 0, -1.1598758)
+[node name="Roccia_4_2" type="Node3D" parent="PareteRocciosa" unique_id=834976009]
+transform = Transform3D(0.9805806, 0, -0.19611631, 0, 1, 0, 0.19611631, 0, 0.9805806, 6.81359, 0, -0.9023111)
 script = ExtResource("2_286og")
-rock_seed = 114085306
-dimensions = Vector3(1.4893216, 0.9600302, 1.1710377)
+rock_seed = 2797921175
+dimensions = Vector3(1.4367253, 0.6564212, 1.1710377)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "4_2"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(1.4893216, 0.9600302, 1.1710377),
+"dimensions": Vector3(1.4367253, 0.6564212, 1.1710377),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 114085306,
+"rock_seed": 2797921175,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9805806, 0, -0.19611637, 0, 1, 0, 0.19611637, 0, 0.9805806, 5.991891, 0, -1.1598758)
+"transform": Transform3D(0.9805806, 0, -0.19611631, 0, 1, 0, 0.19611631, 0, 0.9805806, 6.81359, 0, -0.9023111)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_5_0" type="Node3D" parent="PareteRocciosa" unique_id=1248163215]
-transform = Transform3D(0.9805807, 0, -0.19611596, 0, 1, 0, 0.19611596, 0, 0.9805807, 9.791972, 0, -4.0729904)
+[node name="Roccia_5_0" type="Node3D" parent="PareteRocciosa" unique_id=440106357]
+transform = Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 10.035072, 0, -4.0243707)
 script = ExtResource("2_286og")
 rock_seed = 848476106
 dimensions = Vector3(4.661466, 4.583994, 3.9613957)
@@ -392,55 +392,55 @@ metadata/formation_baseline = {
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9805807, 0, -0.19611596, 0, 1, 0, 0.19611596, 0, 0.9805807, 9.791972, 0, -4.0729904)
+"transform": Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 10.035072, 0, -4.0243707)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_5_1" type="Node3D" parent="PareteRocciosa" unique_id=1572294796]
-transform = Transform3D(0.9805807, 0, -0.19611596, 0, 1, 0, 0.19611596, 0, 0.9805807, 9.729547, 0, -1.9433796)
+[node name="Roccia_5_1" type="Node3D" parent="PareteRocciosa" unique_id=1415557946]
+transform = Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 9.767289, 0, -1.5983505)
 script = ExtResource("2_286og")
-rock_seed = 849367973
-dimensions = Vector3(3.336761, 2.155024, 2.5354347)
+rock_seed = 501918451
+dimensions = Vector3(2.7762897, 1.737365, 2.5354347)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "5_1"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(3.336761, 2.155024, 2.5354347),
+"dimensions": Vector3(2.7762897, 1.737365, 2.5354347),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 849367973,
+"rock_seed": 501918451,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9805807, 0, -0.19611596, 0, 1, 0, 0.19611596, 0, 0.9805807, 9.729547, 0, -1.9433796)
+"transform": Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 9.767289, 0, -1.5983505)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_5_2" type="Node3D" parent="PareteRocciosa" unique_id=578611918]
-transform = Transform3D(0.9805807, 0, -0.19611596, 0, 1, 0, 0.19611596, 0, 0.9805807, 10.599674, 0, -0.29121876)
+[node name="Roccia_5_2" type="Node3D" parent="PareteRocciosa" unique_id=549563832]
+transform = Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 10.714992, 0, -0.368977)
 script = ExtResource("2_286og")
-rock_seed = 1176310750
-dimensions = Vector3(1.457912, 1.2898856, 1.0534022)
+rock_seed = 2909336364
+dimensions = Vector3(1.7410939, 1.2415787, 1.0534022)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "5_2"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(1.457912, 1.2898856, 1.0534022),
+"dimensions": Vector3(1.7410939, 1.2415787, 1.0534022),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 1176310750,
+"rock_seed": 2909336364,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.9805807, 0, -0.19611596, 0, 1, 0, 0.19611596, 0, 0.9805807, 10.599674, 0, -0.29121876)
+"transform": Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 10.714992, 0, -0.368977)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_6_0" type="Node3D" parent="PareteRocciosa" unique_id=1917094458]
+[node name="Roccia_6_0" type="Node3D" parent="PareteRocciosa" unique_id=381783501]
 transform = Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 10.935664, 0, -3.947484)
 script = ExtResource("2_286og")
 rock_seed = 1440071660
@@ -462,51 +462,51 @@ metadata/formation_baseline = {
 }
 metadata/formation_locked = false
 
-[node name="Roccia_6_1" type="Node3D" parent="PareteRocciosa" unique_id=917244507]
-transform = Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 11.224023, 0, -1.4194881)
+[node name="Roccia_6_1" type="Node3D" parent="PareteRocciosa" unique_id=1274539636]
+transform = Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 10.702654, 0, -1.7154882)
 script = ExtResource("2_286og")
-rock_seed = 4238905743
-dimensions = Vector3(2.9229734, 2.4225044, 2.0865834)
+rock_seed = 3374556833
+dimensions = Vector3(3.3225794, 2.5072317, 2.0865834)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "6_1"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(2.9229734, 2.4225044, 2.0865834),
+"dimensions": Vector3(3.3225794, 2.5072317, 2.0865834),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 4238905743,
+"rock_seed": 3374556833,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 11.224023, 0, -1.4194881)
+"transform": Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 10.702654, 0, -1.7154882)
 }
 metadata/formation_locked = false
 
-[node name="Roccia_6_2" type="Node3D" parent="PareteRocciosa" unique_id=1780586432]
-transform = Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 10.376736, 0, -0.22395906)
+[node name="Roccia_6_2" type="Node3D" parent="PareteRocciosa" unique_id=2079961692]
+transform = Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 10.970012, 0, -0.21359192)
 script = ExtResource("2_286og")
-rock_seed = 2256484198
-dimensions = Vector3(1.3479388, 0.964175, 1.1623602)
+rock_seed = 545662797
+dimensions = Vector3(1.4060714, 1.2426786, 1.1623602)
 fracture = 0.7
 strata_dip = 0.15
 lean = 0.12
 metadata/formation_id = "6_2"
 metadata/formation_baseline = {
 "collisions_enabled": true,
-"dimensions": Vector3(1.3479388, 0.964175, 1.1623602),
+"dimensions": Vector3(1.4060714, 1.2426786, 1.1623602),
 "fracture": 0.7,
 "lean": 0.12,
-"rock_seed": 2256484198,
+"rock_seed": 545662797,
 "stone_color": Color(0.34, 0.35, 0.32, 1),
 "strata": 3,
 "strata_dip": 0.15,
-"transform": Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 10.376736, 0, -0.22395906)
+"transform": Transform3D(0.98058075, 0, -0.19611591, 0, 1, 0, 0.19611591, 0, 0.98058075, 10.970012, 0, -0.21359192)
 }
 metadata/formation_locked = false
 
-[node name="Camera" type="Camera3D" parent="." unique_id=1918903995]
+[node name="Camera" type="Camera3D" parent="." unique_id=375091414]
 transform = Transform3D(0.83205026, -0.3324919, 0.44400612, 0, 0.8004434, 0.5994083, -0.5547002, -0.49873787, 0.6660091, 20, 28, 30)
 projection = 1
 current = true

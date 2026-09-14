@@ -89,3 +89,16 @@ Creazione e rigenerazione hanno azioni Undo/Redo distinte. La rigenerazione cons
 Esempio editabile: scenes/dev/rock_formation_example.tscn. Cattura Godot: captures/balcony_attachment/rock_formation_example.png. Test check_rock_formation: determinismo, riconoscimento automatico iniziale, spostamento e figlio manuali, cancellazioni rispettate, Undo/Redo, PackedScene e rifiuto delle guide non piane. La creazione nel menu è verificata sintatticamente; non è un benchmark né la prova interattiva completa del gizmo Path3D.
 
 Prossimo R02.2: ridurre l'effetto di fila regolare, raccordare meglio le masse ed evidenziare il lato libero/diagnosticare le curve problematiche prima delle pareti R03.
+
+
+## R02.2 — Fascia libera verificata e variazione delle masse
+
+Le stazioni hanno ora uno scostamento deterministico lungo la guida; le masse medie/piccole variano anche nelle proporzioni. Gli estremi restano ancorati. ID, baseline, modifiche manuali e cancellazioni mantengono il comportamento R02.1. La disposizione resta una composizione a tre taglie: non è ancora una parete continua, né un algoritmo geologico completo.
+
+Prima di applicare la proposta si proietta l'inviluppo convesso della geometria di ciascuna roccia sul piano locale XZ. L'ingombro viene confrontato con una fascia di 2 metri sul lato libero di ogni segmento della guida campionata. Questo sostituisce la sola distanza prudenziale R02.1. Se una roccia, anche manuale, invade la fascia, il comando mostra il suo ID e non applica nessuna modifica. La verifica è conservativa: non sfrutta cavità sotto le rocce; non verifica navigabilità del mondo o oggetti estranei al gruppo. Le intersezioni fra rocce sono permesse per comporre masse.
+
+Selezionando il Path3D, il gizmo verde indica la fascia libera. Non compare sugli altri gruppi né in gioco. La verifica geometrica avviene al comando Rigenera, non durante il trascinamento. La fascia è espressa in unità locali: mantenere scala del gruppo a 1 per avere 2 metri nel mondo.
+
+Verifiche: 12 seed sulla guida dolce; guida incrociata rilevata; intrusione manuale segnalata senza spostamento; regressioni determinismo, cancellazioni, Undo/Redo e salvataggio superate. Parser Godot di gizmo/plugin superato; screenshot GPU dell'esempio rigenerato ispezionato. L'interazione del nuovo gizmo nell'editor non è stata verificata manualmente.
+
+Prossimo R02.3: raccordi fra masse e alternanza di gruppi/addensamenti per superare ulteriormente l'effetto fila, poi R03 con pareti e terrazze discrete. La varietà architetturale G01.4 e il confronto di quattro castelli V01 restano nella pipeline.
