@@ -1,5 +1,6 @@
 @tool
 extends EditorPlugin
+const RockFormation=preload("res://addons/rock_builder/formation.gd")
 
 var map_export_busy := false
 var panel: VBoxContainer
@@ -20,6 +21,8 @@ var seed_input: SpinBox
 var stroke_method := "apply_edits"
 
 func _enter_tree() -> void:
+	add_tool_menu_item("Crea gruppo roccioso su guida",_create_rock_formation)
+	add_tool_menu_item("Rigenera gruppo roccioso selezionato",_regenerate_rock_formation)
 	add_custom_type("ProceduralRock","Node3D",preload("res://addons/rock_builder/rock.gd"),EditorInterface.get_base_control().get_theme_icon("MeshInstance3D","EditorIcons"))
 	add_tool_menu_item("Crea roccia parametrica",_create_rock)
 	add_tool_menu_item("Esporta mappa PNG · dall'alto",_choose_map_export.bind(false))
@@ -80,6 +83,7 @@ func _enter_tree() -> void:
 	set_process(true)
 
 func _exit_tree() -> void:
+	remove_tool_menu_item("Crea gruppo roccioso su guida"); remove_tool_menu_item("Rigenera gruppo roccioso selezionato")
 	remove_custom_type("ProceduralRock"); remove_tool_menu_item("Crea roccia parametrica")
 	remove_tool_menu_item("Esporta mappa PNG · dall'alto")
 	remove_tool_menu_item("Esporta mappa PNG · isometrica")
@@ -231,3 +235,27 @@ func _create_rock() -> void:
 	undo.add_do_method(parent,"add_child",rock,true); undo.add_do_property(rock,"owner",root)
 	undo.add_undo_method(parent,"remove_child",rock); undo.add_do_reference(rock); undo.commit_action()
 	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(rock); EditorInterface.edit_node(rock)
+
+func _create_rock_formation() -> void:
+	var root := EditorInterface.get_edited_scene_root()
+	if root==null: return
+	var parent: Node=root.get_node_or_null("Pixel/View")
+	if parent==null: parent=root
+	var group=preload("res://addons/rock_builder/formation.gd").new(); group.name="GruppoRoccioso"
+	var undo := get_undo_redo(); undo.create_action("Crea gruppo roccioso",UndoRedo.MERGE_DISABLE,root)
+	undo.add_do_method(parent,"add_child",group,true); undo.add_do_property(group,"owner",root)
+	undo.add_undo_method(parent,"remove_child",group); undo.add_do_reference(group); undo.commit_action()
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(group); EditorInterface.edit_node(group)
+	_regenerate_rock_formation()
+func _regenerate_rock_formation() -> void:
+	for selected in EditorInterface.get_selection().get_selected_nodes():
+		var group: Node=selected
+		while group and not group is RockFormation: group=group.get_parent()
+		if group==null: continue
+		var proposal: Dictionary=group.proposal()
+		if proposal.has("error"):
+			var dialog := AcceptDialog.new(); dialog.dialog_text=proposal.error
+			dialog.confirmed.connect(dialog.queue_free); EditorInterface.get_base_control().add_child(dialog); dialog.popup_centered(); return
+		var undo := get_undo_redo(); undo.create_action("Rigenera gruppo roccioso",UndoRedo.MERGE_DISABLE,group)
+		undo.add_do_method(group,"apply",proposal); undo.add_undo_method(group,"apply",group.snapshot()); undo.commit_action()
+		return

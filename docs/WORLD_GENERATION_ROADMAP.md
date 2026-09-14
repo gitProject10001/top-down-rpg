@@ -36,7 +36,7 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 |---|---|---|---|
 | G01.3b.2b | FATTO | Diagnostica ingombri e verifica editor/Play | Proposta comprensibile, Undo/Redo reali, passaggi percorribili |
 | R01 | IN CORSO — prototipo disponibile | Generatore di singola roccia/affioramento | Seed, dimensioni, piani di frattura, stratificazione, spigolosità; 6 varianti con stesso linguaggio geometrico; collisione semplice |
-| R02 | TODO | Composizione di gruppi rocciosi | Path/area, direzione dominante degli strati, masse grandi/medie/piccole; variazione locale senza distruggere i pezzi spostati a mano |
+| R02 | IN CORSO | Composizione di gruppi rocciosi | Path/area, direzione dominante degli strati, masse grandi/medie/piccole; variazione locale senza distruggere i pezzi spostati a mano |
 | R03 | TODO | Pareti e creste montuose | Pareti fra piattaforme piane, quote discrete, rampe brevi e passaggi riservati, assenza di compenetrazioni macroscopiche; LOD e budget misurati |
 | W01 | TODO | Laghi editabili | Perimetro e quota dell'acqua, riva e bacino, esclusione edifici; superficie d'acqua inizialmente semplice |
 | W02 | TODO | Fiumi editabili | Spline, larghezza/profondità, profilo discendente e confluenze; raccordo alle quote dei laghi; niente flussi in salita |
@@ -74,3 +74,18 @@ Campionario: `scenes/dev/rock_generator_examples.tscn`, sei nodi editabili con p
 Test tools/check_rock_generator.gd: 12 seed, determinismo dei vertici, triangoli non degeneri, una superficie e massimo 400 triangoli nei parametri provati, raycast fisico con collisione attiva/disattivata, round-trip PackedScene. Nessun benchmark su intere montagne; LOD e gruppi MultiMesh restano R02/R03. La resa è ancora un prototipo di forme: non dichiara raggiunta la varietà del concept.
 
 Prossimo incremento R02.1: comporre poche masse grandi/medie/piccole lungo una guida, con orientamento degli strati comune e seed locali, lasciando i pezzi editabili. Conservare una fascia piana libera davanti alla parete.
+
+
+## R02.1 — Gruppi rocciosi lungo una guida
+
+Comandi **Progetto → Strumenti → Crea gruppo roccioso su guida** e **Rigenera gruppo roccioso selezionato**. Il gruppo è un Path3D: selezionalo e modifica la Curve3D con gli strumenti di percorso di Godot. Regola Formation Seed, Spacing, Wall Height, Strata e Strata Dip nell'Inspector, poi rigenera. Le modifiche alla guida non ricostruiscono il gruppo automaticamente.
+
+Per ogni stazione della guida vengono proposte masse grandi, medie e piccole, con seed locali e orientamento geologico coerente. Le nuove rocce si dispongono a sinistra rispetto al verso del percorso; invertire il percorso inverte il lato. La distanza dal fronte è prudenziale, ma non è ancora una prova globale di assenza di ingombri su curve strette o autointersecanti. Il terreno non viene modificato; la guida deve restare a quota locale zero.
+
+Ogni roccia è un nodo figlio con ID e baseline. Trasformazioni, dimensioni o parametri modificati a mano e nodi con figli manuali vengono preservati. Le rocce eliminate manualmente non vengono ricreate a parità di stazioni. Gli ID sono indice di stazione e taglia: grandi cambiamenti alla topologia/lunghezza della guida non costituiscono ancora un sistema di identità spaziale generale. Gli elementi manuali oltre una guida accorciata restano presenti. I campi generation_ids/formation_* sono dati di authoring, non controlli da modificare durante l'uso normale.
+
+Creazione e rigenerazione hanno azioni Undo/Redo distinte. La rigenerazione conserva i nodi presenti e aggiorna quelli automatici; quelli rimossi perché fuori dalla guida vengono ricreati se si annulla. Non elimina figli manuali delle rocce preservate. Non introduce ancora batching/LOD; limite 80 stazioni, cioè al massimo 240 rocce nuove per gruppo.
+
+Esempio editabile: scenes/dev/rock_formation_example.tscn. Cattura Godot: captures/balcony_attachment/rock_formation_example.png. Test check_rock_formation: determinismo, riconoscimento automatico iniziale, spostamento e figlio manuali, cancellazioni rispettate, Undo/Redo, PackedScene e rifiuto delle guide non piane. La creazione nel menu è verificata sintatticamente; non è un benchmark né la prova interattiva completa del gizmo Path3D.
+
+Prossimo R02.2: ridurre l'effetto di fila regolare, raccordare meglio le masse ed evidenziare il lato libero/diagnosticare le curve problematiche prima delle pareti R03.
