@@ -28,15 +28,13 @@ func proposal() -> Dictionary:
  var ribbons := free_ribbons()
  var count := ceili(curve.get_baked_length()/spacing)+1
  if count>80: return {"error":"Massimo 80 stazioni per gruppo: dividi la guida."}
+ var stations := compose_stations(count,curve.get_baked_length())
  var previous := snapshot(); var existing := {}
  for record in previous.records: existing[record.id]=record
  var output: Array=[]; var seen := PackedStringArray(); var protected := 0
  for index in count:
-  var station_rng := RandomNumberGenerator.new()
-  station_rng.seed=hash(str(formation_seed)+":station:"+str(index))
-  var distance_value: float=clampf(index*spacing+station_rng.randf_range(-0.28,0.28)*spacing,0,curve.get_baked_length())
-  if index==0: distance_value=0
-  if index==count-1: distance_value=curve.get_baked_length()
+  var station: Dictionary=stations[index]
+  var distance_value: float=station.distance
   var p := curve.sample_baked(distance_value)
   var direction := curve.sample_baked(minf(distance_value+0.1,curve.get_baked_length()))-curve.sample_baked(maxf(0,distance_value-0.1))
   if direction.length()<0.001: return {"error":"La guida contiene un tratto senza direzione."}
@@ -51,13 +49,15 @@ func proposal() -> Dictionary:
     if record.locked or record.values!=record.baseline or node.get_child_count()>0:
      output.append(record); protected+=1; continue
    var rng := RandomNumberGenerator.new(); rng.seed=hash(str(formation_seed)+":"+id)
-   var size_value := Vector3(spacing*rng.randf_range(1.1,1.4),wall_height*rng.randf_range(0.8,1.2),spacing*rng.randf_range(0.8,1.0))
-   if tier==1: size_value*=Vector3(rng.randf_range(0.48,0.78),rng.randf_range(0.38,0.65),0.65)
+   var size_value := Vector3(spacing*rng.randf_range(1.4,1.8),wall_height*station.prominence*rng.randf_range(0.85,1.12),spacing*rng.randf_range(0.8,1.0))
+   if tier==1: size_value*=Vector3(rng.randf_range(0.8,1.05),rng.randf_range(0.22,0.42),0.85)
    if tier==2: size_value*=Vector3(rng.randf_range(0.2,0.4),rng.randf_range(0.16,0.32),0.3)
    size_value=size_value.max(Vector3.ONE*0.3)
-   # Conservative radius keeps new generated geometry behind the guide.
-   var back := size_value.length()*0.58+(0.5 if tier==0 else 0.1)
-   var pos := p-front*back+direction*rng.randf_range(-0.25,0.25)*spacing
+   # Depth-based setback lets broad shelves intersect the feet of taller masses.
+   # The whole proposal still passes the global free-ribbon geometry check.
+   var back := size_value.z*0.62+(0.85 if tier==0 else 0.25)
+   var pos := p-front*back+direction*rng.randf_range(-0.16,0.16)*spacing
+   if tier==1: pos+=direction*spacing*0.25
    var frame := Transform3D(Basis(Vector3.UP,-atan2(direction.z,direction.x)),pos)
    var values := {"transform":frame,"rock_seed":int(rng.randi()),"dimensions":size_value,"fracture":0.7,"strata":strata,"strata_dip":strata_dip,"lean":0.12,"stone_color":Color(0.34,0.35,0.32),"collisions_enabled":true}
    output.append({"id":id,"values":values,"baseline":values.duplicate(true),"locked":false})
@@ -71,6 +71,30 @@ func proposal() -> Dictionary:
   if conflict:
    return {"error":"Roccia %s: invade la fascia libera davanti alla guida (2 m). Allarga la curva o sposta la roccia modificata. Nessuna modifica applicata."%record.id}
  return {"records":output,"ids":seen,"protected":protected}
+
+## Seeded runs of 2-4 stations share a crest; compressed spacing forms clusters.
+## Stable station/tier IDs keep the existing manual override contract.
+func compose_stations(count: int,length_value: float) -> Array[Dictionary]:
+ var result: Array[Dictionary]=[]
+ var start := 0
+ var cluster := 0
+ while start<count:
+  var rng := RandomNumberGenerator.new()
+  rng.seed=hash(str(formation_seed)+":cluster:"+str(cluster))
+  var members := mini(rng.randi_range(2,4),count-start)
+  var compression := rng.randf_range(0.58,0.78)
+  var crest := rng.randf_range(0.85,1.25)
+  var center := start+(members-1)*0.5
+  for j in members:
+   var index := start+j
+   var t := (center+(j-(members-1)*0.5)*compression)/maxf(count-1,1)
+   if index==0: t=0
+   if index==count-1: t=1
+   var profile := sin(PI*(j+0.5)/members)
+   result.append({"distance":t*length_value,"prominence":crest*lerpf(0.5,1.0,profile)})
+  start+=members
+  cluster+=1
+ return result
 
 ## Local XZ ribbon: the positive normal is the playable side of the guide.
 func free_ribbons() -> Array[PackedVector2Array]:

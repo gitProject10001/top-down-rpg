@@ -27,9 +27,21 @@ func run() -> void:
  assert(moved.position==Vector3(0,0,1),"Validation must not move authored nodes")
  group.apply(before_invalid)
  var clean=preload("res://addons/rock_builder/formation.gd").new(); root.add_child(clean)
+ var previous_shape: Array=[]
+ for station_count in [2,3,4,7,80]:
+  var stations=clean.compose_stations(station_count,40.0)
+  assert(stations.size()==station_count)
+  assert(stations[0].distance==0 and stations[-1].distance==40)
+  for i in range(1,stations.size()):
+   assert(stations[i].distance>stations[i-1].distance,"Clustering must preserve guide order")
  for seed_value in range(12):
   clean.formation_seed=seed_value
-  assert(not clean.proposal().has("error"),"Gentle guide must keep free side clear")
+  var candidate=clean.proposal()
+  assert(not candidate.has("error"),"Gentle guide must keep free side clear")
+  var shape: Array=[]
+  for record in candidate.records: shape.append([record.values.transform,record.values.dimensions])
+  assert(shape!=previous_shape,"Seed must vary composition, not only surface geometry")
+  previous_shape=shape
  clean.curve.clear_points()
  for point in [Vector3(-8,0,-8),Vector3(8,0,8),Vector3(-8,0,8),Vector3(8,0,-8)]: clean.curve.add_point(point)
  assert(clean.proposal().has("error"),"Crossing guide must detect rock intrusion")

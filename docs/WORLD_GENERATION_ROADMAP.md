@@ -102,3 +102,14 @@ Selezionando il Path3D, il gizmo verde indica la fascia libera. Non compare sugl
 Verifiche: 12 seed sulla guida dolce; guida incrociata rilevata; intrusione manuale segnalata senza spostamento; regressioni determinismo, cancellazioni, Undo/Redo e salvataggio superate. Parser Godot di gizmo/plugin superato; screenshot GPU dell'esempio rigenerato ispezionato. L'interazione del nuovo gizmo nell'editor non è stata verificata manualmente.
 
 Prossimo R02.3: raccordi fra masse e alternanza di gruppi/addensamenti per superare ulteriormente l'effetto fila, poi R03 con pareti e terrazze discrete. La varietà architetturale G01.4 e il confronto di quattro castelli V01 restano nella pipeline.
+
+
+## R02.3 — Addensamenti e raccordi bassi
+
+Le stazioni sono suddivise dal seed in gruppi di 2–4 elementi. Ogni gruppo comprime le distanze e condivide un profilo di altezza con picco e spalle più basse. Gli estremi della guida restano ancorati. Le masse principali sono più larghe; la taglia media diventa una base larga e bassa, parzialmente sovrapposta ai piedi delle rocce. Il distacco dalla guida dipende dalla profondità, poi viene verificato sulla geometria completa come in R02.2.
+
+La composizione cambia con il seed nelle posizioni e nelle dimensioni, oltre che nella geometria dei singoli pezzi. Non aggiunge nodi o nuove collisioni rispetto alle tre taglie esistenti. Mantiene ID e baseline: le rocce già modificate a mano non adottano automaticamente le nuove proporzioni. I raccordi sono sovrapposizioni di mesh, non una fusione booleana o una parete impermeabile garantita; restano possibili discontinuità sulle guide difficili.
+
+Verificati 12 seed con fascia libera, variazione della composizione fra seed, ordine delle stazioni e ancoraggio degli estremi per 2/3/4/7/80 stazioni. Superate anche le regressioni di modifica manuale, cancellazione, Undo/Redo e salvataggio. Esempio e screenshot GPU rigenerati con tools/preview_rock_formation.gd; risultato ispezionato.
+
+Prossimo R03.1: introdurre una parete di contenimento per una terrazza a quota discreta, con superficie superiore piana. Prima una piccola scena di prova; rampe e collegamenti controllati in un incremento successivo. G01.4 e V01 rimangono aperti.
