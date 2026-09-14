@@ -1,6 +1,7 @@
 @tool
 extends EditorPlugin
 
+var map_export_busy := false
 var panel: VBoxContainer
 var scroll: ScrollContainer
 var mode: OptionButton
@@ -19,6 +20,8 @@ var seed_input: SpinBox
 var stroke_method := "apply_edits"
 
 func _enter_tree() -> void:
+	add_tool_menu_item("Esporta mappa PNG · dall'alto",_choose_map_export.bind(false))
+	add_tool_menu_item("Esporta mappa PNG · isometrica",_choose_map_export.bind(true))
 	panel = VBoxContainer.new()
 	scroll = ScrollContainer.new()
 	scroll.name = "World"
@@ -75,6 +78,8 @@ func _enter_tree() -> void:
 	set_process(true)
 
 func _exit_tree() -> void:
+	remove_tool_menu_item("Esporta mappa PNG · dall'alto")
+	remove_tool_menu_item("Esporta mappa PNG · isometrica")
 	_finish()
 	remove_control_from_docks(scroll)
 	scroll.queue_free()
@@ -185,3 +190,30 @@ func _generate() -> void:
 	undo.add_undo_method(ground,"apply_plan",ground.world_plan)
 	undo.commit_action()
 	EditorInterface.mark_scene_as_unsaved()
+
+func _choose_map_export(isometric: bool) -> void:
+	if map_export_busy: return
+	var root := EditorInterface.get_edited_scene_root()
+	if root==null: return
+	var dialog := EditorFileDialog.new(); dialog.file_mode=EditorFileDialog.FILE_MODE_SAVE_FILE
+	dialog.access=EditorFileDialog.ACCESS_FILESYSTEM; dialog.add_filter("*.png","Mappa PNG")
+	dialog.current_file=(root.scene_file_path.get_file().get_basename() if not root.scene_file_path.is_empty() else str(root.name))+("_isometrica.png" if isometric else "_alto.png")
+	dialog.file_selected.connect(func(path):
+		if map_export_busy: dialog.queue_free(); return
+		var current := EditorInterface.get_edited_scene_root()
+		if current==null: dialog.queue_free(); return
+		var packed := PackedScene.new()
+		if packed.pack(current)!=OK: dialog.queue_free(); return
+		map_export_busy=true; dialog.queue_free()
+		var progress := AcceptDialog.new(); progress.title="Esportazione mappa"
+		progress.dialog_text="Caricamento della copia del mondo e acquisizione PNG…"; progress.get_ok_button().disabled=true
+		EditorInterface.get_base_control().add_child(progress); progress.popup_centered()
+		var result=await preload("res://addons/world_editor/map_export.gd").export_png(self,packed,path,isometric)
+		map_export_busy=false
+		if is_instance_valid(progress):
+			progress.get_ok_button().disabled=false
+			progress.dialog_text=result.get("error","PNG esportato: "+path)
+			progress.confirmed.connect(progress.queue_free)
+			progress.canceled.connect(progress.queue_free))
+	dialog.canceled.connect(dialog.queue_free)
+	EditorInterface.get_base_control().add_child(dialog); dialog.popup_centered_ratio(0.65)
