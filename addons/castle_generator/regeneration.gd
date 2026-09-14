@@ -60,8 +60,8 @@ static func propose(group: Node3D, candidate: Dictionary) -> Dictionary:
    shapes.append(shifted)
   footprints[record.id]=shapes
  var errors=preload("res://addons/castle_generator/footprints.gd").validate(footprints,merged.span,candidate.get("minimum_open_fraction",0.65))
- if not errors.is_empty(): return {"error":"La proposta entra in conflitto con gli elementi preservati: "+"; ".join(errors)+" Prova un altro seed."}
- return {"snapshot":snapshot,"original":original.duplicate(true),"updates":updates,"baseline":baseline,"plan":merged,"preserved":preserved}
+ if not errors.is_empty(): return {"error":"La proposta entra in conflitto con gli elementi preservati: "+"; ".join(errors)+" Prova un altro seed.","footprints":footprints,"span":merged.span}
+ return {"snapshot":snapshot,"original":original.duplicate(true),"updates":updates,"baseline":baseline,"plan":merged,"preserved":preserved,"footprints":footprints,"span":merged.span}
 
 static func apply(group: Node3D, positions: Dictionary, plan: Dictionary, baseline: Dictionary) -> void:
  for node in group.buildings():

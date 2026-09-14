@@ -1159,3 +1159,22 @@ Test `check_castle_footprints`: corpi orientati separati con AABB sovrapposti, s
 - [ ] G01.3b.2b Verifica editor/Play della rigenerazione con accessori e rotazioni; diagnostica visuale degli ingombri.
 
 Prossimo incremento: G01.3b.2b, prima di ampliare il catalogo per il confronto dei quattro castelli.
+
+
+### Coordinamento con il paesaggio e il concept
+
+Il concept delle quattro fazioni guida solo la composizione. Nuovo backlog trasversale in [WORLD_GENERATION_ROADMAP.md](WORLD_GENERATION_ROADMAP.md): rocce stratificate, gruppi e montagne, laghi/fiumi, attraversamenti e grotte, composizione urbana e dipendenze fra generatori. Il flusso corrente resta G01.3b.2b; R01 è il successivo prototipo ambientale circoscritto. Il confronto dei quattro castelli rimane previsto quando il catalogo e le regole forniranno sufficiente varietà.
+
+
+Vincolo confermato per il paesaggio: superfici prevalentemente piane, terrazze a quote discrete, rampe brevi e rare; niente città distribuite su pendenze continue. I profili rocciosi delimitano le aree o separano i piani. Dettagli in WORLD_GENERATION_ROADMAP.md.
+
+
+### G01.3b.2b — Diagnostica e verifica editor/Play completate
+
+La proposta di rigenerazione include un diagramma dei contorni reali dei corpi e degli accessori, con margine interno del recinto. In caso di conflitto viene mostrata una diagnostica grafica senza applicare la proposta. Il diagramma è contestuale alla conferma, non aggiunge gizmo persistenti alla scena.
+
+Verifiche: `check_castle_composer_editor.gd`, avviato tramite --castle-composer-editor-test nel vero EditorPlugin, supera selezione, lock, rilascio della posizione, conferma rigenerazione e Undo/Redo con un corpo ruotato e accessorio. `check_composed_castle_play.gd` supera ingresso dal portone, persistenza dell'accessorio e collisione del muro ruotato dopo generazione/salvataggio/Play. Screenshot composed_castle_footprints_play.png. Restano nei log i warning preesistenti di organizzazione arredi in plan.gd, estranei a questi assert.
+
+- [x] G01.3b.2b Diagnostica visuale, percorso reale editor e prova mirata Play.
+
+Prossimo prototipo ambientale: R01 (roccia parametrica); sviluppo compositivo successivo G01.4–G01.5. Il terreno resta prevalentemente piano con quote discrete, secondo WORLD_GENERATION_ROADMAP.md.

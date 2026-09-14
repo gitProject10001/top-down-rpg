@@ -142,6 +142,9 @@ func _enter_tree() -> void:
 	scene_changed.connect(_scene_changed)
 	EditorInterface.get_selection().selection_changed.connect(_selection_context)
 	set_process(true)
+	if "--castle-composer-editor-test" in OS.get_cmdline_user_args():
+		_test_runner=load("res://tools/check_castle_composer_editor.gd").new()
+		_test_runner.call_deferred("run",self)
 	if "--house-editor-test" in OS.get_cmdline_user_args():
 		_test_runner=load("res://tools/check_house_editor.gd").new()
 		_test_runner.call_deferred("run",self)
@@ -1289,11 +1292,17 @@ func _preview_castle_regeneration(candidate: Dictionary) -> void:
 	if group==null: _show_plan_error("Rigenerazione","Seleziona il castello generato."); return
 	var service=preload("res://addons/castle_generator/regeneration.gd")
 	var proposal: Dictionary=service.propose(group,candidate)
-	if proposal.has("error"): _show_plan_error("Rigenerazione",proposal.error); return
+	if proposal.has("error"):
+		if proposal.has("footprints"): _show_footprint_diagnostic(proposal)
+		else: _show_plan_error("Rigenerazione",proposal.error)
+		return
 	var dialog := ConfirmationDialog.new(); dialog.title="Rigenerazione · disposizione interna"
+	var diagram=preload("res://addons/castle_generator/footprint_preview.gd").new()
+	diagram.shapes=proposal.footprints; diagram.span=proposal.span
 	dialog.dialog_text="Posizioni automatiche: "+", ".join(proposal.updates.keys())+"\nPreservati: "+", ".join(proposal.preserved)+"\nDimensioni, porte, interni e dettagli restano invariati."
 	for id in proposal.updates:
 		dialog.dialog_text+="\n%s: %s → %s"%[id,str(proposal.snapshot[id].transform.origin),str(proposal.updates[id])]
+	_layout_footprint_dialog(dialog,diagram)
 	dialog.confirmed.connect(func():
 		if not is_instance_valid(group) or service.state(group)!=proposal.snapshot or service.propose(group,candidate)!=proposal:
 			_show_plan_error("Rigenerazione","La scena è cambiata dopo l'anteprima: genera una nuova proposta."); dialog.queue_free(); return
@@ -1337,3 +1346,17 @@ func _release_composition_position() -> void:
 	undo.add_undo_method(group,"set_meta","composition_baseline",group.get_meta("composition_baseline",{}).duplicate(true))
 	undo.add_undo_method(node,"set_meta","composition_locked",node.get_meta("composition_locked",false))
 	undo.commit_action(); _refresh_composition_elements()
+
+func _show_footprint_diagnostic(proposal: Dictionary) -> void:
+	var dialog := AcceptDialog.new(); dialog.title="Ingombri · proposta non applicata"
+	dialog.dialog_text=proposal.error
+	var diagram=preload("res://addons/castle_generator/footprint_preview.gd").new()
+	diagram.shapes=proposal.footprints; diagram.span=proposal.span; diagram.conflict=true
+	_layout_footprint_dialog(dialog,diagram)
+	dialog.confirmed.connect(dialog.queue_free); dialog.canceled.connect(dialog.queue_free)
+	EditorInterface.get_base_control().add_child(dialog); dialog.popup_centered()
+
+func _layout_footprint_dialog(dialog: AcceptDialog, diagram: Control) -> void:
+	var box := VBoxContainer.new(); box.custom_minimum_size.x=560
+	var label := Label.new(); label.text=dialog.dialog_text; label.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+	dialog.dialog_text=""; box.add_child(label); box.add_child(diagram); dialog.add_child(box)
