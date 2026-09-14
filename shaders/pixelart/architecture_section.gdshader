@@ -21,6 +21,6 @@ void fragment() {
   else if(d<second) second=d;
  }
  float joint=smoothstep(0.025,0.09,second-first);
- vec3 stone=mix(vec3(0.055,0.035,0.018),vec3(0.16,0.105,0.052),pigment);
+ vec3 stone=mix(vec3(0.055,0.060,0.053),vec3(0.16,0.17,0.15),pigment);
  ALBEDO=hollow?vec3(0.0):mix(vec3(0.009,0.005,0.002),stone,joint);
 }

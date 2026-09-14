@@ -32,6 +32,7 @@ func _player_occluded(focus: Vector3, height: float) -> bool:
 				var material := mesh.get_active_material(surface)
 				if material is ShaderMaterial and material.shader and material.shader.resource_path in [
 					"res://shaders/pixelart/painted_architecture.gdshader",
+					"res://shaders/pixelart/solid_masonry.gdshader",
 					"res://shaders/pixelart/roof_clay.gdshader",
 					"res://addons/house_builder/plaster.gdshader"]: supported=true
 			_occlusion_meshes[key]=resource.generate_triangle_mesh() if supported else null

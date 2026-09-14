@@ -42,6 +42,7 @@ const WALL_THICKNESS := 0.24
 	set(value): wing_anchor=clampi(value,0,1); request_rebuild()
 var _pending := false
 var _cooldown := 0.0
+var _collision_shell: ArrayMesh
 var _generated: Node3D
 var _buffers: Array[SurfaceTool]=[]
 var build_count := 0
@@ -207,6 +208,8 @@ func _plaster_material() -> ShaderMaterial:
 	random.seed=house_seed
 	material.set_shader_parameter("pattern_offset",Vector3(random.randf_range(-100,100),random.randf_range(-100,100),random.randf_range(-100,100)))
 	material.set_shader_parameter("weathered",weathered)
+	material.set_shader_parameter("exposed_masonry",preload("res://addons/house_builder/masonry_cladding.gd").supported(self))
+	material.set_shader_parameter("masonry_height",wall_height)
 	return material
 
 func rebuild() -> void:
@@ -241,7 +244,9 @@ func rebuild() -> void:
 	roof.name="Roof"
 	roof.mesh=_build_roof()
 	_generated.add_child(roof)
+	_collision_shell=body.mesh
 	if wing_enabled: _join_wing(body,roof)
+	preload("res://addons/house_builder/masonry_cladding.gd").append_to(self,body)
 	_clip_authored_volumes(body,roof)
 	if not _is_wing_part: _finish_openings(body,materials)
 	for component in attached_components(): component.refresh()
@@ -332,6 +337,10 @@ func _join_wing(body: MeshInstance3D,roof: MeshInstance3D) -> void:
 	MeshJoin.append(merged,body.mesh,Transform3D.IDENTITY,[_volume_planes(wing_size,wing.roof_height,frame,0.002)])
 	MeshJoin.append(merged,wing._generated.get_child(0).mesh,frame,[_volume_planes(main_size,roof_height,Transform3D.IDENTITY,-0.002)])
 	body.mesh=merged
+	var collision_merged := ArrayMesh.new()
+	MeshJoin.append(collision_merged,_collision_shell,Transform3D.IDENTITY,[_volume_planes(wing_size,wing.roof_height,frame,0.002)])
+	MeshJoin.append(collision_merged,wing._collision_shell,frame,[_volume_planes(main_size,roof_height,Transform3D.IDENTITY,-0.002)])
+	_collision_shell=collision_merged
 	# Both surfaces are cut on the same vertical valley planes, preserving tile relief.
 	var joined_roof := ArrayMesh.new()
 	MeshJoin.append(joined_roof,roof.mesh,Transform3D.IDENTITY,_roof_cutters(main_size,roof_height,Transform3D.IDENTITY,wing_size,wing.roof_height,frame))
@@ -363,6 +372,9 @@ func _finish_openings(body: MeshInstance3D,materials: Array) -> void:
 		var shell := ArrayMesh.new()
 		MeshJoin.append(shell,body.mesh,Transform3D.IDENTITY,cutters)
 		body.mesh=shell
+		var collision_shell := ArrayMesh.new()
+		MeshJoin.append(collision_shell,_collision_shell,Transform3D.IDENTITY,cutters)
+		_collision_shell=collision_shell
 	_buffers.clear()
 	for i in 4:
 		var buffer := SurfaceTool.new()
@@ -403,7 +415,7 @@ func _finish_openings(body: MeshInstance3D,materials: Array) -> void:
 	# Static collision now follows walls and inset components instead of a solid box.
 	var collision := StaticBody3D.new()
 	collision.name="HouseCollision"
-	for mesh in [body.mesh,details]:
+	for mesh in [_collision_shell,details]:
 		if mesh.get_surface_count()==0: continue
 		var shape := CollisionShape3D.new()
 		shape.shape=mesh.create_trimesh_shape()
@@ -516,6 +528,7 @@ func _clip_authored_volumes(body: MeshInstance3D,roof: MeshInstance3D) -> void:
 		var host: Node3D=call("volume_host")
 		if host and call("volume_error").is_empty(): cutters.append(host._volume_planes(Vector2(host.width,host.depth),host.roof_height,transform.affine_inverse(),-0.001))
 	if cutters.is_empty(): return
+	var collision_clip := ArrayMesh.new(); MeshJoin.append(collision_clip,_collision_shell,Transform3D.IDENTITY,cutters); _collision_shell=collision_clip
 	for instance in [body,roof]:
 		var clipped := ArrayMesh.new(); MeshJoin.append(clipped,instance.mesh,Transform3D.IDENTITY,cutters); instance.mesh=clipped
 

@@ -49,6 +49,7 @@ func run() -> void:
 	var query=PhysicsRayQueryParameters3D.create(Vector3(19,1,2),Vector3(19,1,-2))
 	assert(not space.intersect_ray(query).is_empty(),"Visual cut preserves wall collision")
 	await play._walk(Vector3(19,0,-10),220)
+	print("COURTYARD_PLAYER_POSITION ",play.player.position," inside=",play.inside)
 	assert(not play.inside and play.player.position.z<-9.5)
 	for i in 90: await physics_frame
 	assert(not visibility.occluded and is_zero_approx(visibility._radius),"Visible player must restore the complete walls")

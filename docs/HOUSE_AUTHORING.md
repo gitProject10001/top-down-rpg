@@ -916,3 +916,14 @@ Inspector del campione: Detail Mode = Dettaglio / Economica. La modalità econom
 Confronto misurato sulle mesh: 72 pietre, 4.608 triangoli in dettaglio e 2.802 in economica (-39,2%), più 12 triangoli del nucleo in entrambi i casi. Due mesh/materiali per pannello, non un nodo per pietra. Questa riduzione non implica lo stesso guadagno in FPS: manca ancora una misura su un castello completo e non è presente selezione LOD automatica.
 
 Scena di confronto `solid_masonry_comparison.tscn` e variante salvata `solid_masonry_economical.tscn`. Preview GPU completata con luce frontale e radente; la prova controlla uguaglianza del numero di pietre e riduzione dei triangoli superiore al 20%. Screenshot detail/economical usano stessa camera e luce. Il materiale con normali per distanze maggiori resta un passaggio futuro.
+
+
+#### A09.13 — Rivestimento del castello e pietra sotto l'intonaco
+
+`masonry_cladding.gd` integra i blocchi della variante economica nelle mesh Walls del builder, prima delle sottrazioni per volumi e aperture. La pietra segue le facce dei volumi, incluse le torri ottagonali. Le cortine orizzontali usano il rivestimento geometrico; le torri del nuovo castello aperto nascono con Wall Finish = Pietra. L'esempio `castle_open_courtyard_example.tscn` è aggiornato. Camminamenti e merli mantengono il materiale con rilievo, ora con palette grigia coerente.
+
+Per Wall Finish = Intonaco e Weathered attivo, viene generata muratura arretrata sotto la facciata. Il materiale dell'intonaco apre le chiazze consumate e mostra pietre e fondo di malta reali. I tagli riguardano la fascia di parete esterna: i timpani sopra Wall Height mantengono per ora la colorazione d'usura precedente. Weathered disattivato conserva l'intonaco integro. Volumi aperti e cortine inclinate mantengono il percorso precedente, senza rivestimento geometrico non adattato alla loro forma.
+
+Collisioni separate: `_collision_shell` conserva la mesh semplice del muro e riceve le stesse sottrazioni per aperture e volumi. I blocchi decorativi non diventano ostacoli fisici. Il reveal selettivo e le sezioni operano sulla mesh visiva; il materiale della pietra supporta gli stessi parametri di taglio. Porte e cornici restano escluse come prima.
+
+Verifica GPU: `check_masonry_integration.gd` conferma muratura sotto ogni facciata, parametri dell'intonaco e finitura delle torri. Nella casa di prova: 10.075 triangoli visivi contro 546 nella collisione del muro. `check_open_castle_play.gd` passa ingresso, cortile libero, riattivazione reveal, porte e camminamenti. Screenshot integrated_masonry_castle/plaster.png. Non c'è ancora LOD automatico: aumenta la geometria visiva e il tempo di rigenerazione nell'editor; non è una validazione prestazionale di un villaggio completo.

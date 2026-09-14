@@ -4,6 +4,9 @@ render_mode cull_disabled;
 
 uniform vec3 pattern_offset = vec3(0.0);
 uniform bool weathered = true;
+uniform bool exposed_masonry=false;
+uniform float masonry_height=0.0;
+varying vec3 surface_normal;
 uniform vec4 plaster_color : source_color = vec4(0.68, 0.49, 0.29, 1.0);
 uniform vec4 worn_color : source_color = vec4(0.47, 0.29, 0.19, 1.0);
 varying vec3 local_position;
@@ -22,11 +25,12 @@ float noise(vec3 p) {
             mix(mix(hash(i + vec3(0,0,1)), hash(i + vec3(1,0,1)), f.x),
                 mix(hash(i + vec3(0,1,1)), hash(i + vec3(1,1,1)), f.x), f.y), f.z);
 }
-void vertex() { reveal_world=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; local_position = VERTEX; }
+void vertex() { reveal_world=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; local_position = VERTEX; surface_normal=NORMAL; }
 void fragment() { architecture_reveal(FRAGCOORD.xy);
  // Continuous object-space field: no tiled patch, seams or stretching on resize.
  vec3 p = local_position + pattern_offset;
  float wear = noise(p * 1.13) * 0.58 + noise(p * 3.17) * 0.27 + noise(p * 9.31) * 0.15;
+ if(exposed_masonry && weathered && local_position.y>0.12 && local_position.y<masonry_height-0.08 && dot(local_position.xz,surface_normal.xz)>0.05 && wear>0.575) discard;
  float mask = weathered ? smoothstep(0.55, 0.60, wear) : 0.0;
  float pigment = (noise(p * 5.7) - 0.5) * 0.09 + (noise(p * 37.1) - 0.5) * 0.035;
  ALBEDO = mix(plaster_color.rgb, worn_color.rgb, mask) * (1.0 + pigment);

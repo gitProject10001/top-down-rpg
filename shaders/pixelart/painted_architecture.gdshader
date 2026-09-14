@@ -47,7 +47,7 @@ void fragment(){ architecture_reveal(FRAGCOORD.xy);
   vec2 stone_uv=a.y>max(a.x,a.z)?p.xz:(a.x>a.z?p.zy:p.xy);
   vec4 stone=stone_field(stone_uv);
   // Broad atlas colour preserves the established palette without duplicating joints.
-  vec3 pigment=textureLod(atlas,vec2(0.25,0.75),6.0).rgb*tint.rgb;
+  vec3 pigment=vec3(0.32,0.33,0.31)*tint.rgb;
   float aa=max(fwidth(stone.w),0.002);
   float mortar=smoothstep(0.008-aa,0.030+aa,stone.w);
   ALBEDO=pigment*mix(0.40,0.72+0.48*stone.z,mortar)*(0.97+0.06*stone_hash(floor(stone_uv*48.0)));
