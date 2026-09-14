@@ -343,6 +343,8 @@ func _plan_action(label: String) -> void:
 	if selected==null: _show_plan_error(label,"Seleziona una casa o uno dei suoi elementi."); return
 	var plan=selected.get_node_or_null("InteriorPlan")
 	if label=="Torre: scala interna al tetto":
+		if selected.has_method("roof_is_walkable") and not selected.roof_is_walkable():
+			_show_plan_error(label,"Scegli una copertura a terrazza prima di aggiungere l’accesso al tetto."); return
 		if not selected.has_method("interior_floor_mesh") or plan==null or plan.levels().size()<2:
 			_show_plan_error(label,"Seleziona una torre ottagonale con almeno due piani interni."); return
 		if selected.width<7.0 or selected.depth<7.0:

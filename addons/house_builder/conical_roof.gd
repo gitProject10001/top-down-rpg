@@ -1,0 +1,44 @@
+@tool
+extends RefCounted
+## Independent roof backend: relief shingles on tapered polygon faces.
+var st: SurfaceTool
+func tri(a: Vector3,b: Vector3,c: Vector3,color: Color) -> void:
+ var normal := (c-a).cross(b-a).normalized()
+ for p in [a,b,c]:
+  st.set_normal(normal); st.set_color(color); st.set_uv(Vector2(p.x,p.z)); st.set_uv2(Vector2.ZERO); st.add_vertex(p)
+func quad(a: Vector3,b: Vector3,c: Vector3,d: Vector3,color: Color) -> void:
+ tri(a,b,c,color); tri(a,c,d,color)
+func generate(points: Array[Vector3],height: float,rise: float,seed_value: int) -> ArrayMesh:
+ st=SurfaceTool.new(); st.begin(Mesh.PRIMITIVE_TRIANGLES)
+ var rng := RandomNumberGenerator.new(); rng.seed=seed_value
+ var tip := Vector3(0,height+rise,0)
+ for face in points.size():
+  var a := points[face]; var b := points[(face+1)%points.size()]
+  a+=a.normalized()*0.3; b+=b.normalized()*0.3
+  a.y=height; b.y=height
+  tri(a,tip,b,Color(0.09,0.08,0.07,0.25))
+  var rows := maxi(2,ceili(a.distance_to(tip)/0.3))
+  for row in rows:
+   var low := float(row)/rows
+   var high := minf(1.0,float(row+1.3)/rows)
+   var left := a.lerp(tip,low); var right := b.lerp(tip,low)
+   var count := maxi(1,ceili(left.distance_to(right)/0.38))
+   for column in count:
+    var u0 := (column+0.035)/count; var u1 := (column+0.965)/count
+    var p0 := a.lerp(b,u0).lerp(tip,low)
+    var p1 := a.lerp(b,u1).lerp(tip,low)
+    var p2 := a.lerp(b,u1).lerp(tip,high)
+    var p3 := a.lerp(b,u0).lerp(tip,high)
+    var normal := (b-a).cross(tip-a).normalized()
+    var lift := normal*rng.randf_range(0.035,0.055)
+    var color := Color(0.47,0.37,0.30)*rng.randf_range(0.85,1.15); color.a=0.9
+    if high>=0.999: tri(p0+lift,tip+lift,p1+lift,color)
+    else: quad(p0+lift,p3+lift,p2+lift,p1+lift,color)
+    quad(p0,p0+lift,p1+lift,p1,Color(0.18,0.14,0.12,0.3))
+    quad(p0,p3,p3+lift,p0+lift,Color(0.24,0.20,0.17,0.5))
+    quad(p1,p1+lift,p2+lift,p2,Color(0.24,0.20,0.17,0.5))
+ st.index()
+ var mesh := st.commit()
+ var material := ShaderMaterial.new(); material.shader=preload("res://shaders/pixelart/roof_clay.gdshader")
+ material.set_shader_parameter("cavity_strength",0.78); mesh.surface_set_material(0,material)
+ return mesh

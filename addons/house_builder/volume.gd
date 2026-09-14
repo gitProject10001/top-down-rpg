@@ -76,7 +76,7 @@ func rebuild() -> void:
 		if collision:
 			var shape := CollisionShape3D.new(); shape.shape=_generated.get_node("Roof").mesh.create_trimesh_shape(); collision.add_child(shape)
 		var roof: MeshInstance3D=_generated.get_node("Roof")
-		roof.mesh=preload("res://addons/house_builder/flagstone_floor.gd").apply(self,roof.mesh)
+		if roof_is_walkable(): roof.mesh=preload("res://addons/house_builder/flagstone_floor.gd").apply(self,roof.mesh)
 func volume_error() -> String:
 	var host := volume_host()
 	if not attached: return ""
@@ -335,3 +335,5 @@ func stair_wall() -> int:
 	return [0,2,3][stairs.side] if stairs else 0
 
 func connection_spans(_wall: int,spans: Array[Vector2]) -> Array[Vector2]: return spans
+
+func roof_is_walkable() -> bool: return canopy_roof==2

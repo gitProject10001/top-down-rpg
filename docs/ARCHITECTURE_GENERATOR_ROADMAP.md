@@ -272,7 +272,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A06 | TODO | Due archetipi completi con profili architettonici | A04, A05 | Fucina e sala nordica: differenze leggibili nelle forme e negli interni |
 | A07 | IN CORSO | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
 | A07.4 | FATTO | Torri segmentate a 8/12/16 facce | A07.1 | Vani obliqui, collisioni, parapetti e salvataggio coerenti; campionario editabile |
-| A07.5 | TODO | Copertura conica della torre | A07.4 | Tetto indipendente e parametrico, gronda e raccordo al corpo, gestione accesso al tetto |
+| A07.5 | FATTO | Copertura conica della torre | A07.4 | Tetto indipendente e parametrico, gronda e raccordo al corpo, gestione accesso al tetto |
 | A07.6 | TODO | Cupola e profilo curvo | A07.5 | Edificio terrazzato con cupola; controlli leggibili e copertura separata |
 | A07.7 | TODO | Consolidamento A07 e percorso giocabile | A07.4–A07.6 | Aperture, interni e raccordi coerenti con la pianta; verificare limiti delle stanze e accessi |
 | A08 | IN CORSO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
@@ -1238,3 +1238,14 @@ Il numero di facce si sceglie alla creazione. Nell'editor, cambiarlo su una torr
 Corretta la risoluzione delle aperture condivisa, che limitava gli indici a 7: usa ora wall_count(). I test controllano tutte le facce nelle tre varianti, porta aperta sull'ultima faccia, collisione del tetto e round-trip PackedScene. Superata anche la regressione della torre ottagonale con porta obliqua e scala. Parser del plugin verificato; prova interattiva delle nuove varianti e interni a 12/16 facce ancora da eseguire, prima di chiudere A07.
 
 Esempio: scenes/dev/segmented_towers_example.tscn. Screenshot reale: captures/balcony_attachment/segmented_towers.png. Script: tools/preview_segmented_towers.gd, tools/check_segmented_towers.gd. Prossimo A07.5: copertura conica, poi cupola; A07 complessivo resta IN CORSO.
+
+
+### A07.5 — Copertura conica parametrica
+
+Sulla torre poligonale, Inspector → Tower Roof: Terrazza / Conico. Roof Height controlla l'altezza del cono; larghezza/profondità e numero di facce restano quelli del corpo. La copertura ha gronda di 0.3 m, sottofondo scuro e tegole geometriche rastremate disposte per faccia, con il materiale roof_clay esistente. Una superficie mesh; non un nodo per tegola. Il backend conical_roof.gd è separato dalla torre. I merli/parapetti della terrazza rimangono nei parametri e tornano visibili passando alla terrazza.
+
+Il tetto conico ha collisione ma non è un piano di accesso. Il passaggio al cono viene rifiutato quando è presente una scala esterna abilitata o un'uscita interna sul tetto. Disattivare la scala esterna oppure togliere roof_exit alla scala interna prima del cambio. Il preset UI per aggiungere una scala interna al tetto rifiuta il cono. Modifiche manuali successive incompatibili producono un avviso di configurazione: non viene eliminato il contenuto della torre.
+
+Test check_conical_towers.gd: tre topologie, triangoli finiti e non degeneri, determinismo, una superficie e meno di 30000 triangoli per ciascun esempio provato, collisione inclinata, salvataggio, ritorno a terrazza e protezione scala. Regressione torre ottagonale superata; parser plugin verificato. Nessun benchmark su molti edifici, nessun nuovo Play degli interni in questo incremento. Copertura ancora segmentata; colmi speciali, danni delle tegole e aperture/abbaini sul cono non implementati.
+
+Esempio editabile scenes/dev/conical_towers_example.tscn; render GPU captures/balcony_attachment/conical_towers.png. Prossimo A07.6: cupola e profilo curvo, poi consolidamento A07.7. B01 resta successivo ad A07.
