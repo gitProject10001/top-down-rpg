@@ -35,7 +35,7 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 | ID | Stato | Passo | Risultato verificabile |
 |---|---|---|---|
 | G01.3b.2b | FATTO | Diagnostica ingombri e verifica editor/Play | Proposta comprensibile, Undo/Redo reali, passaggi percorribili |
-| R01 | TODO — prossimo prototipo ambientale | Generatore di singola roccia/affioramento | Seed, dimensioni, piani di frattura, stratificazione, spigolosità; 6 varianti con stesso linguaggio geometrico; collisione semplice |
+| R01 | IN CORSO — prototipo disponibile | Generatore di singola roccia/affioramento | Seed, dimensioni, piani di frattura, stratificazione, spigolosità; 6 varianti con stesso linguaggio geometrico; collisione semplice |
 | R02 | TODO | Composizione di gruppi rocciosi | Path/area, direzione dominante degli strati, masse grandi/medie/piccole; variazione locale senza distruggere i pezzi spostati a mano |
 | R03 | TODO | Pareti e creste montuose | Pareti fra piattaforme piane, quote discrete, rampe brevi e passaggi riservati, assenza di compenetrazioni macroscopiche; LOD e budget misurati |
 | W01 | TODO | Laghi editabili | Perimetro e quota dell'acqua, riva e bacino, esclusione edifici; superficie d'acqua inizialmente semplice |
@@ -61,3 +61,16 @@ La città illustrata mescola una fortezza dominante, edifici subordinati, corti,
 ## Ordine pratico
 
 Verifica G01.3b.2b completata; prossimo R01 come prototipo ambientale circoscritto. Alternare G01.4–G01.5 e R02–R03 senza fondere i due sistemi. W01 precede W02, e l'idrologia stabile precede i ponti e il posizionamento definitivo delle città. C01 precede la generazione degli interni delle grotte. V01 resta una consegna esplicita richiesta dall'utente.
+
+
+## R01.1 — Roccia parametrica disponibile
+
+Comando **Progetto → Strumenti → Crea roccia parametrica**, oppure nodo personalizzato ProceduralRock. Nell'Inspector: Rock Seed, Dimensions, Fracture, Strata, Strata Dip, Lean, Stone Color e collisione opzionale. La posizione del nodo resta manuale; cambiare seed rigenera soltanto la sua geometria. La creazione usa Undo/Redo dell'editor.
+
+Mesh unica chiusa: contorno angolare irregolare, rastremazione, cima inclinata e piccoli arretramenti degli strati, interrotti su alcune facce. Il materiale deriva dalla pietra attuale del gioco. Un corpo StaticBody con forma convessa raccoglie l'ingombro, senza riprodurre ogni fessura. Il generatore non sposta il terreno e non crea colline. Una roccia è il primo componente per le future composizioni R02, non ancora una parete rocciosa completa.
+
+Campionario: `scenes/dev/rock_generator_examples.tscn`, sei nodi editabili con proporzioni/seed diversi. Screenshot reale Godot `captures/balcony_attachment/rock_generator_examples.png`. Script di rigenerazione del campionario: tools/preview_rock_generator.gd.
+
+Test tools/check_rock_generator.gd: 12 seed, determinismo dei vertici, triangoli non degeneri, una superficie e massimo 400 triangoli nei parametri provati, raycast fisico con collisione attiva/disattivata, round-trip PackedScene. Nessun benchmark su intere montagne; LOD e gruppi MultiMesh restano R02/R03. La resa è ancora un prototipo di forme: non dichiara raggiunta la varietà del concept.
+
+Prossimo incremento R02.1: comporre poche masse grandi/medie/piccole lungo una guida, con orientamento degli strati comune e seed locali, lasciando i pezzi editabili. Conservare una fascia piana libera davanti alla parete.

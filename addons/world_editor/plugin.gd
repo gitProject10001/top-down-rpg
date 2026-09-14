@@ -20,6 +20,8 @@ var seed_input: SpinBox
 var stroke_method := "apply_edits"
 
 func _enter_tree() -> void:
+	add_custom_type("ProceduralRock","Node3D",preload("res://addons/rock_builder/rock.gd"),EditorInterface.get_base_control().get_theme_icon("MeshInstance3D","EditorIcons"))
+	add_tool_menu_item("Crea roccia parametrica",_create_rock)
 	add_tool_menu_item("Esporta mappa PNG · dall'alto",_choose_map_export.bind(false))
 	add_tool_menu_item("Esporta mappa PNG · isometrica",_choose_map_export.bind(true))
 	panel = VBoxContainer.new()
@@ -78,6 +80,7 @@ func _enter_tree() -> void:
 	set_process(true)
 
 func _exit_tree() -> void:
+	remove_custom_type("ProceduralRock"); remove_tool_menu_item("Crea roccia parametrica")
 	remove_tool_menu_item("Esporta mappa PNG · dall'alto")
 	remove_tool_menu_item("Esporta mappa PNG · isometrica")
 	_finish()
@@ -217,3 +220,14 @@ func _choose_map_export(isometric: bool) -> void:
 			progress.canceled.connect(progress.queue_free))
 	dialog.canceled.connect(dialog.queue_free)
 	EditorInterface.get_base_control().add_child(dialog); dialog.popup_centered_ratio(0.65)
+
+func _create_rock() -> void:
+	var root := EditorInterface.get_edited_scene_root()
+	if root==null: return
+	var parent: Node=root.get_node_or_null("Pixel/View")
+	if parent==null: parent=root
+	var rock=preload("res://addons/rock_builder/rock.gd").new(); rock.name="Roccia"
+	var undo := get_undo_redo(); undo.create_action("Crea roccia parametrica",UndoRedo.MERGE_DISABLE,root)
+	undo.add_do_method(parent,"add_child",rock,true); undo.add_do_property(rock,"owner",root)
+	undo.add_undo_method(parent,"remove_child",rock); undo.add_do_reference(rock); undo.commit_action()
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(rock); EditorInterface.edit_node(rock)

@@ -1,0 +1,79 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/rock_builder/rock.gd" id="1_hf8ar"]
+
+[sub_resource type="Environment" id="Environment_0fyqh"]
+background_mode = 1
+background_color = Color(0.16, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cwu62"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_mrjmj"]
+size = Vector2(50, 50)
+
+[node name="HouseWorkshop" type="Node3D" unique_id=1981278764]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=301333431]
+environment = SubResource("Environment_0fyqh")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=1591505304]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=699053899]
+material_override = SubResource("StandardMaterial3D_cwu62")
+mesh = SubResource("PlaneMesh_mrjmj")
+
+[node name="Rocce" type="Node3D" parent="." unique_id=1187363551]
+
+[node name="Roccia_1" type="Node3D" parent="Rocce" unique_id=828936727]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, -3.5)
+script = ExtResource("1_hf8ar")
+rock_seed = 31
+strata = 2
+
+[node name="Roccia_2" type="Node3D" parent="Rocce" unique_id=2103761446]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -3.5)
+script = ExtResource("1_hf8ar")
+rock_seed = 50
+dimensions = Vector3(3, 5, 3)
+
+[node name="Roccia_3" type="Node3D" parent="Rocce" unique_id=613013187]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, -3.5)
+script = ExtResource("1_hf8ar")
+rock_seed = 69
+dimensions = Vector3(5, 2.2, 4)
+strata = 4
+
+[node name="Roccia_4" type="Node3D" parent="Rocce" unique_id=309329576]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -7, 0, 3.5)
+script = ExtResource("1_hf8ar")
+rock_seed = 88
+dimensions = Vector3(4, 4, 3)
+strata = 2
+
+[node name="Roccia_5" type="Node3D" parent="Rocce" unique_id=244022874]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.5)
+script = ExtResource("1_hf8ar")
+rock_seed = 107
+dimensions = Vector3(3.5, 3, 4)
+
+[node name="Roccia_6" type="Node3D" parent="Rocce" unique_id=1573970405]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 7, 0, 3.5)
+script = ExtResource("1_hf8ar")
+rock_seed = 126
+dimensions = Vector3(5, 3.5, 3)
+strata = 4
+
+[node name="Camera" type="Camera3D" parent="." unique_id=175280097]
+transform = Transform3D(0.83205026, -0.3324919, 0.44400612, 0, 0.8004434, 0.5994083, -0.5547002, -0.49873787, 0.6660091, 20, 28, 30)
+projection = 1
+current = true
+size = 24.0
