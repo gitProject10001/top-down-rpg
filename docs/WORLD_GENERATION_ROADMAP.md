@@ -113,3 +113,16 @@ La composizione cambia con il seed nelle posizioni e nelle dimensioni, oltre che
 Verificati 12 seed con fascia libera, variazione della composizione fra seed, ordine delle stazioni e ancoraggio degli estremi per 2/3/4/7/80 stazioni. Superate anche le regressioni di modifica manuale, cancellazione, Undo/Redo e salvataggio. Esempio e screenshot GPU rigenerati con tools/preview_rock_formation.gd; risultato ispezionato.
 
 Prossimo R03.1: introdurre una parete di contenimento per una terrazza a quota discreta, con superficie superiore piana. Prima una piccola scena di prova; rampe e collegamenti controllati in un incremento successivo. G01.4 e V01 rimangono aperti.
+
+
+## R03.1 — Terrazza rettangolare a quota discreta
+
+Comandi Progetto → Strumenti → **Crea terrazza rocciosa** e **Rigenera terrazza selezionata**. Selezionare il nodo Terrazza, impostare Footprint (6–60 m per lato), Elevation (quota intera 1–6 m) e Terrace Seed nell'Inspector, poi rigenerare. I parametri descrivono la prossima generazione: la piattaforma attiva conserva separatamente lo stato applicato, anche dopo salvataggio. Mantenere scala unitaria e rotazione attorno al solo asse Y per quote piane in metri.
+
+La piattaforma ha nucleo rettangolare pieno con collisione BoxShape3D e piano superiore orizzontale; non deforma il terreno esistente. Il bordo usa il generatore di rocce esistente e il suo sistema di ID/baseline, con rocce figlie sotto BordoRoccioso, modificabili singolarmente. Spostamenti, parametri, figli manuali e cancellazioni sono rispettati. Il comando di rigenerazione dei gruppi rocciosi riconosce questo bordo e rimanda alla terrazza. Modifiche importanti alle dimensioni possono lasciare pezzi manuali distanti dal nuovo bordo: non vengono riposizionati automaticamente.
+
+Creazione e rigenerazione usano azioni Undo/Redo distinte. Il nucleo interno si ricostruisce dallo stato salvato; le rocce sono nodi posseduti dalla scena. La superficie ha per ora colore uniforme e bordo superiore geometrico regolare: raccordo estetico terra/roccia, sagome libere, navigazione e collegamento con il sistema di terreno restano da fare. Non ci sono ancora rampe o accessi: il piano superiore è solido, ma non raggiungibile dal basso senza un collegamento.
+
+Esempio: scenes/dev/rock_terrace_example.tscn. Render Godot: captures/balcony_attachment/rock_terrace_example.png, rigenerabile con tools/preview_rock_terrace.gd. Test tools/check_rock_terrace.gd: determinismo, raycast sul piano a +3 m e sul fianco, modifiche e figli manuali, cancellazione, Undo/Redo della quota, PackedScene e rigetto dei parametri invalidi. Parser del plugin verificato. Non è stata eseguita una prova interattiva del menu né una passeggiata con il personaggio.
+
+Prossimo R03.2: un accesso tramite rampa corta con pendenza controllata e varco nel bordo, verificato col giocatore. Poi raccordo visivo del ciglio e maggiore libertà della sagoma; evitare che il prototipo rettangolare diventi il vincolo del generatore.

@@ -1,5 +1,6 @@
 @tool
 extends EditorPlugin
+const RockTerrace=preload("res://addons/rock_builder/terrace.gd")
 const RockFormation=preload("res://addons/rock_builder/formation.gd")
 
 var rock_formation_gizmo=preload("res://addons/rock_builder/formation_gizmo.gd").new()
@@ -23,6 +24,8 @@ var seed_input: SpinBox
 var stroke_method := "apply_edits"
 
 func _enter_tree() -> void:
+	add_tool_menu_item("Crea terrazza rocciosa",_create_terrace)
+	add_tool_menu_item("Rigenera terrazza selezionata",_regenerate_terrace)
 	add_node_3d_gizmo_plugin(rock_formation_gizmo)
 	add_tool_menu_item("Crea gruppo roccioso su guida",_create_rock_formation)
 	add_tool_menu_item("Rigenera gruppo roccioso selezionato",_regenerate_rock_formation)
@@ -86,6 +89,8 @@ func _enter_tree() -> void:
 	set_process(true)
 
 func _exit_tree() -> void:
+	remove_tool_menu_item("Crea terrazza rocciosa")
+	remove_tool_menu_item("Rigenera terrazza selezionata")
 	remove_node_3d_gizmo_plugin(rock_formation_gizmo)
 	remove_tool_menu_item("Crea gruppo roccioso su guida"); remove_tool_menu_item("Rigenera gruppo roccioso selezionato")
 	remove_custom_type("ProceduralRock"); remove_tool_menu_item("Crea roccia parametrica")
@@ -256,10 +261,37 @@ func _regenerate_rock_formation() -> void:
 		var group: Node=selected
 		while group and not group is RockFormation: group=group.get_parent()
 		if group==null: continue
+		if group.get_parent() is RockTerrace:
+			_regenerate_terrace(); return
 		var proposal: Dictionary=group.proposal()
 		if proposal.has("error"):
 			var dialog := AcceptDialog.new(); dialog.dialog_text=proposal.error
 			dialog.confirmed.connect(dialog.queue_free); EditorInterface.get_base_control().add_child(dialog); dialog.popup_centered(); return
 		var undo := get_undo_redo(); undo.create_action("Rigenera gruppo roccioso",UndoRedo.MERGE_DISABLE,group)
 		undo.add_do_method(group,"apply",proposal); undo.add_undo_method(group,"apply",group.snapshot()); undo.commit_action()
+		return
+
+func _create_terrace() -> void:
+	var root := EditorInterface.get_edited_scene_root()
+	if root==null: return
+	var parent: Node=root.get_node_or_null("Pixel/View")
+	if parent==null: parent=root
+	var terrace=preload("res://addons/rock_builder/terrace.gd").new(); terrace.name="Terrazza"
+	var undo := get_undo_redo(); undo.create_action("Crea terrazza",UndoRedo.MERGE_DISABLE,root)
+	undo.add_do_method(parent,"add_child",terrace,true); undo.add_do_property(terrace,"owner",root)
+	undo.add_undo_method(parent,"remove_child",terrace); undo.add_do_reference(terrace); undo.commit_action()
+	EditorInterface.get_selection().clear(); EditorInterface.get_selection().add_node(terrace); EditorInterface.edit_node(terrace)
+	_regenerate_terrace()
+func _regenerate_terrace() -> void:
+	for selected in EditorInterface.get_selection().get_selected_nodes():
+		var terrace: Node=selected
+		while terrace and not terrace is RockTerrace: terrace=terrace.get_parent()
+		if terrace==null: continue
+		var proposal: Dictionary=terrace.proposal()
+		if proposal.has("error"):
+			var dialog := AcceptDialog.new(); dialog.dialog_text=proposal.error
+			dialog.confirmed.connect(dialog.queue_free); dialog.canceled.connect(dialog.queue_free)
+			EditorInterface.get_base_control().add_child(dialog); dialog.popup_centered(); return
+		var undo := get_undo_redo(); undo.create_action("Rigenera terrazza",UndoRedo.MERGE_DISABLE,terrace)
+		undo.add_do_method(terrace,"apply",proposal); undo.add_undo_method(terrace,"apply",terrace.snapshot()); undo.commit_action()
 		return

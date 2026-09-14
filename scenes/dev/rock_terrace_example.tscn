@@ -1,0 +1,582 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/rock_builder/terrace.gd" id="1_j1pc1"]
+[ext_resource type="Script" path="res://addons/rock_builder/formation.gd" id="2_jt0vb"]
+[ext_resource type="Script" path="res://addons/rock_builder/rock.gd" id="3_gkmrf"]
+
+[sub_resource type="Environment" id="Environment_vtqum"]
+background_mode = 1
+background_color = Color(0.16, 0.18, 0.2, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.85, 1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ibn2k"]
+albedo_color = Color(0.25, 0.28, 0.2, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_qbxmw"]
+size = Vector2(50, 50)
+
+[sub_resource type="Curve3D" id="Curve3D_4lpmh"]
+
+[node name="HouseWorkshop" type="Node3D" unique_id=1455760366]
+
+[node name="@WorldEnvironment@61" type="WorldEnvironment" parent="." unique_id=1397211056]
+environment = SubResource("Environment_vtqum")
+
+[node name="@DirectionalLight3D@62" type="DirectionalLight3D" parent="." unique_id=1672380085]
+transform = Transform3D(0.81915206, 0.4262504, -0.38379753, 0, 0.66913056, 0.74314487, 0.57357645, -0.6087487, 0.54811966, 0, 0, 0)
+light_color = Color(1, 0.93, 0.84, 1)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="@MeshInstance3D@63" type="MeshInstance3D" parent="." unique_id=1917239209]
+material_override = SubResource("StandardMaterial3D_ibn2k")
+mesh = SubResource("PlaneMesh_qbxmw")
+
+[node name="Terrazza" type="Node3D" parent="." unique_id=1669424239]
+script = ExtResource("1_j1pc1")
+applied_state = {
+"elevation": 3,
+"footprint": Vector2(16, 12)
+}
+
+[node name="BordoRoccioso" type="Path3D" parent="Terrazza" unique_id=1735334902]
+curve = SubResource("Curve3D_4lpmh")
+script = ExtResource("2_jt0vb")
+generation_ids = PackedStringArray("0_0", "0_1", "0_2", "0_3", "0_4", "0_5", "0_6", "1_0", "1_1", "1_2", "1_3", "1_4", "2_0", "2_1", "2_2", "2_3", "2_4", "2_5", "2_6", "3_0", "3_1", "3_2", "3_3", "3_4")
+
+[node name="Roccia_0_0" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=313909887]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.857143, 0, -6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 4122753064
+dimensions = Vector3(4.114286, 2.8059769, 1.9648958)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "0_0"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.8059769, 1.9648958),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 4122753064,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6.857143, 0, -6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_0_1" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1203590577]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5714283, 0, -6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 2612966548
+dimensions = Vector3(4.114286, 2.9552164, 2.1831229)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "0_1"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.9552164, 2.1831229),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 2612966548,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.5714283, 0, -6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_0_2" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1291812258]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2857141, 0, -6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 3569070132
+dimensions = Vector3(4.114286, 2.952419, 1.6523516)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "0_2"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.952419, 1.6523516),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 3569070132,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.2857141, 0, -6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_0_3" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=235134211]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 186381972
+dimensions = Vector3(4.114286, 2.627721, 1.9918814)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "0_3"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.627721, 1.9918814),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 186381972,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_0_4" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1760833633]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2857141, 0, -6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 3126168565
+dimensions = Vector3(4.114286, 2.6208885, 1.626521)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "0_4"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.6208885, 1.626521),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 3126168565,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.2857141, 0, -6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_0_5" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1871641178]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5714283, 0, -6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 3542253610
+dimensions = Vector3(4.114286, 2.9609036, 2.1394567)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "0_5"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.9609036, 2.1394567),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 3542253610,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 4.5714283, 0, -6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_0_6" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1141901972]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8571424, 0, -6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 3082988420
+dimensions = Vector3(4.114286, 2.9554439, 1.818796)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "0_6"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.9554439, 1.818796),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 3082988420,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6.8571424, 0, -6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_1_0" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=104470100]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.1, 0, -4.8)
+script = ExtResource("3_gkmrf")
+rock_seed = 536714209
+dimensions = Vector3(4.32, 2.8152785, 1.8314409)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "1_0"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.32, 2.8152785, 1.8314409),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 536714209,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.1, 0, -4.8)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_1_1" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=700012822]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.1, 0, -2.3999999)
+script = ExtResource("3_gkmrf")
+rock_seed = 3872306077
+dimensions = Vector3(4.32, 2.9614544, 1.7202964)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "1_1"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.32, 2.9614544, 1.7202964),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 3872306077,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.1, 0, -2.3999999)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_1_2" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=592945348]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.1, 0, 0)
+script = ExtResource("3_gkmrf")
+rock_seed = 1162169507
+dimensions = Vector3(4.32, 2.7751126, 2.1524382)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "1_2"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.32, 2.7751126, 2.1524382),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 1162169507,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.1, 0, 0)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_1_3" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=936411418]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.1, 0, 2.3999996)
+script = ExtResource("3_gkmrf")
+rock_seed = 4001844966
+dimensions = Vector3(4.32, 2.7712872, 1.9996587)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "1_3"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.32, 2.7712872, 1.9996587),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 4001844966,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.1, 0, 2.3999996)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_1_4" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1594876192]
+transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.1, 0, 4.799999)
+script = ExtResource("3_gkmrf")
+rock_seed = 1457831842
+dimensions = Vector3(4.32, 2.8980112, 2.1838465)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "1_4"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.32, 2.8980112, 2.1838465),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 1457831842,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 8.1, 0, 4.799999)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_2_0" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1669033238]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 6.857143, 0, 6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 1715183307
+dimensions = Vector3(4.114286, 2.78958, 2.1223533)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "2_0"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.78958, 2.1223533),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 1715183307,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 6.857143, 0, 6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_2_1" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=845294366]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 4.5714283, 0, 6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 1584449768
+dimensions = Vector3(4.114286, 2.9647508, 1.9803834)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "2_1"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.9647508, 1.9803834),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 1584449768,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 4.5714283, 0, 6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_2_2" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1962539164]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 2.2857141, 0, 6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 496913066
+dimensions = Vector3(4.114286, 2.8380308, 1.6676074)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "2_2"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.8380308, 1.6676074),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 496913066,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 2.2857141, 0, 6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_2_3" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1188193409]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 3453095884
+dimensions = Vector3(4.114286, 2.7426536, 2.0511794)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "2_3"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.7426536, 2.0511794),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 3453095884,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, 0, 0, 6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_2_4" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1647903235]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -2.2857141, 0, 6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 3399214577
+dimensions = Vector3(4.114286, 2.837594, 2.1239035)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "2_4"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.837594, 2.1239035),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 3399214577,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -2.2857141, 0, 6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_2_5" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1680816567]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -4.5714283, 0, 6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 491040815
+dimensions = Vector3(4.114286, 2.6378155, 1.7610015)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "2_5"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.6378155, 1.7610015),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 491040815,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -4.5714283, 0, 6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_2_6" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1846489595]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -6.8571424, 0, 6.1)
+script = ExtResource("3_gkmrf")
+rock_seed = 1542138312
+dimensions = Vector3(4.114286, 2.6309304, 1.690935)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "2_6"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.114286, 2.6309304, 1.690935),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 1542138312,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -6.8571424, 0, 6.1)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_3_0" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1440922678]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.1, 0, 4.8)
+script = ExtResource("3_gkmrf")
+rock_seed = 4223986473
+dimensions = Vector3(4.32, 2.819292, 1.9659078)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "3_0"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.32, 2.819292, 1.9659078),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 4223986473,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.1, 0, 4.8)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_3_1" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1528546549]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.1, 0, 2.3999999)
+script = ExtResource("3_gkmrf")
+rock_seed = 4293308779
+dimensions = Vector3(4.32, 2.6552913, 1.8910867)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "3_1"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.32, 2.6552913, 1.8910867),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 4293308779,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.1, 0, 2.3999999)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_3_2" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=896136918]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.1, 0, 0)
+script = ExtResource("3_gkmrf")
+rock_seed = 25481196
+dimensions = Vector3(4.32, 2.9214618, 2.102221)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "3_2"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.32, 2.9214618, 2.102221),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 25481196,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.1, 0, 0)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_3_3" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=91077871]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.1, 0, -2.3999996)
+script = ExtResource("3_gkmrf")
+rock_seed = 1921687825
+dimensions = Vector3(4.32, 2.7674954, 1.810652)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "3_3"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.32, 2.7674954, 1.810652),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 1921687825,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.1, 0, -2.3999996)
+}
+metadata/formation_locked = false
+
+[node name="Roccia_3_4" type="Node3D" parent="Terrazza/BordoRoccioso" unique_id=1718483444]
+transform = Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.1, 0, -4.799999)
+script = ExtResource("3_gkmrf")
+rock_seed = 26094378
+dimensions = Vector3(4.32, 2.7835872, 2.0349824)
+fracture = 0.7
+strata_dip = 0.08
+lean = 0.05
+metadata/formation_id = "3_4"
+metadata/formation_baseline = {
+"collisions_enabled": true,
+"dimensions": Vector3(4.32, 2.7835872, 2.0349824),
+"fracture": 0.7,
+"lean": 0.05,
+"rock_seed": 26094378,
+"stone_color": Color(0.34, 0.35, 0.32, 1),
+"strata": 3,
+"strata_dip": 0.08,
+"transform": Transform3D(-4.371139e-08, 0, 1, 0, 1, 0, -1, 0, -4.371139e-08, -8.1, 0, -4.799999)
+}
+metadata/formation_locked = false
+
+[node name="Camera" type="Camera3D" parent="." unique_id=1435299596]
+transform = Transform3D(0.83205026, -0.3324919, 0.44400612, 0, 0.8004434, 0.5994083, -0.5547002, -0.49873787, 0.6660091, 20, 28, 30)
+projection = 1
+current = true
+size = 24.0
