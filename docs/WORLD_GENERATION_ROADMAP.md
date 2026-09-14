@@ -36,8 +36,15 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 |---|---|---|---|
 | G01.3b.2b | FATTO | Diagnostica ingombri e verifica editor/Play | Proposta comprensibile, Undo/Redo reali, passaggi percorribili |
 | R01 | IN CORSO — prototipo disponibile | Generatore di singola roccia/affioramento | Seed, dimensioni, piani di frattura, stratificazione, spigolosità; 6 varianti con stesso linguaggio geometrico; collisione semplice |
-| R02 | IN CORSO | Composizione di gruppi rocciosi | Path/area, direzione dominante degli strati, masse grandi/medie/piccole; variazione locale senza distruggere i pezzi spostati a mano |
-| R03 | TODO | Pareti e creste montuose | Pareti fra piattaforme piane, quote discrete, rampe brevi e passaggi riservati, assenza di compenetrazioni macroscopiche; LOD e budget misurati |
+| R02 | IN CORSO — R02.1–R02.3 verificati | Composizione di gruppi rocciosi | Path/area, direzione dominante degli strati, masse grandi/medie/piccole; variazione locale senza distruggere i pezzi spostati a mano |
+| R03 | IN CORSO — R03.1–R03.2 verificati | Pareti e creste montuose | Pareti fra piattaforme piane, quote discrete, rampe brevi e passaggi riservati, assenza di compenetrazioni macroscopiche; LOD e budget misurati |
+| R01.1 | FATTO | Roccia parametrica | Sei varianti, seed e collisione verificati |
+| R02.1 | FATTO | Gruppi su guida | ID e modifiche manuali preservati |
+| R02.2 | FATTO | Fascia libera | Diagnostica geometrica e gizmo contestuale |
+| R02.3 | FATTO | Addensamenti e raccordi | Picchi condivisi, basi sovrapposte e 12 seed verificati |
+| R03.1 | FATTO | Terrazza piana | Quota discreta, volume solido, salvataggio e Undo/Redo |
+| R03.2 | FATTO | Accesso alla terrazza | Rampa, varco e salita/discesa del giocatore verificati |
+| R03.3 | TODO | Ciglio e sagoma della terrazza | Raccordo terra/roccia, bordo meno rettangolare, piano e accesso preservati |
 | W01 | TODO | Laghi editabili | Perimetro e quota dell'acqua, riva e bacino, esclusione edifici; superficie d'acqua inizialmente semplice |
 | W02 | TODO | Fiumi editabili | Spline, larghezza/profondità, profilo discendente e confluenze; raccordo alle quote dei laghi; niente flussi in salita |
 | W03 | TODO | Attraversamenti e rive | Ponti, guadi, approdi, passaggi e accessi alle sponde; terreno/rocce/strade leggono gli stessi vincoli |
@@ -60,7 +67,7 @@ La città illustrata mescola una fortezza dominante, edifici subordinati, corti,
 
 ## Ordine pratico
 
-Verifica G01.3b.2b completata; prossimo R01 come prototipo ambientale circoscritto. Alternare G01.4–G01.5 e R02–R03 senza fondere i due sistemi. W01 precede W02, e l'idrologia stabile precede i ponti e il posizionamento definitivo delle città. C01 precede la generazione degli interni delle grotte. V01 resta una consegna esplicita richiesta dall'utente.
+Verifica G01.3b.2b completata; disponibili R01.1, R02.1–R02.3 e R03.1–R03.2. Prossimo incremento ambientale R03.3. Alternare G01.4–G01.5 e R02–R03 senza fondere i due sistemi. W01 precede W02, e l'idrologia stabile precede i ponti e il posizionamento definitivo delle città. C01 precede la generazione degli interni delle grotte. V01 resta una consegna esplicita richiesta dall'utente.
 
 
 ## R01.1 — Roccia parametrica disponibile
@@ -126,3 +133,18 @@ Creazione e rigenerazione usano azioni Undo/Redo distinte. Il nucleo interno si 
 Esempio: scenes/dev/rock_terrace_example.tscn. Render Godot: captures/balcony_attachment/rock_terrace_example.png, rigenerabile con tools/preview_rock_terrace.gd. Test tools/check_rock_terrace.gd: determinismo, raycast sul piano a +3 m e sul fianco, modifiche e figli manuali, cancellazione, Undo/Redo della quota, PackedScene e rigetto dei parametri invalidi. Parser del plugin verificato. Non è stata eseguita una prova interattiva del menu né una passeggiata con il personaggio.
 
 Prossimo R03.2: un accesso tramite rampa corta con pendenza controllata e varco nel bordo, verificato col giocatore. Poi raccordo visivo del ciglio e maggiore libertà della sagoma; evitare che il prototipo rettangolare diventi il vincolo del generatore.
+
+
+## R03.2 — Rampa con varco e prova giocabile
+
+La terrazza offre Ramp Enabled, Ramp Width e Ramp Length. In questa versione l'accesso è centrato sul lato locale +Z; ruotare l'intera terrazza per orientarlo. La lunghezza deve essere almeno due volte la quota (massimo 26.6°), larghezza minima 2 m. Rigenerare dopo aver modificato i parametri. I salvataggi precedenti restano senza rampa fino alla rigenerazione.
+
+La rampa è un cuneo solido con superficie inclinata e collisione convessa, collegato alla piattaforma. La proposta esclude le rocce automatiche che invadono il corridoio di accesso; disabilitando la rampa le ripristina. Una roccia manuale nel varco produce un errore senza alterare la scena. La verifica riguarda il bordo della terrazza, non eventuali oggetti estranei aggiunti alla scena. Niente parapetti, navigazione AI o accessi multipli in questo incremento.
+
+Aprire scenes/dev/rock_terrace_playable.tscn e usare F6/WASD per provare l'esempio salvato. Usa player3 e il controller reale con camera isometrica fissa, senza teletrasporto sulla rampa. Test check_rock_terrace_play: arresto a metà rampa, salita sul piano e ritorno al terreno; quote misurate rispetto alla posizione del corpo a riposo. Test check_rock_terrace: varco/ripristino, rampa troppo ripida, ostruzione manuale, collisioni, salvataggio e Undo/Redo. Screenshot reale rock_terrace_ramp_play.png. Il movimento è stato verificato tramite input automatici; non è una sessione manuale estesa né un benchmark.
+
+Prossimo R03.3: raccordare il ciglio e la sagoma mantenendo piano e accesso percorribili. R03 complessivo resta IN CORSO: mancano ancora integrazione terreno, LOD e misure di budget.
+
+## Gestione del lavoro
+
+La board docs/GENERATOR_KANBAN.md è generata dalle tabelle delle due roadmap. Aggiornare prima la tabella pertinente e le note, quindi eseguire `python tools/update_generator_board.py`: aggiorna anche le righe ambientali nella Sequenza di implementazione della roadmap architettonica. Non segnare FATTO una macrofase perché è concluso un suo prototipo.

@@ -259,6 +259,34 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | G01 | IN CORSO | Composizione da metadati, separata dai builder | A01, A08, A09 | Piano riproducibile, varianti strutturali, editing protetto |
 | A10 | TODO | Rovine strutturali controllabili | A03, A04, A07 | R07: togli una porzione di tetto/muro, interno e collisione coerenti |
 | A11 | TODO | Integrazione insediamento e consolidamento | Incrementale; chiusura dopo A08 | Case e castello nello stesso villaggio, rigenerazione locale e budget misurati |
+<!-- WORLD_PIPELINE_START -->
+
+| ID | Stato | Incremento ambientale / integrazione | Dipendenze | Esempio / criterio di uscita |
+|---|---|---|---|---|
+| G01.3b.2b | FATTO | Diagnostica ingombri e verifica editor/Play | Pipeline mondo | Proposta comprensibile, Undo/Redo reali, passaggi percorribili |
+| R01 | IN CORSO — prototipo disponibile | Generatore di singola roccia/affioramento | Pipeline mondo | Seed, dimensioni, piani di frattura, stratificazione, spigolosità; 6 varianti con stesso linguaggio geometrico; collisione semplice |
+| R02 | IN CORSO — R02.1–R02.3 verificati | Composizione di gruppi rocciosi | Pipeline mondo | Path/area, direzione dominante degli strati, masse grandi/medie/piccole; variazione locale senza distruggere i pezzi spostati a mano |
+| R03 | IN CORSO — R03.1–R03.2 verificati | Pareti e creste montuose | Pipeline mondo | Pareti fra piattaforme piane, quote discrete, rampe brevi e passaggi riservati, assenza di compenetrazioni macroscopiche; LOD e budget misurati |
+| R01.1 | FATTO | Roccia parametrica | Pipeline mondo | Sei varianti, seed e collisione verificati |
+| R02.1 | FATTO | Gruppi su guida | Pipeline mondo | ID e modifiche manuali preservati |
+| R02.2 | FATTO | Fascia libera | Pipeline mondo | Diagnostica geometrica e gizmo contestuale |
+| R02.3 | FATTO | Addensamenti e raccordi | Pipeline mondo | Picchi condivisi, basi sovrapposte e 12 seed verificati |
+| R03.1 | FATTO | Terrazza piana | Pipeline mondo | Quota discreta, volume solido, salvataggio e Undo/Redo |
+| R03.2 | FATTO | Accesso alla terrazza | Pipeline mondo | Rampa, varco e salita/discesa del giocatore verificati |
+| R03.3 | TODO | Ciglio e sagoma della terrazza | Pipeline mondo | Raccordo terra/roccia, bordo meno rettangolare, piano e accesso preservati |
+| W01 | TODO | Laghi editabili | Pipeline mondo | Perimetro e quota dell'acqua, riva e bacino, esclusione edifici; superficie d'acqua inizialmente semplice |
+| W02 | TODO | Fiumi editabili | Pipeline mondo | Spline, larghezza/profondità, profilo discendente e confluenze; raccordo alle quote dei laghi; niente flussi in salita |
+| W03 | TODO | Attraversamenti e rive | Pipeline mondo | Ponti, guadi, approdi, passaggi e accessi alle sponde; terreno/rocce/strade leggono gli stessi vincoli |
+| C01 | TODO | Ingressi di grotta | Pipeline mondo | Apertura reale nel blocco roccioso, soglia percorribile, collisione coerente e leggibilità alla camera fissa |
+| C02 | TODO | Piano di grotta | Pipeline mondo | Stanze/cunicoli con anelli e diramazioni, quote e collegamenti; editing manuale separato dall'involucro esterno |
+| G01.4 | TODO | Catalogo architettonico | Pipeline mondo | Ruoli del piano associati a profili/componenti; famiglie sostituibili senza cambiare il planner |
+| G01.5 | TODO | Varietà compositiva del castello | Pipeline mondo | Recinti segmentati, più torri/corpi, corti e gerarchie differenti; preservazione manuale |
+| S01 | TODO | Composizione urbana organica | Pipeline mondo | Strade principali e secondarie, piazze, porte, edifici gerarchizzati, addensamenti e vuoti; insediamenti su piani/terrazze, collegamenti ai vincoli del paesaggio |
+| S02 | TODO | Edifici urbani più articolati | Pipeline mondo | Volumi aggregati, tetti collegati, facciate e accessori; le città cambiano forma oltre al colore |
+| V01 | TODO | Confronto dei quattro castelli | Pipeline mondo | Quattro richieste/seed tramite tool, scene editabili e stessa camera; almeno due organizzazioni strutturali distinte |
+| V02 | TODO | Vertical slice città–villaggio–POI | Pipeline mondo | Tempi reali di cammino, incontri, visibilità e streaming; aggiornamento delle distanze proposte dal concept |
+<!-- WORLD_PIPELINE_END -->
+
 
 ### A01 — Prima implementazione consigliata
 

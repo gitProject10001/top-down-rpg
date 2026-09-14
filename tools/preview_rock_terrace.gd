@@ -43,7 +43,7 @@ func run() -> void:
 	for frame in 30: await process_frame
 	for layer in root.find_children("*","CanvasLayer",true,false): layer.hide()
 	var ui := CanvasLayer.new(); root.add_child(ui)
-	var label := Label.new(); label.text="R03.1 · TERRAZZA PIANA\nQuota +3 m · superficie 16 × 12 m · bordo roccioso"; label.position=Vector2(30,30); label.add_theme_font_size_override("font_size",20); ui.add_child(label)
+	var label := Label.new(); label.text="R03.2 · TERRAZZA CON RAMPA\nQuota +3 m · rampa 6 × 3 m · varco nel bordo"; label.position=Vector2(30,30); label.add_theme_font_size_override("font_size",20); ui.add_child(label)
 	await process_frame; await RenderingServer.frame_post_draw
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("res://captures/balcony_attachment"))
 	root.get_texture().get_image().save_png("res://captures/balcony_attachment/rock_terrace_example.png")
