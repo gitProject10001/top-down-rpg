@@ -68,11 +68,11 @@ var _slope_rise := 0.0
 var _base_drop := 0.0
 @export var connect_to_tower := false:
 	set(value): connect_to_tower=value; request_rebuild()
-@export_range(0,7,1) var tower_face := 2:
+@export_range(0,15,1) var tower_face := 2:
 	set(value): tower_face=value; request_rebuild()
 @export_node_path("Node3D") var target_tower: NodePath:
 	set(value): target_tower=value; request_rebuild()
-@export_range(0,7,1) var target_face := 6:
+@export_range(0,15,1) var target_face := 6:
 	set(value): target_face=value; request_rebuild()
 var _last_target: Node3D
 var _connection_signature := ""
@@ -84,6 +84,8 @@ func destination_error() -> String:
 	var host := fortification_host(); var target := destination()
 	if target==null or target==host: return "Seleziona una seconda torre valida per Target Tower."
 	if host==null or not host.is_inside_tree() or not target.is_inside_tree(): return "Torri non disponibili nella scena."
+	if target_face<0 or target_face>=target.wall_count(): return "Target Face non esiste sulla torre selezionata."
+	if not target.roof_is_walkable(): return "La torre di arrivo richiede una copertura a terrazza."
 	if depth>target.wall_length(target_face)-0.25: return "La faccia della seconda torre è troppo stretta."
 	var a: Vector3=host.to_global(host.wall_point(tower_face,0,0))
 	var b: Vector3=target.to_global(target.wall_point(target_face,0,0))
@@ -112,7 +114,9 @@ func fortification_host() -> Node3D:
 func connection_error() -> String:
 	if not connect_to_tower: return ""
 	var host := fortification_host()
-	if host==null: return "Il muro collegato deve essere figlio di una torre ottagonale."
+	if host==null: return "Il muro collegato deve essere figlio di una torre poligonale."
+	if tower_face<0 or tower_face>=host.wall_count(): return "Tower Face non esiste sulla torre selezionata."
+	if not host.roof_is_walkable(): return "Il collegamento richiede una torre con copertura a terrazza."
 	if depth>host.wall_length(tower_face)-0.25: return "Il muro è più largo della faccia della torre: aumenta la torre o riduci Depth del muro."
 	for other in host.get_children():
 		if other!=self and other.has_method("fortification_host") and other.connect_to_tower and other.tower_face==tower_face:

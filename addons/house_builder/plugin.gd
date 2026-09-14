@@ -346,7 +346,7 @@ func _plan_action(label: String) -> void:
 		if selected.has_method("roof_is_walkable") and not selected.roof_is_walkable():
 			_show_plan_error(label,"Scegli una copertura a terrazza prima di aggiungere l’accesso al tetto."); return
 		if not selected.has_method("interior_floor_mesh") or plan==null or plan.levels().size()<2:
-			_show_plan_error(label,"Seleziona una torre ottagonale con almeno due piani interni."); return
+			_show_plan_error(label,"Seleziona una torre poligonale con almeno due piani interni."); return
 		if selected.width<7.0 or selected.depth<7.0:
 			_show_plan_error(label,"Per questa disposizione iniziale servono almeno 7 × 7 metri. Puoi poi modificare la scala manualmente."); return
 		var top: Node3D=plan.levels().back()
@@ -357,7 +357,7 @@ func _plan_action(label: String) -> void:
 		_add_authored(top,stairs,label); return
 	if label=="Torre: due piani e scala":
 		if not selected.has_method("interior_floor_mesh"):
-			_show_plan_error(label,"Seleziona una torre ottagonale."); return
+			_show_plan_error(label,"Seleziona una torre poligonale."); return
 		if plan!=null:
 			_show_plan_error(label,"Gli interni esistono già: modifica i piani e la scala presenti."); return
 		if selected.width<6.0 or selected.depth<6.0:
@@ -1085,7 +1085,7 @@ func _create_curtain_wall() -> void:
 func _attach_curtain() -> void:
 	var tower := _selected_house()
 	if tower==null or not tower.has_method("footprint_vertices"):
-		_show_plan_error("Collega cortina","Seleziona una torre ottagonale."); return
+		_show_plan_error("Collega cortina","Seleziona una torre poligonale."); return
 	var wall=preload("res://addons/house_builder/curtain_wall.gd").new()
 	wall.name="Cortina"; wall.width=8.0; wall.connect_to_tower=true
 	var chosen := -1

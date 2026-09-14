@@ -1,0 +1,63 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://addons/house_builder/polygon_tower.gd" id="1_7q46d"]
+[ext_resource type="Script" path="res://addons/house_builder/plan.gd" id="2_40syy"]
+[ext_resource type="Script" path="res://addons/house_builder/plan_element.gd" id="3_ht3y5"]
+
+[node name="TorreOttagonale" type="Node3D" unique_id=936160332]
+script = ExtResource("1_7q46d")
+face_count = 16
+battlements_enabled = true
+canopy_roof = 2
+volume_id = "volume_1463126_47345305240"
+attached = false
+archetype_id = "tower"
+width = 7.2
+depth = 7.2
+wall_height = 5.6
+roof_height = 1.0
+openings = Array[Dictionary]([{
+"height": 2.1,
+"kind": "door",
+"wall": 0,
+"width": 1.2
+}, {
+"height": 1.1,
+"kind": "window",
+"wall": 7,
+"width": 0.5,
+"y": 3.6
+}, {
+"height": 1.1,
+"kind": "window",
+"wall": 1,
+"width": 0.5,
+"y": 3.6
+}])
+
+[node name="InteriorPlan" type="Node3D" parent="." unique_id=980116627]
+script = ExtResource("2_40syy")
+floor_height = 2.8
+
+[node name="PianoTerra" type="Node3D" parent="InteriorPlan" unique_id=57872464]
+metadata/floor_id = "tower_ground"
+
+[node name="ScalaPrimoPiano" type="Node3D" parent="InteriorPlan/PianoTerra" unique_id=42371182]
+script = ExtResource("3_ht3y5")
+kind = 2
+dimensions = Vector3(1.2, 2.8, 4.2)
+stable_id = "tower_stair_0"
+room_ids = PackedStringArray()
+
+[node name="PrimoPiano" type="Node3D" parent="InteriorPlan" unique_id=481956764]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.8, 0)
+metadata/floor_id = "tower_upper"
+
+[node name="ScalaTetto" type="Node3D" parent="InteriorPlan/PrimoPiano" unique_id=2120803610]
+transform = Transform3D(-1, 0, -8.742278e-08, 0, 1, 0, 8.742278e-08, 0, -1, 1.5, 0, 0)
+script = ExtResource("3_ht3y5")
+kind = 2
+roof_exit = true
+dimensions = Vector3(1.2, 2.93, 4.2)
+stable_id = "tower_roof_stair"
+room_ids = PackedStringArray()
