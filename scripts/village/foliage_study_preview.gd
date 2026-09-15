@@ -1,18 +1,16 @@
 extends Node3D
 
 func _ready() -> void:
-    $Camera.position = Vector3(12, 16, 25)
-    $Camera.look_at(Vector3(0, 4.7, 0))
-    $Camera.add_to_group("camera_rig")
-    var player := preload("res://scenes/player/player3.tscn").instantiate()
-    player.position = Vector3(0, 0.1, 3)
-    add_child(player)
-    var ui := CanvasLayer.new()
-    add_child(ui)
-    var label := Label.new()
-    label.position = Vector2(24, 24)
-    label.text = "ALBERI · STUDIO T01\nLatifoglia / Pino diradato\nWASD: movimento · F6: avvia questa scena"
-    ui.add_child(label)
+    var rig: Node = load("res://scenes/dev/gameplay_preview_rig.tscn").instantiate()
+    var view: SubViewport = rig.get_node("Pixel/View")
+    # Keep authored tree positions; use the same presentation as gameplay in Play.
+    for child in get_children():
+        remove_child(child)
+        if child.name in ["Camera", "Environment", "Sun"]:
+            child.free()
+        else:
+            view.add_child(child)
+    add_child(rig)
     if "--capture-foliage" in OS.get_cmdline_user_args():
         await get_tree().create_timer(2.0).timeout
         await RenderingServer.frame_post_draw

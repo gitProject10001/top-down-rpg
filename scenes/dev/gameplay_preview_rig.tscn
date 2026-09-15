@@ -1,0 +1,200 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/village/iso_cam.gd" id="1_q4no0"]
+[ext_resource type="Shader" path="res://shaders/pixelart/pixel_post.gdshader" id="2_h5hxu"]
+[ext_resource type="Texture2D" path="res://assets/textures/pixelart/palette_camp.png" id="3_e2x8g"]
+[ext_resource type="Script" path="res://scripts/village/pixel_snap.gd" id="4_prq08"]
+[ext_resource type="Script" path="res://scripts/village/village_character_palette.gd" id="5_4qo1g"]
+[ext_resource type="PackedScene" path="res://scenes/player/player3.tscn" id="6_as2kj"]
+[ext_resource type="Script" path="res://scripts/player.gd" id="7_a1xbe"]
+
+[sub_resource type="ProceduralSkyMaterial" id="sky_mat"]
+sky_top_color = Color(0.3, 0.32, 0.35, 1)
+sky_horizon_color = Color(0.47, 0.44, 0.38, 1)
+ground_bottom_color = Color(0.16, 0.13, 0.1, 1)
+ground_horizon_color = Color(0.3, 0.26, 0.2, 1)
+
+[sub_resource type="Sky" id="sky"]
+sky_material = SubResource("sky_mat")
+
+[sub_resource type="Environment" id="Environment_km8hs"]
+background_mode = 2
+sky = SubResource("sky")
+ambient_light_source = 2
+ambient_light_color = Color(0.65, 0.72, 0.8, 1)
+ambient_light_sky_contribution = 0.4
+ambient_light_energy = 0.408
+tonemap_mode = 2
+ssao_enabled = true
+ssao_radius = 0.7
+ssao_intensity = 1.3
+ssao_power = 1.6
+ssao_detail = 1.0
+ssao_horizon = 0.05
+ssao_light_affect = 0.15
+sdfgi_enabled = true
+sdfgi_use_occlusion = true
+sdfgi_energy = 0.8
+
+[sub_resource type="QuadMesh" id="post_quad"]
+flip_faces = true
+size = Vector2(2, 2)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_n8e0r"]
+render_priority = 127
+shader = ExtResource("2_h5hxu")
+shader_parameter/palette_tex = ExtResource("3_e2x8g")
+shader_parameter/palette_count = 64
+shader_parameter/palette_mix = 0.0
+shader_parameter/palette_weights = Vector3(1.25, 1.35, 1.35)
+shader_parameter/dither = 0.006
+shader_parameter/depth_edge = 0.006
+shader_parameter/normal_edge = 0.33
+shader_parameter/outline_strength = 0.1
+shader_parameter/ink_color = Color(0.05, 0.042, 0.036, 1)
+shader_parameter/ink_from_surface = 0.1
+shader_parameter/ink_darken = 0.32
+shader_parameter/ink_fade_start = 120.0
+shader_parameter/ink_fade_end = 200.0
+shader_parameter/ink_fade_floor = 0.3
+shader_parameter/exposure = 1.2
+shader_parameter/white_point = 2.2
+shader_parameter/contrast = 1.02
+shader_parameter/saturation = 0.9
+shader_parameter/shadow_tint = Color(0.42, 0.36, 0.3, 1)
+shader_parameter/highlight_tint = Color(1, 0.94, 0.8, 1)
+shader_parameter/split_strength = 0.14
+shader_parameter/vignette = 0.1
+
+[node name="GameplayPreviewRig" type="Node3D" unique_id=279762309]
+
+[node name="Pixel" type="SubViewportContainer" parent="." unique_id=1114341495]
+texture_filter = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+stretch = true
+
+[node name="View" type="SubViewport" parent="Pixel" unique_id=731927723]
+handle_input_locally = false
+msaa_3d = 2
+size = Vector2i(1152, 648)
+render_target_update_mode = 4
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Pixel/View" unique_id=758837316]
+environment = SubResource("Environment_km8hs")
+
+[node name="Sun" type="DirectionalLight3D" parent="Pixel/View" unique_id=1634938349]
+transform = Transform3D(0.8191518, 0.4260356, -0.38358712, 0, 0.6687934, 0.7427375, 0.5735763, -0.60844195, 0.5478192, 0, 14, 0)
+light_color = Color(1, 0.94, 0.84, 1)
+light_energy = 1.15
+shadow_enabled = true
+shadow_bias = 0.04
+shadow_normal_bias = 0.35
+shadow_blur = 0.85
+directional_shadow_max_distance = 60.0
+
+[node name="IsoCam" type="Camera3D" parent="Pixel/View" unique_id=2033923590 groups=["camera_rig"]]
+transform = Transform3D(0.70710677, -0.5254828, 0.47314674, 0, 0.66913056, 0.74314487, -0.70710677, -0.5254828, 0.47314674, 20.196638, 34.60215, 23.71646)
+projection = 1
+current = true
+size = 17.5
+far = 280.0
+script = ExtResource("1_q4no0")
+target_path = NodePath("../Player")
+pitch_deg = 48.0
+ortho_size = 17.5
+focus_height = 4.0
+pixel_rows = 450
+
+[node name="PostPixel" type="MeshInstance3D" parent="Pixel/View/IsoCam" unique_id=1431222476]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+visible = false
+cast_shadow = 0
+extra_cull_margin = 16384.0
+mesh = SubResource("post_quad")
+surface_material_override/0 = SubResource("ShaderMaterial_n8e0r")
+
+[node name="PixelSnap" type="Node" parent="Pixel/View" unique_id=1312944443]
+process_priority = 100
+script = ExtResource("4_prq08")
+camera_path = NodePath("../IsoCam")
+targets = Array[NodePath]([NodePath("../Player")])
+
+[node name="SoftSkyFill" type="DirectionalLight3D" parent="Pixel/View" unique_id=476759187]
+transform = Transform3D(0.70710677, -0.29883623, 0.6408563, 0, 0.90630776, 0.42261827, -0.70710677, -0.29883623, 0.6408563, 0, 0, 0)
+light_color = Color(0.72, 0.81, 0.9, 1)
+light_energy = 0.24
+
+[node name="VillageCharacterPalette" type="Node" parent="Pixel/View" unique_id=549345949]
+script = ExtResource("5_4qo1g")
+
+[node name="Player" type="CharacterBody3D" parent="Pixel/View" unique_id=1117663100 groups=["player"] instance=ExtResource("6_as2kj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.1, 3)
+script = ExtResource("7_a1xbe")
+hand_follow = 0.2
+attack_timing = {
+"atk_a": {
+"cancel": 0.7,
+"speed": 0.9,
+"strike": 0.45,
+"tail": 0.9,
+"windup": 0.16
+},
+"atk_b": {
+"cancel": 0.68,
+"speed": 0.9,
+"strike": 0.45,
+"tail": 0.85,
+"windup": 0.18
+},
+"atk_c": {
+"cancel": 0.62,
+"cancel_min": 0.68,
+"speed": 1.8,
+"strike": 0.4,
+"tail": 0.8,
+"windup": 0.26
+},
+"atk_dash": {
+"cancel": 0.6,
+"speed": 1.7,
+"strike": 0.34,
+"tail": 0.9,
+"windup": 0.18
+},
+"atk_hook": {
+"cancel": 0.68,
+"speed": 1.1,
+"strike": 0.45,
+"tail": 0.88,
+"windup": 0.16
+},
+"atk_jab": {
+"cancel": 0.62,
+"speed": 1.3,
+"strike": 0.4,
+"tail": 0.9,
+"windup": 0.12
+},
+"atk_swing": {
+"cancel": 0.68,
+"speed": 1.1,
+"strike": 0.45,
+"tail": 0.88,
+"windup": 0.16
+},
+"chop": {
+"cancel": 0.7,
+"speed": 1.0,
+"strike": 0.45,
+"tail": 0.85,
+"windup": 0.22
+}
+}
+locomotion_clips = PackedStringArray("idle", "run_fwd", "run_back", "strafe_left", "strafe_right", "aim_idle", "aim_fwd", "aim_back", "aim_left", "aim_right", "atk_h", "atk_b", "atk_d", "atk_combo")
+loop_clips = PackedStringArray()
+face_movement = true

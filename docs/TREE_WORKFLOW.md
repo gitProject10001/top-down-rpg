@@ -39,7 +39,14 @@ tramite cache PC2. Sono questi gli elementi da separare nella pipeline.
 ## Utilizzo
 
 Aprire `scenes/dev/foliage_study.tscn`, F6; WASD usa il giocatore del progetto.
-La camera resta fissa per confrontare silhouette e scala. Trascinare in altre
+La camera mantiene gli angoli del gioco e segue il giocatore. Il rig leggero
+`scenes/dev/gameplay_preview_rig.tscn` deriva dalla scena principale: stesso
+giocatore, camera `iso_cam.gd` (48°, zoom 17.5), viewport, pixel snap, ambiente,
+sole, luce di riempimento e palette personaggio. Il mondo non viene caricato.
+Per riallinearlo dopo modifiche alla scena principale eseguire in Godot headless
+`--script tools/build_gameplay_preview_rig.gd`. Movimento, follow e collisione
+sono verificati da `tools/check_foliage_gameplay.gd`.
+Trascinare in altre
 scene `scenes/props/study_broadleaf.tscn` e `study_pine.tscn`.
 
 Il sorgente è `art_source/foliage_study.blend`. Le due scene contengono geometria,

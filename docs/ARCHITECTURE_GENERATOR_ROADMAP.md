@@ -292,6 +292,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | ID | Stato | Incremento ambientale / integrazione | Dipendenze | Esempio / criterio di uscita |
 |---|---|---|---|---|
 | T01.1 | FATTO | Studio alberi Blender → Godot | Pipeline mondo | Latifoglia e pino originali, alpha spray, normali chioma, palette e vento runtime; scena F6, sorgente e test in TREE_WORKFLOW.md |
+| T01.1a | FATTO | Prova alberi con presentazione gameplay | Pipeline mondo | Rig estratto dalla scena principale: stesso player, camera follow, viewport, luci e palette; movimento e collisioni verificati |
 | T01.2 | TODO | Rifinitura visiva alberi | Pipeline mondo | Confronto reference alla camera di gioco, tronco, ciuffi e ombre; approvazione prima di sostituire gli alberi esistenti |
 | T01.3 | TODO | Authoring alberi | Pipeline mondo | Percorsi e guide editabili con rigenerazione locale e preservazione delle modifiche manuali |
 | T01.4 | TODO | Foresta e budget | Pipeline mondo | LOD, istanze, overdraw e ombre misurati; visibilità giocatore e integrazione catalogo world editor |

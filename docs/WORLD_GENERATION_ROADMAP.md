@@ -39,6 +39,7 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 | ID | Stato | Passo | Risultato verificabile |
 |---|---|---|---|
 | T01.1 | FATTO | Studio alberi Blender → Godot | Latifoglia e pino originali, alpha spray, normali chioma, palette e vento runtime; scena F6, sorgente e test in TREE_WORKFLOW.md |
+| T01.1a | FATTO | Prova alberi con presentazione gameplay | Rig estratto dalla scena principale: stesso player, camera follow, viewport, luci e palette; movimento e collisioni verificati |
 | T01.2 | TODO | Rifinitura visiva alberi | Confronto reference alla camera di gioco, tronco, ciuffi e ombre; approvazione prima di sostituire gli alberi esistenti |
 | T01.3 | TODO | Authoring alberi | Percorsi e guide editabili con rigenerazione locale e preservazione delle modifiche manuali |
 | T01.4 | TODO | Foresta e budget | LOD, istanze, overdraw e ombre misurati; visibilità giocatore e integrazione catalogo world editor |
