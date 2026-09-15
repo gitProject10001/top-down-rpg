@@ -311,7 +311,11 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | R03.1 | FATTO | Terrazza piana | Pipeline mondo | Quota discreta, volume solido, salvataggio e Undo/Redo |
 | R03.2 | FATTO | Accesso alla terrazza | Pipeline mondo | Rampa, varco e salita/discesa del giocatore verificati |
 | R03.3 | TODO | Ciglio e sagoma della terrazza | Pipeline mondo | Raccordo terra/roccia, bordo meno rettangolare, piano e accesso preservati |
-| W01 | TODO | Laghi editabili | Pipeline mondo | Perimetro e quota dell'acqua, riva e bacino, esclusione edifici; superficie d'acqua inizialmente semplice |
+| W01 | IN CORSO — esempio W01.1 | Laghi editabili | Pipeline mondo | Perimetro e quota dell'acqua, riva e bacino, esclusione edifici; superficie d'acqua inizialmente semplice |
+| W01.1 | FATTO | Lago ed emissario di prova | Pipeline mondo | Nodo tool con perimetro, flusso prescritto, vortice opzionale, fondale percorribile e onde locali; camera gameplay e test ingresso/uscita |
+| W01.2 | TODO | Authoring lago e rive | Pipeline mondo | Gizmo contestuali, Undo/Redo, diagnostica perimetro; preview fondale in editor e protezione terreno manuale |
+| W01.3 | TODO | Qualità visiva acqua | Pipeline mondo | Rive naturali, fondale, riflessi e caustiche meno ripetitive; riferimento alla camera gameplay |
+| W04 | TODO | Interazioni acqua locali | Pipeline mondo | Scie, spruzzi, ostacoli e oggetti galleggianti; simulazione limitata solo a comportamenti necessari |
 | W02 | TODO | Fiumi editabili | Pipeline mondo | Spline, larghezza/profondità, profilo discendente e confluenze; raccordo alle quote dei laghi; niente flussi in salita |
 | W03 | TODO | Attraversamenti e rive | Pipeline mondo | Ponti, guadi, approdi, passaggi e accessi alle sponde; terreno/rocce/strade leggono gli stessi vincoli |
 | C01 | TODO | Ingressi di grotta | Pipeline mondo | Apertura reale nel blocco roccioso, soglia percorribile, collisione coerente e leggibilità alla camera fissa |
