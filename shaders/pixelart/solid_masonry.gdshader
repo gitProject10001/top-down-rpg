@@ -1,10 +1,12 @@
 shader_type spatial;
 #include "res://shaders/pixelart/architecture_reveal.gdshaderinc"
+#include "res://shaders/pixelart/stone_pigment.gdshaderinc"
 uniform bool use_vertex_color=true;
 uniform vec3 base_color=vec3(0.18,0.17,0.15);
 render_mode diffuse_burley, specular_schlick_ggx;
 varying vec3 local_position;
-void vertex() { local_position=VERTEX; reveal_world=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
+varying vec3 face_normal;
+void vertex() { local_position=VERTEX; face_normal=NORMAL; reveal_world=(MODEL_MATRIX*vec4(VERTEX,1.0)).xyz; }
 float hash(vec3 p) { return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453); }
 void fragment() {
  architecture_reveal(FRAGCOORD.xy);
@@ -18,4 +20,8 @@ void fragment() {
  ALBEDO=pigment*(0.84+0.22*cloud+0.04*grain+0.035*mottling);
  ROUGHNESS=0.9; SPECULAR=0.06;
  AO=use_vertex_color?COLOR.a:0.48; AO_LIGHT_AFFECT=0.65;
+ if(anime_painted) {
+  ALBEDO=painted_stone(pigment*(.92+.12*cloud),local_position,face_normal);
+  ROUGHNESS=1.0; SPECULAR=0.0;
+ }
 }

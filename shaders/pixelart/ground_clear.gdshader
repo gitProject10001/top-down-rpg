@@ -1,5 +1,10 @@
 shader_type spatial;
 render_mode world_vertex_coords;
+// Opt-in art study. The original material is preserved when disabled.
+uniform bool anime_painted = false;
+uniform sampler2D meadow_painting : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
+uniform sampler2D path_painting : source_color, filter_linear_mipmap_anisotropic, repeat_disable;
+uniform sampler2D brush_normal : filter_linear_mipmap, repeat_enable;
 
 // THE GROUND, AND WHY IT IS NOT JUST A TILED TEXTURE.
 //
@@ -194,11 +199,11 @@ vec3 stochastic_layer(vec2 pos, vec2 ddx, vec2 ddy, float metres, float column, 
 	vec2 v2;
 	vec2 v3;
 	triangle_grid(uv, w, v1, v2, v3);
-	if (column < 0.5) {
+	if (column < 0.5 || anime_painted) {
 		// Each vertex samples a bounded patch, with no wrapping or mirroring.
 		// Four independent meadow regions provide different painted features.
 		vec3 result = vec3(0.0);
-		vec3 weights = pow(w, vec3(3.0));
+		vec3 weights = pow(w, vec3(anime_painted ? 1.4 : 3.0));
 		weights /= max(dot(weights, vec3(1.0)), 0.0001);
 		for (int i = 0; i < 3; i++) {
 			vec2 vertex = i == 0 ? v1 : (i == 1 ? v2 : v3);
@@ -208,7 +213,19 @@ vec3 stochastic_layer(vec2 pos, vec2 ddx, vec2 ddy, float metres, float column, 
 			mat2 rotation = mat2(vec2(cos(angle), sin(angle)), vec2(-sin(angle), cos(angle)));
 			vec2 corner = step(vec2(0.5), rnd.xy) * 0.75;
 			vec2 sample_uv = corner + vec2(0.125) + (rnd.xy - 0.5) * 0.04 + rotation * (uv - anchor) * 0.045;
-			result += textureGrad(painting, sample_uv, rotation * dx * 0.045, rotation * dy * 0.045).rgb * weights[i];
+			if (anime_painted) {
+				// Bounded overlapping crops avoid requiring perfectly seamless source edges.
+				vec2 brush_uv = vec2(0.5) + (rnd.xy - 0.5) * 0.25 + rotation * (uv - anchor) * 0.22;
+				vec3 brush_color;
+				if (column < 0.5) {
+					brush_color = textureGrad(meadow_painting, brush_uv, rotation * dx * 0.22, rotation * dy * 0.22).rgb;
+				} else {
+					brush_color = textureGrad(path_painting, brush_uv, rotation * dx * 0.22, rotation * dy * 0.22).rgb;
+				}
+				result += brush_color * weights[i];
+			} else {
+				result += textureGrad(painting, sample_uv, rotation * dx * 0.045, rotation * dy * 0.045).rgb * weights[i];
+			}
 		}
 		return result;
 	}
@@ -251,6 +268,7 @@ void vertex() {
 
 
 void fragment() {
+	float brush_surface = 1.0;
 	vec2 pos = builder_layout ? (builder_inverse * vec4(world_position, 1.0)).xz : world_position.xz;
 	vec2 ddx = dFdx(pos);
 	vec2 ddy = dFdy(pos);
@@ -314,8 +332,9 @@ void fragment() {
 		vec3 ragged = (ground_noise(pos * 1.7) - 0.5) * road_edge_noise * 4.0 * mask * (1.0 - mask);
 		mask = clamp(mask + ragged, vec3(0.0), vec3(1.0));
 
-		float dirt = smoothstep(0.05, 0.95, mask.r);
+		float dirt = anime_painted ? smoothstep(0.12, 0.82, mask.r + (ground_noise(pos * 4.0) - .5) * .28) : smoothstep(0.05, 0.95, mask.r);
 		float gravel = smoothstep(0.05, 0.95, mask.g);
+		brush_surface *= (1.0-dirt)*(1.0-gravel);
 		float lush = smoothstep(0.05, 0.95, mask.b);
 
 		if (lush > 0.002) {
@@ -349,6 +368,15 @@ void fragment() {
 			vec3 path_soil = stochastic_layer(pos,ddx,ddy,road_metres,1.0,DIRT_MEAN)*dirt_grade;
 			ALBEDO = mix(ALBEDO,path_soil,amount);
 		}
+	}
+	if (anime_painted) {
+		// Existing submerged vertices receive sandy bed paint, not meadow grass.
+		float submerged = 1.0 - smoothstep(-0.08, 0.25, world_position.y + (ground_noise(pos*5.0)-.5)*.09);
+		vec3 bed = stochastic_layer(pos, ddx, ddy, road_metres, 1.0, DIRT_MEAN) * vec3(.55,.65,.66);
+		ALBEDO = mix(ALBEDO, bed, submerged);
+		vec3 painted_normal = texture(brush_normal,world_position.xz/4.581).rgb*2.0-1.0;
+		vec3 world_normal = normalize(vec3(painted_normal.x,painted_normal.z,-painted_normal.y));
+		NORMAL = normalize(mix(NORMAL, mat3(VIEW_MATRIX)*world_normal, .35*brush_surface*(1.0-submerged)));
 	}
 	ROUGHNESS = 1.0;
 	SPECULAR = 0.0;

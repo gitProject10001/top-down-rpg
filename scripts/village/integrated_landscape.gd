@@ -7,6 +7,7 @@ var cooldown:=0.0
 var plans: Array=[]
 var interior_states: Dictionary={}
 var nearest_door: Node3D
+var art_direction = preload("res://scripts/village/anime_art_direction.gd").new()
 func _ready() -> void:
     var rig=load("res://scenes/dev/gameplay_preview_rig.tscn").instantiate()
     var view=rig.get_node("Pixel/View")
@@ -20,9 +21,11 @@ func _ready() -> void:
         water.set_simulation(true)
         local_patch(water)
     for node in view.find_children("InteriorPlan","Node3D",true,false):plans.append(node)
+    art_direction.configure(view)
+    art_direction.apply(not "--original-art" in OS.get_cmdline_user_args())
     var ui:=CanvasLayer.new();add_child(ui)
     var label:=Label.new();label.position=Vector2(20,20);label.text="SCENA INTEGRATA · strumenti esistenti
-WASD movimento · F8 panoramica · F campo acqua · 1 città / 2 guado / 3 lago · E porta"
+WASD movimento · F8 panoramica · F campo acqua · 1 città / 2 guado / 3 lago · E porta · F7 stile"
     ui.add_child(label)
     if "--capture-integrated" in OS.get_cmdline_user_args():
         if "--river-view" in OS.get_cmdline_user_args():player.position=Vector3(3,1,21)
@@ -51,6 +54,9 @@ func toggle_overview() -> void:
     else:camera.size=17.5
 func _unhandled_key_input(event: InputEvent) -> void:
     if event is InputEventKey and event.pressed and not event.echo:
+        if event.keycode==KEY_F7:
+            art_direction.apply(not art_direction.enabled)
+            print("ART_DIRECTION ", "anime dipinto" if art_direction.enabled else "originale")
         if event.keycode==KEY_E and is_instance_valid(nearest_door):nearest_door.toggle(player.global_position)
         if event.keycode==KEY_F8:toggle_overview()
         if event.keycode==KEY_F:

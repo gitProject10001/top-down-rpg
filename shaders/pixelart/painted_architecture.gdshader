@@ -1,5 +1,6 @@
 shader_type spatial;
 #include "res://shaders/pixelart/architecture_reveal.gdshaderinc"
+#include "res://shaders/pixelart/stone_pigment.gdshaderinc"
 render_mode cull_disabled;
 uniform sampler2D atlas : source_color, filter_nearest_mipmap;
 uniform vec2 quadrant=vec2(0,0.5);
@@ -91,6 +92,10 @@ void fragment(){ architecture_reveal(FRAGCOORD.xy);
   if((plain_vertical_stone && !horizontal) || (plain_horizontal_stone && horizontal)) {
    ALBEDO=vec3(0.16,0.155,0.14)*(0.97+0.04*stone_hash(floor(stone_uv*48.0)));
    NORMAL=surface_normal; AO=0.62; ROUGHNESS=0.96; SPECULAR=0.06;
+  }
+  if(anime_painted) {
+   ALBEDO=painted_stone(ALBEDO,p,norm);
+   ROUGHNESS=1.0; SPECULAR=0.0;
   }
  }
 }

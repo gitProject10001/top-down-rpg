@@ -6,6 +6,7 @@ uniform vec2 flow_path[16];
 uniform int path_count = 0;
 uniform float flow_speed = .55;
 uniform bool river_mode = false;
+uniform bool anime_painted = false;
 uniform vec4 obstacles[12];
 uniform int obstacle_count = 0;
 uniform float rock_flow_influence = 1.0;
@@ -129,7 +130,8 @@ void fragment() {
     float phase=fract(clock*.12);
     vec2 q=p-flow*phase*2.0;
     vec2 q2=p-flow*fract(phase+.5)*2.0;
-    float caustic=mix(cells(q*1.9),cells(q2*1.9),abs(phase*2.0-1.0));
+    float caustic_scale = anime_painted ? 0.85 : 1.9;
+    float caustic=mix(cells(q*caustic_scale),cells(q2*caustic_scale),abs(phase*2.0-1.0));
     float ring=0.0;
     for(int i=0;i<8;i++) {
         float age=clock-rings[i].z;
@@ -197,6 +199,20 @@ void fragment() {
     }
     ALBEDO=color+vec3(.035,.09,.07)*caustic*.35+vec3(.2,.35,.3)*(ring*.45+foam*1.4+wake+rock_foam+sim_foam);
     ALBEDO=ALBEDO*(1.0-sim_trough*.32)+vec3(.07,.12,.105)*sim_crest;
+    if (anime_painted) {
+        // Broad turquoise washes; keep the existing simulation and obstacle foam.
+        vec3 shallows = vec3(.012, .23, .29);
+        vec3 depths = vec3(.006, .10, .19);
+        float brush = noise2(q * 1.1) * .5 + noise2(q * 2.3) * .5;
+        ALBEDO = mix(shallows, depths, clamp(depth / .65, 0.0, 1.0));
+        ALBEDO *= .70 + brush * .45;
+        float painted_ripple = smoothstep(.44,.56,noise2(q*2.8+noise2(q*1.3)));
+        ALBEDO += vec3(.015,.06,.065) * painted_ripple;
+        ALBEDO += vec3(.12,.27,.24) * caustic * .09;
+        ALBEDO += vec3(.40,.57,.48) * (foam + rock_foam + ring * .45 + wake + sim_foam);
+        ALBEDO += vec3(.05,.12,.11) * sim_crest;
+        ALBEDO *= 1.0 - sim_trough * .2;
+    }
     if(debug_flow) {
         vec2 cell=(floor(p/1.5)+.5)*1.5;
         vec2 direction=current(cell);direction/=max(length(direction),.001);
@@ -212,8 +228,8 @@ void fragment() {
     local_slope.x-=(swell(p+vec2(.05,0),bank)-swell(p-vec2(.05,0),bank))/.1;
     local_slope.z-=(swell(p+vec2(0,.05),bank)-swell(p-vec2(0,.05),bank))/.1;
     NORMAL=normalize(NORMAL+mat3(VIEW_MATRIX)*mat3(MODEL_MATRIX)*local_slope);
-    ROUGHNESS=.23;
-    SPECULAR=.65;
-    ALPHA=mix(.45,.82,clamp(depth/.5,0.0,1.0));
+    ROUGHNESS=anime_painted ? .42 : .23;
+    SPECULAR=anime_painted ? .35 : .65;
+    ALPHA=anime_painted ? mix(.20,.98,smoothstep(0.0,.85,bank+(noise2(p*5.0)-.5)*.12)) : mix(.45,.82,clamp(depth/.5,0.0,1.0));
     EMISSION=vec3(.025,.05,.04)*caustic*.15+vec3(.15,.23,.2)*ring*.2+vec3(.06,.09,.08)*foam+vec3(.012,.025,.021)*sim_crest;
 }
