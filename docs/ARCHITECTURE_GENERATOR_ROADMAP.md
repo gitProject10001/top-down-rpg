@@ -270,7 +270,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A04 | TODO | Piani e interni coerenti con i volumi | A02, A03 | Casa R02: ingresso, scala esterna/interna, piano superiore percorribile |
 | A05 | TODO | Facciate e strutture per campate | A03, A04 | Graticcio e portico: travi e aperture seguono la struttura senza invadere i vani |
 | A06 | TODO | Due archetipi completi con profili architettonici | A04, A05 | Fucina e sala nordica: differenze leggibili nelle forme e negli interni |
-| A07 | IN CORSO | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
+| A07 | IN CORSO — resta confronto R10/R13 | Piante poligonali, torri e coperture curve | A03–A06 | Torre quadrata/circolare, terrazza con cupola; caso elfico separato |
 | A07.4 | FATTO | Torri segmentate a 8/12/16 facce | A07.1 | Vani obliqui, collisioni, parapetti e salvataggio coerenti; campionario editabile |
 | A07.5 | FATTO | Copertura conica della torre | A07.4 | Tetto indipendente e parametrico, gronda e raccordo al corpo, gestione accesso al tetto |
 | A07.6 | FATTO | Cupola e profilo curvo | A07.5 | Edificio terrazzato con cupola; controlli leggibili e copertura separata |
@@ -680,11 +680,11 @@ scale interne, coperture coniche e raccordi alle mura ancora da implementare.
 Passo successivo realizzato in A07.2: piani interni coerenti con la pianta e collegamento verticale.
 
 
-- [ ] Piante poligonali semplici; supporto delle curve con pochi controlli leggibili.
-- [ ] Torri cilindriche/prismatiche, coperture coniche, cupole, parapetti.
-- [ ] Taglio di aperture su pareti non planari o facce segmentate.
-- [ ] Solai, scale e arredo rispettano la pianta reale, non il suo rettangolo limite.
-- [ ] Profili curvi delle coperture come capacità separata; confronto con R10 e R13.
+- [x] Piante poligonali semplici: sagome convesse deformabili, 8/12/16 facce e maniglie contestuali (limiti dichiarati).
+- [x] Torri prismatiche/arrotondate segmentate, coperture coniche, cupole e parapetti.
+- [x] Taglio di aperture su facce segmentate, con collisioni verificate.
+- [x] Solai e scale nella pianta reale; contenimento degli ingombri dichiarati di stanze, muri e arredo verificato.
+- [ ] Profili curvi separati disponibili; resta il confronto esplicito con R10 e R13 (non ancora verificato).
 
 **Uscita:** torre e edificio terrazzato R09 giocabili. Non richiedere subito tutte
 le curve elfiche per sbloccare il castello: torri quadrate/circolari bastano alla fase A08.
@@ -1318,3 +1318,14 @@ La sagoma rifiuta una faccia troppo corta per la larghezza richiesta da un'apert
 Test check_outline_attachments.gd: aggiornamento del solaio, cortina, scala esterna, collisione del vano e apertura preservata; rifiuto del restringimento incompatibile. Test reale editor check_outline_editor.gd, avviato con --outline-editor-test: proiezione camera sul piano del gizmo, modifica, Undo, Redo e annullamento. La prima esecuzione ha rivelato una chiamata is_selected non disponibile su EditorNode3DGizmo: sostituita con la selezione dell'EditorInterface anche nel gizmo della fascia libera delle rocce. I messaggi preesistenti di organize_furniture in editor sono separati da questa verifica.
 
 A07.8 concluso. A07 generale resta aperto per un audit finale dei criteri originari prima di passare a B01: non confondere le prove su una sagoma convessa con copertura esaustiva di tutte le combinazioni. Restano noti i limiti di planner rettangolare per le stanze, 8/12/16 vertici fissi e assenza di poligoni concavi; tali limiti sono espliciti, non implementazioni implicite.
+
+
+### Audit A07 — 2026-09-15
+
+Audit della checklist originale, senza aggiungere nuove sottofasi. Disponibili e verificati: sagome convesse con controllo dei vertici, torri segmentate, coni/cupole, aperture sulle facce, solai, scale, terrazza con padiglione e relativi percorsi giocabili. Le verifiche dei passi precedenti restano evidenza: non sono state rieseguite indiscriminatamente in questo audit.
+
+Trovata e corretta una lacuna nel contenimento: ora include gli arredi kind=3, anche figli delle stanze, nelle proposte e negli avvisi/gizmo. Test check_polygon_room_bounds esteso agli arredi fuori pianta e al ripristino; regressione inserimento stanze superata. Per asset esterni viene controllato il volume Dimensions dichiarato, non l'intera geometria importata: l'autore deve dichiarare un ingombro adeguato. Restano esclusi oggetti arbitrari fuori dall'InteriorPlan.
+
+La quinta voce richiede anche un confronto con R10/R13, non solo l'esistenza di una cupola: non lo dichiariamo fatto in assenza di quel confronto. A07 resta IN CORSO per questo unico criterio esplicito. Prossima azione: esaminare R10/R13 e registrare cosa rappresenta il builder e quali forme mancano; nessuna nuova card numerata introdotta. B01 rimane successivo alla chiusura concordata di A07.
+
+Limiti tecnici già noti: piante convesse e numero di vertici fisso; stanze generate rettangolari; coperture segmentate; nessuna promessa di supporto esaustivo di curve elfiche o piante concave. Questi limiti non sono equivalenti a test falliti sui casi consegnati.

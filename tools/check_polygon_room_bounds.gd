@@ -27,6 +27,16 @@ func run() -> void:
   assert(not room.containment_error().is_empty(),"Live scaled wall must be checked")
   room.scale=Vector3.ONE
   assert(room.containment_error().is_empty(),"Warning clears when corrected")
+  var furniture=preload("res://addons/house_builder/plan_element.gd").new(); furniture.kind=3; furniture.stable_id="prop_test"; furniture.name="ArredoTest"; furniture.dimensions=Vector3(1,1,1)
+  room.kind=0; room.rotation=Vector3.ZERO; room.dimensions=Vector3(2,2.6,2)
+  room.add_child(furniture)
+  assert(furniture.containment_error().is_empty())
+  furniture.position=Vector3(3.4,0,3.4)
+  assert("Arredo" in furniture.containment_error(),"Room-child furniture outside polygon must be diagnosed")
+  var records=plan.level_records(0)
+  assert(plan.checked_proposal(0,records)==records and plan.generation_failed)
+  furniture.position=Vector3.ZERO
+  assert(furniture.containment_error().is_empty())
   tower.free()
  print("POLYGON_ROOM_WALL_BOUNDS_ROTATION_PARENTS_PRESERVATION_OK")
  quit()

@@ -319,12 +319,12 @@ func _exit_tree() -> void:
 ## This validates rectangular authoring elements; it does not clip or rewrite them.
 func polygon_footprint_error(record: Dictionary,actual_frame: Variant=null) -> String:
 	var host := house()
-	if host==null or not host.has_method("footprint_vertices") or int(record.get("kind",-1)) not in [0,1]: return ""
+	if host==null or not host.has_method("footprint_vertices") or int(record.get("kind",-1)) not in [0,1,3]: return ""
 	var size: Vector3=record.dimensions
 	var frame: Transform3D=actual_frame if actual_frame!=null else Transform3D(Basis.from_euler(record.get("rotation",Vector3.ZERO)),record.get("position",Vector3.ZERO))
 	for x in [-size.x*0.5,size.x*0.5]:
 		for y in [0.0,size.y]:
 			for z in [-size.z*0.5,size.z*0.5]:
 				if not host.contains_footprint(frame*Vector3(x,y,z),0.2):
-					return "%s '%s' fuori dal perimetro poligonale (margine interno 20 cm). Sposta o riduci l'elemento; nessuna modifica automatica."%["Stanza" if record.kind==0 else "Muro",record.get("id","senza ID")]
+					return "%s '%s' fuori dal perimetro poligonale (margine interno 20 cm). Sposta o riduci l'elemento; nessuna modifica automatica."%[{0:"Stanza",1:"Muro",3:"Arredo"}[int(record.kind)],record.get("id","senza ID")]
 	return ""

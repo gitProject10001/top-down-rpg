@@ -47,7 +47,7 @@ func _process(_dt: float) -> void:
 		_pose=transform
 		if is_inside_tree(): update_gizmos()
 	if _pending: rebuild()
-	if Engine.is_editor_hint() and kind in [0,1,2]:
+	if Engine.is_editor_hint() and kind in [0,1,2,3]:
 		var p=plan()
 		var signature := str(transform,dimensions,p.floor_height if p else 0,p.house().dimensions() if p else Vector4.ZERO)
 		if signature!=_warning_signature:
