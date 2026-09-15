@@ -81,6 +81,18 @@ forma esatta di ogni roccia e non garantisce conservazione della portata.
 
 ## Verifiche e prossimi passi
 
+W01.4: in Play, 1 = calmo, 2 = brezza, 3 = mosso. Inspector: Wind Angle,
+Wave Height e Breaking Foam. Due onde analitiche deformano la superficie;
+la fase viene compressa vicino al bordo e l'ampiezza si annulla sulla linea
+di riva. La schiuma segue cresta e coda, con intensità maggiore sulle coste
+raggiunte dal vento; non è un bordo bianco sempre acceso.
+La mesh usa quattro suddivisioni uniformi per triangolo iniziale, evitando
+fessure tra bordi con tessellazione differente. Nessuna modifica al fondale
+fisico, nessuna simulazione di pressione o allagamento.
+La risacca è per ora rappresentata dentro la superficie: avanzamento sul terreno,
+terreno bagnato e spruzzi da impatto delle onde sulle rocce sono W01.4b.
+`--rough-water` insieme a `--capture-water` cattura il preset mosso.
+
 `tools/check_water_study.gd`: ingresso e uscita reali, collisione fondale,
 onde nel lago ma non sulla terra, comandi campo/vortice.
 `--capture-water` salva `captures/water_study.png` con il player nel lago.

@@ -43,6 +43,39 @@ var _drop_cursor := 0
 var _rng := RandomNumberGenerator.new()
 var river_mode := false
 var obstacles := PackedVector4Array()
+@export_range(-180,180,1) var wind_angle := 35.0:
+    set(value):
+        wind_angle=value
+        schedule_build()
+@export_range(0,.2,.005) var wave_height := .045:
+    set(value):
+        wave_height=value
+        schedule_build()
+@export_range(0,2,.05) var breaking_foam := .65:
+    set(value):
+        breaking_foam=value
+        schedule_build()
+
+func set_wave_preset(index: int) -> void:
+    var preset:=clampi(index,0,2)
+    wave_height=[0.0,.045,.11][preset]
+    breaking_foam=[0.0,.65,1.25][preset]
+
+func _subdivide_water(a: Vector2,b: Vector2,c: Vector2,vertices: PackedVector3Array,uv: PackedVector2Array,indices: PackedInt32Array,level: int=0) -> void:
+    # Equal subdivision depth on every original triangle prevents displaced T-junctions.
+    if level<4:
+        var ab:=(a+b)*.5
+        var bc:=(b+c)*.5
+        var ca:=(c+a)*.5
+        _subdivide_water(a,ab,ca,vertices,uv,indices,level+1)
+        _subdivide_water(ab,b,bc,vertices,uv,indices,level+1)
+        _subdivide_water(ca,bc,c,vertices,uv,indices,level+1)
+        _subdivide_water(ab,bc,ca,vertices,uv,indices,level+1)
+        return
+    for p in [a,b,c]:
+        indices.append(vertices.size())
+        vertices.append(Vector3(p.x,0,p.y))
+        uv.append(p)
 
 func _ready() -> void:
     for i in 8: _rings.append(Vector4(0,0,-100,0))
@@ -91,16 +124,17 @@ func rebuild() -> void:
         _surface.free()
     update_configuration_warnings()
     if not _get_configuration_warnings().is_empty(): return
-    var indices := Geometry2D.triangulate_polygon(boundary)
+    var triangles := Geometry2D.triangulate_polygon(boundary)
+    var indices:=PackedInt32Array()
     var arrays := []
     arrays.resize(Mesh.ARRAY_MAX)
     var vertices := PackedVector3Array()
     var normals := PackedVector3Array()
     var uv := PackedVector2Array()
-    for p in boundary:
-        vertices.append(Vector3(p.x,0,p.y))
-        normals.append(Vector3.UP)
-        uv.append(p)
+    for i in range(0,triangles.size(),3):
+        _subdivide_water(boundary[triangles[i]],boundary[triangles[i+1]],boundary[triangles[i+2]],vertices,uv,indices)
+    normals.resize(vertices.size())
+    normals.fill(Vector3.UP)
     arrays[Mesh.ARRAY_VERTEX] = vertices
     arrays[Mesh.ARRAY_NORMAL] = normals
     arrays[Mesh.ARRAY_TEX_UV] = uv
@@ -118,6 +152,9 @@ func rebuild() -> void:
     material.set_shader_parameter("flow_path",path)
     material.set_shader_parameter("path_count",flow_path.size())
     material.set_shader_parameter("flow_speed",flow_speed)
+    material.set_shader_parameter("wind_direction",Vector2.from_angle(deg_to_rad(wind_angle)))
+    material.set_shader_parameter("wave_height",wave_height)
+    material.set_shader_parameter("breaking_foam",breaking_foam)
     material.set_shader_parameter("river_mode",river_mode)
     var blockers := obstacles.duplicate()
     blockers.resize(12)
@@ -131,6 +168,7 @@ func rebuild() -> void:
     _surface.name = "WaterSurface"
     _surface.mesh = mesh
     _surface.material_override = material
+    _surface.extra_cull_margin=.25
     _surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
     add_child(_surface, false, Node.INTERNAL_MODE_BACK)
 

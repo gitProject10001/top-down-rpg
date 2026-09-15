@@ -316,6 +316,8 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | W01.2 | TODO | Authoring lago e rive | Pipeline mondo | Gizmo contestuali, Undo/Redo, diagnostica perimetro; preview fondale in editor e protezione terreno manuale |
 | W01.3 | TODO | Qualità visiva acqua | Pipeline mondo | Rive naturali, fondale, riflessi e caustiche meno ripetitive; riferimento alla camera gameplay |
 | W01.3a | FATTO | Caustiche senza griglia regolare | Pipeline mondo | Celle deformate e linee discontinue con intensità variabile; rendering gameplay verificato |
+| W01.4 | FATTO | Lago mosso: prima versione visiva | Pipeline mondo | Preset calmo/brezza/mosso, vento, superficie deformata e schiuma pulsante al passaggio delle creste verso riva |
+| W01.4b | TODO | Risacca e impatti sulla costa | Pipeline mondo | Fascia di terreno bagnata con avanzamento/ritiro, spruzzi delle onde sulle rocce e transizione visiva onde/fondale più accurata |
 | W04 | IN CORSO — W04.1 disponibile | Interazioni acqua locali | Pipeline mondo | Scie, spruzzi, ostacoli e oggetti galleggianti; simulazione limitata solo a comportamenti necessari |
 | W04.1 | FATTO | Scia del personaggio e spruzzi | Pipeline mondo | Scia orientata dalla velocità, schiuma, normali disturbate e 48 gocce riutilizzate; niente emissioni da fermo o sulla terra |
 | W02 | IN CORSO — W02.1 disponibile | Fiumi editabili | Pipeline mondo | Spline, larghezza/profondità, profilo discendente e confluenze; raccordo alle quote dei laghi; niente flussi in salita |

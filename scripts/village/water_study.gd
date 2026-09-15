@@ -7,6 +7,7 @@ var water: Node3D
 var player: CharacterBody3D
 var _last := Vector3.ZERO
 var _cooldown := 0.0
+var _wave_label: Label
 
 func _ready() -> void:
     water=get_node(water_path)
@@ -24,7 +25,13 @@ func _ready() -> void:
     label.text="ACQUA · W01.1\nWASD: entra nel lago · F: campo di flusso · V: vortice locale"
     if water.river_mode:label.text="FIUME · W02.1\nWASD: movimento · F: frecce della corrente · V: vortice locale"
     ui.add_child(label)
+    _wave_label=Label.new();_wave_label.position=Vector2(24,82)
+    _wave_label.text="1: calmo · 2: brezza · 3: mosso — Brezza"
+    ui.add_child(_wave_label)
     if "--capture-water" in OS.get_cmdline_user_args():
+        if "--rough-water" in OS.get_cmdline_user_args():
+            water.set_wave_preset(2)
+            _wave_label.text="1: calmo · 2: brezza · 3: mosso — Mosso"
         player.position=capture_position
         await get_tree().create_timer(1.5).timeout
         Input.action_press("move_up")
@@ -65,3 +72,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
     if event is InputEventKey and event.pressed and not event.echo:
         if event.keycode==KEY_F: water.debug_flow=not water.debug_flow
         if event.keycode==KEY_V: water.vortex_strength=0.0 if water.vortex_strength>0 else .8
+        if event.keycode in [KEY_1,KEY_2,KEY_3]:
+            var preset: int=event.keycode-KEY_1
+            water.set_wave_preset(preset)
+            _wave_label.text="1: calmo · 2: brezza · 3: mosso — "+["Calmo","Brezza","Mosso"][preset]

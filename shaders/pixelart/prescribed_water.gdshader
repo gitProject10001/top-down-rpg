@@ -16,6 +16,9 @@ uniform vec4 rings[8];
 uniform vec4 wakes[16];
 uniform vec2 wake_directions[16];
 uniform float clock = 0.0;
+uniform vec2 wind_direction = vec2(.8,.6);
+uniform float wave_height = .045;
+uniform float breaking_foam = .65;
 
 vec2 hash2(vec2 p) {
     return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
@@ -49,6 +52,27 @@ float shore(vec2 p) {
         d=min(d,length(p-a-ab*t));
     }
     return d;
+}
+vec2 toward_shore(vec2 p) {
+    float best=10000.0; vec2 result=vec2(0.0);
+    for(int i=0;i<edge_count;i++) {
+        vec2 a=boundary[i];vec2 ab=boundary[(i+1)%edge_count]-a;
+        vec2 offset=a+ab*clamp(dot(p-a,ab)/max(dot(ab,ab),.00001),0.0,1.0)-p;
+        float d=length(offset);
+        if(d<best){best=d;result=offset/max(d,.001);}
+    }
+    return result;
+}
+float wind_phase(vec2 p) {
+    return dot(p,wind_direction)*2.1-clock*2.5+sin(dot(p,vec2(-wind_direction.y,wind_direction.x))*.65)*.35;
+}
+float swell(vec2 p,float bank) {
+    vec2 secondary=vec2(wind_direction.x*.92-wind_direction.y*.38,wind_direction.x*.38+wind_direction.y*.92);
+    float compressed=wind_phase(p)+1.2*exp(-bank*.9);
+    return wave_height*(sin(compressed)*.7+sin(dot(p,secondary)*3.4-clock*3.3)*.3)*(1.0+.25*exp(-bank))*smoothstep(0.0,.75,bank);
+}
+void vertex() {
+    VERTEX.y+=swell(UV,shore(UV));
 }
 vec2 current(vec2 p) {
     float best=10000.0; vec2 flow=vec2(0.0);
@@ -121,7 +145,13 @@ void fragment() {
     wake=min(wake,1.0);
     float depth=basin_depth*smoothstep(0.0,1.5,bank);
     vec3 color=mix(vec3(.025,.16,.12),vec3(.004,.035,.045),clamp(depth/.5,0.0,1.0));
-    float foam=(1.0-smoothstep(.035,.20,bank))*(.35+.2*sin(p.x*12.0+p.y*9.0+clock));
+    float phase_wave=wind_phase(p)+1.2*exp(-bank*.9);
+    float incoming=max(0.0,dot(toward_shore(p),wind_direction));
+    float crest=smoothstep(.40,.93,sin(phase_wave));
+    float wash=smoothstep(.10,.80,sin(phase_wave-.55));
+    float shore_band=(1.0-smoothstep(.12,1.3,bank))*smoothstep(0.0,.07,bank);
+    float breakup=.25+.75*noise2(p*8.0-wind_direction*clock*.6);
+    float foam=(crest*.8+wash*.3)*shore_band*(.12+.88*incoming)*breaking_foam*breakup;
     float rock_foam=0.0;
     for(int i=0;i<obstacle_count;i++) {
         vec2 offset=p-obstacles[i].xy;
@@ -136,7 +166,7 @@ void fragment() {
         float broken=smoothstep(.25,.75,noise2(offset*6.0-downstream*clock*1.8));
         rock_foam+=(collar*.35+trail*.45)*broken;
     }
-    ALBEDO=color+vec3(.035,.09,.07)*caustic*.35+vec3(.2,.35,.3)*(ring*.45+foam*.5+wake+rock_foam);
+    ALBEDO=color+vec3(.035,.09,.07)*caustic*.35+vec3(.2,.35,.3)*(ring*.45+foam*1.4+wake+rock_foam);
     if(debug_flow) {
         vec2 cell=(floor(p/1.5)+.5)*1.5;
         vec2 direction=current(cell);direction/=max(length(direction),.001);
@@ -148,9 +178,11 @@ void fragment() {
         ALBEDO=mix(vec3(flow.x*.25+.3,.06,flow.y*.25+.3),vec3(.9),max(shaft,head));
     }
     vec3 local_slope=vec3(sin(q.x*5.0+q.y)*.06+disturbance.x,0.0,cos(q.y*5.0-q.x)*.06+disturbance.y);
+    local_slope.x-=(swell(p+vec2(.05,0),bank)-swell(p-vec2(.05,0),bank))/.1;
+    local_slope.z-=(swell(p+vec2(0,.05),bank)-swell(p-vec2(0,.05),bank))/.1;
     NORMAL=normalize(NORMAL+mat3(VIEW_MATRIX)*mat3(MODEL_MATRIX)*local_slope);
     ROUGHNESS=.23;
     SPECULAR=.65;
     ALPHA=mix(.45,.82,clamp(depth/.5,0.0,1.0));
-    EMISSION=vec3(.025,.05,.04)*caustic*.15+vec3(.15,.23,.2)*ring*.2;
+    EMISSION=vec3(.025,.05,.04)*caustic*.15+vec3(.15,.23,.2)*ring*.2+vec3(.06,.09,.08)*foam;
 }

@@ -44,6 +44,13 @@ func check() -> void:
         scene._unhandled_key_input(event)
         await process_frame
     assert(water.debug_flow and water.vortex_strength>.0)
+    for preset in 3:
+        var event:=InputEventKey.new();event.pressed=true;event.keycode=KEY_1+preset
+        scene._unhandled_key_input(event)
+        await process_frame
+        assert(is_equal_approx(water.wave_height,[0.0,.045,.11][preset]))
+        assert(water._surface.material_override.get_shader_parameter("wave_height")==water.wave_height)
+    assert(water._surface.mesh.get_faces().size()>300,"Surface supports wave displacement")
     await walk(player,camera,Vector3(-3,0,7))
     assert(player.is_on_floor() and player.position.z>6.5,"Exit lake across bank")
     print("WATER_PASS: lake entry/exit, collision, ripples, flow debug and vortex")
