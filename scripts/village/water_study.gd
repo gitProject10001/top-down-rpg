@@ -35,7 +35,7 @@ func _ready() -> void:
     _update_simulation_label()
     if "--simulate-water" in OS.get_cmdline_user_args():
         water.set_simulation(true)
-        capture_file="res://captures/water_simulated.png"
+        capture_file="res://captures/river_simulated.png" if water.river_mode else "res://captures/water_simulated.png"
     if "--compare-water" in OS.get_cmdline_user_args():
         water.set_wave_preset(0)
         _wave_label.text="1: calmo · 2: brezza · 3: mosso — Calmo (confronto interazioni)"
@@ -108,5 +108,5 @@ func _update_simulation_label() -> void:
     if water.simulation_enabled and water.wave_field:
         var field=water.wave_field
         var average: float=float(field.total_usec)/maxi(1,field.step_count)/1000.0
-        message="F7: confronto · O: impulso — B: simulazione locale 64×64 / 30 Hz\nCPU solver: %.2f ms/passo · picco %.1f mm"%[average,field.max_height()*1000]
+        message="F7: confronto · O: impulso — B: onde + corrente 64×64 / 30 Hz\nCPU solver: %.2f ms/passo · picco %.1f mm"%[average,field.max_height()*1000]
     _simulation_label.text=message

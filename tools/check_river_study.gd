@@ -17,9 +17,13 @@ func check() -> void:
         var radial:=Vector2.from_angle(i*TAU/20)
         var velocity: Vector2=river.flow_at(center+radial*obstacle.z*1.01)
         assert(velocity.is_finite() and velocity.length()<=river.flow_speed*2.51)
+    river.set_simulation(true)
+    var field_id: int=river.wave_field.get_instance_id()
+    assert(river.wave_field.flow_texture!=null)
     var rock=river.get_node("Rocks/Rock_1")
     rock.position.x+=1.5
     for i in 3:await process_frame
+    assert(river.wave_field.get_instance_id()!=field_id,"Rock edits rebake simulation mask and flow")
     assert(absf(river.obstacles[1].x-center.x-1.5)<.01,"Moving the authored rock updates flow")
     assert(not rock.find_children("*","StaticBody3D",true,false).is_empty(),"Rocks retain builder collisions")
     var old: PackedVector2Array=river.boundary.duplicate()

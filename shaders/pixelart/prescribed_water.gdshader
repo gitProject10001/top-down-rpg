@@ -8,6 +8,7 @@ uniform float flow_speed = .55;
 uniform bool river_mode = false;
 uniform vec4 obstacles[12];
 uniform int obstacle_count = 0;
+uniform float rock_flow_influence = 1.0;
 uniform float basin_depth = .4;
 uniform bool debug_flow = false;
 uniform vec2 vortex_center = vec2(-3,-2);
@@ -20,6 +21,7 @@ uniform vec2 wind_direction = vec2(.8,.6);
 uniform float wave_height = .045;
 uniform float breaking_foam = .65;
 uniform bool simulation_enabled = false;
+uniform sampler2D baked_flow : filter_linear, repeat_disable;
 uniform sampler2D wave_field : filter_linear, repeat_disable;
 uniform vec4 simulation_bounds = vec4(-10,-9,20,20);
 
@@ -110,13 +112,14 @@ vec2 current(vec2 p) {
         else {
             vec2 radial=offset/max(distance,.001);
             float ratio=pow(obstacles[i].z/max(distance,.001),2.0);
-            flow-=ratio*(2.0*radial*dot(flow,radial)-flow);
+            flow-=rock_flow_influence*ratio*(2.0*radial*dot(flow,radial)-flow);
         }
     }
     flow*=min(1.0,flow_speed*2.5/max(length(flow),.001));
     vec2 offset=p-vortex_center;
     flow+=vec2(-offset.y,offset.x)*vortex_strength*exp(-dot(offset,offset)*.5);
-    return flow;
+    vec2 uv=(p-simulation_bounds.xy)/simulation_bounds.zw;
+    return mix(flow,texture(baked_flow,clamp(uv,vec2(0),vec2(1))).rg,simulation_mix(p));
 }
 void fragment() {
     vec2 p=UV;

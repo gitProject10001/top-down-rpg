@@ -32,12 +32,13 @@ Aggiornare stati e criteri nelle tabelle, poi eseguire `python tools/update_gene
 | **[W01.3](WORLD_GENERATION_ROADMAP.md)** — Qualità visiva acqua<br>TODO |  | **[R02.2](WORLD_GENERATION_ROADMAP.md)** — Fascia libera<br>FATTO |
 | **[W01.4b](WORLD_GENERATION_ROADMAP.md)** — Risacca e impatti sulla costa<br>TODO |  | **[R02.3](WORLD_GENERATION_ROADMAP.md)** — Addensamenti e raccordi<br>FATTO |
 | **[W04.3](WORLD_GENERATION_ROADMAP.md)** — Onde locali: GPU e qualita visiva<br>TODO |  | **[R03.1](WORLD_GENERATION_ROADMAP.md)** — Terrazza piana<br>FATTO |
-| **[W02.2](WORLD_GENERATION_ROADMAP.md)** — Robustezza rive e raccordi<br>TODO |  | **[R03.2](WORLD_GENERATION_ROADMAP.md)** — Accesso alla terrazza<br>FATTO |
-| **[W03](WORLD_GENERATION_ROADMAP.md)** — Attraversamenti e rive<br>TODO |  | **[W01.1](WORLD_GENERATION_ROADMAP.md)** — Lago ed emissario di prova<br>FATTO |
-| **[C01](WORLD_GENERATION_ROADMAP.md)** — Ingressi di grotta<br>TODO |  | **[W01.3a](WORLD_GENERATION_ROADMAP.md)** — Caustiche senza griglia regolare<br>FATTO |
-| **[C02](WORLD_GENERATION_ROADMAP.md)** — Piano di grotta<br>TODO |  | **[W01.4](WORLD_GENERATION_ROADMAP.md)** — Lago mosso: prima versione visiva<br>FATTO |
-| **[G01.4](WORLD_GENERATION_ROADMAP.md)** — Catalogo architettonico<br>TODO |  | **[W04.1](WORLD_GENERATION_ROADMAP.md)** — Scia del personaggio e spruzzi<br>FATTO |
-| **[G01.5](WORLD_GENERATION_ROADMAP.md)** — Varietà compositiva del castello<br>RIMANDATO |  | **[W04.2](WORLD_GENERATION_ROADMAP.md)** — Prototipo A/B onde locali<br>FATTO |
+| **[W04.5](WORLD_GENERATION_ROADMAP.md)** — Controllo artistico e continuita del flow<br>TODO |  | **[R03.2](WORLD_GENERATION_ROADMAP.md)** — Accesso alla terrazza<br>FATTO |
+| **[W02.2](WORLD_GENERATION_ROADMAP.md)** — Robustezza rive e raccordi<br>TODO |  | **[W01.1](WORLD_GENERATION_ROADMAP.md)** — Lago ed emissario di prova<br>FATTO |
+| **[W03](WORLD_GENERATION_ROADMAP.md)** — Attraversamenti e rive<br>TODO |  | **[W01.3a](WORLD_GENERATION_ROADMAP.md)** — Caustiche senza griglia regolare<br>FATTO |
+| **[C01](WORLD_GENERATION_ROADMAP.md)** — Ingressi di grotta<br>TODO |  | **[W01.4](WORLD_GENERATION_ROADMAP.md)** — Lago mosso: prima versione visiva<br>FATTO |
+| **[C02](WORLD_GENERATION_ROADMAP.md)** — Piano di grotta<br>TODO |  | **[W04.1](WORLD_GENERATION_ROADMAP.md)** — Scia del personaggio e spruzzi<br>FATTO |
+| **[G01.4](WORLD_GENERATION_ROADMAP.md)** — Catalogo architettonico<br>TODO |  | **[W04.2](WORLD_GENERATION_ROADMAP.md)** — Prototipo A/B onde locali<br>FATTO |
+| **[G01.5](WORLD_GENERATION_ROADMAP.md)** — Varietà compositiva del castello<br>RIMANDATO |  | **[W04.4](WORLD_GENERATION_ROADMAP.md)** — Trasporto onde nel campo artistico<br>FATTO |
 | **[S01](WORLD_GENERATION_ROADMAP.md)** — Composizione urbana organica<br>RIMANDATO |  | **[W02.1](WORLD_GENERATION_ROADMAP.md)** — Fiume curvo con rocce<br>FATTO |
 | **[S02](WORLD_GENERATION_ROADMAP.md)** — Edifici urbani più articolati<br>TODO |  |  |
 | **[V01](WORLD_GENERATION_ROADMAP.md)** — Confronto dei quattro castelli<br>RIMANDATO |  |  |

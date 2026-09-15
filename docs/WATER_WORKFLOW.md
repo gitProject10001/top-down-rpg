@@ -165,3 +165,35 @@ nessun contributo: F7 attiva il solver, camminare in acqua oppure O lo eccitano.
 Verificato con capture reale durante movimento, preset brezza, senza impulso
 aggiuntivo O; compilazione shader e cattura senza errori. La risoluzione locale
 resta 64x64: affinare forma e riflessi rimane W04.3.
+
+
+## W04.4 — Onde trasportate dalla corrente artistica
+
+Nel lago e in `river_study.tscn`, F7 ora attiva onde + trasporto della corrente.
+F mostra il campo condiviso da solver e shader; V aggiunge il vortice locale.
+`Flow Speed` regola la velocita di riferimento lungo la guida; `Rock Flow
+Influence` dosa da 0 a 1 la deviazione attorno alle rocce. La deviazione decade
+con la distanza. Non c'e' rumore temporale che accumula accelerazione.
+La velocita media su tutta la superficie e la portata NON sono vincolate:
+si preserva il riferimento artistico, non la conservazione fisica della massa.
+
+Il campo viene precalcolato in una texture RG float e in pesi di trasporto per
+il passo fisso. Il solver trasporta altezza e velocita verticale con backtrace
+semi-Lagrangiano bilineare. Anche caustiche superficiali, scie e debug campionano
+la texture nella zona simulata. Le celle asciutte bloccano i campioni; lo
+spostamento per passo e' limitato a mezza cella. Il fiume usa un quadrato che
+copre il suo perimetro; la risoluzione rimane 64x64, quindi fiumi molto lunghi
+perdono dettaglio. Cambiare rocce, guida, velocita o vortice ricrea campo e
+maschera e azzera le onde correnti. Questo sostituisce il precedente rebake
+manuale tramite F7. Il bake e' in memoria, non un asset salvato su disco.
+
+Test `check_flow_waves.gd`: impulso dopo 25 passi, baricentro dell'energia
+-0,763 / 0 / +0,763 metri per corrente -1 / 0 / +1 m/s; impulsi ripetuti finiti
+e limitati. `check_river_study.gd` verifica anche rebake dopo spostamento roccia.
+Costo solver CPU comprensivo del trasporto circa 1,6-2 ms/passo in questi test,
+escluso upload/rendering. L'interpolazione introduce dissipazione numerica:
+non e' shallow water e non genera pressione, risalti o turbolenza fisica.
+Prossimi affinamenti: backend GPU, perturbazioni artistiche con media controllata,
+maschere piu' accurate e continuita tra zone. Nessuna conservazione di portata
+implicita. Capture fluviale: `--capture-water --simulate-water` salva
+`captures/river_simulated.png`.

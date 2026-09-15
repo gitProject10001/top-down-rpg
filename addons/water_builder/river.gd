@@ -63,26 +63,3 @@ func _process(delta: float) -> void:
     _read_rocks()
     if old!=obstacles:schedule_build()
     super._process(delta)
-
-func flow_at(point: Vector2) -> Vector2:
-    var best:=INF
-    var result:=Vector2.ZERO
-    for i in range(flow_path.size()-1):
-        var a:=flow_path[i]
-        var b:=flow_path[i+1]
-        var delta:=b-a
-        var t:=clampf((point-a).dot(delta)/maxf(delta.length_squared(),.00001),0,1)
-        var distance:=point.distance_to(a+delta*t)
-        if distance<best:
-            best=distance
-            var incoming: Vector2=(b-flow_path[maxi(0,i-1)]).normalized()
-            var outgoing: Vector2=(flow_path[mini(flow_path.size()-1,i+2)]-a).normalized()
-            result=incoming.lerp(outgoing,t).normalized()*flow_speed
-    for obstacle in obstacles:
-        var offset:=point-Vector2(obstacle.x,obstacle.y)
-        var distance:=offset.length()
-        if distance<obstacle.z:return Vector2.ZERO
-        var radial:=offset/maxf(distance,.001)
-        var ratio:=pow(obstacle.z/maxf(distance,.001),2)
-        result-=ratio*(2*radial*result.dot(radial)-result)
-    return result.limit_length(flow_speed*2.5)

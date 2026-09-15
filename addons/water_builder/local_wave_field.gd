@@ -17,6 +17,45 @@ var total_usec := 0
 var max_usec := 0
 var dropped_time := 0.0
 var _accumulator := 0.0
+var flow_texture: ImageTexture
+var _sources:=PackedInt32Array()
+var _weights:=PackedFloat32Array()
+var _advected_height:=PackedFloat32Array()
+var _advected_velocity:=PackedFloat32Array()
+
+func bake_flow(sample: Callable) -> void:
+    # Fixed-step semi-Lagrangian backtrace, baked once per guide/rock edit.
+    _sources.resize(SIZE*SIZE*4);_weights.resize(SIZE*SIZE*4)
+    _advected_height.resize(SIZE*SIZE);_advected_velocity.resize(SIZE*SIZE)
+    var pixels:=PackedFloat32Array();pixels.resize(SIZE*SIZE*2)
+    for y in SIZE:
+        for x in SIZE:
+            var i:=y*SIZE+x
+            var p:=bounds.position+(Vector2(x,y)+Vector2(.5,.5))*bounds.size/SIZE
+            var flow: Vector2=sample.call(p) if wet[i] else Vector2.ZERO
+            # Never backtrace more than half a cell: avoids skipping thin obstacles.
+            flow=flow.limit_length(bounds.size.x/SIZE/DT*.5)
+            pixels[i*2]=flow.x;pixels[i*2+1]=flow.y
+            var source:=Vector2(x,y)-flow*DT*SIZE/bounds.size
+            source=source.clamp(Vector2.ZERO,Vector2.ONE*(SIZE-1))
+            var a:=Vector2i(source.floor());var f:=source-Vector2(a)
+            var indices: Array[int]=[a.y*SIZE+a.x,a.y*SIZE+mini(a.x+1,SIZE-1),mini(a.y+1,SIZE-1)*SIZE+a.x,mini(a.y+1,SIZE-1)*SIZE+mini(a.x+1,SIZE-1)]
+            var weights: Array[float]=[(1-f.x)*(1-f.y),f.x*(1-f.y),(1-f.x)*f.y,f.x*f.y]
+            for j in 4:
+                _sources[i*4+j]=indices[j] if wet[indices[j]] else i
+                _weights[i*4+j]=weights[j]
+    flow_texture=ImageTexture.create_from_image(Image.create_from_data(SIZE,SIZE,false,Image.FORMAT_RGF,pixels.to_byte_array()))
+
+func _advect() -> void:
+    if _sources.is_empty():return
+    for i in height.size():
+        var h:=0.0;var v:=0.0
+        for j in 4:
+            var source:=_sources[i*4+j];var weight:=_weights[i*4+j]
+            h+=height[source]*weight;v+=velocity[source]*weight
+        _advected_height[i]=h;_advected_velocity[i]=v
+    height=_advected_height.duplicate();velocity=_advected_velocity.duplicate()
+
 
 func configure(polygon: PackedVector2Array, obstacles: PackedVector4Array) -> void:
     var count:=SIZE*SIZE
@@ -71,6 +110,7 @@ func step() -> void:
     for i in height.size():
         velocity[i]=next_velocity[i]
         height[i]+=velocity[i]
+    _advect()
     var usec:=Time.get_ticks_usec()-start
     total_usec+=usec;max_usec=maxi(max_usec,usec);step_count+=1
 

@@ -43,20 +43,34 @@ var _drop_cursor := 0
 var _rng := RandomNumberGenerator.new()
 var river_mode := false
 var obstacles := PackedVector4Array()
+@export_range(0,1,.05) var rock_flow_influence:=1.0:
+    set(value):
+        rock_flow_influence=value
+        schedule_build()
 var simulation_enabled := false
 var wave_field: RefCounted
+var _simulation_signature:=0
 
 func set_simulation(enabled: bool) -> void:
     simulation_enabled=enabled
+    _simulation_signature=hash([boundary,obstacles,flow_path,flow_speed,vortex_center,vortex_strength,rock_flow_influence])
     if enabled:
         wave_field=preload("res://addons/water_builder/local_wave_field.gd").new()
+        if river_mode:
+            var rect:=Rect2(boundary[0],Vector2.ZERO)
+            for point in boundary:rect=rect.expand(point)
+            var side:=maxf(rect.size.x,rect.size.y)+2.0
+            wave_field.bounds=Rect2(rect.get_center()-Vector2.ONE*side*.5,Vector2.ONE*side)
         wave_field.configure(boundary,obstacles)
+        wave_field.bake_flow(flow_at)
     _bind_simulation()
 
 func _bind_simulation() -> void:
     if not is_instance_valid(_surface):return
+    _surface.material_override.set_shader_parameter("rock_flow_influence",rock_flow_influence)
     _surface.material_override.set_shader_parameter("simulation_enabled",simulation_enabled)
     if wave_field:
+        _surface.material_override.set_shader_parameter("baked_flow",wave_field.flow_texture)
         _surface.material_override.set_shader_parameter("wave_field",wave_field.texture)
         var rect: Rect2=wave_field.bounds
         _surface.material_override.set_shader_parameter("simulation_bounds",Vector4(rect.position.x,rect.position.y,rect.size.x,rect.size.y))
@@ -237,6 +251,11 @@ func disturb(world_point: Vector3, world_velocity: Vector3) -> void:
 
 func _process(delta: float) -> void:
     _clock += delta
+    if simulation_enabled and wave_field:
+        var signature=hash([boundary,obstacles,flow_path,flow_speed,vortex_center,vortex_strength,rock_flow_influence])
+        if signature!=_simulation_signature:
+            set_simulation(true)
+            _simulation_signature=signature
     if simulation_enabled and wave_field:wave_field.advance(delta)
     if is_instance_valid(_surface):
         _surface.material_override.set_shader_parameter("clock",_clock)
@@ -252,3 +271,29 @@ func _process(delta: float) -> void:
             drop.position += drop.velocity*delta
             var size := maxf(0.0,1.0-drop.age/.6) if drop.position.y>0 else 0.0
             _spray.multimesh.set_instance_transform(i,Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*size),drop.position))
+
+func flow_at(point: Vector2) -> Vector2:
+    var best:=INF
+    var result:=Vector2.ZERO
+    for i in range(flow_path.size()-1):
+        var a:=flow_path[i]
+        var b:=flow_path[i+1]
+        var delta:=b-a
+        var t:=clampf((point-a).dot(delta)/maxf(delta.length_squared(),.00001),0,1)
+        var distance:=point.distance_to(a+delta*t)
+        if distance<best:
+            best=distance
+            var incoming: Vector2=(b-flow_path[maxi(0,i-1)]).normalized()
+            var outgoing: Vector2=(flow_path[mini(flow_path.size()-1,i+2)]-a).normalized()
+            result=incoming.lerp(outgoing,t).normalized()*flow_speed
+    if not river_mode:result*=smoothstep(-1.0,6.0,point.x)
+    for obstacle in obstacles:
+        var offset:=point-Vector2(obstacle.x,obstacle.y)
+        var distance:=offset.length()
+        if distance<obstacle.z:return Vector2.ZERO
+        var radial:=offset/maxf(distance,.001)
+        var ratio:=pow(obstacle.z/maxf(distance,.001),2)
+        result-=rock_flow_influence*ratio*(2*radial*result.dot(radial)-result)
+    result=result.limit_length(flow_speed*2.5)
+    var offset:=point-vortex_center
+    return result+Vector2(-offset.y,offset.x)*vortex_strength*exp(-offset.length_squared()*.5)
