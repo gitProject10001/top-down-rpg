@@ -41,6 +41,8 @@ var _spray: MultiMeshInstance3D
 var _drops: Array[Dictionary] = []
 var _drop_cursor := 0
 var _rng := RandomNumberGenerator.new()
+var river_mode := false
+var obstacles := PackedVector4Array()
 
 func _ready() -> void:
     for i in 8: _rings.append(Vector4(0,0,-100,0))
@@ -116,6 +118,11 @@ func rebuild() -> void:
     material.set_shader_parameter("flow_path",path)
     material.set_shader_parameter("path_count",flow_path.size())
     material.set_shader_parameter("flow_speed",flow_speed)
+    material.set_shader_parameter("river_mode",river_mode)
+    var blockers := obstacles.duplicate()
+    blockers.resize(12)
+    material.set_shader_parameter("obstacles",blockers)
+    material.set_shader_parameter("obstacle_count",mini(obstacles.size(),12))
     material.set_shader_parameter("basin_depth",basin_depth)
     material.set_shader_parameter("debug_flow",debug_flow)
     material.set_shader_parameter("vortex_center",vortex_center)

@@ -48,6 +48,37 @@ del personaggio, traiettoria balistica e durata massima di 0,6 secondi.
 Da fermo e sulla terra non vengono emesse scie. Non ci sono ancora riflessioni
 contro ostacoli, spostamento di massa o collegamento alle animazioni dei singoli piedi.
 
+## W02.1 — Fiume e rocce
+
+Aprire `scenes/dev/river_study.tscn`, F6. Stessa camera e interazione del lago.
+F mostra frecce e componenti del campo; V abilita il vortice opzionale.
+La scena è prodotta da `tools/build_river_study.gd` usando il nodo
+`addons/water_builder/river.gd` e quattro rocce di `rock_builder`.
+
+In editor selezionare `River/FlowGuide` e modificare la Curve3D con i controlli
+nativi di Path3D. `River.widths` contiene larghezze interpolate lungo il percorso.
+Il prototipo campiona 16 sezioni e ricava 32 vertici di sponda. La superficie
+rimane alla quota del nodo River; mantenere il percorso sul piano XZ e il nodo
+FlowGuide senza trasformazioni aggiuntive. La quota Y della curva non genera
+cascate o pendenze. Il fondale si ricostruisce all'avvio della prova.
+
+Le rocce sotto `River/Rocks` restano nodi editabili del builder con collisioni.
+Posizione e dimensioni aggiornano il campo: ogni ostacolo è approssimato da un
+cerchio; la corrente viene deviata analiticamente e limitata in velocità.
+Schiuma locale al contatto e scia discontinua a valle indicano l'ostacolo.
+Massimo 12 rocce influenti nel prototipo; nessun solver, erosione, accumulo
+o simulazione di pressione. Le collisioni usano invece la geometria del rock builder.
+
+`flow_at()` espone un campionamento CPU del flusso base e delle deviazioni,
+utile per test e futura interazione con oggetti; non include ancora il vortice
+visivo opzionale. `tools/check_river_study.gd` verifica geometria del percorso,
+larghezze, velocità limitata, aggiornamento dopo spostamento roccia e collisioni.
+`--capture-water` sulla scena fluviale salva `captures/river_study.png`.
+
+Restano da risolvere curve troppo strette e autointersezioni delle rive, vincoli
+precisi sulle sponde e confluenze. La deviazione circolare non ricostruisce la
+forma esatta di ogni roccia e non garantisce conservazione della portata.
+
 ## Verifiche e prossimi passi
 
 `tools/check_water_study.gd`: ingresso e uscita reali, collisione fondale,

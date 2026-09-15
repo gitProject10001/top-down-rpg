@@ -5,6 +5,9 @@ uniform int edge_count = 0;
 uniform vec2 flow_path[16];
 uniform int path_count = 0;
 uniform float flow_speed = .55;
+uniform bool river_mode = false;
+uniform vec4 obstacles[12];
+uniform int obstacle_count = 0;
 uniform float basin_depth = .4;
 uniform bool debug_flow = false;
 uniform vec2 vortex_center = vec2(-3,-2);
@@ -16,6 +19,10 @@ uniform float clock = 0.0;
 
 vec2 hash2(vec2 p) {
     return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
+}
+float noise2(vec2 p) {
+    vec2 cell=floor(p);vec2 f=fract(p);f=f*f*(3.0-2.0*f);
+    return mix(mix(hash2(cell).x,hash2(cell+vec2(1,0)).x,f.x),mix(hash2(cell+vec2(0,1)).x,hash2(cell+vec2(1,1)).x,f.x),f.y);
 }
 float cells(vec2 p) {
     p+=vec2(sin(p.y*2.5+sin(p.x*1.6)+clock*.3),cos(p.x*2.3+sin(p.y*1.9)-clock*.22))*.35;
@@ -49,9 +56,25 @@ vec2 current(vec2 p) {
         vec2 a=flow_path[i]; vec2 ab=flow_path[i+1]-a;
         float t=clamp(dot(p-a,ab)/max(dot(ab,ab),.00001),0.0,1.0);
         float d=length(p-a-ab*t);
-        if(d<best) { best=d; flow=ab/max(length(ab),.001); }
+        if(d<best) {
+            best=d;
+            vec2 before=flow_path[i+1]-flow_path[max(0,i-1)];
+            vec2 after=flow_path[min(path_count-1,i+2)]-a;
+            flow=normalize(mix(normalize(before),normalize(after),t));
+        }
     }
-    flow*=flow_speed*smoothstep(-1.0,6.0,p.x);
+    flow*=flow_speed*(river_mode?1.0:smoothstep(-1.0,6.0,p.x));
+    for(int i=0;i<obstacle_count;i++) {
+        vec2 offset=p-obstacles[i].xy;
+        float distance=length(offset);
+        if(distance<obstacles[i].z) { flow=vec2(0.0); }
+        else {
+            vec2 radial=offset/max(distance,.001);
+            float ratio=pow(obstacles[i].z/max(distance,.001),2.0);
+            flow-=ratio*(2.0*radial*dot(flow,radial)-flow);
+        }
+    }
+    flow*=min(1.0,flow_speed*2.5/max(length(flow),.001));
     vec2 offset=p-vortex_center;
     flow+=vec2(-offset.y,offset.x)*vortex_strength*exp(-dot(offset,offset)*.5);
     return flow;
@@ -99,8 +122,31 @@ void fragment() {
     float depth=basin_depth*smoothstep(0.0,1.5,bank);
     vec3 color=mix(vec3(.025,.16,.12),vec3(.004,.035,.045),clamp(depth/.5,0.0,1.0));
     float foam=(1.0-smoothstep(.035,.20,bank))*(.35+.2*sin(p.x*12.0+p.y*9.0+clock));
-    ALBEDO=color+vec3(.035,.09,.07)*caustic*.35+vec3(.2,.35,.3)*(ring*.45+foam*.5+wake);
-    if(debug_flow) ALBEDO=vec3(flow.x*.35+.5,.15,flow.y*.35+.5);
+    float rock_foam=0.0;
+    for(int i=0;i<obstacle_count;i++) {
+        vec2 offset=p-obstacles[i].xy;
+        float radius=obstacles[i].z;
+        vec2 downstream=current(obstacles[i].xy+vec2(radius*2.0,radius*2.0));
+        downstream/=max(length(downstream),.001);
+        float along=dot(offset,downstream);
+        float across=abs(dot(offset,vec2(-downstream.y,downstream.x)));
+        float collar=exp(-pow((length(offset)-radius)/.16,2.0));
+        float trail=smoothstep(radius*.5,radius,along)*(1.0-smoothstep(radius+1.0,radius+3.5,along));
+        trail*=exp(-pow(across/(radius*.55+.1),2.0));
+        float broken=smoothstep(.25,.75,noise2(offset*6.0-downstream*clock*1.8));
+        rock_foam+=(collar*.35+trail*.45)*broken;
+    }
+    ALBEDO=color+vec3(.035,.09,.07)*caustic*.35+vec3(.2,.35,.3)*(ring*.45+foam*.5+wake+rock_foam);
+    if(debug_flow) {
+        vec2 cell=(floor(p/1.5)+.5)*1.5;
+        vec2 direction=current(cell);direction/=max(length(direction),.001);
+        vec2 offset=p-cell;
+        float along=dot(offset,direction);
+        float across=dot(offset,vec2(-direction.y,direction.x));
+        float shaft=(1.0-smoothstep(.025,.05,abs(across)))*(1.0-step(.42,abs(along)));
+        float head=(1.0-smoothstep(.03,.06,abs(abs(across)-(.42-along)*.7)))*step(.12,along)*step(along,.42);
+        ALBEDO=mix(vec3(flow.x*.25+.3,.06,flow.y*.25+.3),vec3(.9),max(shaft,head));
+    }
     vec3 local_slope=vec3(sin(q.x*5.0+q.y)*.06+disturbance.x,0.0,cos(q.y*5.0-q.x)*.06+disturbance.y);
     NORMAL=normalize(NORMAL+mat3(VIEW_MATRIX)*mat3(MODEL_MATRIX)*local_slope);
     ROUGHNESS=.23;

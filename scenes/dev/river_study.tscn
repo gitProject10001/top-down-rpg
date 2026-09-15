@@ -1,0 +1,55 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/village/water_study.gd" id="1_e0p1i"]
+[ext_resource type="Script" path="res://addons/water_builder/river.gd" id="2_aldbh"]
+[ext_resource type="Script" path="res://addons/rock_builder/rock.gd" id="3_740px"]
+
+[sub_resource type="Curve3D" id="Curve3D_810jr"]
+_data = {
+"points": PackedVector3Array(-0.90000004, 0, -1.0500001, 0.90000004, 0, 1.0500001, -13, 0, -13, -2.1000001, 0, -1.5, 2.1000001, 0, 1.5, -7, 0, -6, -1.6500001, 0, -1.5, 1.6500001, 0, 1.5, 1, 0, -3, -1.8000001, 0, -2.1000001, 1.8000001, 0, 2.1000001, 4, 0, 4, -1.35, 0, -1.0500001, 1.35, 0, 1.0500001, 13, 0, 11),
+"tilts": PackedFloat32Array(0, 0, 0, 0, 0)
+}
+point_count = 5
+
+[node name="RiverStudy" type="Node3D" unique_id=472032941]
+script = ExtResource("1_e0p1i")
+water_path = NodePath("River")
+spawn_position = Vector3(-3, 1, 3)
+capture_position = Vector3(2, 0.7, 1)
+capture_file = "res://captures/river_study.png"
+
+[node name="River" type="Node3D" parent="." unique_id=1462234395]
+script = ExtResource("2_aldbh")
+widths = PackedFloat32Array(5, 7, 5, 6, 8)
+boundary = PackedVector2Array(-8, -4, -5, -7, 0, -7, 4, -4, 5, -1, 12, 1, 16, 0, 17, 3, 12, 4, 5, 2, 2, 5, -4, 5, -8, 2)
+flow_path = PackedVector2Array(0, 0, 5, 0.5, 12, 2.5, 16.5, 1.5)
+flow_speed = 0.9
+
+[node name="FlowGuide" type="Path3D" parent="River" unique_id=75389497]
+curve = SubResource("Curve3D_810jr")
+
+[node name="Rocks" type="Node3D" parent="River" unique_id=593959095]
+
+[node name="Rock_0" type="Node3D" parent="River/Rocks" unique_id=1878319623]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, -0.38, -5.6)
+script = ExtResource("3_740px")
+rock_seed = 31
+dimensions = Vector3(1.8, 1.3, 1.7)
+
+[node name="Rock_1" type="Node3D" parent="River/Rocks" unique_id=217896587]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.2, -0.38, -3)
+script = ExtResource("3_740px")
+rock_seed = 38
+dimensions = Vector3(1.9, 1.5, 1.7)
+
+[node name="Rock_2" type="Node3D" parent="River/Rocks" unique_id=813538171]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.8, -0.38, 2.9)
+script = ExtResource("3_740px")
+rock_seed = 45
+dimensions = Vector3(2, 1.7, 1.7)
+
+[node name="Rock_3" type="Node3D" parent="River/Rocks" unique_id=28036742]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 5.7, -0.38, 6)
+script = ExtResource("3_740px")
+rock_seed = 52
+dimensions = Vector3(2.1, 1.9, 1.7)

@@ -65,7 +65,9 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 | W01.3a | FATTO | Caustiche senza griglia regolare | Celle deformate e linee discontinue con intensità variabile; rendering gameplay verificato |
 | W04 | IN CORSO — W04.1 disponibile | Interazioni acqua locali | Scie, spruzzi, ostacoli e oggetti galleggianti; simulazione limitata solo a comportamenti necessari |
 | W04.1 | FATTO | Scia del personaggio e spruzzi | Scia orientata dalla velocità, schiuma, normali disturbate e 48 gocce riutilizzate; niente emissioni da fermo o sulla terra |
-| W02 | TODO | Fiumi editabili | Spline, larghezza/profondità, profilo discendente e confluenze; raccordo alle quote dei laghi; niente flussi in salita |
+| W02 | IN CORSO — W02.1 disponibile | Fiumi editabili | Spline, larghezza/profondità, profilo discendente e confluenze; raccordo alle quote dei laghi; niente flussi in salita |
+| W02.1 | FATTO | Fiume curvo con rocce | Path3D e larghezze, corrente indipendente dall'asse X, rocce del builder che deviano il campo e producono schiuma; scena gameplay e frecce debug |
+| W02.2 | TODO | Robustezza rive e raccordi | Diagnostica curve strette/incroci, vincolo di non attraversare le sponde, quote discrete e confluenze; fondale aggiornato in editor |
 | W03 | TODO | Attraversamenti e rive | Ponti, guadi, approdi, passaggi e accessi alle sponde; terreno/rocce/strade leggono gli stessi vincoli |
 | C01 | TODO | Ingressi di grotta | Apertura reale nel blocco roccioso, soglia percorribile, collisione coerente e leggibilità alla camera fissa |
 | C02 | TODO | Piano di grotta | Stanze/cunicoli con anelli e diramazioni, quote e collegamenti; editing manuale separato dall'involucro esterno |
