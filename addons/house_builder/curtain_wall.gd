@@ -141,6 +141,8 @@ func _process(delta: float) -> void:
 	var host := fortification_host()
 	var target := destination()
 	var signature := str(host.global_transform if host and host.is_inside_tree() else Transform3D.IDENTITY,target_tower,target_face,target.global_transform if target and target.is_inside_tree() else Transform3D.IDENTITY,target.dimensions() if target else Vector4.ZERO,connection_error(),walkway_profile,allow_sloped_walkway,connect_to_tower,tower_face,width,depth,host.dimensions() if host else Vector4.ZERO)
+	if host: signature+=str(host.footprint_vertices())
+	if target: signature+=str(target.footprint_vertices())
 	if signature!=_connection_signature:
 		_connection_signature=signature; request_rebuild()
 		if host: host.request_rebuild()

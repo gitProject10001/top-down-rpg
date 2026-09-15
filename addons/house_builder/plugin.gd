@@ -147,6 +147,9 @@ func _enter_tree() -> void:
 	if "--castle-composer-editor-test" in OS.get_cmdline_user_args():
 		_test_runner=load("res://tools/check_castle_composer_editor.gd").new()
 		_test_runner.call_deferred("run",self)
+	if "--outline-editor-test" in OS.get_cmdline_user_args():
+		_test_runner=load("res://tools/check_outline_editor.gd").new()
+		_test_runner.call_deferred("run",self)
 	if "--house-editor-test" in OS.get_cmdline_user_args():
 		_test_runner=load("res://tools/check_house_editor.gd").new()
 		_test_runner.call_deferred("run",self)

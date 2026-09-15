@@ -64,6 +64,7 @@ func _ready() -> void:
 func _process(_dt: float) -> void:
 	if Engine.is_editor_hint(): observe_deletions()
 	var signature := str(house().dimensions(),house().wing_settings(),floor_height,levels().size())
+	if house().has_method("footprint_vertices"): signature+=str(house().footprint_vertices())
 	for e in elements():
 		if e.kind==2: signature+=str(e.transform,e.dimensions,e.roof_exit,e.guardrails_enabled)
 	if signature!=_signature:

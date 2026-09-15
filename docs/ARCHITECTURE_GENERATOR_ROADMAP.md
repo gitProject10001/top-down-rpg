@@ -279,9 +279,9 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A07.7 | FATTO | Consolidamento A07 e percorso giocabile | A07.4–A07.6 | Aperture, interni e raccordi coerenti con la pianta; verificare limiti delle stanze e accessi |
 | A07.7a | FATTO | Percorsi nelle torri 12/16 e diagnostica raccordi | A07.4–A07.6 | Giocatore terra→piani→tetto→terra; facce oltre 7 e coperture incompatibili diagnosticate |
 | A07.7b | FATTO | Stanze e contenimento nella pianta poligonale | A07.7a | Stanze/muri manuali verificati rispetto al perimetro reale; errori evidenti senza perdita di editing |
-| A07.8 | IN CORSO | Piante poligonali oltre i prismi regolari | A07.7 | Controlli di sagoma, validazione della pianta e conservazione degli agganci; prima poligoni convessi |
+| A07.8 | FATTO | Piante poligonali oltre i prismi regolari | A07.7 | Controlli di sagoma, validazione della pianta e conservazione degli agganci; prima poligoni convessi |
 | A07.8a | FATTO | Sagoma convessa deformabile | A07.7 | Vertici normalizzati, validazione, maniglie dedicate e esempio asimmetrico |
-| A07.8b | TODO | Verifica degli agganci durante la deformazione | A07.8a | Aperture, scale/cortine e interni validati dopo editing; prova Undo/Redo del gizmo |
+| A07.8b | FATTO | Verifica degli agganci durante la deformazione | A07.8a | Aperture, scale/cortine e interni validati dopo editing; prova Undo/Redo del gizmo |
 | A08 | IN CORSO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
 | A09 | IN CORSO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
 | G01 | RIMANDATO | Composizione da metadati, separata dai builder | A01, A08, A09 | Piano riproducibile, varianti strutturali, editing protetto |
@@ -1307,3 +1307,14 @@ La validazione ammette solo poligoni strettamente convessi, orientati come la pi
 Le pareti mantengono i loro indici; la posizione derivata delle aperture segue la nuova faccia. Non è garantita la validità di una porta su una faccia accorciata o di un arredo dopo restringimento: valgono i controlli esistenti, da consolidare in A07.8b. Il numero dei lati rimane 8/12/16, non si aggiungono/eliminano vertici in questa versione. Non è una pianta concava.
 
 Campionario scenes/dev/custom_outline_towers_example.tscn, render captures/balcony_attachment/custom_outline_towers.png. Test check_custom_tower_outline.gd: sagoma asimmetrica, raycast sulle facce, rifiuto concavità/duplicati/ordine inverso, salvataggio e ridimensionamento. Screenshot GPU ispezionato. A07.8 e A07 restano IN CORSO fino alla verifica degli agganci e del gizmo; B01 resta successivo.
+
+
+### A07.8b — Agganci, aggiornamento e Undo della sagoma
+
+Corretti due aggiornamenti mancanti: InteriorPlan e cortine confrontano ora anche i vertici del perimetro, non soltanto larghezza/profondità. Una deformazione senza variazione delle dimensioni nominali ricostruisce solai e raccordi. Scala esterna e apertura della porta seguono le nuove facce; i record manuali restano invariati.
+
+La sagoma rifiuta una faccia troppo corta per la larghezza richiesta da un'apertura esistente, evitando il ridimensionamento implicito del vano. Il drag si ferma all'ultima sagoma valida; via Inspector compare un avviso. Questo controllo riguarda la modifica dei vertici: il ridimensionamento generale Width/Depth mantiene il comportamento precedente e richiede ancora di controllare gli avvisi.
+
+Test check_outline_attachments.gd: aggiornamento del solaio, cortina, scala esterna, collisione del vano e apertura preservata; rifiuto del restringimento incompatibile. Test reale editor check_outline_editor.gd, avviato con --outline-editor-test: proiezione camera sul piano del gizmo, modifica, Undo, Redo e annullamento. La prima esecuzione ha rivelato una chiamata is_selected non disponibile su EditorNode3DGizmo: sostituita con la selezione dell'EditorInterface anche nel gizmo della fascia libera delle rocce. I messaggi preesistenti di organize_furniture in editor sono separati da questa verifica.
+
+A07.8 concluso. A07 generale resta aperto per un audit finale dei criteri originari prima di passare a B01: non confondere le prove su una sagoma convessa con copertura esaustiva di tutte le combinazioni. Restano noti i limiti di planner rettangolare per le stanze, 8/12/16 vertici fissi e assenza di poligoni concavi; tali limiti sono espliciti, non implementazioni implicite.

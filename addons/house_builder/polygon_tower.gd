@@ -16,6 +16,7 @@ extends "res://addons/house_builder/volume.gd"
 @export var custom_outline := PackedVector2Array():
 	set(value):
 		var issue := outline_error(value)
+		if issue.is_empty() and is_inside_tree(): issue=outline_attachment_error(value)
 		if not issue.is_empty(): push_warning(issue); return
 		custom_outline=value.duplicate(); request_rebuild()
 func outline_error(points: PackedVector2Array) -> String:
@@ -31,6 +32,15 @@ func outline_error(points: PackedVector2Array) -> String:
 		for j in points.size():
 			if j==i or j==(i+1)%points.size(): continue
 			if edge.cross(points[j]-a)>=-0.00001: return "La sagoma deve essere convessa, senza incroci o vertici allineati; conserva l'ordine originale."
+	return ""
+func outline_attachment_error(points: PackedVector2Array) -> String:
+	var shape := regular_outline() if points.is_empty() else points
+	for opening in all_openings():
+		var wall := int(opening.get("wall",0))
+		if wall<0 or wall>=shape.size(): return "Un'apertura usa una faccia inesistente."
+		var delta := (shape[(wall+1)%shape.size()]-shape[wall])*Vector2(width,depth)
+		var requested := float(opening.get("width",1.0 if opening.get("kind","")=="door" else 0.85))
+		if delta.length()<requested+0.4: return "Faccia %d troppo stretta per l'apertura esistente: sposta o riduci prima l'apertura."%wall
 	return ""
 func regular_outline() -> PackedVector2Array:
 	var result := PackedVector2Array()

@@ -7,8 +7,8 @@ func _has_gizmo(node: Node3D) -> bool: return node is Formation
 func _get_gizmo_name() -> String: return "Rock free side"
 func _redraw(gizmo: EditorNode3DGizmo) -> void:
  gizmo.clear()
- if not gizmo.is_selected(): return
  var node=gizmo.get_node_3d()
+ if not EditorInterface.get_selection().get_selected_nodes().has(node): return
  if node.curve==null: return
  var lines := PackedVector3Array()
  for ribbon in node.free_ribbons():

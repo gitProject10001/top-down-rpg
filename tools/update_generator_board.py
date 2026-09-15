@@ -39,7 +39,7 @@ output = """# Kanban dei generatori
 
 Board locale versionata, generata dalle tabelle delle roadmap. DOING include le macrofasi parziali; non significa che ci siano più agenti al lavoro. DONE riguarda il criterio della singola card, non l'intero sistema.
 
-**Priorità: A07 — geometrie architettoniche, prima di B01.1. Prossimo A07.8b: agganci e Undo della sagoma deformabile.** Generazione globale da seed e V01 rimandati; R03.3 in backlog. Le card RIMANDATO restano in TODO con stato esplicito.
+**Priorità: A07 — geometrie architettoniche, prima di B01.1. Prossimo: audit finale A07 prima di B01.** Generazione globale da seed e V01 rimandati; R03.3 in backlog. Le card RIMANDATO restano in TODO con stato esplicito.
 
 Le card mantengono gli stati delle roadmap. Il criterio di uscita e le dipendenze sono nelle tabelle collegate; prima di iniziare una card TODO, verificare quelle dipendenze.
 

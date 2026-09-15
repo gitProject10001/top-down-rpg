@@ -8,7 +8,7 @@ func _get_gizmo_name() -> String: return "Tower outline"
 func _redraw(gizmo: EditorNode3DGizmo) -> void:
  gizmo.clear()
  var node=gizmo.get_node_3d()
- if not gizmo.is_selected() or not node.edit_outline: return
+ if not EditorInterface.get_selection().get_selected_nodes().has(node) or not node.edit_outline: return
  var points := PackedVector3Array(node.footprint_vertices())
  var lines := PackedVector3Array(); var ids := PackedInt32Array()
  for i in points.size():
@@ -23,7 +23,7 @@ func _set_handle(g: EditorNode3DGizmo,id: int,_s: bool,camera: Camera3D,screen: 
  if hit==null: return
  var points: PackedVector2Array=node.custom_outline.duplicate() if not node.custom_outline.is_empty() else node.regular_outline()
  points[id]=Vector2(snappedf(hit.x,0.1)/node.width,snappedf(hit.z,0.1)/node.depth)
- if node.outline_error(points).is_empty(): node.custom_outline=points
+ if node.outline_error(points).is_empty() and node.outline_attachment_error(points).is_empty(): node.custom_outline=points
 func _commit_handle(g: EditorNode3DGizmo,_id: int,_s: bool,before: Variant,cancel: bool) -> void:
  var node=g.get_node_3d()
  if cancel: node.custom_outline=before; return
