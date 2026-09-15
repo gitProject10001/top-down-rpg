@@ -1,5 +1,6 @@
 @tool
 extends EditorPlugin
+var outline_gizmos=preload("res://addons/house_builder/outline_gizmo.gd").new()
 var composition_panel: VBoxContainer
 var court_elevation: SpinBox
 const ExteriorStair=preload("res://addons/house_builder/exterior_stair.gd")
@@ -60,6 +61,7 @@ var _architecture_ui_key := ""
 var architecture_profiles: Array=[preload("res://addons/house_builder/profiles/compact_timber.tres"),preload("res://addons/house_builder/profiles/nordic_longhouse.tres")]
 
 func _enter_tree() -> void:
+	outline_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(outline_gizmos)
 	error_dialog=AcceptDialog.new()
 	error_dialog.title="House Builder · operazione non eseguita"
 	error_dialog.get_label().autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
@@ -149,6 +151,7 @@ func _enter_tree() -> void:
 		_test_runner=load("res://tools/check_house_editor.gd").new()
 		_test_runner.call_deferred("run",self)
 func _exit_tree() -> void:
+	remove_node_3d_gizmo_plugin(outline_gizmos)
 	EditorInterface.get_selection().selection_changed.disconnect(_selection_context)
 	error_dialog.queue_free()
 	_cancel()

@@ -4,11 +4,40 @@ extends "res://addons/house_builder/volume.gd"
 @export_enum("8 facce:8", "12 facce:12", "16 facce:16") var face_count := 8:
 	set(value):
 		if value not in [8,12,16] or value==face_count: return
+		if not custom_outline.is_empty(): push_warning("Ripristina la sagoma regolare prima di cambiare numero di facce."); return
 		# Face indices are attachment anchors: never silently reassign authored openings.
 		if is_inside_tree() and (not openings.is_empty() or not attached_components().is_empty() or get_node_or_null("InteriorPlan")!=null or get_child_count()>0):
 			push_warning("Scegli il numero di facce prima di aggiungere aperture, interni o componenti. Usa una nuova torre per cambiare topologia.")
 			return
 		face_count=value; request_rebuild()
+@export var edit_outline := false:
+	set(value): edit_outline=value; if is_inside_tree(): update_gizmos()
+## Normalized X/Z points: scaled by Width/Depth; empty uses the regular footprint.
+@export var custom_outline := PackedVector2Array():
+	set(value):
+		var issue := outline_error(value)
+		if not issue.is_empty(): push_warning(issue); return
+		custom_outline=value.duplicate(); request_rebuild()
+func outline_error(points: PackedVector2Array) -> String:
+	if points.is_empty(): return ""
+	if points.size()!=face_count: return "La sagoma deve conservare %d vertici e l'ordine delle facce."%face_count
+	for i in points.size():
+		var a := points[i]; var b := points[(i+1)%points.size()]
+		if not a.is_finite() or maxf(absf(a.x),absf(a.y))>0.75: return "Vertici finiti entro ±0.75 delle dimensioni della torre."
+		var edge := b-a
+		if edge.length()<0.08: return "Due vertici sono troppo vicini."
+		# Clockwise XZ contour, with the origin strictly inside each half-plane.
+		if edge.cross(-a)>-0.08*edge.length(): return "Mantieni il centro dentro la sagoma, con margine per muri e solai."
+		for j in points.size():
+			if j==i or j==(i+1)%points.size(): continue
+			if edge.cross(points[j]-a)>=-0.00001: return "La sagoma deve essere convessa, senza incroci o vertici allineati; conserva l'ordine originale."
+	return ""
+func regular_outline() -> PackedVector2Array:
+	var result := PackedVector2Array()
+	for i in face_count:
+		var angle := (i-0.5)*TAU/float(face_count)
+		result.append(Vector2(sin(angle),cos(angle))*0.5/cos(PI/float(face_count)))
+	return result
 @export_enum("Terrazza", "Conico", "Cupola") var tower_roof := 0:
 	set(value):
 		if value!=0 and is_inside_tree() and not conical_access_error().is_empty():
@@ -37,9 +66,8 @@ func wall_count() -> int: return face_count
 
 func footprint_vertices() -> Array[Vector3]:
 	var points: Array[Vector3]=[]
-	for i in wall_count():
-		var angle := (i-0.5)*TAU/float(wall_count())
-		points.append(Vector3(sin(angle)*width*0.5/cos(PI/float(wall_count())),0,cos(angle)*depth*0.5/cos(PI/float(wall_count()))))
+	var outline := custom_outline if not custom_outline.is_empty() else regular_outline()
+	for point in outline: points.append(Vector3(point.x*width,0,point.y*depth))
 	return points
 
 func wall_length(wall: int) -> float:

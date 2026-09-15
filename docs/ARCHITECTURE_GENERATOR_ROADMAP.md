@@ -279,7 +279,9 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | A07.7 | FATTO | Consolidamento A07 e percorso giocabile | A07.4–A07.6 | Aperture, interni e raccordi coerenti con la pianta; verificare limiti delle stanze e accessi |
 | A07.7a | FATTO | Percorsi nelle torri 12/16 e diagnostica raccordi | A07.4–A07.6 | Giocatore terra→piani→tetto→terra; facce oltre 7 e coperture incompatibili diagnosticate |
 | A07.7b | FATTO | Stanze e contenimento nella pianta poligonale | A07.7a | Stanze/muri manuali verificati rispetto al perimetro reale; errori evidenti senza perdita di editing |
-| A07.8 | TODO | Piante poligonali oltre i prismi regolari | A07.7 | Controlli di sagoma, validazione della pianta e conservazione degli agganci; prima poligoni convessi |
+| A07.8 | IN CORSO | Piante poligonali oltre i prismi regolari | A07.7 | Controlli di sagoma, validazione della pianta e conservazione degli agganci; prima poligoni convessi |
+| A07.8a | FATTO | Sagoma convessa deformabile | A07.7 | Vertici normalizzati, validazione, maniglie dedicate e esempio asimmetrico |
+| A07.8b | TODO | Verifica degli agganci durante la deformazione | A07.8a | Aperture, scale/cortine e interni validati dopo editing; prova Undo/Redo del gizmo |
 | A08 | IN CORSO | Primo Castle Builder: cortina, torri e porta | A04, A07 | Castello piccolo con cortile e percorso giocabile ingresso→mura→torre |
 | A09 | IN CORSO | Complessi articolati e castelli multilivello | A08 | Mastio, corpi accessori, più corti, raccordi e quote indipendenti |
 | G01 | RIMANDATO | Composizione da metadati, separata dai builder | A01, A08, A09 | Piano riproducibile, varianti strutturali, editing protetto |
@@ -1294,3 +1296,14 @@ Nell'editor, stanza/muro fuori perimetro mostra un avviso di configurazione con 
 Test check_polygon_room_bounds.gd su 8/12/16 facce: angoli fuori pianta, muri ruotati, trasformazione della torre, piano traslato, scala manuale, errore che si risolve e preservazione della scena. Regressione check_house_room_insert.gd superata. Parser gizmo verificato; il contorno rosso non è stato verificato tramite interazione manuale nell'editor in questo incremento.
 
 A07.7 concluso; A07 complessivo resta IN CORSO rispetto alla richiesta originaria di piante poligonali e controlli liberi. Prossimo A07.8: estendere le sagome oltre i prismi regolari, mantenendo espliciti i limiti di aggancio. B01 resta dopo A07, come richiesto.
+
+
+### A07.8a — Sagoma convessa deformabile
+
+Sulla torre: attivare Edit Outline nell'Inspector per vedere le maniglie dei vertici del solo nodo selezionato. Il trascinamento avviene sul piano locale XZ, con snap 10 cm, e conserva numero e ordine dei vertici. Custom Outline contiene coordinate normalizzate rispetto a Width/Depth; svuotarlo ripristina la sagoma regolare. Il cambio di numero di facce è bloccato finché la sagoma custom è presente.
+
+La validazione ammette solo poligoni strettamente convessi, orientati come la pianta originale, con centro interno e distanze minime fra punti. Concavità, incroci, inversione dell'ordine e vertici coincidenti vengono rifiutati. Durante il drag il punto resta all'ultima posizione valida; una modifica invalida nell'Inspector emette un avviso. Il gizmo usa Undo/Redo e annullamento; il parser è verificato, la prova interattiva del drag resta A07.8b.
+
+Le pareti mantengono i loro indici; la posizione derivata delle aperture segue la nuova faccia. Non è garantita la validità di una porta su una faccia accorciata o di un arredo dopo restringimento: valgono i controlli esistenti, da consolidare in A07.8b. Il numero dei lati rimane 8/12/16, non si aggiungono/eliminano vertici in questa versione. Non è una pianta concava.
+
+Campionario scenes/dev/custom_outline_towers_example.tscn, render captures/balcony_attachment/custom_outline_towers.png. Test check_custom_tower_outline.gd: sagoma asimmetrica, raycast sulle facce, rifiuto concavità/duplicati/ordine inverso, salvataggio e ridimensionamento. Screenshot GPU ispezionato. A07.8 e A07 restano IN CORSO fino alla verifica degli agganci e del gizmo; B01 resta successivo.
