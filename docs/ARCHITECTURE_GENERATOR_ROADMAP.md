@@ -294,6 +294,10 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | T01.1 | FATTO | Studio alberi Blender → Godot | Pipeline mondo | Latifoglia e pino originali, alpha spray, normali chioma, palette e vento runtime; scena F6, sorgente e test in TREE_WORKFLOW.md |
 | T01.1a | FATTO | Prova alberi con presentazione gameplay | Pipeline mondo | Rig estratto dalla scena principale: stesso player, camera follow, viewport, luci e palette; movimento e collisioni verificati |
 | T01.2 | TODO | Rifinitura visiva alberi | Pipeline mondo | Confronto reference alla camera di gioco, tronco, ciuffi e ombre; approvazione prima di sostituire gli alberi esistenti |
+| T01.2a | FATTO | Tronco e radici continui | Pipeline mondo | Sezioni senza ribaltamenti, curva progressiva, colletto e radici nella stessa mesh; verificato in Blender e nella scena gameplay |
+| T01.2b | TODO | Corteccia e raccordo al terreno | Pipeline mondo | Venature leggere alla scala di gioco, variazione lungo il tronco, terra/muschio al piede; evitare texture rumorose e radici a stella troppo regolari |
+| T01.2c | TODO | Palette e silhouette chioma | Pipeline mondo | Ridurre zone grigie/sbiancate con le luci gameplay, ciuffi meno uniformi e pino più arioso; conservare la leggibilità dei volumi |
+| T01.2d | TODO | Vento gerarchico | Pipeline mondo | Rami e ciuffi con movimento coerente, tronco stabile, niente foglie che slittano sugli attacchi; valutazione dalla camera gameplay |
 | T01.3 | TODO | Authoring alberi | Pipeline mondo | Percorsi e guide editabili con rigenerazione locale e preservazione delle modifiche manuali |
 | T01.4 | TODO | Foresta e budget | Pipeline mondo | LOD, istanze, overdraw e ombre misurati; visibilità giocatore e integrazione catalogo world editor |
 | G01.3b.2b | FATTO | Diagnostica ingombri e verifica editor/Play | Pipeline mondo | Proposta comprensibile, Undo/Redo reali, passaggi percorribili |

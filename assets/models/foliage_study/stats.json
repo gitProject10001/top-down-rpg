@@ -2,11 +2,11 @@
   "broadleaf": {
     "sprays": 2610,
     "leaf_triangles": 5220,
-    "branch_triangles": 1948
+    "branch_triangles": 3504
   },
   "pine": {
     "sprays": 2546,
     "leaf_triangles": 5092,
-    "branch_triangles": 3268
+    "branch_triangles": 4888
   }
 }

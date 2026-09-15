@@ -75,23 +75,51 @@ def build(kind):
     paths = []
 
     def branch(points, radius):
+        trunk = not paths
         paths.append({'points':points, 'radius':radius})
         verts, faces = [], []
-        count = 8
+        count = 32 if trunk else 8
+        if trunk:
+            controls = [Vector(p) for p in points]
+            sampled = []
+            for segment in range(len(controls)-1):
+                a,b,c,d = [controls[max(0,min(i,len(controls)-1))] for i in [segment-1,segment,segment+1,segment+2]]
+                for step in range(5):
+                    t = step/5
+                    sampled.append(.5*((2*b)+(-a+c)*t+(2*a-5*b+4*c-d)*t*t+(-a+3*b-3*c+d)*t*t*t))
+            sampled.append(controls[-1])
+            # Root collar and buttresses are rings of the trunk, never separate cones.
+            points = [Vector((0,0,z)) for z in [-.12,.015,.10,.22,.38]] + [p for p in sampled if p.z>.45]
+        distances = [0.0]
+        for a,b in zip(points,points[1:]): distances.append(distances[-1]+(Vector(b)-Vector(a)).length)
+        axis = Vector((1,0,0))
         for k, pt in enumerate(points):
             p = Vector(pt)
-            tangent = Vector(points[min(k+1,len(points)-1)])-Vector(points[max(0,k-1)])
-            rotation = tangent.to_track_quat('Z','Y')
-            rad = radius*(1-.91*k/(len(points)-1))
+            tangent = (Vector(points[min(k+1,len(points)-1)])-Vector(points[max(0,k-1)])).normalized()
+            # Parallel transport avoids arbitrary roll flips between cross-sections.
+            axis = axis-tangent*axis.dot(tangent)
+            if axis.length_squared<.001:
+                axis = tangent.cross(Vector((0,1,0)))
+            axis.normalize()
+            other = tangent.cross(axis).normalized()
+            rad = radius*(1-.91*distances[k]/distances[-1])
             for i in range(count):
                 angle=i*math.tau/count
-                verts.append(p+rotation@Vector((math.cos(angle)*rad,math.sin(angle)*rad,0)))
+                spread = 0.0
+                if trunk:
+                    for root in range(5):
+                        heading = root*math.tau/5+.17*math.sin(root*3.1)
+                        lobe = max(0,math.cos(angle-heading))**22
+                        spread += (.50+.14*math.sin(root*2.7))*lobe*math.exp(-max(0,p.z)*7)
+                    spread += .10*math.exp(-max(0,p.z)*4)
+                verts.append(p+(axis*math.cos(angle)+other*math.sin(angle))*(rad+spread))
         for k in range(len(points)-1):
             for i in range(count):
                 a=k*count+i; b=k*count+(i+1)%count
                 faces.append((a,b,b+count,a+count))
         faces += [tuple(reversed(range(count))), tuple(range(len(verts)-count,len(verts)))]
         mesh=bpy.data.meshes.new('BranchMesh'); mesh.from_pydata(verts,[],faces); mesh.update()
+        for poly in mesh.polygons: poly.use_smooth = True
         obj=bpy.data.objects.new('Branch_%03d'%len(paths),mesh); scene.collection.objects.link(obj)
         mesh.materials.append(bark); branches.append(obj)
 
@@ -126,9 +154,6 @@ def build(kind):
                 branch([tuple(mid),tuple(end)],.024)
                 lobes.append((end,(.68,.53,.26)))
         lobes.append((Vector((.04,.3,11.4)),(.45,.43,.58)))
-    for i in range(5):
-        angle=i*math.tau/5
-        branch([(math.cos(angle)*.7,math.sin(angle)*.7,.015),(0,0,.24)],.11)
 
     verts=[]; faces=[]; normals=[]; uvs=[]; colors=[]
     for center, radii in lobes:

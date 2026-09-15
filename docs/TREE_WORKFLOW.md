@@ -61,15 +61,24 @@ e Branches della scena scelta; non esportare le guide.
 
 `tools/check_foliage_study.gd` controlla isolamento dei due export, colori,
 normali, materiale runtime, collisione e limite di 12.000 triangoli per albero.
-Latifoglia: 7.168 triangoli; pino: 8.360. Due superfici per asset.
+Latifoglia: 8.724 triangoli; pino: 9.980 dopo T01.2a. Due superfici per asset.
 `--capture-foliage` sulla scena salva `captures/foliage_study.png` e chiude.
 Le prestazioni di una foresta non sono certificate dal frame rate di due alberi:
 occorrono test di overdraw, ombre, distanze e LOD.
 
 ## Prossimi incrementi
 
-T01.2: confronto artistico alla camera di gioco, tronchi meno angolari, ombre
-meno chiuse, distribuzione dei ciuffi meno regolare; approvazione visiva.
+T01.2a completato: il tronco usa una curva interpolata e sezioni con orientamento
+trasportato progressivamente, evitando ribaltamenti e strozzature. La base ha
+radici integrate nella stessa superficie, con estremità sotto quota zero;
+rimosse le cinque radici separate con taper invertito. Normali lisce sui rami.
+Chiome, maschere e palette restano quelle già confrontate.
+
+T01.2b: corteccia con venature leggere, variazione verticale e raccordo terra/muschio;
+variare ulteriormente direzioni e lunghezze delle radici per ridurre la forma a stella.
+T01.2c: correggere le zone grigie/sbiancate sotto le luci del gioco, rendere meno
+uniformi i ciuffi e più aperto il pino; confronto visivo con la camera gameplay.
+T01.2d: vento gerarchico con rami e ciuffi solidali agli attacchi, evitando scorrimenti.
 T01.3: editor dei percorsi/guide e rebuild locale che preservi interventi manuali.
 T01.4: LOD, istanze, distanza ombre, stress test della foresta, visibilità giocatore
 e integrazione nel catalogo del world editor. Evitare la sostituzione globale
