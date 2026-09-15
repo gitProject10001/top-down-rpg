@@ -36,12 +36,17 @@ var _visual: Node3D
 var _pose := Transform3D.IDENTITY
 var _cut := false
 var _warning_signature := ""
+var _editor_poll := 0.0
 func _ready() -> void:
 	_pose=transform; dirty()
 func dirty() -> void:
 	_pending=true
 	if is_inside_tree(): update_gizmos()
 func _process(_dt: float) -> void:
+	_editor_poll+=_dt
+	# Moving/resizing a node bypasses the idle audit interval.
+	if Engine.is_editor_hint() and not _pending and transform==_pose and _editor_poll<0.1: return
+	_editor_poll=0.0
 	if Engine.is_editor_hint() and kind==0: refresh_room_name()
 	if transform!=_pose:
 		_pose=transform

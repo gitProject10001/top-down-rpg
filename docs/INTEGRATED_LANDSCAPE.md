@@ -125,3 +125,9 @@ Verifica della revisione: INTERIOR_PASS conferma ingresso reale attraverso la
 porta aperta con E e attivazione cutaway; INTEGRATED_PASS conferma il percorso
 precedente. Capture panoramico senza errori runtime. Il test headless conserva
 il noto messaggio PagedAllocator alla chiusura.
+
+## Editing e performance
+
+Il terreno e' ora raggruppato: selezionare `TerrenoComposto` per spostarlo;
+mesh e materiale sono in `TerrenoComposto/Superficie`. Vedi
+[EDITOR_PERFORMANCE.md](EDITOR_PERFORMANCE.md) per misure, interventi e limiti.

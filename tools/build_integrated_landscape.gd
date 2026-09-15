@@ -114,7 +114,8 @@ func build() -> void:
     st.generate_normals()
     var ground:=MeshInstance3D.new();ground.name="TerrenoComposto";ground.mesh=st.commit()
     ground.material_override=roads.surface_material
-    attach(ground);ground.create_trimesh_collision()
+    var terrain_group:=Node3D.new();terrain_group.name="TerrenoComposto";terrain_group.set_meta("_edit_group_",true);attach(terrain_group)
+    ground.name="Superficie";attach(ground,terrain_group);ground.create_trimesh_collision()
     for child in ground.get_children():owned(child)
     scene.set_script(load("res://scripts/village/integrated_landscape.gd"))
     var packed:=PackedScene.new();assert(packed.pack(scene)==OK)

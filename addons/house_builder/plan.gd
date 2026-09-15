@@ -19,6 +19,7 @@ const MeshJoin=preload("res://addons/house_builder/mesh_join.gd")
 	set(v): active_floor=v; _pending=true
 var _pending := true
 var _signature := ""
+var _editor_poll := 0.0
 var _wood: Material
 var _wall: Material
 var _floors: Node3D
@@ -62,6 +63,10 @@ func _ready() -> void:
 	_pending=true
 	organize_furniture.call_deferred()
 func _process(_dt: float) -> void:
+	_editor_poll+=_dt
+	# Geometry edits marked dirty remain immediate; audit unchanged hierarchy at 10 Hz.
+	if Engine.is_editor_hint() and not _pending and _editor_poll<0.1: return
+	_editor_poll=0.0
 	if Engine.is_editor_hint(): observe_deletions()
 	var signature := str(house().dimensions(),house().wing_settings(),floor_height,levels().size())
 	if house().has_method("footprint_vertices"): signature+=str(house().footprint_vertices())

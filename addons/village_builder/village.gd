@@ -13,6 +13,8 @@ const Request=preload("res://addons/house_builder/building_request.gd")
 @export_storage var surface_rect := Rect2()
 var _surface: MeshInstance3D
 var _surface_signature := ""
+var _bound_surface_material: ShaderMaterial
+var _bound_surface_transform:=Transform3D.IDENTITY
 @export var seed_value := 1047
 @export_enum("Casa popolana","Bottega","Casa benestante") var building_type := 0
 @export_range(1,3) var storeys := 1
@@ -247,7 +249,9 @@ func street_candidates() -> Array:
 	return candidates
 
 func _process(_dt: float) -> void:
-	if surface_material: surface_material.set_shader_parameter("builder_inverse",global_transform.affine_inverse())
+	if surface_material and (surface_material!=_bound_surface_material or global_transform!=_bound_surface_transform):
+		_bound_surface_material=surface_material; _bound_surface_transform=global_transform
+		surface_material.set_shader_parameter("builder_inverse",global_transform.affine_inverse())
 	var signature := str(auto_surface,surface_rect,surface_material)
 	if signature==_surface_signature: return
 	_surface_signature=signature

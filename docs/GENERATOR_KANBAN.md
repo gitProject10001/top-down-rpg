@@ -24,22 +24,22 @@ Aggiornare stati e criteri nelle tabelle, poi eseguire `python tools/update_gene
 | **[T01.2](WORLD_GENERATION_ROADMAP.md)** — Rifinitura visiva alberi<br>TODO | **[W02](WORLD_GENERATION_ROADMAP.md)** — Fiumi editabili<br>IN CORSO — W02.1 disponibile | **[A07.8a](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Sagoma convessa deformabile<br>FATTO |
 | **[T01.2b](WORLD_GENERATION_ROADMAP.md)** — Corteccia e raccordo al terreno<br>TODO |  | **[A07.8b](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Verifica degli agganci durante la deformazione<br>FATTO |
 | **[T01.2c](WORLD_GENERATION_ROADMAP.md)** — Palette e silhouette chioma<br>TODO |  | **[I01](WORLD_GENERATION_ROADMAP.md)** — Scena integrata con strumenti esistenti<br>FATTO |
-| **[T01.2d](WORLD_GENERATION_ROADMAP.md)** — Vento gerarchico<br>TODO |  | **[T01.1](WORLD_GENERATION_ROADMAP.md)** — Studio alberi Blender → Godot<br>FATTO |
-| **[T01.3](WORLD_GENERATION_ROADMAP.md)** — Authoring alberi<br>TODO |  | **[T01.1a](WORLD_GENERATION_ROADMAP.md)** — Prova alberi con presentazione gameplay<br>FATTO |
-| **[T01.4](WORLD_GENERATION_ROADMAP.md)** — Foresta e budget<br>TODO |  | **[T01.2a](WORLD_GENERATION_ROADMAP.md)** — Tronco e radici continui<br>FATTO |
-| **[R03.3](WORLD_GENERATION_ROADMAP.md)** — Ciglio e sagoma della terrazza<br>TODO |  | **[G01.3b.2b](WORLD_GENERATION_ROADMAP.md)** — Diagnostica ingombri e verifica editor/Play<br>FATTO |
-| **[W01.2](WORLD_GENERATION_ROADMAP.md)** — Authoring lago e rive<br>TODO |  | **[R01.1](WORLD_GENERATION_ROADMAP.md)** — Roccia parametrica<br>FATTO |
-| **[W01.3](WORLD_GENERATION_ROADMAP.md)** — Qualità visiva acqua<br>TODO |  | **[R02.1](WORLD_GENERATION_ROADMAP.md)** — Gruppi su guida<br>FATTO |
-| **[W01.4b](WORLD_GENERATION_ROADMAP.md)** — Risacca e impatti sulla costa<br>TODO |  | **[R02.2](WORLD_GENERATION_ROADMAP.md)** — Fascia libera<br>FATTO |
-| **[W04.3](WORLD_GENERATION_ROADMAP.md)** — Onde locali: GPU e qualita visiva<br>TODO |  | **[R02.3](WORLD_GENERATION_ROADMAP.md)** — Addensamenti e raccordi<br>FATTO |
-| **[W04.5](WORLD_GENERATION_ROADMAP.md)** — Controllo artistico e continuita del flow<br>TODO |  | **[R03.1](WORLD_GENERATION_ROADMAP.md)** — Terrazza piana<br>FATTO |
-| **[W02.2](WORLD_GENERATION_ROADMAP.md)** — Robustezza rive e raccordi<br>TODO |  | **[R03.2](WORLD_GENERATION_ROADMAP.md)** — Accesso alla terrazza<br>FATTO |
-| **[W03](WORLD_GENERATION_ROADMAP.md)** — Attraversamenti e rive<br>TODO |  | **[W01.1](WORLD_GENERATION_ROADMAP.md)** — Lago ed emissario di prova<br>FATTO |
-| **[C01](WORLD_GENERATION_ROADMAP.md)** — Ingressi di grotta<br>TODO |  | **[W01.3a](WORLD_GENERATION_ROADMAP.md)** — Caustiche senza griglia regolare<br>FATTO |
-| **[C02](WORLD_GENERATION_ROADMAP.md)** — Piano di grotta<br>TODO |  | **[W01.4](WORLD_GENERATION_ROADMAP.md)** — Lago mosso: prima versione visiva<br>FATTO |
-| **[G01.4](WORLD_GENERATION_ROADMAP.md)** — Catalogo architettonico<br>TODO |  | **[W04.1](WORLD_GENERATION_ROADMAP.md)** — Scia del personaggio e spruzzi<br>FATTO |
-| **[G01.5](WORLD_GENERATION_ROADMAP.md)** — Varietà compositiva del castello<br>RIMANDATO |  | **[W04.2](WORLD_GENERATION_ROADMAP.md)** — Prototipo A/B onde locali<br>FATTO |
-| **[S01](WORLD_GENERATION_ROADMAP.md)** — Composizione urbana organica<br>RIMANDATO |  | **[W04.4](WORLD_GENERATION_ROADMAP.md)** — Trasporto onde nel campo artistico<br>FATTO |
-| **[S02](WORLD_GENERATION_ROADMAP.md)** — Edifici urbani più articolati<br>TODO |  | **[W02.1](WORLD_GENERATION_ROADMAP.md)** — Fiume curvo con rocce<br>FATTO |
-| **[V01](WORLD_GENERATION_ROADMAP.md)** — Confronto dei quattro castelli<br>RIMANDATO |  |  |
+| **[T01.2d](WORLD_GENERATION_ROADMAP.md)** — Vento gerarchico<br>TODO |  | **[I01.1](WORLD_GENERATION_ROADMAP.md)** — Primo intervento performance editor<br>FATTO |
+| **[T01.3](WORLD_GENERATION_ROADMAP.md)** — Authoring alberi<br>TODO |  | **[T01.1](WORLD_GENERATION_ROADMAP.md)** — Studio alberi Blender → Godot<br>FATTO |
+| **[T01.4](WORLD_GENERATION_ROADMAP.md)** — Foresta e budget<br>TODO |  | **[T01.1a](WORLD_GENERATION_ROADMAP.md)** — Prova alberi con presentazione gameplay<br>FATTO |
+| **[R03.3](WORLD_GENERATION_ROADMAP.md)** — Ciglio e sagoma della terrazza<br>TODO |  | **[T01.2a](WORLD_GENERATION_ROADMAP.md)** — Tronco e radici continui<br>FATTO |
+| **[W01.2](WORLD_GENERATION_ROADMAP.md)** — Authoring lago e rive<br>TODO |  | **[G01.3b.2b](WORLD_GENERATION_ROADMAP.md)** — Diagnostica ingombri e verifica editor/Play<br>FATTO |
+| **[W01.3](WORLD_GENERATION_ROADMAP.md)** — Qualità visiva acqua<br>TODO |  | **[R01.1](WORLD_GENERATION_ROADMAP.md)** — Roccia parametrica<br>FATTO |
+| **[W01.4b](WORLD_GENERATION_ROADMAP.md)** — Risacca e impatti sulla costa<br>TODO |  | **[R02.1](WORLD_GENERATION_ROADMAP.md)** — Gruppi su guida<br>FATTO |
+| **[W04.3](WORLD_GENERATION_ROADMAP.md)** — Onde locali: GPU e qualita visiva<br>TODO |  | **[R02.2](WORLD_GENERATION_ROADMAP.md)** — Fascia libera<br>FATTO |
+| **[W04.5](WORLD_GENERATION_ROADMAP.md)** — Controllo artistico e continuita del flow<br>TODO |  | **[R02.3](WORLD_GENERATION_ROADMAP.md)** — Addensamenti e raccordi<br>FATTO |
+| **[W02.2](WORLD_GENERATION_ROADMAP.md)** — Robustezza rive e raccordi<br>TODO |  | **[R03.1](WORLD_GENERATION_ROADMAP.md)** — Terrazza piana<br>FATTO |
+| **[W03](WORLD_GENERATION_ROADMAP.md)** — Attraversamenti e rive<br>TODO |  | **[R03.2](WORLD_GENERATION_ROADMAP.md)** — Accesso alla terrazza<br>FATTO |
+| **[C01](WORLD_GENERATION_ROADMAP.md)** — Ingressi di grotta<br>TODO |  | **[W01.1](WORLD_GENERATION_ROADMAP.md)** — Lago ed emissario di prova<br>FATTO |
+| **[C02](WORLD_GENERATION_ROADMAP.md)** — Piano di grotta<br>TODO |  | **[W01.3a](WORLD_GENERATION_ROADMAP.md)** — Caustiche senza griglia regolare<br>FATTO |
+| **[G01.4](WORLD_GENERATION_ROADMAP.md)** — Catalogo architettonico<br>TODO |  | **[W01.4](WORLD_GENERATION_ROADMAP.md)** — Lago mosso: prima versione visiva<br>FATTO |
+| **[G01.5](WORLD_GENERATION_ROADMAP.md)** — Varietà compositiva del castello<br>RIMANDATO |  | **[W04.1](WORLD_GENERATION_ROADMAP.md)** — Scia del personaggio e spruzzi<br>FATTO |
+| **[S01](WORLD_GENERATION_ROADMAP.md)** — Composizione urbana organica<br>RIMANDATO |  | **[W04.2](WORLD_GENERATION_ROADMAP.md)** — Prototipo A/B onde locali<br>FATTO |
+| **[S02](WORLD_GENERATION_ROADMAP.md)** — Edifici urbani più articolati<br>TODO |  | **[W04.4](WORLD_GENERATION_ROADMAP.md)** — Trasporto onde nel campo artistico<br>FATTO |
+| **[V01](WORLD_GENERATION_ROADMAP.md)** — Confronto dei quattro castelli<br>RIMANDATO |  | **[W02.1](WORLD_GENERATION_ROADMAP.md)** — Fiume curvo con rocce<br>FATTO |
 | **[V02](WORLD_GENERATION_ROADMAP.md)** — Vertical slice città–villaggio–POI<br>TODO |  |  |
