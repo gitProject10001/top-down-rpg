@@ -1,0 +1,47 @@
+[gd_scene load_steps=8 format=3]
+[ext_resource type="PackedScene" path="res://scenes/props/study_broadleaf.tscn" id="1"]
+[ext_resource type="PackedScene" path="res://scenes/props/study_pine.tscn" id="2"]
+[ext_resource type="Script" path="res://scripts/village/foliage_study_preview.gd" id="3"]
+[sub_resource type="Environment" id="Env"]
+background_mode = 1
+background_color = Color(0.095, 0.13, 0.14, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.31, 0.37, 0.30, 1)
+ambient_light_energy = 0.22
+tonemap_mode = 0
+ssao_enabled = true
+ssao_radius = 1.2
+ssao_intensity = 2.0
+[sub_resource type="StandardMaterial3D" id="GroundMat"]
+albedo_color = Color(0.27, 0.30, 0.16, 1)
+roughness = 1.0
+[sub_resource type="PlaneMesh" id="GroundMesh"]
+material = SubResource("GroundMat")
+size = Vector2(40, 30)
+[sub_resource type="BoxShape3D" id="GroundShape"]
+size = Vector3(40, 0.2, 30)
+[node name="FoliageStudy" type="Node3D"]
+script = ExtResource("3")
+[node name="Broadleaf" parent="." instance=ExtResource("1")]
+position = Vector3(-4, 0, 0)
+[node name="Pine" parent="." instance=ExtResource("2")]
+position = Vector3(4, 0, 0)
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("GroundMesh")
+[node name="Body" type="StaticBody3D" parent="Ground"]
+[node name="Shape" type="CollisionShape3D" parent="Ground/Body"]
+position = Vector3(0, -0.1, 0)
+shape = SubResource("GroundShape")
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-42, -38, 0)
+light_color = Color(1, 0.96, 0.82, 1)
+light_energy = 1.15
+shadow_enabled = true
+directional_shadow_max_distance = 70.0
+[node name="Camera" type="Camera3D" parent="."]
+projection = 1
+size = 19.5
+far = 150.0
+current = true

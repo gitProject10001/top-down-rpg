@@ -38,6 +38,10 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 
 | ID | Stato | Passo | Risultato verificabile |
 |---|---|---|---|
+| T01.1 | FATTO | Studio alberi Blender → Godot | Latifoglia e pino originali, alpha spray, normali chioma, palette e vento runtime; scena F6, sorgente e test in TREE_WORKFLOW.md |
+| T01.2 | TODO | Rifinitura visiva alberi | Confronto reference alla camera di gioco, tronco, ciuffi e ombre; approvazione prima di sostituire gli alberi esistenti |
+| T01.3 | TODO | Authoring alberi | Percorsi e guide editabili con rigenerazione locale e preservazione delle modifiche manuali |
+| T01.4 | TODO | Foresta e budget | LOD, istanze, overdraw e ombre misurati; visibilità giocatore e integrazione catalogo world editor |
 | G01.3b.2b | FATTO | Diagnostica ingombri e verifica editor/Play | Proposta comprensibile, Undo/Redo reali, passaggi percorribili |
 | R01 | IN CORSO — prototipo disponibile | Generatore di singola roccia/affioramento | Seed, dimensioni, piani di frattura, stratificazione, spigolosità; 6 varianti con stesso linguaggio geometrico; collisione semplice |
 | R02 | IN CORSO — R02.1–R02.3 verificati | Composizione di gruppi rocciosi | Path/area, direzione dominante degli strati, masse grandi/medie/piccole; variazione locale senza distruggere i pezzi spostati a mano |
