@@ -44,8 +44,8 @@ personaggio o i parametri della camera durante il gioco normale.
 8. Due guide `formation.gd` compongono gli affioramenti a nord; ogni roccia
    rimane un elemento del builder modificabile. Cinque massi separati nel fiume.
 9. Play: onde e corrente attive su entrambi i corpi d'acqua; impulsi del
-   personaggio. Il lago usa una zona simulata di 50 x 50 metri, il fiume la
-   propria estensione. Entrambi rimangono a 64 x 64: il dettaglio ne risente.
+   personaggio. Entrambi usano zone locali di 24 x 24 metri a 64 x 64 celle
+   vicino al personaggio; il ricentramento azzera le onde precedenti.
 10. Verifica del percorso portone / uscita città / guado / borgo e capture
     panoramico dalla scena realmente renderizzata.
 
@@ -93,3 +93,35 @@ rimangono prevalentemente piani come richiesto; non abbiamo introdotto colline.
 - Aggiungere `--gameplay-view`: `captures/integrated_gameplay.png`.
 - Il noto messaggio PagedAllocator può comparire in chiusura headless; verificare
   separatamente gli errori durante la prova, non interpretarli come test superato.
+
+
+## Revisione: terreno, acqua e case abitabili
+
+Il terreno ora usa `ground_clear.gdshader` e le stesse texture dipinte della
+main (`ground_painting.png`, `terrain_layers.png`). Il Surface Builder produce
+una maschera unica delle strade applicata alla mesh del terreno: nessun piano
+rettangolare sovrapposto che copra il fiume. Le guide di composizione sono
+nascoste visivamente; si possono selezionare nell'albero e riattivare per editarle.
+
+La precedente griglia estesa a tutto il fiume dava celle di circa 2 metri e
+impulsi enormi. Ora ciascuna acqua usa 64x64 celle su 24x24 metri vicino al
+personaggio (37,5 cm/cella). La zona si ricentra quando ci si allontana oltre
+7 metri dal centro, azzerando le onde: questa discontinuita resta da migliorare
+con trasferimento del campo tra patch. Il fiume usa il preset calmo, lasciando
+corrente e interazioni senza sovrapporre onde da vento del lago.
+
+Le 12 case aggiunte hanno ora un `InteriorPlan` con un piano, stanze, muri e
+arredi proposti dagli strumenti esistenti, tutti salvati e modificabili.
+E apre/chiude la porta vicina, evidenziata. Entrando si attivano cutaway della
+casa e visibilita del piano tramite le API esistenti. Non include ancora il
+buio esterno coordinato della scena dedicata agli interni. Il castello conserva
+i propri piani della factory; non sono stati inventati interni per gli edifici
+che la factory lascia privi di un piano completo.
+
+Corretto anche il record della finestra nelle case cittadine: usava `offset`
+invece del campo `u` del builder, finendo sovrapposta alla porta centrale.
+
+Verifica della revisione: INTERIOR_PASS conferma ingresso reale attraverso la
+porta aperta con E e attivazione cutaway; INTEGRATED_PASS conferma il percorso
+precedente. Capture panoramico senza errori runtime. Il test headless conserva
+il noto messaggio PagedAllocator alla chiusura.

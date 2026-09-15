@@ -38,7 +38,7 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 
 | ID | Stato | Passo | Risultato verificabile |
 |---|---|---|---|
-| I01 | FATTO | Scena integrata con strumenti esistenti | Città murata, borgo, fiume/lago simulati, nuovi alberi e affioramenti; Play, panoramica e percorso verificabile. Passi e limiti in INTEGRATED_LANDSCAPE.md |
+| I01 | FATTO | Scena integrata con strumenti esistenti | Città murata, borgo, fiume/lago simulati, nuovi alberi e affioramenti; Play, panoramica, terreno della main e 12 case con InteriorPlan; acqua su patch locali. Passi e limiti in INTEGRATED_LANDSCAPE.md |
 | T01.1 | FATTO | Studio alberi Blender → Godot | Latifoglia e pino originali, alpha spray, normali chioma, palette e vento runtime; scena F6, sorgente e test in TREE_WORKFLOW.md |
 | T01.1a | FATTO | Prova alberi con presentazione gameplay | Rig estratto dalla scena principale: stesso player, camera follow, viewport, luci e palette; movimento e collisioni verificati |
 | T01.2 | TODO | Rifinitura visiva alberi | Confronto reference alla camera di gioco, tronco, ciuffi e ombre; approvazione prima di sostituire gli alberi esistenti |

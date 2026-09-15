@@ -40,7 +40,7 @@ func build() -> void:
         var house=load("res://addons/house_builder/house.gd").new()
         house.name="CasaCitta_%02d"%i;house.position=Vector3(-40+(i%3)*10,.18,-20+(i/3)*9)
         house.width=5+i%2;house.depth=6;house.wall_height=3.0+(i%3)*.6;house.house_seed=900+i
-        var openings: Array[Dictionary]=[{"kind":"door","wall":0,"width":1.3,"height":2.1},{"kind":"window","wall":0,"offset":1.8,"width":.8,"height":1.0,"sill":1.5}]
+        var openings: Array[Dictionary]=[{"kind":"door","wall":0,"width":1.3,"height":2.1},{"kind":"window","wall":0,"u":.72,"width":.8,"height":1.0,"sill":1.5}]
         house.openings=openings;attach(house)
     var roads=load("res://addons/village_builder/village.gd").new();roads.name="StradeCitta";roads.show_zones=false;roads.position.y=.18;attach(roads)
     guide(roads,"Piazza",4,PackedVector2Array([Vector2(-40,-9),Vector2(-22,-9),Vector2(-22,0),Vector2(-40,0)]))
@@ -48,7 +48,7 @@ func build() -> void:
     var village=load("res://addons/village_builder/village.gd").new();village.name="Borgo";village.position=Vector3(24,.18,23);village.max_houses=10;village.show_zones=false;attach(village)
     guide(village,"Perimetro",0,PackedVector2Array([Vector2(-15,-13),Vector2(26,-13),Vector2(26,26),Vector2(-15,26)]))
     guide(village,"StradaBorgo",1,PackedVector2Array([Vector2(-12,0),Vector2(8,3),Vector2(22,20)]),4)
-    var river=load("res://addons/water_builder/river.gd").new();river.name="Fiume";river.basin_depth=.22;river.flow_speed=.85;river.widths=PackedFloat32Array([7,9,8,10,9]);attach(river)
+    var river=load("res://addons/water_builder/river.gd").new();river.name="Fiume";river.basin_depth=.22;river.flow_speed=.85;river.set_wave_preset(0);river.widths=PackedFloat32Array([7,9,8,10,9]);attach(river)
     var path:=Path3D.new();path.name="FlowGuide";path.curve=Curve3D.new()
     for point in [Vector3(-1,0,-66),Vector3(2,0,-35),Vector3(-1,0,-8),Vector3(4,0,21),Vector3(0,0,65)]:path.curve.add_point(point,Vector3(0,0,-5),Vector3(0,0,5))
     attach(path,river)
@@ -80,6 +80,29 @@ func build() -> void:
         formation.apply(proposal)
         for child in formation.get_children():owned(child)
     village.apply(village.propose())
+    guide(roads,"PerimetroSuolo",0,PackedVector2Array([Vector2(-76,-72),Vector2(76,-72),Vector2(76,72),Vector2(-76,72)]))
+    for source in village.guides(1):
+        var points:=PackedVector2Array()
+        for point in source.points:points.append(point+Vector2(village.position.x,village.position.z))
+        guide(roads,"Borgo_"+str(source.name),1,points,source.road_width)
+    preload("res://addons/village_builder/surface.gd").bake(roads)
+    for guide_node in roads.get_children():guide_node.visible=false
+    for guide_node in village.guides(0)+village.guides(1):guide_node.visible=false
+    var houses: Array=[]
+    for child in scene.get_children():
+        if str(child.name).begins_with("CasaCitta_"):houses.append(child)
+    for lot in village.lots():
+        for child in lot.get_children():
+            if child.has_method("set_cutaway"):houses.append(child)
+    for house in houses:
+        var plan=load("res://addons/house_builder/plan.gd").new();plan.name="InteriorPlan";plan.preview_inside=false;plan.floor_height=house.wall_height;plan.requested_rooms=2
+        attach(plan,house)
+        var level:=Node3D.new();level.name="PianoTerra";attach(level,plan)
+        var rooms: Array=plan.propose_rooms(0)
+        assert(not plan.generation_failed,plan.generation_report)
+        plan.apply_records(0,rooms)
+        plan.apply_records(0,plan.propose_furniture(0))
+        owned(plan)
     for lot in village.lots():owned(lot)
     var st:=SurfaceTool.new();st.begin(Mesh.PRIMITIVE_TRIANGLES)
     for z in range(-72,72,2):
@@ -90,7 +113,7 @@ func build() -> void:
                 st.set_color(Color(.27,.31,.16) if y>.1 else Color(.37,.32,.21));st.add_vertex(Vector3(p.x,y,p.y))
     st.generate_normals()
     var ground:=MeshInstance3D.new();ground.name="TerrenoComposto";ground.mesh=st.commit()
-    var mat:=StandardMaterial3D.new();mat.vertex_color_use_as_albedo=true;mat.vertex_color_is_srgb=true;mat.roughness=1;ground.material_override=mat
+    ground.material_override=roads.surface_material
     attach(ground);ground.create_trimesh_collision()
     for child in ground.get_children():owned(child)
     scene.set_script(load("res://scripts/village/integrated_landscape.gd"))

@@ -23,6 +23,27 @@ func check() -> void:
         var distance: Vector2=Vector2(scene.player.position.x-target.x,scene.player.position.z-target.z)
         assert(distance.length()<1,"Route blocked at "+str(scene.player.position)+" target "+str(target))
     assert(scene.player.is_on_floor())
+    var house=view.get_node("CasaCitta_00")
+    var plan=house.get_node("InteriorPlan")
+    assert(plan.levels().size()==1 and plan.level_records(0).size()>2)
+    scene.player.position=Vector3(-40,1,-15.6);scene.player.velocity=Vector3.ZERO
+    for i in 40:await physics_frame
+    assert(is_instance_valid(scene.nearest_door),"Exterior door can be selected")
+    var event:=InputEventKey.new();event.pressed=true;event.keycode=KEY_E
+    scene._unhandled_key_input(event)
+    for i in 30:await physics_frame
+    for i in 80:
+        var raw:=Vector3.FORWARD.rotated(Vector3.UP,-scene.camera.global_rotation.y)
+        for pair in [["move_left",-raw.x],["move_right",raw.x],["move_up",-raw.z],["move_down",raw.z]]:
+            if pair[1]>0:Input.action_press(pair[0],pair[1])
+            else:Input.action_release(pair[0])
+        await physics_frame
+        if scene.player.position.z<-17.5:break
+    for action in ["move_left","move_right","move_up","move_down"]:Input.action_release(action)
+    assert(scene.player.position.z<-17.5,"Walk through opened house door "+str(scene.player.position)+" door="+str(scene.nearest_door))
+    assert(scene.interior_states[plan.get_instance_id()].x==1,"Interior cutaway activated")
+    print("INTERIOR_PASS entry through E door and cutaway")
+
     scene.toggle_overview();assert(scene.overview and scene.camera.size==145)
     scene.toggle_overview();assert(not scene.overview)
     print("INTEGRATED_PASS 8 curtains, 2 simulated waters, 91 trees, city-ford-village movement")
