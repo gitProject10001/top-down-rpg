@@ -19,6 +19,21 @@ uniform float clock = 0.0;
 uniform vec2 wind_direction = vec2(.8,.6);
 uniform float wave_height = .045;
 uniform float breaking_foam = .65;
+uniform bool simulation_enabled = false;
+uniform sampler2D wave_field : filter_linear, repeat_disable;
+uniform vec4 simulation_bounds = vec4(-10,-9,20,20);
+
+float simulated(vec2 p) {
+    vec2 uv=(p-simulation_bounds.xy)/simulation_bounds.zw;
+    if(!simulation_enabled || min(uv.x,uv.y)<0.0 || max(uv.x,uv.y)>1.0)return 0.0;
+    float edge=min(min(uv.x,uv.y),min(1.0-uv.x,1.0-uv.y));
+    return texture(wave_field,uv).r*smoothstep(0.0,.07,edge);
+}
+float simulation_mix(vec2 p) {
+    vec2 uv=(p-simulation_bounds.xy)/simulation_bounds.zw;
+    float edge=min(min(uv.x,uv.y),min(1.0-uv.x,1.0-uv.y));
+    return simulation_enabled?smoothstep(0.0,.07,edge):0.0;
+}
 
 vec2 hash2(vec2 p) {
     return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
@@ -72,7 +87,7 @@ float swell(vec2 p,float bank) {
     return wave_height*(sin(compressed)*.7+sin(dot(p,secondary)*3.4-clock*3.3)*.3)*(1.0+.25*exp(-bank))*smoothstep(0.0,.75,bank);
 }
 void vertex() {
-    VERTEX.y+=swell(UV,shore(UV));
+    VERTEX.y+=swell(UV,shore(UV))+simulated(UV);
 }
 vec2 current(vec2 p) {
     float best=10000.0; vec2 flow=vec2(0.0);
@@ -143,6 +158,12 @@ void fragment() {
         }
     }
     wake=min(wake,1.0);
+    float sim_mix=simulation_mix(p);
+    ring*=1.0-sim_mix;
+    wake*=1.0-sim_mix;
+    disturbance*=1.0-sim_mix;
+    vec2 sim_gradient=vec2(simulated(p+vec2(.15,0))-simulated(p-vec2(.15,0)),simulated(p+vec2(0,.15))-simulated(p-vec2(0,.15)))/.3;
+    float sim_foam=smoothstep(.012,.05,length(sim_gradient))*sim_mix*.25;
     float depth=basin_depth*smoothstep(0.0,1.5,bank);
     vec3 color=mix(vec3(.025,.16,.12),vec3(.004,.035,.045),clamp(depth/.5,0.0,1.0));
     float phase_wave=wind_phase(p)+1.2*exp(-bank*.9);
@@ -166,7 +187,7 @@ void fragment() {
         float broken=smoothstep(.25,.75,noise2(offset*6.0-downstream*clock*1.8));
         rock_foam+=(collar*.35+trail*.45)*broken;
     }
-    ALBEDO=color+vec3(.035,.09,.07)*caustic*.35+vec3(.2,.35,.3)*(ring*.45+foam*1.4+wake+rock_foam);
+    ALBEDO=color+vec3(.035,.09,.07)*caustic*.35+vec3(.2,.35,.3)*(ring*.45+foam*1.4+wake+rock_foam+sim_foam);
     if(debug_flow) {
         vec2 cell=(floor(p/1.5)+.5)*1.5;
         vec2 direction=current(cell);direction/=max(length(direction),.001);
@@ -178,6 +199,7 @@ void fragment() {
         ALBEDO=mix(vec3(flow.x*.25+.3,.06,flow.y*.25+.3),vec3(.9),max(shaft,head));
     }
     vec3 local_slope=vec3(sin(q.x*5.0+q.y)*.06+disturbance.x,0.0,cos(q.y*5.0-q.x)*.06+disturbance.y);
+    local_slope-=vec3(sim_gradient.x,0.0,sim_gradient.y)*2.0;
     local_slope.x-=(swell(p+vec2(.05,0),bank)-swell(p-vec2(.05,0),bank))/.1;
     local_slope.z-=(swell(p+vec2(0,.05),bank)-swell(p-vec2(0,.05),bank))/.1;
     NORMAL=normalize(NORMAL+mat3(VIEW_MATRIX)*mat3(MODEL_MATRIX)*local_slope);

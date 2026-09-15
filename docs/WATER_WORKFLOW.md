@@ -109,3 +109,46 @@ onde nel lago ma non sulla terra, comandi campo/vortice.
 
 W01 e W02 restano aperti. Questo esempio dimostra il flusso di rendering e Play,
 non completa ancora il builder di laghi e fiumi.
+
+
+## W04.2 — Confronto A/B con simulazione locale
+
+Aprire `scenes/dev/water_study.tscn` e premere F6: stessa camera e personaggio
+ del gioco. F7 alterna A (scie analitiche) e B (onde simulate); O aggiunge un
+impulso in acqua, WASD produce impulsi camminando. Ogni attivazione di B azzera
+il campo. Premere 1 per isolare le interazioni dal vento.
+
+`local_wave_field.gd` implementa un'equazione delle onde smorzata su griglia
+CPU 64x64, 30 Hz, in una zona fissa di 20x20 metri nelle coordinate locali
+ del lago. La maschera delle rive e degli ostacoli circolari viene acquisita
+all'attivazione: riattivare B dopo modifiche. Le celle asciutte riflettono
+le onde; il bordo esterno della zona le assorbe gradualmente. Gli impulsi
+bilanciano spostamenti positivi e negativi. Passo fisso, coefficiente CFL
+controllato e massimo tre passi per frame evitano accumuli di lavoro dopo pause.
+Le onde aggiornano normali e altezza visiva; non modificano collisioni o livello
+medio, non trasportano acqua orizzontalmente. Il flusso prescritto resta separato.
+Dentro la zona le scie analitiche vengono sfumate via per evitare duplicazioni;
+fuori continuano a funzionare. Gli spruzzi rimangono attivi in entrambi i modi.
+
+Prima misura locale: circa 0,57 ms medi per passo del solver nel test headless;
+circa 0,40 ms nel breve capture con rendering. Misure indicative, escluse copia
+texture e costo GPU; non sono un benchmark del mondo completo. Entrambe le
+catture raggiungono il limite di 60 FPS, insufficiente per stimare il costo GPU.
+
+Verifiche: `tools/check_local_wave_field.gd` controlla propagazione (797 celle
+inizialmente ferme raggiunte), decadimento, celle asciutte, impulsi ripetuti,
+valori finiti e recupero dopo un frame lungo. `tools/check_water_study.gd`
+verifica anche F7, O, binding shader e assenza di impulsi sulla terra.
+Il test di integrazione conserva il noto messaggio PagedAllocator in chiusura
+headless; i capture renderizzati terminano senza errori.
+
+Capture: `--capture-water --compare-water` produce `captures/water_analytic.png`;
+aggiungere `--simulate-water` produce `captures/water_simulated.png`.
+La simulazione e' visivamente piu' discreta delle scie precedenti: il confronto
+non dimostra ancora una qualita' finale superiore. Caustiche e rifrazione sono
+invariate. Restano GPU, miglioramento della lettura con la camera di gioco,
+caustiche sul fondale derivate dal campo e test dedicato delle riflessioni.
+
+Riferimento studiato: [WebGL Water](https://madebyevan.com/webgl-water/) e
+[solver originale](https://github.com/evanw/webgl-water/blob/master/water.js).
+Questo e' un prototipo originale CPU, non una conversione completa della demo GPU.

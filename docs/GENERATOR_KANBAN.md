@@ -2,7 +2,7 @@
 
 Board locale versionata, generata dalle tabelle delle roadmap. DOING include le macrofasi parziali; non significa che ci siano più agenti al lavoro. DONE riguarda il criterio della singola card, non l'intero sistema.
 
-**Ramo corrente: W01 — acqua prescritta; esempio lago/emissario disponibile, segue authoring di rive e perimetro.** T01 ha una base accettata provvisoriamente, con tronco/radici corretti e suggerimenti in backlog. La pipeline architettonica riprende da A07: audit eseguito; resta confronto esplicito R10/R13 prima di B01.1. Generazione globale da seed e V01 rimandati; R03.3 in backlog. Le card RIMANDATO restano in TODO con stato esplicito.
+**Ramo corrente: acqua — W04.2 confronto A/B con onde locali disponibile; W04.3 GPU e resa visiva in TODO, W01.2 authoring rive ancora aperto.** T01 ha una base accettata provvisoriamente, con tronco/radici corretti e suggerimenti in backlog. La pipeline architettonica riprende da A07: audit eseguito; resta confronto esplicito R10/R13 prima di B01.1. Generazione globale da seed e V01 rimandati; R03.3 in backlog. Le card RIMANDATO restano in TODO con stato esplicito.
 
 Le card mantengono gli stati delle roadmap. Il criterio di uscita e le dipendenze sono nelle tabelle collegate; prima di iniziare una card TODO, verificare quelle dipendenze.
 
@@ -31,12 +31,13 @@ Aggiornare stati e criteri nelle tabelle, poi eseguire `python tools/update_gene
 | **[W01.2](WORLD_GENERATION_ROADMAP.md)** — Authoring lago e rive<br>TODO |  | **[R02.1](WORLD_GENERATION_ROADMAP.md)** — Gruppi su guida<br>FATTO |
 | **[W01.3](WORLD_GENERATION_ROADMAP.md)** — Qualità visiva acqua<br>TODO |  | **[R02.2](WORLD_GENERATION_ROADMAP.md)** — Fascia libera<br>FATTO |
 | **[W01.4b](WORLD_GENERATION_ROADMAP.md)** — Risacca e impatti sulla costa<br>TODO |  | **[R02.3](WORLD_GENERATION_ROADMAP.md)** — Addensamenti e raccordi<br>FATTO |
-| **[W02.2](WORLD_GENERATION_ROADMAP.md)** — Robustezza rive e raccordi<br>TODO |  | **[R03.1](WORLD_GENERATION_ROADMAP.md)** — Terrazza piana<br>FATTO |
-| **[W03](WORLD_GENERATION_ROADMAP.md)** — Attraversamenti e rive<br>TODO |  | **[R03.2](WORLD_GENERATION_ROADMAP.md)** — Accesso alla terrazza<br>FATTO |
-| **[C01](WORLD_GENERATION_ROADMAP.md)** — Ingressi di grotta<br>TODO |  | **[W01.1](WORLD_GENERATION_ROADMAP.md)** — Lago ed emissario di prova<br>FATTO |
-| **[C02](WORLD_GENERATION_ROADMAP.md)** — Piano di grotta<br>TODO |  | **[W01.3a](WORLD_GENERATION_ROADMAP.md)** — Caustiche senza griglia regolare<br>FATTO |
-| **[G01.4](WORLD_GENERATION_ROADMAP.md)** — Catalogo architettonico<br>TODO |  | **[W01.4](WORLD_GENERATION_ROADMAP.md)** — Lago mosso: prima versione visiva<br>FATTO |
-| **[G01.5](WORLD_GENERATION_ROADMAP.md)** — Varietà compositiva del castello<br>RIMANDATO |  | **[W04.1](WORLD_GENERATION_ROADMAP.md)** — Scia del personaggio e spruzzi<br>FATTO |
+| **[W04.3](WORLD_GENERATION_ROADMAP.md)** — Onde locali: GPU e qualita visiva<br>TODO |  | **[R03.1](WORLD_GENERATION_ROADMAP.md)** — Terrazza piana<br>FATTO |
+| **[W02.2](WORLD_GENERATION_ROADMAP.md)** — Robustezza rive e raccordi<br>TODO |  | **[R03.2](WORLD_GENERATION_ROADMAP.md)** — Accesso alla terrazza<br>FATTO |
+| **[W03](WORLD_GENERATION_ROADMAP.md)** — Attraversamenti e rive<br>TODO |  | **[W01.1](WORLD_GENERATION_ROADMAP.md)** — Lago ed emissario di prova<br>FATTO |
+| **[C01](WORLD_GENERATION_ROADMAP.md)** — Ingressi di grotta<br>TODO |  | **[W01.3a](WORLD_GENERATION_ROADMAP.md)** — Caustiche senza griglia regolare<br>FATTO |
+| **[C02](WORLD_GENERATION_ROADMAP.md)** — Piano di grotta<br>TODO |  | **[W01.4](WORLD_GENERATION_ROADMAP.md)** — Lago mosso: prima versione visiva<br>FATTO |
+| **[G01.4](WORLD_GENERATION_ROADMAP.md)** — Catalogo architettonico<br>TODO |  | **[W04.1](WORLD_GENERATION_ROADMAP.md)** — Scia del personaggio e spruzzi<br>FATTO |
+| **[G01.5](WORLD_GENERATION_ROADMAP.md)** — Varietà compositiva del castello<br>RIMANDATO |  | **[W04.2](WORLD_GENERATION_ROADMAP.md)** — Prototipo A/B onde locali<br>FATTO |
 | **[S01](WORLD_GENERATION_ROADMAP.md)** — Composizione urbana organica<br>RIMANDATO |  | **[W02.1](WORLD_GENERATION_ROADMAP.md)** — Fiume curvo con rocce<br>FATTO |
 | **[S02](WORLD_GENERATION_ROADMAP.md)** — Edifici urbani più articolati<br>TODO |  |  |
 | **[V01](WORLD_GENERATION_ROADMAP.md)** — Confronto dei quattro castelli<br>RIMANDATO |  |  |

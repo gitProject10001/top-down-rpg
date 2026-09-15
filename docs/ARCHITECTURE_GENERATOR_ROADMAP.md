@@ -320,6 +320,8 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | W01.4b | TODO | Risacca e impatti sulla costa | Pipeline mondo | Fascia di terreno bagnata con avanzamento/ritiro, spruzzi delle onde sulle rocce e transizione visiva onde/fondale più accurata |
 | W04 | IN CORSO — W04.1 disponibile | Interazioni acqua locali | Pipeline mondo | Scie, spruzzi, ostacoli e oggetti galleggianti; simulazione limitata solo a comportamenti necessari |
 | W04.1 | FATTO | Scia del personaggio e spruzzi | Pipeline mondo | Scia orientata dalla velocità, schiuma, normali disturbate e 48 gocce riutilizzate; niente emissioni da fermo o sulla terra |
+| W04.2 | FATTO | Prototipo A/B onde locali | Pipeline mondo | Lago Play, F7 analitico/simulato, griglia CPU 64x64 a 30 Hz, impulsi, maschere, smorzamento e test di stabilita; costo solver misurato, resa da affinare |
+| W04.3 | TODO | Onde locali: GPU e qualita visiva | Pipeline mondo | Profilare costo completo, backend GPU, lettura dalla camera isometrica, confronto riflessioni e caustiche derivate dal campo sul fondale |
 | W02 | IN CORSO — W02.1 disponibile | Fiumi editabili | Pipeline mondo | Spline, larghezza/profondità, profilo discendente e confluenze; raccordo alle quote dei laghi; niente flussi in salita |
 | W02.1 | FATTO | Fiume curvo con rocce | Pipeline mondo | Path3D e larghezze, corrente indipendente dall'asse X, rocce del builder che deviano il campo e producono schiuma; scena gameplay e frecce debug |
 | W02.2 | TODO | Robustezza rive e raccordi | Pipeline mondo | Diagnostica curve strette/incroci, vincolo di non attraversare le sponde, quote discrete e confluenze; fondale aggiornato in editor |

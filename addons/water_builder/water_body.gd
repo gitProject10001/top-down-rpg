@@ -1,6 +1,6 @@
 @tool
 extends Node3D
-## Prescribed water surface; no time-integrated fluid state.
+## Prescribed flow and wind with an optional local wave heightfield for A/B tests.
 @export var boundary := PackedVector2Array([Vector2(-8,-4),Vector2(-5,-7),Vector2(0,-7),Vector2(4,-4),Vector2(5,-1),Vector2(12,1),Vector2(16,0),Vector2(17,3),Vector2(12,4),Vector2(5,2),Vector2(2,5),Vector2(-4,5),Vector2(-8,2)]):
     set(value):
         boundary = value
@@ -43,6 +43,23 @@ var _drop_cursor := 0
 var _rng := RandomNumberGenerator.new()
 var river_mode := false
 var obstacles := PackedVector4Array()
+var simulation_enabled := false
+var wave_field: RefCounted
+
+func set_simulation(enabled: bool) -> void:
+    simulation_enabled=enabled
+    if enabled:
+        wave_field=preload("res://addons/water_builder/local_wave_field.gd").new()
+        wave_field.configure(boundary,obstacles)
+    _bind_simulation()
+
+func _bind_simulation() -> void:
+    if not is_instance_valid(_surface):return
+    _surface.material_override.set_shader_parameter("simulation_enabled",simulation_enabled)
+    if wave_field:
+        _surface.material_override.set_shader_parameter("wave_field",wave_field.texture)
+        var rect: Rect2=wave_field.bounds
+        _surface.material_override.set_shader_parameter("simulation_bounds",Vector4(rect.position.x,rect.position.y,rect.size.x,rect.size.y))
 @export_range(-180,180,1) var wind_angle := 35.0:
     set(value):
         wind_angle=value
@@ -171,6 +188,7 @@ func rebuild() -> void:
     _surface.extra_cull_margin=.25
     _surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
     add_child(_surface, false, Node.INTERNAL_MODE_BACK)
+    _bind_simulation()
 
 func contains_point(point: Vector2) -> bool:
     return Geometry2D.is_point_in_polygon(point,boundary)
@@ -194,6 +212,7 @@ func ripple(world_point: Vector3, strength := 1.0) -> void:
     if not contains_point(Vector2(local.x,local.z)): return
     _rings[_next_ring] = Vector4(local.x,local.z,_clock,clampf(strength,0,1))
     _next_ring = (_next_ring+1)%8
+    if simulation_enabled and wave_field:wave_field.impulse(Vector2(local.x,local.z),strength*.035)
 
 func disturb(world_point: Vector3, world_velocity: Vector3) -> void:
     var local := to_local(world_point)
@@ -218,6 +237,7 @@ func disturb(world_point: Vector3, world_velocity: Vector3) -> void:
 
 func _process(delta: float) -> void:
     _clock += delta
+    if simulation_enabled and wave_field:wave_field.advance(delta)
     if is_instance_valid(_surface):
         _surface.material_override.set_shader_parameter("clock",_clock)
         _surface.material_override.set_shader_parameter("rings",_rings)
