@@ -22,8 +22,9 @@ func _ready() -> void:
     if "--capture-water" in OS.get_cmdline_user_args():
         player.position=Vector3(-3,.7,2)
         await get_tree().create_timer(1.5).timeout
-        water.ripple(player.global_position)
-        await get_tree().create_timer(.35).timeout
+        Input.action_press("move_up")
+        await get_tree().create_timer(.65).timeout
+        Input.action_release("move_up")
         await RenderingServer.frame_post_draw
         var result:=get_viewport().get_texture().get_image().save_png("res://captures/water_study.png")
         print("WATER_CAPTURE ",result)
@@ -51,7 +52,7 @@ func _physics_process(delta: float) -> void:
     if not is_instance_valid(player):return
     _cooldown-=delta
     if player.is_on_floor() and player.global_position.distance_to(_last)>.22 and _cooldown<=0:
-        water.ripple(player.global_position,.8)
+        water.disturb(player.global_position,player.velocity)
         _last=player.global_position
         _cooldown=.15
 

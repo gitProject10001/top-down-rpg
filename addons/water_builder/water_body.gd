@@ -34,9 +34,40 @@ var _surface: MeshInstance3D
 var _clock := 0.0
 var _rings := PackedVector4Array()
 var _next_ring := 0
+var _wakes := PackedVector4Array()
+var _directions := PackedVector2Array()
+var _next_wake := 0
+var _spray: MultiMeshInstance3D
+var _drops: Array[Dictionary] = []
+var _drop_cursor := 0
+var _rng := RandomNumberGenerator.new()
 
 func _ready() -> void:
     for i in 8: _rings.append(Vector4(0,0,-100,0))
+    for i in 16:
+        _wakes.append(Vector4(0,0,-100,0))
+        _directions.append(Vector2.ZERO)
+    if not Engine.is_editor_hint():
+        _spray = MultiMeshInstance3D.new()
+        _spray.name = "LocalSpray"
+        _spray.multimesh = MultiMesh.new()
+        _spray.multimesh.transform_format = MultiMesh.TRANSFORM_3D
+        var drop := SphereMesh.new()
+        drop.radius = .025
+        drop.height = .065
+        drop.radial_segments = 6
+        drop.rings = 2
+        var material := StandardMaterial3D.new()
+        material.albedo_color = Color(.52,.78,.72)
+        material.roughness = .25
+        drop.material = material
+        _spray.multimesh.mesh = drop
+        _spray.multimesh.instance_count = 48
+        _spray.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+        add_child(_spray,false,Node.INTERNAL_MODE_BACK)
+        for i in 48:
+            _drops.append({"age":1.0,"position":Vector3.ZERO,"velocity":Vector3.ZERO})
+            _spray.multimesh.set_instance_transform(i,Transform3D(Basis.IDENTITY.scaled(Vector3.ZERO),Vector3.ZERO))
     rebuild()
 
 func schedule_build() -> void:
@@ -119,8 +150,40 @@ func ripple(world_point: Vector3, strength := 1.0) -> void:
     _rings[_next_ring] = Vector4(local.x,local.z,_clock,clampf(strength,0,1))
     _next_ring = (_next_ring+1)%8
 
+func disturb(world_point: Vector3, world_velocity: Vector3) -> void:
+    var local := to_local(world_point)
+    if not contains_point(Vector2(local.x,local.z)): return
+    var velocity := global_basis.inverse()*world_velocity
+    var heading := Vector2(velocity.x,velocity.z)
+    var speed := heading.length()
+    if speed < .2: return
+    heading /= speed
+    var strength := clampf(speed/5.0,.15,1.0)
+    _wakes[_next_wake] = Vector4(local.x,local.z,_clock,strength)
+    _directions[_next_wake] = heading
+    _next_wake = (_next_wake+1)%16
+    ripple(world_point,strength*.6)
+    if not is_instance_valid(_spray): return
+    for i in 4:
+        var side := Vector3(-heading.y,0,heading.x)*(-1 if i%2 else 1)
+        _drops[_drop_cursor] = {"age":0.0,
+            "position":Vector3(local.x,.025,local.z)+side*.12,
+            "velocity":side*_rng.randf_range(.4,1.0)*strength+Vector3(heading.x,0,heading.y)*speed*.12+Vector3.UP*_rng.randf_range(.8,1.6)*strength}
+        _drop_cursor = (_drop_cursor+1)%48
+
 func _process(delta: float) -> void:
     _clock += delta
     if is_instance_valid(_surface):
         _surface.material_override.set_shader_parameter("clock",_clock)
         _surface.material_override.set_shader_parameter("rings",_rings)
+        _surface.material_override.set_shader_parameter("wakes",_wakes)
+        _surface.material_override.set_shader_parameter("wake_directions",_directions)
+    if is_instance_valid(_spray):
+        for i in _drops.size():
+            var drop := _drops[i]
+            if drop.age >= .6: continue
+            drop.age += delta
+            drop.velocity += Vector3.DOWN*5.0*delta
+            drop.position += drop.velocity*delta
+            var size := maxf(0.0,1.0-drop.age/.6) if drop.position.y>0 else 0.0
+            _spray.multimesh.set_instance_transform(i,Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*size),drop.position))

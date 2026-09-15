@@ -315,7 +315,9 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | W01.1 | FATTO | Lago ed emissario di prova | Pipeline mondo | Nodo tool con perimetro, flusso prescritto, vortice opzionale, fondale percorribile e onde locali; camera gameplay e test ingresso/uscita |
 | W01.2 | TODO | Authoring lago e rive | Pipeline mondo | Gizmo contestuali, Undo/Redo, diagnostica perimetro; preview fondale in editor e protezione terreno manuale |
 | W01.3 | TODO | Qualità visiva acqua | Pipeline mondo | Rive naturali, fondale, riflessi e caustiche meno ripetitive; riferimento alla camera gameplay |
-| W04 | TODO | Interazioni acqua locali | Pipeline mondo | Scie, spruzzi, ostacoli e oggetti galleggianti; simulazione limitata solo a comportamenti necessari |
+| W01.3a | FATTO | Caustiche senza griglia regolare | Pipeline mondo | Celle deformate e linee discontinue con intensità variabile; rendering gameplay verificato |
+| W04 | IN CORSO — W04.1 disponibile | Interazioni acqua locali | Pipeline mondo | Scie, spruzzi, ostacoli e oggetti galleggianti; simulazione limitata solo a comportamenti necessari |
+| W04.1 | FATTO | Scia del personaggio e spruzzi | Pipeline mondo | Scia orientata dalla velocità, schiuma, normali disturbate e 48 gocce riutilizzate; niente emissioni da fermo o sulla terra |
 | W02 | TODO | Fiumi editabili | Pipeline mondo | Spline, larghezza/profondità, profilo discendente e confluenze; raccordo alle quote dei laghi; niente flussi in salita |
 | W03 | TODO | Attraversamenti e rive | Pipeline mondo | Ponti, guadi, approdi, passaggi e accessi alle sponde; terreno/rocce/strade leggono gli stessi vincoli |
 | C01 | TODO | Ingressi di grotta | Pipeline mondo | Apertura reale nel blocco roccioso, soglia percorribile, collisione coerente e leggibilità alla camera fissa |

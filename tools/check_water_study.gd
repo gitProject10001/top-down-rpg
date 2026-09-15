@@ -30,6 +30,12 @@ func check() -> void:
     await walk(player,camera,Vector3(-3,0,2))
     assert(player.is_on_floor() and player.position.z<2.5,"Enter lake on the shallow bed")
     assert(water._rings[0].w>0,"Walking produces local rings")
+    assert(water._wakes[0].w>0 and water._directions[0].length()>.9,"Motion creates directional wakes")
+    assert(water._spray.multimesh.instance_count==48,"Spray has a fixed budget")
+    var wake_count: int=water._next_wake
+    water.disturb(player.global_position,Vector3.ZERO)
+    water.disturb(Vector3(-20,0,20),Vector3(3,0,0))
+    assert(water._next_wake==wake_count,"Stationary player and dry land do not emit wakes")
     var count: int=water._next_ring
     water.ripple(Vector3(-20,0,20))
     assert(water._next_ring==count,"Dry land does not produce rings")

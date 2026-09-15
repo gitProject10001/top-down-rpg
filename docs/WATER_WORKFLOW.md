@@ -34,11 +34,19 @@ velocità e schiuma, con accoppiamento, vincoli di passo e correzioni specifiche
 Non viene copiato né eseguito quel solver. Qui il livello resta costante:
 nessun trasporto di massa, riempimento, allagamento o instabilità di integrazione.
 
+W01.3a: caustiche cellulari deformate, linee curve interrotte da variazioni locali
+di intensità. Sostituito il prodotto periodico di sinusoidi che produceva una
+scacchiera. Rimangono un effetto artistico di superficie, da rifinire sul fondale.
+
 Il campo guida due fasi di scorrimento interpolate, evitando deformazioni visive
 che crescono senza limite. Il vortice è un campo tangenziale con attenuazione
 locale; non risucchia acqua. Le interazioni usano otto onde analitiche a durata
-massima di due secondi, attivate dal movimento a piedi. Non si propagano contro
-ostacoli e non producono riflessioni fisiche o spruzzi volumetrici.
+massima di due secondi, ora irregolari e attenuate. W04.1 aggiunge 16 campioni
+di scia orientati dalla velocità, schiuma discontinua e perturbazione delle normali.
+Gli spruzzi sono 48 piccole mesh in un MultiMesh, riutilizzate; emissione ai lati
+del personaggio, traiettoria balistica e durata massima di 0,6 secondi.
+Da fermo e sulla terra non vengono emesse scie. Non ci sono ancora riflessioni
+contro ostacoli, spostamento di massa o collegamento alle animazioni dei singoli piedi.
 
 ## Verifiche e prossimi passi
 

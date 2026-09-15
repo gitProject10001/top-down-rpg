@@ -62,7 +62,9 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 | W01.1 | FATTO | Lago ed emissario di prova | Nodo tool con perimetro, flusso prescritto, vortice opzionale, fondale percorribile e onde locali; camera gameplay e test ingresso/uscita |
 | W01.2 | TODO | Authoring lago e rive | Gizmo contestuali, Undo/Redo, diagnostica perimetro; preview fondale in editor e protezione terreno manuale |
 | W01.3 | TODO | Qualità visiva acqua | Rive naturali, fondale, riflessi e caustiche meno ripetitive; riferimento alla camera gameplay |
-| W04 | TODO | Interazioni acqua locali | Scie, spruzzi, ostacoli e oggetti galleggianti; simulazione limitata solo a comportamenti necessari |
+| W01.3a | FATTO | Caustiche senza griglia regolare | Celle deformate e linee discontinue con intensità variabile; rendering gameplay verificato |
+| W04 | IN CORSO — W04.1 disponibile | Interazioni acqua locali | Scie, spruzzi, ostacoli e oggetti galleggianti; simulazione limitata solo a comportamenti necessari |
+| W04.1 | FATTO | Scia del personaggio e spruzzi | Scia orientata dalla velocità, schiuma, normali disturbate e 48 gocce riutilizzate; niente emissioni da fermo o sulla terra |
 | W02 | TODO | Fiumi editabili | Spline, larghezza/profondità, profilo discendente e confluenze; raccordo alle quote dei laghi; niente flussi in salita |
 | W03 | TODO | Attraversamenti e rive | Ponti, guadi, approdi, passaggi e accessi alle sponde; terreno/rocce/strade leggono gli stessi vincoli |
 | C01 | TODO | Ingressi di grotta | Apertura reale nel blocco roccioso, soglia percorribile, collisione coerente e leggibilità alla camera fissa |

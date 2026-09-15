@@ -20,7 +20,7 @@ Aggiornare stati e criteri nelle tabelle, poi eseguire `python tools/update_gene
 | **[A06](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Due archetipi completi con profili architettonici<br>TODO | **[R02](WORLD_GENERATION_ROADMAP.md)** — Composizione di gruppi rocciosi<br>IN CORSO — R02.1–R02.3 verificati | **[A07.7](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Consolidamento A07 e percorso giocabile<br>FATTO |
 | **[G01](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Composizione da metadati, separata dai builder<br>RIMANDATO | **[R03](WORLD_GENERATION_ROADMAP.md)** — Pareti e creste montuose<br>IN CORSO — R03.1–R03.2 verificati | **[A07.7a](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Percorsi nelle torri 12/16 e diagnostica raccordi<br>FATTO |
 | **[A10](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Rovine strutturali controllabili<br>TODO | **[W01](WORLD_GENERATION_ROADMAP.md)** — Laghi editabili<br>IN CORSO — esempio W01.1 | **[A07.7b](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Stanze e contenimento nella pianta poligonale<br>FATTO |
-| **[A11](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Integrazione insediamento e consolidamento<br>TODO |  | **[A07.8](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Piante poligonali oltre i prismi regolari<br>FATTO |
+| **[A11](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Integrazione insediamento e consolidamento<br>TODO | **[W04](WORLD_GENERATION_ROADMAP.md)** — Interazioni acqua locali<br>IN CORSO — W04.1 disponibile | **[A07.8](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Piante poligonali oltre i prismi regolari<br>FATTO |
 | **[T01.2](WORLD_GENERATION_ROADMAP.md)** — Rifinitura visiva alberi<br>TODO |  | **[A07.8a](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Sagoma convessa deformabile<br>FATTO |
 | **[T01.2b](WORLD_GENERATION_ROADMAP.md)** — Corteccia e raccordo al terreno<br>TODO |  | **[A07.8b](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Verifica degli agganci durante la deformazione<br>FATTO |
 | **[T01.2c](WORLD_GENERATION_ROADMAP.md)** — Palette e silhouette chioma<br>TODO |  | **[T01.1](WORLD_GENERATION_ROADMAP.md)** — Studio alberi Blender → Godot<br>FATTO |
@@ -30,13 +30,12 @@ Aggiornare stati e criteri nelle tabelle, poi eseguire `python tools/update_gene
 | **[R03.3](WORLD_GENERATION_ROADMAP.md)** — Ciglio e sagoma della terrazza<br>TODO |  | **[R01.1](WORLD_GENERATION_ROADMAP.md)** — Roccia parametrica<br>FATTO |
 | **[W01.2](WORLD_GENERATION_ROADMAP.md)** — Authoring lago e rive<br>TODO |  | **[R02.1](WORLD_GENERATION_ROADMAP.md)** — Gruppi su guida<br>FATTO |
 | **[W01.3](WORLD_GENERATION_ROADMAP.md)** — Qualità visiva acqua<br>TODO |  | **[R02.2](WORLD_GENERATION_ROADMAP.md)** — Fascia libera<br>FATTO |
-| **[W04](WORLD_GENERATION_ROADMAP.md)** — Interazioni acqua locali<br>TODO |  | **[R02.3](WORLD_GENERATION_ROADMAP.md)** — Addensamenti e raccordi<br>FATTO |
-| **[W02](WORLD_GENERATION_ROADMAP.md)** — Fiumi editabili<br>TODO |  | **[R03.1](WORLD_GENERATION_ROADMAP.md)** — Terrazza piana<br>FATTO |
-| **[W03](WORLD_GENERATION_ROADMAP.md)** — Attraversamenti e rive<br>TODO |  | **[R03.2](WORLD_GENERATION_ROADMAP.md)** — Accesso alla terrazza<br>FATTO |
-| **[C01](WORLD_GENERATION_ROADMAP.md)** — Ingressi di grotta<br>TODO |  | **[W01.1](WORLD_GENERATION_ROADMAP.md)** — Lago ed emissario di prova<br>FATTO |
-| **[C02](WORLD_GENERATION_ROADMAP.md)** — Piano di grotta<br>TODO |  |  |
-| **[G01.4](WORLD_GENERATION_ROADMAP.md)** — Catalogo architettonico<br>TODO |  |  |
-| **[G01.5](WORLD_GENERATION_ROADMAP.md)** — Varietà compositiva del castello<br>RIMANDATO |  |  |
+| **[W02](WORLD_GENERATION_ROADMAP.md)** — Fiumi editabili<br>TODO |  | **[R02.3](WORLD_GENERATION_ROADMAP.md)** — Addensamenti e raccordi<br>FATTO |
+| **[W03](WORLD_GENERATION_ROADMAP.md)** — Attraversamenti e rive<br>TODO |  | **[R03.1](WORLD_GENERATION_ROADMAP.md)** — Terrazza piana<br>FATTO |
+| **[C01](WORLD_GENERATION_ROADMAP.md)** — Ingressi di grotta<br>TODO |  | **[R03.2](WORLD_GENERATION_ROADMAP.md)** — Accesso alla terrazza<br>FATTO |
+| **[C02](WORLD_GENERATION_ROADMAP.md)** — Piano di grotta<br>TODO |  | **[W01.1](WORLD_GENERATION_ROADMAP.md)** — Lago ed emissario di prova<br>FATTO |
+| **[G01.4](WORLD_GENERATION_ROADMAP.md)** — Catalogo architettonico<br>TODO |  | **[W01.3a](WORLD_GENERATION_ROADMAP.md)** — Caustiche senza griglia regolare<br>FATTO |
+| **[G01.5](WORLD_GENERATION_ROADMAP.md)** — Varietà compositiva del castello<br>RIMANDATO |  | **[W04.1](WORLD_GENERATION_ROADMAP.md)** — Scia del personaggio e spruzzi<br>FATTO |
 | **[S01](WORLD_GENERATION_ROADMAP.md)** — Composizione urbana organica<br>RIMANDATO |  |  |
 | **[S02](WORLD_GENERATION_ROADMAP.md)** — Edifici urbani più articolati<br>TODO |  |  |
 | **[V01](WORLD_GENERATION_ROADMAP.md)** — Confronto dei quattro castelli<br>RIMANDATO |  |  |
