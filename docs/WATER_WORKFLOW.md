@@ -152,3 +152,16 @@ caustiche sul fondale derivate dal campo e test dedicato delle riflessioni.
 Riferimento studiato: [WebGL Water](https://madebyevan.com/webgl-water/) e
 [solver originale](https://github.com/evanw/webgl-water/blob/master/water.js).
 Questo e' un prototipo originale CPU, non una conversione completa della demo GPU.
+
+
+### Correzione leggibilita dopo F7
+
+Le normali da sole rendevano praticamente invisibili le onde millimetriche con
+la camera e la luce del gioco. Lo shader ora evidenzia creste e avvallamenti
+usando l'altezza simulata, aumenta il contributo delle pendenze alle normali e
+lega la schiuma alla pendenza delle creste. Il contrasto e' una scelta visiva,
+non una modifica alla fisica o nuovi cerchi analitici. Campo nullo significa
+nessun contributo: F7 attiva il solver, camminare in acqua oppure O lo eccitano.
+Verificato con capture reale durante movimento, preset brezza, senza impulso
+aggiuntivo O; compilazione shader e cattura senza errori. La risoluzione locale
+resta 64x64: affinare forma e riflessi rimane W04.3.

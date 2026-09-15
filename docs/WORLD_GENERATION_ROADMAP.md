@@ -67,7 +67,7 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 | W01.4b | TODO | Risacca e impatti sulla costa | Fascia di terreno bagnata con avanzamento/ritiro, spruzzi delle onde sulle rocce e transizione visiva onde/fondale più accurata |
 | W04 | IN CORSO — W04.1 disponibile | Interazioni acqua locali | Scie, spruzzi, ostacoli e oggetti galleggianti; simulazione limitata solo a comportamenti necessari |
 | W04.1 | FATTO | Scia del personaggio e spruzzi | Scia orientata dalla velocità, schiuma, normali disturbate e 48 gocce riutilizzate; niente emissioni da fermo o sulla terra |
-| W04.2 | FATTO | Prototipo A/B onde locali | Lago Play, F7 analitico/simulato, griglia CPU 64x64 a 30 Hz, impulsi, maschere, smorzamento e test di stabilita; costo solver misurato, resa da affinare |
+| W04.2 | FATTO | Prototipo A/B onde locali | Lago Play, F7 analitico/simulato, griglia CPU 64x64 a 30 Hz, impulsi, maschere, smorzamento e test di stabilita; costo solver misurato; contrasto creste/avvallamenti corretto per visibilita dopo F7, resa da affinare |
 | W04.3 | TODO | Onde locali: GPU e qualita visiva | Profilare costo completo, backend GPU, lettura dalla camera isometrica, confronto riflessioni e caustiche derivate dal campo sul fondale |
 | W02 | IN CORSO — W02.1 disponibile | Fiumi editabili | Spline, larghezza/profondità, profilo discendente e confluenze; raccordo alle quote dei laghi; niente flussi in salita |
 | W02.1 | FATTO | Fiume curvo con rocce | Path3D e larghezze, corrente indipendente dall'asse X, rocce del builder che deviano il campo e producono schiuma; scena gameplay e frecce debug |

@@ -163,7 +163,12 @@ void fragment() {
     wake*=1.0-sim_mix;
     disturbance*=1.0-sim_mix;
     vec2 sim_gradient=vec2(simulated(p+vec2(.15,0))-simulated(p-vec2(.15,0)),simulated(p+vec2(0,.15))-simulated(p-vec2(0,.15)))/.3;
-    float sim_foam=smoothstep(.012,.05,length(sim_gradient))*sim_mix*.25;
+    // Readable crest/trough contrast comes from the simulated field, not extra rings.
+    // Millimetric waves otherwise disappear under the fixed camera and flat sky lighting.
+    float sim_height=simulated(p);
+    float sim_crest=smoothstep(.00035,.003,sim_height)*sim_mix;
+    float sim_trough=smoothstep(.00035,.003,-sim_height)*sim_mix;
+    float sim_foam=smoothstep(.003,.016,length(sim_gradient))*sim_crest*.18;
     float depth=basin_depth*smoothstep(0.0,1.5,bank);
     vec3 color=mix(vec3(.025,.16,.12),vec3(.004,.035,.045),clamp(depth/.5,0.0,1.0));
     float phase_wave=wind_phase(p)+1.2*exp(-bank*.9);
@@ -188,6 +193,7 @@ void fragment() {
         rock_foam+=(collar*.35+trail*.45)*broken;
     }
     ALBEDO=color+vec3(.035,.09,.07)*caustic*.35+vec3(.2,.35,.3)*(ring*.45+foam*1.4+wake+rock_foam+sim_foam);
+    ALBEDO=ALBEDO*(1.0-sim_trough*.32)+vec3(.07,.12,.105)*sim_crest;
     if(debug_flow) {
         vec2 cell=(floor(p/1.5)+.5)*1.5;
         vec2 direction=current(cell);direction/=max(length(direction),.001);
@@ -199,12 +205,12 @@ void fragment() {
         ALBEDO=mix(vec3(flow.x*.25+.3,.06,flow.y*.25+.3),vec3(.9),max(shaft,head));
     }
     vec3 local_slope=vec3(sin(q.x*5.0+q.y)*.06+disturbance.x,0.0,cos(q.y*5.0-q.x)*.06+disturbance.y);
-    local_slope-=vec3(sim_gradient.x,0.0,sim_gradient.y)*2.0;
+    local_slope-=vec3(sim_gradient.x,0.0,sim_gradient.y)*5.0;
     local_slope.x-=(swell(p+vec2(.05,0),bank)-swell(p-vec2(.05,0),bank))/.1;
     local_slope.z-=(swell(p+vec2(0,.05),bank)-swell(p-vec2(0,.05),bank))/.1;
     NORMAL=normalize(NORMAL+mat3(VIEW_MATRIX)*mat3(MODEL_MATRIX)*local_slope);
     ROUGHNESS=.23;
     SPECULAR=.65;
     ALPHA=mix(.45,.82,clamp(depth/.5,0.0,1.0));
-    EMISSION=vec3(.025,.05,.04)*caustic*.15+vec3(.15,.23,.2)*ring*.2+vec3(.06,.09,.08)*foam;
+    EMISSION=vec3(.025,.05,.04)*caustic*.15+vec3(.15,.23,.2)*ring*.2+vec3(.06,.09,.08)*foam+vec3(.012,.025,.021)*sim_crest;
 }
