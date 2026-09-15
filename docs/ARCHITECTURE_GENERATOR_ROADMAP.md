@@ -291,6 +291,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 
 | ID | Stato | Incremento ambientale / integrazione | Dipendenze | Esempio / criterio di uscita |
 |---|---|---|---|---|
+| I01 | FATTO | Scena integrata con strumenti esistenti | Pipeline mondo | Città murata, borgo, fiume/lago simulati, nuovi alberi e affioramenti; Play, panoramica e percorso verificabile. Passi e limiti in INTEGRATED_LANDSCAPE.md |
 | T01.1 | FATTO | Studio alberi Blender → Godot | Pipeline mondo | Latifoglia e pino originali, alpha spray, normali chioma, palette e vento runtime; scena F6, sorgente e test in TREE_WORKFLOW.md |
 | T01.1a | FATTO | Prova alberi con presentazione gameplay | Pipeline mondo | Rig estratto dalla scena principale: stesso player, camera follow, viewport, luci e palette; movimento e collisioni verificati |
 | T01.2 | TODO | Rifinitura visiva alberi | Pipeline mondo | Confronto reference alla camera di gioco, tronco, ciuffi e ombre; approvazione prima di sostituire gli alberi esistenti |
