@@ -23,7 +23,8 @@ static func append_to(house: Node3D,target: ArrayMesh) -> void:
      if denominator<0.15: continue
      var da: Vector3=(house.wall_point(a,0,0)-corner).normalized()
      var db: Vector3=(house.wall_point(b,0,0)-corner).normalized()
-     var rows := maxi(1,roundi(house.wall_height/0.37))
+     var course_height: float=house.masonry_finish.block_size.y if house.masonry_finish else .37
+     var rows := maxi(1,roundi(house.wall_height/course_height))
      for row in rows:
       var la := 0.52 if row%2==0 else 0.29
       var lb := 0.29 if row%2==0 else 0.52
@@ -52,4 +53,5 @@ static func append_to(house: Node3D,target: ArrayMesh) -> void:
  if emitted:
   tool.commit(target)
   var material := ShaderMaterial.new(); material.shader=preload("res://shaders/pixelart/solid_masonry.gdshader")
+  if house.masonry_finish: house.masonry_finish.apply(material,.205,false,house.position.y if house.has_method("volume_host") else 0.0)
   target.surface_set_material(target.get_surface_count()-1,material)

@@ -1,6 +1,8 @@
 shader_type spatial;
 render_mode diffuse_burley, specular_disabled;
 #include "res://shaders/pixelart/architecture_reveal.gdshaderinc"
+#include "res://shaders/pixelart/stone_pigment.gdshaderinc"
+#include "res://addons/house_builder/masonry_finish.gdshaderinc"
 uniform int surface_kind = 0;
 uniform bool weathered = true;
 uniform float pattern_seed = 0.0;
@@ -35,4 +37,11 @@ void fragment() {
  ROUGHNESS=1.0; SPECULAR=0.0;
  AO=mix(.77,1.0,smoothstep(.02,.22,detail_position.y));
  AO_LIGHT_AFFECT=.6;
+ if(masonry_finish_enabled) {
+  vec3 wear=vec3(masonry_weathering);
+  if(anime_painted) wear*=vec3(art_layer(2,reveal_world,moss_amount),art_layer(3,reveal_world,damp_amount),art_layer(4,reveal_world,damage_amount))/vec3(.35,.25,.20);
+  vec4 finish=masonry_finish(COLOR.rgb,detail_position,detail_normal,AO,clamp(wear,vec3(0),vec3(1)));
+  ALBEDO=finish.rgb; AO=finish.a;
+  if(masonry_courses) NORMAL=masonry_relief_normal(VERTEX,NORMAL,finish.a*.016);
+ }
 }

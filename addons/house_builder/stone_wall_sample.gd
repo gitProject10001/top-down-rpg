@@ -17,6 +17,8 @@ var _contact: Dictionary={}
 var _surface: SurfaceTool
 var _rng := RandomNumberGenerator.new()
 var stone_count := 0
+var masonry_finish: Resource
+var masonry_height_offset := 0.0
 func _ready() -> void: rebuild()
 func request_rebuild() -> void:
  if not is_inside_tree() or _pending: return
@@ -81,14 +83,16 @@ func rebuild() -> void:
  var y := 0.0
  var row_heights: Array[float]=[]
  var total := 0.0
- for i in maxi(3,roundi(height/0.37)):
+ var course_height: float=masonry_finish.block_size.y if masonry_finish else .37
+ var width_scale: float=masonry_finish.block_size.x/.72 if masonry_finish else 1.0
+ for i in maxi(3,roundi(height/course_height)):
   var h := _rng.randf_range(0.30,0.44); row_heights.append(h); total+=h
  var row := 0
  for weight in row_heights:
   var row_height := height*weight/total
   var x := -width*0.5
   while x<width*0.5-0.01:
-   var w := minf(_rng.randf_range(0.48,0.94),width*0.5-x)
+   var w := minf(_rng.randf_range(0.48,0.94)*width_scale,width*0.5-x)
    if x==-width*0.5 and row%2==1: w=minf(w,0.37)
    if width*0.5-x-w<0.28: w=width*0.5-x
    var gap := _rng.randf_range(0.009,0.033)
@@ -96,6 +100,9 @@ func rebuild() -> void:
    x+=w
   y+=row_height; row+=1
  var material := ShaderMaterial.new(); material.shader=preload("res://shaders/pixelart/solid_masonry.gdshader")
+ if masonry_finish:
+  masonry_finish.apply(material,.205,false,masonry_height_offset)
+  material.set_shader_parameter("masonry_ledge_heights",Vector4(.34,height-.10,-100,-100)+Vector4.ONE*masonry_height_offset)
  var mesh := MeshInstance3D.new(); mesh.name="IndividualStones"; mesh.mesh=_surface.commit(); mesh.material_override=material; _generated.add_child(mesh)
  var mortar := MeshInstance3D.new(); mortar.name="RecessedMortar"
  var box := BoxMesh.new(); box.size=Vector3(width-0.026,height-0.026,0.452)

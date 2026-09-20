@@ -171,6 +171,20 @@ func run() -> void:
 			var door: Dictionary = house.resolved_opening(house.openings[0])
 			var outside: Vector3 = house.to_global(house.wall_point(door.wall, door.along, 0, 1.7)) + Vector3.UP*.6
 			await capture("borgo_"+Migration.ROLES[i],outside,22 if i in [2,5] else 19,house.global_position+Vector3.UP*3.0)
+			if i==5 and "--portal-closeups" in OS.get_cmdline_user_args():
+				var portal: Node3D=house.get_node("RecipeDetails/FacciataGotica")
+				await capture("church_portal_close",outside,7.5,portal.to_global(Vector3(0,2.0,0)))
+				var saved_yaw: float=scene.camera.yaw_deg
+				var saved_pitch: float=scene.camera.pitch_deg
+				scene.camera.yaw_deg+=30.0
+				scene.camera.pitch_deg=35.0
+				await capture("church_portal_oblique",outside,7.5,portal.to_global(Vector3(0,2.0,0)))
+				scene.camera.yaw_deg=saved_yaw
+				scene.camera.pitch_deg=saved_pitch
+				scene.camera._apply(true)
+			if i==5 and "--rose-closeup" in OS.get_cmdline_user_args():
+				var facade: Node3D=house.get_node("RecipeDetails/FacciataGotica")
+				await capture("church_rose_close",outside,5.0,facade.to_global(Vector3(0,facade.dimensions.y*.735,0)))
 			if i==5 and "--shadow-comparison" in OS.get_cmdline_user_args():
 				var sun: DirectionalLight3D=view.get_node("Sun")
 				var angle: float=sun.light_angular_distance

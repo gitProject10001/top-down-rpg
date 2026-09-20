@@ -30,6 +30,10 @@ Luce dipinta ribilanciata: meno ambiente uniforme, SSAO con raggio 65 cm,
 occlusione SDFGI riattivata e penombra del sole a 0,5° (la prova a 2,2° perdeva
 le ombre portate su tetto e terreno). Parametri salvati nel
 profilo artistico, condiviso tra anteprima editor e Play e reversibile con F7.
+La chiesa condivide inoltre `chapel_stone.tres` fra navata, frontone e
+campanile: palette, scala dei corsi e usura si modificano nell'House Builder.
+La navata mantiene blocchi geometrici; i corsi sui pannelli gotici sono
+dettaglio di materiale. Cornici e archi conservano il proprio rilievo reale.
 La scena è il **prototipo visivo**; ricette e componenti negli addon sono la
 **base riutilizzabile**. L'editor adattivo tipo Tiny Glade, i collegamenti
 automatici fra sistemi e la generazione urbana completa restano sviluppi futuri.
@@ -202,3 +206,14 @@ il noto messaggio PagedAllocator alla chiusura.
 Il terreno e' ora raggruppato: selezionare `TerrenoComposto` per spostarlo;
 mesh e materiale sono in `TerrenoComposto/Superficie`. Vedi
 [EDITOR_PERFORMANCE.md](EDITOR_PERFORMANCE.md) per misure, interventi e limiti.
+
+
+Il portale della chiesa usa il parametro riutilizzabile
+`RecipeDetails/FacciataGotica.portal_recess_depth` (0,76 m): tre ordini di
+pietra, conci separati e soglia a filo. Porta e accesso sono conservati.
+Questa prova visiva usa l'House Builder; gli automatismi futuri di raccordo
+facciata/terreno restano da implementare.
+
+Il rosone della stessa facciata usa `rose_recess_depth = 0.10`: foro
+circolare nella mesh, bordo svasato e cornice a conci. La vetrata arretrata
+rimane davanti al frontone retrostante e conserva il disegno esistente.

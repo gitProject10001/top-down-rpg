@@ -14,6 +14,8 @@ static func append_to(house: Node3D, body: MeshInstance3D) -> void:
  for wall in house.wall_count():
   var sample=Sample.new(); sample.width=house.wall_length(wall); sample.height=house.wall_height
   sample.stone_seed=house.house_seed+wall*71; sample.detail_mode=1
+  sample.masonry_finish=house.masonry_finish
+  sample.masonry_height_offset=house.position.y if house.has_method("volume_host") else 0.0
   house._generated.add_child(sample,false,Node.INTERNAL_MODE_BACK)
   var tangent: Vector3=(house.wall_point(wall,1,0)-house.wall_point(wall,0,0)).normalized()
   var normal: Vector3=house.wall_normal(wall)

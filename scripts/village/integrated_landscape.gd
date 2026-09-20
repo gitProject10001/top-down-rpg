@@ -92,10 +92,18 @@ func connect_art_geometry(view: Node) -> void:
         if house.has_signal("recipe_applied") and house.has_signal("rebuilt") and not house.has_method("volume_host"):
             var callback:=queue_house_art.bind(house)
             if not house.rebuilt.is_connected(callback): house.rebuilt.connect(callback)
+            connect_detail_art(house)
     for child in view.get_children():
         var cliff=child.get_node_or_null("ContinuousCliff")
         if cliff and cliff.has_signal("rebuilt") and not cliff.rebuilt.is_connected(queue_art_refresh):
             cliff.rebuilt.connect(queue_art_refresh)
+
+func connect_detail_art(house: Node3D) -> void:
+    var details=house.get_node_or_null("RecipeDetails")
+    if not details: return
+    var callback:=queue_house_art.bind(house)
+    for detail in details.get_children():
+        if detail.has_signal("rebuilt") and not detail.rebuilt.is_connected(callback): detail.rebuilt.connect(callback)
 
 func queue_house_art(house: Node3D) -> void:
     if _house_art_pending.is_empty(): call_deferred("refresh_house_art")
@@ -106,6 +114,7 @@ func refresh_house_art() -> void:
     _house_art_pending.clear()
     for house in houses:
         if not is_instance_valid(house) or not house.is_inside_tree(): continue
+        connect_detail_art(house)
         var plan=house.get_node_or_null("InteriorPlan")
         if plan and not Engine.is_editor_hint():
             var state: Vector2i=interior_states.get(plan.get_instance_id(),Vector2i.ZERO)

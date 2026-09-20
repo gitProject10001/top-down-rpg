@@ -6,10 +6,10 @@ const House = preload("res://addons/house_builder/house.gd")
 const Volume = preload("res://addons/house_builder/volume.gd")
 const Balcony = preload("res://addons/house_builder/balcony.gd")
 const CONTAINERS := ["Volumes", "Components", "RecipeDetails"]
-const MAIN_FIELDS := ["width", "depth", "wall_height", "roof_height", "wall_finish", "masonry_trim", "weathered", "house_seed", "archetype_id", "facade_storey_height", "facade_upper_windows"]
+const MAIN_FIELDS := ["width", "depth", "wall_height", "roof_height", "wall_finish", "masonry_trim", "masonry_finish", "weathered", "house_seed", "archetype_id", "facade_storey_height", "facade_upper_windows"]
 const BALCONY_FIELDS := ["component_id", "host_id", "along", "elevation", "balcony_width", "projection", "create_door", "floor_id", "door_id", "support_posts", "exterior_stairs", "stair_width", "stair_offset", "ground_level", "door_open", "locked"]
-const VOLUME_FIELDS := ["width", "depth", "wall_height", "roof_height", "wall_finish", "masonry_trim", "weathered", "house_seed", "openings", "structure_kind", "canopy_roof", "post_spacing", "post_size", "automatic_frame", "attached", "host_wall", "host_offset", "junction_mode", "junction_width", "junction_height", "junction_offset", "junction_open", "parapet_enabled", "battlements_enabled", "battlement_spacing", "roof_door_enabled", "roof_door_floor_id", "roof_door_offset", "roof_door_open", "volume_id", "attachment_elevation", "attachment_inset", "roof_junction", "facade_storey_height", "facade_upper_windows"]
-const DETAIL_FIELDS := ["kind", "dimensions", "detail_seed", "weathered", "locked", "detail_id", "palette", "collision_enabled", "motif"]
+const VOLUME_FIELDS := ["width", "depth", "wall_height", "roof_height", "wall_finish", "masonry_trim", "masonry_finish", "weathered", "house_seed", "openings", "structure_kind", "canopy_roof", "post_spacing", "post_size", "automatic_frame", "attached", "host_wall", "host_offset", "junction_mode", "junction_width", "junction_height", "junction_offset", "junction_open", "parapet_enabled", "battlements_enabled", "battlement_spacing", "roof_door_enabled", "roof_door_floor_id", "roof_door_offset", "roof_door_open", "volume_id", "attachment_elevation", "attachment_inset", "roof_junction", "facade_storey_height", "facade_upper_windows"]
+const DETAIL_FIELDS := ["kind", "dimensions", "detail_seed", "weathered", "locked", "detail_id", "masonry_finish", "palette", "collision_enabled", "motif", "portal_recess_depth", "rose_recess_depth"]
 
 static func snapshot(house: Node3D) -> Dictionary:
 	var state := {"properties": _read(house, MAIN_FIELDS), "recipe": house.building_recipe,
@@ -114,6 +114,7 @@ static func propose(house: Node3D, recipe: Recipe, structural_seed := -1, detail
 			for key in properties:
 				if key not in VOLUME_FIELDS: problems.append("Proprietà volume sconosciuta: " + str(key))
 			_write(volume, properties)
+			if not properties.has("masonry_finish"): volume.masonry_finish=ghost.masonry_finish
 			volume.volume_id = record.id
 			volume.house_seed = hash(str(structural_seed) + ":" + record.id)
 			var walls: Array = d.get("preferred_walls", [int(properties.get("host_wall", 1))])
@@ -160,6 +161,7 @@ static func propose(house: Node3D, recipe: Recipe, structural_seed := -1, detail
 		var values := _read(detail, DETAIL_FIELDS)
 		for key in DETAIL_FIELDS:
 			if d.has(key): values[key] = d[key]
+		if not d.has("masonry_finish"): values.masonry_finish=ghost.masonry_finish
 		values.detail_id = record.id
 		values.detail_seed = hash(str(detail_seed) + ":" + record.id)
 		var position := Vector3.ZERO
@@ -259,11 +261,11 @@ static func _record(node: Node3D, container_name: String) -> Dictionary:
 	var baseline: Dictionary = node.get_meta("recipe_baseline", {}).duplicate(true)
 	# Earlier recipe scenes tracked fewer secondary Volume properties. Missing
 	# entries mean the generator defaults; non-default edits remain protected.
-	if container_name == "Volumes" and baseline.has("values"):
+	if container_name in ["Volumes","RecipeDetails"] and baseline.has("values"):
 		var defaults: Node3D
-		for key in VOLUME_FIELDS:
+		for key in _part_fields(container_name):
 			if baseline.values.has(key): continue
-			if defaults == null: defaults = Volume.new()
+			if defaults == null: defaults = _new_part(container_name)
 			baseline.values[key] = defaults.get(key)
 		if defaults: defaults.free()
 	return {"id": str(node.get_meta("recipe_part_id")), "container": container_name, "name": String(node.name),

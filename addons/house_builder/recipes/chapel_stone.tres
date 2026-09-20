@@ -1,0 +1,7 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://addons/house_builder/masonry_finish.gd" id="1"]
+[resource]
+script = ExtResource("1")
+stone_color = Color(0.32, 0.305, 0.27, 1)
+block_size = Vector2(0.72, 0.37)
+weathering = 0.5

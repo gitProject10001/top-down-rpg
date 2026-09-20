@@ -168,6 +168,12 @@ aggiunge cornici e pilastri in pietra al normale House/Volume. Le proporzioni
 restano nella ricetta; raccordi del campanile, orientamento libero delle navate
 e dipendenze adattive sono sviluppi futuri, non chiusure di B02/B03.
 
+La chiesa prova ora anche `MasonryFinish`, Resource condivisa fra House,
+Volume e dettagli: palette, scala della muratura e usura modificabili, con
+rigenerazione locale e conservazione del confronto F7. I corsi sui grandi
+pannelli gotici sono shader, mentre cornici e muratura della navata restano
+geometrici. Questa finitura non completa i pennelli di authoring o B02.
+
 Il divario principale è il **vocabolario delle forme**. Cambiare texture o assegnare
 un'etichetta a una casa rettangolare non basta a ottenere gli edifici osservati.
 

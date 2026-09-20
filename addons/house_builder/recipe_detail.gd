@@ -1,5 +1,6 @@
 @tool
 extends Node3D
+signal rebuilt
 ## Original procedural building details. The component and its transform are the
 ## authored object; only _GeneratedRecipeDetail is disposable cached geometry.
 const KINDS := ["chimney", "bell_gable", "shop_counter_goods", "forge_workbench", "firewood", "trough", "fence", "hanging_sign", "dormer", "gothic_facade", "gothic_bell_tower", "gothic_buttress", "gothic_window", "market_awning"]
@@ -8,11 +9,24 @@ const MASONRY_CUTAWAY_KINDS := ["gothic_facade", "gothic_bell_tower", "gothic_bu
 const CUTAWAY_HEIGHT := 1.05
 const DEFAULT_COLORS := [Color(.29,.20,.12), Color(.47,.45,.38), Color(.19,.21,.20), Color(.64,.52,.29), Color(.40,.21,.12), Color(.59,.43,.23), Color(.085,.085,.072)]
 enum Surface { WOOD, STONE, METAL, PAINT, CLAY, GOODS, DARK }
+const MasonryFinish=preload("res://addons/house_builder/masonry_finish.gd")
+@export var masonry_finish: MasonryFinish:
+	set(value):
+		if masonry_finish and masonry_finish.changed.is_connected(request_rebuild): masonry_finish.changed.disconnect(request_rebuild)
+		masonry_finish=value
+		if masonry_finish and not masonry_finish.changed.is_connected(request_rebuild): masonry_finish.changed.connect(request_rebuild)
+		request_rebuild()
 
 @export_enum("chimney", "bell_gable", "shop_counter_goods", "forge_workbench", "firewood", "trough", "fence", "hanging_sign", "dormer", "gothic_facade", "gothic_bell_tower", "gothic_buttress", "gothic_window", "market_awning") var kind := "chimney":
 	set(value): kind = value; request_rebuild()
 @export var dimensions := Vector3(.75, 1.7, .75):
 	set(value): dimensions = value.max(Vector3.ONE * .05); request_rebuild()
+## Zero preserves the original facade. Positive depth builds a stepped stone reveal.
+@export_range(0.0, 1.5, .01, "suffix:m") var portal_recess_depth := 0.0:
+	set(value): portal_recess_depth = clampf(value,0.0,1.5); request_rebuild()
+## Depth of the rose glass behind the facade; zero retains the legacy relief.
+@export_range(0.0, .65, .01, "suffix:m") var rose_recess_depth := 0.0:
+	set(value): rose_recess_depth = clampf(value,0.0,.65); request_rebuild()
 @export var detail_seed := 416522:
 	set(value): detail_seed = value; request_rebuild()
 @export var weathered := true:
@@ -50,8 +64,51 @@ static func default_dimensions(detail_kind: String) -> Vector3:
 		"gothic_bell_tower": Vector3(2.55,11.8,2.35), "gothic_buttress": Vector3(.72,5.1,1.0),
 		"gothic_window": Vector3(1.3,2.6,.3), "market_awning": Vector3(4.6,3.4,2.0)}.get(detail_kind, Vector3.ONE)
 
+var _roof_signature := ""
+
 func _ready() -> void:
+	set_notify_local_transform(true)
 	rebuild()
+
+func _notification(what: int) -> void:
+	if what==NOTIFICATION_LOCAL_TRANSFORM_CHANGED: _sync_roof_cutter()
+
+func _exit_tree() -> void:
+	if kind=="gothic_facade": _invalidate_host_roof()
+
+func _invalidate_host_roof() -> void:
+	var container := get_parent()
+	if container and container.name=="RecipeDetails":
+		var host := container.get_parent()
+		if host and host.has_method("request_rebuild"): host.request_rebuild()
+
+func _sync_roof_cutter() -> void:
+	var signature := str(dimensions,transform) if kind=="gothic_facade" else ""
+	if signature!=_roof_signature:
+		_roof_signature=signature
+		_invalidate_host_roof()
+
+## Convex regions occupied by the stone gable trim, in the target roof frame.
+## Only roof decoration is trimmed; walls and gameplay collision stay intact.
+func roof_trim_cutters(target: Node3D) -> Array:
+	var cutters: Array=[]
+	if kind!="gothic_facade": return cutters
+	for segment in preload("res://addons/house_builder/recipe_gothic.gd").gable_trim_segments(dimensions):
+		var a: Vector3=segment[0]; var b: Vector3=segment[1]
+		var axis := (b-a).normalized()
+		var side := axis.cross(Vector3.FORWARD).normalized()
+		var back := axis.cross(side).normalized()
+		var frame := target.global_transform.affine_inverse()*global_transform*Transform3D(Basis(side,axis,back),(a+b)*.5)
+		# A 15 mm joint avoids coplanar flicker along the stone's exposed edge.
+		var half := Vector3(.09+.015,(b-a).length()*.5+.015,.13+.015)
+		var planes: Array=[]
+		for k in 3:
+			var normal := Vector3.ZERO; normal[k]=1.0
+			planes.append(frame*Plane(normal,half[k]))
+			planes.append(frame*Plane(-normal,half[k]))
+		cutters.append(planes)
+	return cutters
+
 
 func request_rebuild() -> void:
 	if _pending: return
@@ -115,9 +172,11 @@ func rebuild() -> void:
 			body.add_child(shape)
 	if kind in MASONRY_CUTAWAY_KINDS:
 		_build_cutaway_caps()
+	_sync_roof_cutter()
 	build_count += 1
 	set_cutaway(_cutaway)
 	update_gizmos()
+	rebuilt.emit()
 
 func set_cutaway(enabled: bool) -> void:
 	_cutaway = enabled
@@ -140,6 +199,7 @@ func _build_cutaway_caps() -> void:
 	_generated.add_child(caps)
 	var cap_material := StandardMaterial3D.new()
 	cap_material.albedo_color = _color(Surface.WOOD if kind == "market_awning" else Surface.STONE,.88)
+	if masonry_finish and kind!="market_awning": cap_material.albedo_color=masonry_finish.stone_color*.88
 	cap_material.roughness = 1.0
 	cap_material.metallic_specular = 0.0
 	for record in _collision_records:
@@ -160,9 +220,18 @@ func _material(surface: int) -> Material:
 	material.set_shader_parameter("surface_kind", surface)
 	material.set_shader_parameter("weathered", weathered)
 	material.set_shader_parameter("pattern_seed", float(posmod(detail_seed, 8191)))
+	if masonry_finish and surface in [Surface.STONE,7]:
+		var source := _color(Surface.STONE)
+		masonry_finish.apply(material,(source.r+source.g+source.b)/3.0,surface==7,position.y)
+		var h := dimensions.y
+		var ledges := Vector4(-100,-100,-100,-100)
+		if kind=="gothic_bell_tower": ledges=Vector4(.25,.49,.625,.805)*h
+		elif kind=="gothic_buttress": ledges=Vector4(.17,.34,.65,.77)*h
+		material.set_shader_parameter("masonry_ledge_heights",ledges+Vector4.ONE*position.y)
 	return material
 
 func _color(surface: int, scale := 1.0) -> Color:
+	if surface==7: surface=Surface.STONE
 	var color: Color = palette[surface] if surface < palette.size() else DEFAULT_COLORS[surface]
 	return Color(color.r*scale, color.g*scale, color.b*scale, 1.0)
 

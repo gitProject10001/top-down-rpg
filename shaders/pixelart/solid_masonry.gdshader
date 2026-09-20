@@ -1,6 +1,7 @@
 shader_type spatial;
 #include "res://shaders/pixelart/architecture_reveal.gdshaderinc"
 #include "res://shaders/pixelart/stone_pigment.gdshaderinc"
+#include "res://addons/house_builder/masonry_finish.gdshaderinc"
 uniform bool use_vertex_color=true;
 uniform vec3 base_color=vec3(0.18,0.17,0.15);
 uniform float stone_normal_flatten : hint_range(0.0,1.0) = 0.0;
@@ -33,5 +34,11 @@ void fragment() {
   ALBEDO=painted_stone(pigment*(.92+.12*cloud),local_position,face_normal);
   ALBEDO=stone_weather(ALBEDO,local_position,face_normal,reveal_world,use_vertex_color?COLOR.a:0.5);
   ROUGHNESS=1.0; SPECULAR=0.0;
+ }
+ if(masonry_finish_enabled) {
+  vec3 wear=vec3(masonry_weathering);
+  if(anime_painted) wear*=vec3(art_layer(2,reveal_world,moss_amount),art_layer(3,reveal_world,damp_amount),art_layer(4,reveal_world,damage_amount))/vec3(.35,.25,.20);
+  vec4 finish=masonry_finish(stone_color,local_position,face_normal,use_vertex_color?COLOR.a:0.82,clamp(wear,vec3(0),vec3(1)));
+  ALBEDO=finish.rgb; AO=finish.a; ROUGHNESS=1.0; SPECULAR=0.0;
  }
 }

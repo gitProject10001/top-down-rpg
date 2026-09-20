@@ -45,7 +45,7 @@ func paint_architecture(node: Node, visited: Dictionary) -> void:
         for material in materials:
             if not material is ShaderMaterial or material.shader == null:
                 continue
-            if material.shader.resource_path.get_file() not in ["solid_masonry.gdshader","painted_architecture.gdshader"]:
+            if material.shader.resource_path.get_file() not in ["solid_masonry.gdshader","painted_architecture.gdshader","recipe_detail.gdshader"]:
                 continue
             var id: int = material.get_instance_id()
             if visited.has(id):

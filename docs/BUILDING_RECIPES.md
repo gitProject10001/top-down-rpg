@@ -119,6 +119,46 @@ persistente nell'interfaccia. È un'opzione del prototipo, **non B01 completato*
 
 ## Applicazione nella scena integrata
 
+### Finitura condivisa della pietra della chiesa
+
+`MasonryFinish` (`addons/house_builder/masonry_finish.gd`) è una Resource
+opzionale di House, Volume e RecipeDetail: colore della pietra, dimensioni
+nominali dei blocchi e quantità di usura. `recipes/chapel_stone.tres` è la
+taratura del concept (0,72 × 0,37 m). Modificare la risorsa nell'Inspector
+rigenera i nodi che la usano; una copia locale permette un override manuale.
+Le ricette ereditano la finitura dal corpo principale, salvo override del
+componente. Ricette e scene senza finitura conservano i materiali precedenti.
+
+La navata mantiene i blocchi geometrici e gli spigoli in rilievo. I grandi
+pannelli gotici ricevono corsi nello shader con rilievo delle normali e
+occlusione delle fughe: questi giunti **non** aggiungono collisioni o nuove
+ombre geometriche. Cornici, archi e pilastri restano forme reali, con pietra
+leggermente più chiara e senza stampare corsi rettangolari sull'arco.
+Palette e pennellate seguono la stessa funzione nei due materiali.
+
+Muschio e umidità si concentrano alla base, nei giunti e sui ripiani; le
+colature partono dalle quote delle cornici del campanile e dei contrafforti.
+I corpi sopraelevati tengono conto della quota per evitare una falsa fascia
+di muschio a metà parete. Le crepe sono segni superficiali radi e interrotti.
+Non sono state aggiunte brecce o scheggiature geometriche nuove.
+
+Gli strati artistici esistenti modulano muschio, umidità e danno anche sui
+dettagli con questa finitura. Il segnale `RecipeDetail.rebuilt` riusa il
+normale aggiornamento locale dei materiali e del cutaway: un ritocco al
+campanile non rigenera prato e terreno. I pennelli interattivi restano futuri.
+La taratura del sole a 0,5° resta quella approvata nel confronto F7.
+
+Controlli: modifica live della Resource, identità condivisa dopo riapertura,
+Undo/Redo e aperture originali in `check_chapel_composition`; rigenerazione
+dei dettagli e ripristino F7 in `check_building_material_refresh`.
+La prima prova completa della scena passa le 12 porte e i sei percorsi
+(`captures/church_stone_render.log`). Il successivo controllo visivo usa
+`--capture-only`, dopo l'aggiunta delle colature sotto i ripiani.
+Risultato finale: `captures/church_stone_final.log`, nessun errore; mediana
+frame 16,674 ms, p95 16,793 ms a 1152×648. Immagine effettiva della scena:
+`captures/church_stone_final.png`. Passano i controlli di composizione,
+ricette e aggiornamento dei materiali (`rebuild_notifications=7`).
+
 ### Locanda: corpo alto e raccordo dei tetti — 20 settembre 2026
 
 La locanda ora aggiunge `Volumes/CorpoCamere`, un normale Volume largo circa
@@ -389,3 +429,70 @@ adattivo.
 Fonti di stato: [roadmap architettonica](ARCHITECTURE_GENERATOR_ROADMAP.md),
 [roadmap del mondo](WORLD_GENERATION_ROADMAP.md),
 [scena integrata](INTEGRATED_LANDSCAPE.md).
+
+
+### Campione: portale incassato della chiesa
+
+Il componente `gothic_facade` espone `portal_recess_depth` nell'Inspector
+(metri; zero conserva il portale precedente). La ricetta `chapel` usa 0,76 m
+entro una facciata profonda 1,60 m. Tre ordini arretrati di stipiti e conci
+separati da giunti reali restringono l'imbocco da 2,24 a 1,56 m; la porta
+esistente da 1,40 m resta nella sua posizione. Il sopraluce arretrato e la
+soglia a filo terreno completano il campione. Spessore e ombre sono geometrici.
+
+Il servizio ricette salva il parametro, conserva gli override manuali e lo
+ripristina con Undo/Redo. Le collisioni laterali lasciano libero il corridoio;
+il cutaway usa la stessa pipeline della facciata. Nessun generatore parallelo.
+
+`tools/check_chapel_composition.gd` verifica geometria profonda, determinismo,
+corridoio, override e riapertura. La verifica del borgo accetta
+`--portal-closeups` per aggiungere `captures/church_portal_close.png`.
+Il rosone incassato è descritto sotto; i raccordi dei contrafforti restano un campione successivo.
+
+Validazione del campione (1152x648, RTX 3070): composizione della chiesa,
+ricette e dettagli passano; nella scena completa passano 12 ingressi/uscite,
+sei percorsi a piedi, F7 e panoramica. Frame mediano 16,679 ms, p95 16,825 ms;
+GPU mediana 5,866 ms. Sono misure della macchina attuale, non un budget
+universale. Log: `captures/portal_render.log`. Il dettaglio obliquo viene
+salvato in `captures/church_portal_oblique.png`.
+
+
+### Rosone incassato
+
+`gothic_facade.rose_recess_depth` controlla l'arretramento della vetrata
+(zero mantiene il rilievo precedente). La ricetta della chiesa usa 0,10 m,
+circa 0,22 m dal bordo esterno della cornice al fondo. Questo tiene conto
+anche del rivestimento sporgente del frontone retrostante: il vetro rimane davanti alla sua
+muratura. La facciata ha un'apertura circolare reale, una strombatura in
+pietra e una cornice di 24 conci con giunti geometrici. I dodici settori
+colorati e i raggi seguono la vetrata arretrata.
+
+Il parametro usa Inspector, servizio ricette, override manuali e
+salvataggio esistenti. La profondita' viene limitata dallo spessore della
+facciata; in altre composizioni va verificato anche il corpo retrostante.
+Il rosone resta una vetrata opaca decorativa, non una nuova apertura
+trasparente verso l'interno dell'edificio.
+
+Il test di composizione verifica con un raggio che davanti al vetro non
+restino triangoli della parete e che la parte bassa del vetro superi il
+rivestimento del corpo retrostante, oltre a determinismo, override e riapertura.
+`--rose-closeup` nella verifica del borgo produce `captures/church_rose_close.png`.
+
+
+### Raccordo tegole e cornice del frontone
+
+La cornice inclinata di `gothic_facade` fornisce regioni di esclusione alla
+pipeline `MeshJoin` dei tetti della casa e dei volumi collegati. Le regioni
+usano gli stessi segmenti della pietra visibile, con 15 mm di margine:
+le tegole vengono tagliate localmente senza modificare muri o collisioni.
+Con `masonry_trim` anche le cornici dei frontoni del corpo edilizio e
+il colmo in pietra escludono le tegole dal loro volume. Sui frontoni in
+pietra, le file terminali finiscono sulla faccia interna della cornice:
+non mantengono lo sbalzo di 30 cm previsto per il tetto senza cornice.
+Trasformazione, dimensioni, cambio di tipo e rimozione della facciata
+invalidano il raccordo tramite la rigenerazione esistente.
+
+Il controllo della chiesa campiona entrambi i lati della cornice: rileva
+le intersezioni nella copertura originale e verifica che non rimangano
+in quella raccordata. Verifica anche l'aggiornamento dopo lo spostamento
+della facciata nell'editor.

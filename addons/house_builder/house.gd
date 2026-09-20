@@ -9,6 +9,7 @@ const MeshJoin=preload("res://addons/house_builder/mesh_join.gd")
 const Door=preload("res://addons/house_builder/door.gd")
 const ArchitectureProfile=preload("res://addons/house_builder/architecture_profile.gd")
 const BuildingRecipe=preload("res://addons/house_builder/building_recipe.gd")
+const MasonryFinish=preload("res://addons/house_builder/masonry_finish.gd")
 @export_group("Architettura")
 @export var architecture_profile: ArchitectureProfile
 @export_enum("dwelling","shop","hall","forge","tower","keep","inn","stable","chapel") var archetype_id := "dwelling"
@@ -40,6 +41,12 @@ const WALL_THICKNESS := 0.24
 ## Stone cornices and corner piers instead of the exposed timber grid.
 @export var masonry_trim := false:
 	set(value): masonry_trim=value; request_rebuild()
+@export var masonry_finish: MasonryFinish:
+	set(value):
+		if masonry_finish and masonry_finish.changed.is_connected(request_rebuild): masonry_finish.changed.disconnect(request_rebuild)
+		masonry_finish=value
+		if masonry_finish and not masonry_finish.changed.is_connected(request_rebuild): masonry_finish.changed.connect(request_rebuild)
+		request_rebuild()
 @export var weathered := true:
 	set(value): weathered=value; request_rebuild()
 @export var house_seed := 416522:
@@ -229,6 +236,16 @@ func _mortar_material() -> ShaderMaterial:
 	material.shader=preload("res://shaders/pixelart/solid_masonry.gdshader")
 	material.set_shader_parameter("use_vertex_color",false)
 	material.set_shader_parameter("base_color",Vector3(0.16,0.155,0.14))
+	if masonry_finish: masonry_finish.apply(material,.205,false,position.y if has_method("volume_host") else 0.0)
+	return material
+
+func _stone_trim_material() -> ShaderMaterial:
+	if masonry_finish==null: return _material(Vector2(0,0.5),Color(0.65,0.63,0.59))
+	var material := ShaderMaterial.new()
+	material.shader=preload("res://shaders/pixelart/solid_masonry.gdshader")
+	material.set_shader_parameter("use_vertex_color",false)
+	material.set_shader_parameter("base_color",Vector3(.22,.22,.22))
+	masonry_finish.apply(material,.205,false,position.y if has_method("volume_host") else 0.0)
 	return material
 
 func _plaster_material() -> ShaderMaterial:
@@ -262,7 +279,7 @@ func rebuild() -> void:
 	var dark := StandardMaterial3D.new()
 	dark.albedo_color=Color(0.015,0.011,0.009)
 	dark.roughness=1.0
-	var materials := [_plaster_material(),_material(Vector2(0.5,0),Color(0.60,0.53,0.46)),_material(Vector2(0,0.5),Color(0.65,0.63,0.59)),dark]
+	var materials := [_plaster_material(),_material(Vector2(0.5,0),Color(0.60,0.53,0.46)),_stone_trim_material(),dark]
 	var mesh := ArrayMesh.new()
 	for i in _buffers.size():
 		var arrays := _buffers[i].commit_to_arrays()
@@ -281,6 +298,7 @@ func rebuild() -> void:
 	if wing_enabled: _join_wing(body,roof)
 	preload("res://addons/house_builder/masonry_cladding.gd").append_to(self,body)
 	_clip_authored_volumes(body,roof)
+	_clip_facade_roof_trim(roof)
 	if not _is_wing_part: _finish_openings(body,materials)
 	for component in attached_components(): component.refresh()
 	for volume in authored_volumes(): volume.rebuild()
@@ -603,6 +621,49 @@ func _clip_authored_volumes(body: MeshInstance3D,roof: MeshInstance3D) -> void:
 	var collision_clip := ArrayMesh.new(); MeshJoin.append(collision_clip,_collision_shell,Transform3D.IDENTITY,cutters); _collision_shell=collision_clip
 	for instance in [body,roof]:
 		var clipped := ArrayMesh.new(); MeshJoin.append(clipped,instance.mesh,Transform3D.IDENTITY,cutters); instance.mesh=clipped
+
+func _stone_roof_trim_cutters() -> Array:
+	var cutters: Array=[]
+	if not masonry_trim: return cutters
+	if has_method("volume_host") and (get("structure_kind")!=0 or get("canopy_roof")==2): return cutters
+	# Stone verges replace the ordinary 30 cm tile overhang at the gable ends.
+	# End courses stop at their inner face, rather than leaving clipped tile
+	# fragments projecting in front of the coping.
+	cutters.append([Plane(Vector3.FORWARD,-depth*.5+.125)])
+	cutters.append([Plane(Vector3.BACK,-depth*.5+.125)])
+	for end in [-1.0,1.0]:
+		for side in [-1.0,1.0]:
+			var a := Vector3(side*width*.5,wall_height,end*depth*.5)
+			var b := Vector3(0,wall_height+roof_height,end*depth*.5)
+			var axis := (b-a).normalized()
+			var right := axis.cross(Vector3.FORWARD).normalized()
+			var frame := Transform3D(Basis(right,axis,axis.cross(right).normalized()),(a+b)*.5)
+			cutters.append(_trim_box_planes(frame,Vector3(.125,(b-a).length()*.5+.015,.125)))
+	cutters.append(_trim_box_planes(Transform3D(Basis.IDENTITY,Vector3(0,wall_height+roof_height+.06,0)),Vector3(.115,.105,(depth+.7)*.5+.015)))
+	return cutters
+
+func _trim_box_planes(frame: Transform3D,half: Vector3) -> Array:
+	var planes: Array=[]
+	for k in 3:
+		var axis := Vector3.ZERO; axis[k]=1.0
+		planes.append(frame*Plane(axis,half[k]))
+		planes.append(frame*Plane(-axis,half[k]))
+	return planes
+
+func _clip_facade_roof_trim(roof: MeshInstance3D) -> void:
+	var cutters := _stone_roof_trim_cutters()
+	var host: Node3D=self
+	if has_method("volume_host") and get("attached"):
+		var owner_house: Node3D=call("volume_host")
+		if owner_house: host=owner_house
+	var details := host.get_node_or_null("RecipeDetails")
+	if details:
+		for detail in details.get_children():
+			if detail.has_method("roof_trim_cutters"): cutters.append_array(detail.roof_trim_cutters(self))
+	if cutters.is_empty(): return
+	var trimmed := ArrayMesh.new()
+	MeshJoin.append(trimmed,roof.mesh,Transform3D.IDENTITY,cutters)
+	roof.mesh=trimmed
 
 func cutaway_cutters(floor_base: float,storey_height: float) -> Array:
 	return [[Plane(Vector3.DOWN,-floor_base-storey_height)],[Plane(Vector3.LEFT,-width*0.5+0.35),Plane(Vector3.DOWN,-floor_base-0.8)],[Plane(Vector3.FORWARD,-depth*0.5+0.35),Plane(Vector3.DOWN,-floor_base-0.8)]]

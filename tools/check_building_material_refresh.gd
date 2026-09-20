@@ -46,7 +46,7 @@ func create_house(world: Node, title: String, role: String) -> Node3D:
 	var house := House.new(); house.name = title; house.width = 6.0; house.depth = 7.0
 	house.openings = [{"kind": "door", "wall": 0, "u": 0.0, "width": 1.4, "height": 2.3}]
 	var recipe = load("res://addons/house_builder/recipes/" + role + ".tres")
-	var proposal := Recipes.propose(house, recipe, 14, 23)
+	var proposal := Recipes.propose(house, recipe, 14, 23,"",role!="chapel")
 	check(proposal.ok, "test building recipe valid: " + str(proposal.errors))
 	if proposal.ok: Recipes.apply(house, proposal.after)
 	world.add_child(house)
@@ -89,6 +89,12 @@ func run() -> void:
 	check(art.grass == grass and grass.enabled_calls == grass_calls, "local material refresh does not reconfigure or toggle grass")
 	check(materials(neighbor) == neighbor_materials, "neighbor material identities are untouched")
 	check(marker.position == Vector3(3, 4, 5), "unrelated presentation records remain active")
+	var facade: Node3D=neighbor.get_node("RecipeDetails/FacciataGotica")
+	facade.rebuilt.connect(queue_refresh.bind(neighbor))
+	facade.rebuild()
+	await process_frame
+	var facade_material: ShaderMaterial=facade.get_node("_GeneratedRecipeDetail/DetailMesh").mesh.surface_get_material(0)
+	check(facade_material.get_shader_parameter("anime_painted")==true and facade_material.get_shader_parameter("masonry_finish_enabled")==true,"detail rebuild preserves painted weathering and shared masonry finish")
 	var walls: MeshInstance3D = house.get_node("_Generated/Walls")
 	check(materials(walls).any(func(m): return m.get_shader_parameter("art_edit_count") == 1), "surface stamp reapplied to replacement wall")
 	art.apply(false)
@@ -96,6 +102,7 @@ func run() -> void:
 	await process_frame
 	assert_painted(house, false, "rebuild while F7 is off stays in original mode")
 	assert_painted(neighbor, false, "F7 still restores untouched neighbor")
+	check(facade_material.get_shader_parameter("anime_painted")!=true,"F7 restores rebuilt detail shader")
 	art.apply(true)
 	assert_painted(house, true, "F7 restores regenerated painted materials")
 	assert_painted(neighbor, true, "neighbor retains its reversible presentation")

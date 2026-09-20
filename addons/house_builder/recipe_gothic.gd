@@ -8,6 +8,7 @@ const METAL := 2
 const GLASS := 3
 const ROOF := 4
 const DARK := 6
+func wall_surface() -> int: return 7 if d.masonry_finish else STONE
 
 static func build(detail: Node3D) -> void:
 	var builder := new()
@@ -91,10 +92,66 @@ func ring(center: Vector3,inside: float,outside: float,depth: float,surface := S
 		var a := TAU*float(i)/segments; var b := TAU*float(i+1)/segments
 		prism(PackedVector2Array([Vector2(cos(a),sin(a))*inside,Vector2(cos(a),sin(a))*outside,Vector2(cos(b),sin(b))*outside,Vector2(cos(b),sin(b))*inside]),depth,center,surface)
 
-func rose(center: Vector3,radius: float) -> void:
+## Subtract a convex aperture from each wall triangle. Keeping the outside
+## pieces avoids fragile polygon bridges and never leaves a face over the glass.
+func aperture_wall(outline: PackedVector2Array, center: Vector2, radius: float, depth: float) -> void:
+	var hole := PackedVector2Array()
+	for i in 32: hole.append(center+Vector2(cos(TAU*i/32.0),sin(TAU*i/32.0))*radius)
+	var edge := outline.duplicate()
+	if Geometry2D.is_polygon_clockwise(edge): edge.reverse()
+	var indices := Geometry2D.triangulate_polygon(edge)
+	var tint := color(wall_surface())
+	for t in range(0,indices.size(),3):
+		var remaining := PackedVector2Array([edge[indices[t]],edge[indices[t+1]],edge[indices[t+2]]])
+		for j in hole.size():
+			if remaining.size()<3: break
+			var a := hole[j]; var axis := hole[(j+1)%hole.size()]-a
+			var inside := PackedVector2Array(); var outside := PackedVector2Array()
+			for k in remaining.size():
+				var p := remaining[k]; var q := remaining[(k+1)%remaining.size()]
+				var dp := axis.cross(p-a); var dq := axis.cross(q-a)
+				if dp>=0.0: inside.append(p)
+				else: outside.append(p)
+				if (dp<0.0)!=(dq<0.0):
+					var cut := p.lerp(q,dp/(dp-dq))
+					inside.append(cut); outside.append(cut)
+			for k in range(1,outside.size()-1):
+				var v0 := Vector3(outside[0].x,outside[0].y,0)
+				var v1 := Vector3(outside[k].x,outside[k].y,0)
+				var v2 := Vector3(outside[k+1].x,outside[k+1].y,0)
+				if (v1-v0).cross(v2-v0).length_squared()<.0000000001: continue
+				tri(v0,v1,v2,wall_surface(),tint)
+				tri(v0-Vector3.BACK*depth,v2-Vector3.BACK*depth,v1-Vector3.BACK*depth,wall_surface(),tint)
+			remaining=inside
+	for loop in [edge,hole]:
+		for j in loop.size():
+			var p: Vector2=loop[j]; var q: Vector2=loop[(j+1)%loop.size()]
+			var a := Vector3(p.x,p.y,-depth); var b := Vector3(q.x,q.y,-depth)
+			if loop==hole: quad(b,a,a+Vector3.BACK*depth,b+Vector3.BACK*depth,STONE,tint)
+			else: quad(a,b,b+Vector3.BACK*depth,a+Vector3.BACK*depth,wall_surface(),tint)
+
+func rose_reveal(center: Vector3,radius: float,recess: float) -> void:
+	# A splayed stone lining narrows toward the glass; both edges cast shadows.
+	for i in 32:
+		var a := TAU*i/32.0; var b := TAU*(i+1)/32.0
+		var front_a := center+Vector3(cos(a),sin(a),0)*radius*.94
+		var front_b := center+Vector3(cos(b),sin(b),0)*radius*.94
+		var back_a := center+Vector3(cos(a),sin(a),0)*radius*.84-Vector3.BACK*(recess+.06)
+		var back_b := center+Vector3(cos(b),sin(b),0)*radius*.84-Vector3.BACK*(recess+.06)
+		quad(front_a,front_b,back_b,back_a,STONE,color(STONE,.92))
+	# Individual voussoirs have narrow physical joints, not painted spokes.
+	for i in 24:
+		var a := TAU*i/24.0+.004; var b := TAU*(i+1)/24.0-.004
+		prism(PackedVector2Array([Vector2(cos(a),sin(a))*radius*.94,Vector2(cos(a),sin(a))*radius*1.14,Vector2(cos(b),sin(b))*radius*1.14,Vector2(cos(b),sin(b))*radius*.94]),.16,center)
+
+func rose(center: Vector3,radius: float,recess := 0.0) -> void:
+	var relief := .2 if recess>0.0 else 1.0
+	if recess>0.0:
+		rose_reveal(center,radius,recess)
+		center.z-=recess+.04
 	disc(center,radius,GLASS,Color(.06,.12,.20))
-	ring(center+Vector3(0,0,.055),radius*.93,radius*1.12,.16)
-	ring(center+Vector3(0,0,.14),radius*.81,radius*.86,.045,METAL,24)
+	if recess<=0.0: ring(center+Vector3(0,0,.055*relief),radius*.93,radius*1.12,.16)
+	ring(center+Vector3(0,0,.14*relief),radius*.81,radius*.86,.045*relief,METAL,24)
 	var blue := Color(.075,.24,.40)
 	var amber := Color(.54,.34,.095)
 	# Twelve petal sectors and raised lead ribs form readable radial tracery.
@@ -103,10 +160,10 @@ func rose(center: Vector3,radius: float) -> void:
 		var b := TAU*float(i+1)/12
 		var mid := (a+b)*.5
 		var petal := PackedVector2Array([Vector2(cos(a),sin(a))*radius*.20,Vector2(cos(a),sin(a))*radius*.65,Vector2(cos(mid),sin(mid))*radius*.80,Vector2(cos(b),sin(b))*radius*.65,Vector2(cos(b),sin(b))*radius*.20])
-		prism(petal,.028,center+Vector3(0,0,.11),GLASS,amber if i%3==0 else blue.lightened(float(i%3)*.035))
-		beam(center+Vector3(cos(a),sin(a),0)*radius*.18+Vector3(0,0,.15),center+Vector3(cos(a),sin(a),0)*radius*.84+Vector3(0,0,.15),radius*.035,.035,METAL,Color(.49,.39,.20))
-	ring(center+Vector3(0,0,.17),radius*.14,radius*.23,.055,STONE,16)
-	disc(center+Vector3(0,0,.185),radius*.14,GLASS,Color(.52,.32,.075),16)
+		prism(petal,.028*relief,center+Vector3(0,0,.11*relief),GLASS,amber if i%3==0 else blue.lightened(float(i%3)*.035))
+		beam(center+Vector3(cos(a),sin(a),0)*radius*.18+Vector3(0,0,.15*relief),center+Vector3(cos(a),sin(a),0)*radius*.84+Vector3(0,0,.15*relief),radius*.035,.035*relief,METAL,Color(.49,.39,.20))
+	ring(center+Vector3(0,0,.17*relief),radius*.14,radius*.23,.055*relief,STONE,16)
+	disc(center+Vector3(0,0,.185*relief),radius*.14,GLASS,Color(.52,.32,.075),16)
 
 func lancet(center: Vector3,width: float,height: float,depth: float,glass := true) -> void:
 	var r := width*.5
@@ -146,11 +203,43 @@ func spire(center: Vector3,width: float,depth: float,height: float,surface := RO
 	for i in 8:
 		beam(center+Vector3(footprint[i].x,0,footprint[i].y),center+Vector3(0,height,0),.045,.045,METAL,color(METAL,.80))
 
+## Separate stones expose real side faces and recessed joints at gameplay scale.
+func recessed_portal(radius: float, spring: float, rise: float, recess: float) -> void:
+	var tier_depth := recess/3.0
+	for tier in 3:
+		var inner := radius-float(tier)*.17
+		var z := .09-float(tier)*tier_depth
+		var thickness := .27 if tier==0 else .19
+		var block_depth := tier_depth+.035
+		for side in [-1.0,1.0]:
+			for row in 6:
+				box(Vector3(side*(inner+thickness*.5),(float(row)+.5)*spring/6.0,z-block_depth*.5),Vector3(thickness,spring/6.0-.014,block_depth))
+			# The inner edges stay outside the original 1.4 m door corridor.
+			solid(Vector3(side*(inner+thickness*.5),spring*.5,z-block_depth*.5),Vector3(thickness,spring,block_depth))
+		var inside := ogive(inner,rise-float(tier)*.12)
+		var outside := ogive(inner+thickness,rise-float(tier)*.12+thickness*1.2)
+		for i in range(inside.size()-1):
+			var points := PackedVector2Array([inside[i],outside[i],outside[i+1],inside[i+1]])
+			var centroid := (points[0]+points[1]+points[2]+points[3])*.25
+			for j in points.size(): points[j]=points[j].move_toward(centroid,.006)
+			prism(points,block_depth,Vector3(0,spring,z-block_depth*.5))
+	# Flush threshold: visible stone underfoot, no raised obstacle or new doorway.
+	box(Vector3(0,-.045,-recess*.5),Vector3(radius*2.0,.09,recess+.24))
+
+## Shared by the visible cornice and roof exclusion, so edits cannot drift.
+static func gable_trim_segments(size: Vector3) -> Array:
+	var narrow := size.x<6.0
+	var shoulder := size.y*(.67 if narrow else .61)
+	var half := size.x*(.495 if narrow else .41)
+	return [[Vector3(-half,shoulder+.03,0),Vector3(0,size.y-.03,0)],
+		[Vector3(half,shoulder+.03,0),Vector3(0,size.y-.03,0)]]
+
 func facade() -> void:
 	var w: float = d.dimensions.x
 	var h: float = d.dimensions.y
 	var depth: float = d.dimensions.z
-	var r := minf(1.0,maxf(.90,w*.14))
+	var recess: float = minf(d.portal_recess_depth,depth*.5)
+	var r := 1.12 if recess>0.0 else minf(1.0,maxf(.90,w*.14))
 	var spring := 2.40
 	var rise := 1.22
 	var portal := ogive(r,rise)
@@ -161,26 +250,35 @@ func facade() -> void:
 	for i in range(portal.size()-1,-1,-1): outline.append(portal[i]+Vector2(0,spring))
 	outline.append(Vector2(-r,0))
 	# Rear half is solid stone; the front half holds raised portal and tracery.
-	prism(outline,depth*.5,Vector3(0,0,-depth*.25))
+	var rose_radius := minf(1.08,w*(.18 if narrow else .13))
+	var rose_depth: float = minf(d.rose_recess_depth,maxf(0.0,depth*.5-.22))
+	if rose_depth>0.0:
+		aperture_wall(outline,Vector2(0,h*.735),rose_radius,depth*.5)
+	else:
+		prism(outline,depth*.5,Vector3(0,0,-depth*.25),wall_surface())
 	var front := 0.0
-	for x in [-r-.13,r+.13]:
-		box(Vector3(x,spring*.5,front+.07),Vector3(.26,spring,.25))
-		box(Vector3(x,.16,front+.08),Vector3(.40,.32,.34))
-		box(Vector3(x,spring-.04,front+.10),Vector3(.39,.16,.36))
-	pointed_band(Vector3(0,spring,front+.08),r,rise,.25,.24)
-	pointed_band(Vector3(0,spring,front+.21),r+.30,rise+.30,.09,.11)
+	if recess>0.0:
+		recessed_portal(r,spring,rise,recess)
+	else:
+		for x in [-r-.13,r+.13]:
+			box(Vector3(x,spring*.5,front+.07),Vector3(.26,spring,.25))
+			box(Vector3(x,.16,front+.08),Vector3(.40,.32,.34))
+			box(Vector3(x,spring-.04,front+.10),Vector3(.39,.16,.36))
+		pointed_band(Vector3(0,spring,front+.08),r,rise,.25,.24)
+		pointed_band(Vector3(0,spring,front+.21),r+.30,rise+.30,.09,.11)
 	# The existing rectangular door remains the moving leaf below this transom.
+	var transom_z := -recess if recess>0.0 else front-.025
 	var tympanum := PackedVector2Array([Vector2(-r,2.34),Vector2(r,2.34),Vector2(r,spring)])
 	for i in range(portal.size()-1,-1,-1): tympanum.append(portal[i]+Vector2(0,spring))
-	prism(tympanum,.03,Vector3(0,0,front-.025),GLASS,Color(.10,.14,.15))
+	prism(tympanum,.03,Vector3(0,0,transom_z),GLASS,Color(.10,.14,.15))
 	for side in [-1.0,1.0]:
-		beam(Vector3(0,2.37,front+.025),Vector3(side*.57,3.12,front+.025),.045,.035,METAL)
+		beam(Vector3(0,2.37,transom_z+.05),Vector3(side*.57,3.12,transom_z+.05),.045,.035,METAL)
 		var x: float = side*w*.40
 		box(Vector3(x,shoulder*.5,front+.02),Vector3(.35,shoulder,.22))
 		box(Vector3(side*w*.31,.12,front),Vector3(w*.35,.24,depth*.55))
 		if not narrow: lancet(Vector3(side*w*.29,1.16,front+.08),.78,2.26,.16)
-		beam(Vector3(side*gable_half,shoulder+.03,front),Vector3(0,h-.03,front),.18,.26)
-	rose(Vector3(0,h*.735,front+.04),minf(1.08,w*(.18 if narrow else .13)))
+	for segment in gable_trim_segments(d.dimensions): beam(segment[0],segment[1],.18,.26)
+	rose(Vector3(0,h*.735,front+.04),rose_radius,rose_depth)
 	# Masonry blockers flank, never cross, the retained central doorway.
 	var side_width := (w-2.0*r)*.5
 	for side in [-1.0,1.0]: solid(Vector3(side*(r+side_width*.5),shoulder*.5,-depth*.25),Vector3(side_width,shoulder,depth*.5))
@@ -188,7 +286,7 @@ func facade() -> void:
 func buttress() -> void:
 	var w: float=d.dimensions.x; var h: float=d.dimensions.y; var depth: float=d.dimensions.z
 	box(Vector3(0,h*.05,0),Vector3(w,h*.10,depth))
-	box(Vector3(0,h*.30,-depth*.025),Vector3(w*.77,h*.43,depth*.86))
+	box(Vector3(0,h*.30,-depth*.025),Vector3(w*.77,h*.43,depth*.86),wall_surface())
 	prism(PackedVector2Array([Vector2(-w*.44,h*.50),Vector2(w*.44,h*.50),Vector2(w*.30,h*.60),Vector2(-w*.30,h*.60)]),depth*.96,Vector3.ZERO)
 	box(Vector3(0,h*.665,-depth*.17),Vector3(w*.56,h*.18,depth*.55))
 	box(Vector3(0,h*.77,-depth*.17),Vector3(w*.70,h*.05,depth*.68))
@@ -199,7 +297,7 @@ func buttress() -> void:
 func tower() -> void:
 	var w: float=d.dimensions.x; var h: float=d.dimensions.y; var depth: float=d.dimensions.z
 	box(Vector3(0,h*.025,0),Vector3(w,h*.05,depth))
-	box(Vector3(0,h*.325,0),Vector3(w*.86,h*.60,depth*.86))
+	box(Vector3(0,h*.325,0),Vector3(w*.86,h*.60,depth*.86),wall_surface())
 	for x in [-w*.38,w*.38]:
 		for z in [-depth*.38,depth*.38]:
 			box(Vector3(x,h*.335,z),Vector3(w*.15,h*.62,depth*.15),STONE,color(STONE,1.05))
