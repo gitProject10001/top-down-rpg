@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://addons/house_builder/building_recipe.gd" id="1"]
+[resource]
+script = ExtResource("1")
+recipe_id = "forge"
+display_name = "Fucina · tettoia e camino"
+role = "forge"
+main_properties = {"wall_height": 3.65, "roof_height": 1.2, "wall_finish": 1}
+components = Array[Dictionary]([{"id": "TettoiaLavoro", "width_ratio": 0.84, "preferred_walls": [3, 0, 1], "properties": {"structure_kind": 1, "canopy_roof": 1, "depth": 2.7, "wall_height": 2.6, "roof_height": 0.75, "post_spacing": 3.0}}])
+details = Array[Dictionary]([{"id": "CaminoFucina", "kind": "chimney", "anchor": "roof", "u": -0.5, "v": -0.45, "dimensions": Vector3(1.35, 2.9, 1.2), "palette": PackedColorArray(0.29, 0.20, 0.12, 1, 0.32, 0.30, 0.26, 1, 0.12, 0.13, 0.12, 1)}, {"id": "BancoFucina", "kind": "forge_workbench", "anchor": "left", "u": -0.65, "position": Vector3(-2.1, 0, 0), "rotation_degrees": Vector3(0, -90, 0), "dimensions": Vector3(2.1, 1.55, 1.1), "palette": PackedColorArray(0.29, 0.20, 0.12, 1, 0.32, 0.30, 0.26, 1, 0.12, 0.13, 0.12, 1)}, {"id": "Legna", "kind": "firewood", "anchor": "right", "u": -0.55, "position": Vector3(0.6, 0, 0), "rotation_degrees": Vector3(0, 90, 0), "dimensions": Vector3(1.7, 1.0, 0.8)}])

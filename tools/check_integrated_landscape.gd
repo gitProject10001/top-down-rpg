@@ -28,6 +28,9 @@ func check() -> void:
     assert(plan.levels().size()==1 and plan.level_records(0).size()>2)
     scene.player.position=Vector3(-40,1,-15.6);scene.player.velocity=Vector3.ZERO
     for i in 40:await physics_frame
+    if not is_instance_valid(scene.nearest_door):
+        print("INTEGRATED_DOOR_DIAGNOSTIC player=",scene.player.global_position," state=",scene.player.state_name()," house=",house.global_position)
+        for door in house.find_children("*","AnimatableBody3D",true,false): print("DOOR ",door.get_path()," at=",door.global_position)
     assert(is_instance_valid(scene.nearest_door),"Exterior door can be selected")
     var event:=InputEventKey.new();event.pressed=true;event.keycode=KEY_E
     scene._unhandled_key_input(event)

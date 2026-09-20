@@ -112,7 +112,7 @@ func physics_update(delta: float) -> void:
 	if f >= 1.0:
 		# A press buffered during the lunge flows into the normal combo — the lunge is an OPENER.
 		if player.consume_attack_buffer():
-			fsm.transition_to("Attack")
+			fsm.transition_to("DirAttack" if fsm.has_state("DirAttack") else "Attack")
 		else:
 			fsm.transition_to("Move" if player.get_move_input() != Vector2.ZERO else "Idle")
 

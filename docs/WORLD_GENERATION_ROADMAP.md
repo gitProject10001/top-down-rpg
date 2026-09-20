@@ -2,11 +2,20 @@
 
 Il concept delle quattro fazioni è un riferimento **di composizione**, non un risultato finale da copiare. Guida densità, masse, percorsi, spazi liberi e rapporti dimensionali. Non impone texture, colori, città identiche al disegno o un terreno scolpito a mano per imitarlo.
 
-## Priorità attuale — 2026-09-14
+## Priorità attuale — 2026-09-20
 
-Priorità al builder architettonico: A07 prima, poi editing assistito B01.1. Utente e assistente costruiranno gli insediamenti da reference usando gli strumenti. Generazione globale da seed e confronto V01 rimandati; i sistemi esistenti restano disponibili. Il ramo ambientale è fermo al completamento R03.2, con R03.3 e acqua/grotte in backlog. Non iniziare automaticamente R03.3 solo perché segue l'ultima card conclusa.
+Incremento corrente: ricette architettoniche riutilizzabili e applicazione alle dodici case della scena integrata. Restano posizioni dei corpi principali, strade e dati degli interni; locanda e cappella adottano ingombri maggiori e accessi ricalcolati dal collegamento stradale esistente. Questo avvia G01.4 come catalogo locale; non completa la generazione urbana S02 o l'interazione adattiva B01–B03. A07 conserva il confronto R10/R13 aperto prima di B01.1. Generazione globale da seed e confronto V01 restano rimandati.
+
+La scena integrata include ora uno studio dipinto con erba geometrica, alberi rielaborati, pareti continue e due zone sopraelevate percorribili. Sono prove e componenti concreti, documentati in [INTEGRATED_LANDSCAPE.md](INTEGRATED_LANDSCAPE.md) e [ART_STUDY_DATA.md](ART_STUDY_DATA.md); non chiudono automaticamente R03, l'authoring generale del terreno, i pennelli artistici o il budget di un mondo esteso. R03.3, acqua e grotte mantengono i rispettivi criteri e priorità; non avviarli solo perché seguono l'ultima card conclusa.
 
 ## Punto di ripartenza
+
+Campione chiesa aggiornato: navata 8,8 × 14,2 m, frontone collegato al tetto,
+campanile 13,8 m e finitura in pietra riutilizzabile. La composizione locale
+arretra il corpo di 1,8 m nel lotto per preservare l'imbocco stradale: non è
+ancora una regola generica edificio–terreno. Il confronto visivo usa un profilo
+di luce con occlusione e riempimento modificabili. G01.4/S02 e B01–B03 mantengono
+i criteri aperti sopra indicati.
 
 G01.3b.2b: diagnostica degli ingombri e verifica della rigenerazione nell'editor/Play. Sono disponibili edifici parametrici, torri/cortine, corte singola generata, editing protetto delle posizioni e validazione degli accessori. Non sono ancora disponibili la varietà delle città del concept o una generazione completa di paesaggio roccioso/idrologia/grotte.
 
@@ -22,6 +31,26 @@ Le montagne del concept si traducono soprattutto in masse e pareti rocciose ai b
 Il modello futuro del terreno deve esporre piattaforme con ID, quota e perimetro e collegamenti tramite rampa/scala; i generatori leggono questi dati. Non introdurre rumore altimetrico continuo nel layout giocabile come impostazione predefinita. Anche laghi e fiumi vanno progettati su questi piani: bacini a quota definita, tratti fluviali leggibili e raccordi fra quote localizzati. Dettaglio irregolare consentito sulle superfici rocciose, non come ondulazione generalizzata dei percorsi.
 
 ## Separazione dei sistemi
+
+### Spunti dal video Bergfried — piano futuro
+
+Il video locale analizzato il 20 settembre mostra tracciati murari lungo creste
+irregolari (1:30–1:38), complessi con forti differenze fra masse principali e
+accessorie (1:46–2:14) e anteprime che rendono visibili occupazione e conflitti
+prima della posa (3:58–4:38). Fonte, tempi e limiti dell'osservazione sono nella
+[roadmap architettonica](ARCHITECTURE_GENERATOR_ROADMAP.md#riferimento-aggiuntivo-bergfried-devlog-00--20-settembre-2026).
+
+Per il nostro piano: mostrare insieme piattaforma disponibile, corpo proposto,
+accessi e vicini interessati; far leggere il conflitto prima della conferma.
+Le ricette G01.4/S02 devono differire anche in silhouette, aggregazione, parti
+aperte e corti funzionali. Il tracciato delle mura riusa cortine e torri, e
+strade/terreno restano nei loro builder: nessun secondo modello di authoring.
+Non deduciamo dal filmato un solver generale delle intersezioni o un sistema
+di rigenerazione protetta. Rimangono aperti i relativi criteri e resta valido
+il vincolo del nostro mondo a quote discrete; questa analisi non introduce
+nuova geometria, nuovi comandi o cambi di stato delle card.
+
+### Contratto comune
 
 Richiesta e seed → piano modificabile → validazione → realizzazione geometrica → scena editabile. Riutilizzare questo contratto, non un unico algoritmo universale.
 
@@ -79,10 +108,10 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 | W03 | TODO | Attraversamenti e rive | Ponti, guadi, approdi, passaggi e accessi alle sponde; terreno/rocce/strade leggono gli stessi vincoli |
 | C01 | TODO | Ingressi di grotta | Apertura reale nel blocco roccioso, soglia percorribile, collisione coerente e leggibilità alla camera fissa |
 | C02 | TODO | Piano di grotta | Stanze/cunicoli con anelli e diramazioni, quote e collegamenti; editing manuale separato dall'involucro esterno |
-| G01.4 | TODO | Catalogo architettonico | Ruoli del piano associati a profili/componenti; famiglie sostituibili senza cambiare il planner |
+| G01.4 | IN CORSO — ricette locali verificate | Catalogo architettonico | Sei ruoli, BuildingRequest opzionale, persistenza/edit/UndoRedo e dodici case di prova verificati; integrazione planner e famiglie sostituibili ancora aperte; BUILDING_RECIPES.md |
 | G01.5 | RIMANDATO | Varietà compositiva del castello | Recinti segmentati, più torri/corpi, corti e gerarchie differenti; preservazione manuale |
 | S01 | RIMANDATO | Composizione urbana organica | Strade principali e secondarie, piazze, porte, edifici gerarchizzati, addensamenti e vuoti; insediamenti su piani/terrazze, collegamenti ai vincoli del paesaggio |
-| S02 | TODO | Edifici urbani più articolati | Volumi aggregati, tetti collegati, facciate e accessori; le città cambiano forma oltre al colore |
+| S02 | TODO | Edifici urbani più articolati | Estendere le ricette oltre le dodici case di prova: volumi aggregati, tetti collegati, facciate/accessori e interni coerenti; varietà strutturale verificata, non solo ruoli o colori |
 | V01 | RIMANDATO | Confronto dei quattro castelli | Quattro richieste/seed tramite tool, scene editabili e stessa camera; almeno due organizzazioni strutturali distinte |
 | V02 | TODO | Vertical slice città–villaggio–POI | Tempi reali di cammino, incontri, visibilità e streaming; aggiornamento delle distanze proposte dal concept |
 
@@ -92,11 +121,11 @@ La qualità nasce dalle forme: volumi principali spigolosi, tagli orientati, str
 
 ## Cosa manca alla città
 
-La città illustrata mescola una fortezza dominante, edifici subordinati, corti, vie irregolari ma connesse e una relazione con il pendio. Oggi il generatore ha soprattutto una corte singola e due corpi interni: mancano catalogo dei ruoli, aggregazione urbana, sagome/recinti differenti e collocazione su superfici piane e terrazze. Per questo non dichiariamo pronta la varietà delle quattro città e non la sostituiamo con quattro recolor.
+La città illustrata mescola una fortezza dominante, edifici subordinati, corti, vie irregolari ma connesse e una relazione con il pendio. Il compositore del castello ha soprattutto una corte singola e due corpi interni. La scena integrata aggiunge edifici collocati e variati localmente; il catalogo di ricette introduce i ruoli, ma non risolve aggregazione urbana, sagome/recinti differenti e collocazione automatica su piani e terrazze. Per questo non dichiariamo pronta la varietà delle quattro città.
 
 ## Ordine pratico
 
-Verifica G01.3b.2b completata; disponibili R01.1, R02.1–R02.3 e R03.1–R03.2. Prossimo passo prioritario: confronto A07 con R10/R13, ultimo criterio aperto dell’audit, poi completamento A07 prima di B01.1; R03.3 resta il prossimo del ramo ambientale quando verrà ripreso. Alternare G01.4–G01.5 e R02–R03 senza fondere i due sistemi. W01 precede W02, e l'idrologia stabile precede i ponti e il posizionamento definitivo delle città. C01 precede la generazione degli interni delle grotte. V01 resta una consegna esplicita richiesta dall'utente.
+Completare e verificare l'incremento locale delle ricette nella scena integrata. La sequenza generale resta: confronto A07 con R10/R13, ultimo criterio aperto dell'audit, prima di B01.1; raccordi e urbanistica nei rispettivi step, senza fondere i generatori. R03.3 resta il prossimo incremento del ramo terrazze quando verrà ripreso; le zone sopraelevate del concept non ne sostituiscono tutti i criteri. L'idrologia stabile precede i ponti e il posizionamento definitivo delle città; C01 precede gli interni delle grotte. V01 rimane una consegna futura esplicita, attualmente rimandata.
 
 
 ## R01.1 — Roccia parametrica disponibile

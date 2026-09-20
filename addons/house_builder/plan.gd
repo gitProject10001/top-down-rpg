@@ -85,6 +85,9 @@ func rebuild() -> void:
 	var list := levels()
 	if list.is_empty(): return
 	var total := list.size()*floor_height
+	# A recipe may raise the exterior eaves without adding interior storeys.
+	# Legacy plans continue to determine the exact outer wall height.
+	if house().building_recipe != null: total=maxf(total,house().wall_height)
 	if not is_equal_approx(house().wall_height,total): house().wall_height=total
 	if is_instance_valid(_floors): _floors.free()
 	_floors=Node3D.new(); _floors.name="_Floors"; add_child(_floors,false,Node.INTERNAL_MODE_BACK)

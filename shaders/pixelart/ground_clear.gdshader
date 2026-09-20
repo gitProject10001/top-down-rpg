@@ -1,4 +1,8 @@
 shader_type spatial;
+uniform sampler2D art_coverage : filter_linear, repeat_disable;
+uniform vec2 art_coverage_center = vec2(0.0);
+uniform vec2 art_coverage_size = vec2(152.0,144.0);
+uniform bool use_art_coverage = false;
 render_mode world_vertex_coords;
 // Opt-in art study. The original material is preserved when disabled.
 uniform bool anime_painted = false;
@@ -333,6 +337,12 @@ void fragment() {
 		mask = clamp(mask + ragged, vec3(0.0), vec3(1.0));
 
 		float dirt = anime_painted ? smoothstep(0.12, 0.82, mask.r + (ground_noise(pos * 4.0) - .5) * .28) : smoothstep(0.05, 0.95, mask.r);
+		if (anime_painted && use_art_coverage) {
+			vec2 art_uv=(world_position.xz-art_coverage_center)/art_coverage_size+vec2(.5);
+			vec4 authored=texture(art_coverage,art_uv);
+			dirt=authored.r*inside;
+			ALBEDO*=mix(vec3(.91,.98,1.06),vec3(1.05,1.02,.93),authored.b);
+		}
 		float gravel = smoothstep(0.05, 0.95, mask.g);
 		brush_surface *= (1.0-dirt)*(1.0-gravel);
 		float lush = smoothstep(0.05, 0.95, mask.b);

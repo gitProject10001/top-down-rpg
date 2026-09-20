@@ -1,6 +1,6 @@
 # Piano evolutivo dei generatori architettonici
 
-Aggiornato: **2026-09-14**. Baseline iniziale: `e0c9cd5`; incrementi successivi documentati sotto.
+Aggiornato: **2026-09-20**. Baseline iniziale: `e0c9cd5`; incrementi successivi documentati sotto.
 Stato: **builder in sviluppo; priorità alla costruzione architettonica assistita**.
 Questo documento è il registro da aggiornare a ogni incremento, non una lista di
 funzionalità già disponibili.
@@ -11,11 +11,51 @@ Il numero di villaggi/case/castelli è contenuto: per ora non serve moltiplicare
 
 L'interazione desiderata è quella di un builder reattivo: l'utente modifica un volume e regole locali propongono/adattano finestre, campate e dettagli. La reference Tiny Glade descrive questo obiettivo d'interazione; non richiede di copiarne il rendering. Conservare i generatori e i seed esistenti come infrastruttura, ma rimandare varietà del planner, città automatiche e confronto dei quattro castelli generati. Il confronto potrà tornare quando utile allo strumento.
 
-**Priorità richiesta: completare prima A07; poi B01.1, facciata assistita su una casa rettangolare.** Il ramo ambientale si ferma dopo R03.2; R03.3 rimane in backlog. Gli step B seguono il consolidamento di A07, senza sostituire le geometrie A. Riprendere geometrie A02/A03/A07 per ciò che serve all'esempio, senza attendere un generatore globale.
+**Sequenza dell'editing assistito: completare prima A07; poi B01.1, facciata assistita su una casa rettangolare.** L'incremento locale delle ricette descritto sotto non cambia questa dipendenza. R03.3 rimane in backlog; le successive prove ambientali della scena integrata sono documentate separatamente. Gli step B seguono il consolidamento di A07, senza sostituire le geometrie A. Riprendere geometrie A02/A03/A07 per ciò che serve all'esempio, senza attendere un generatore globale.
 
 Contratto di editing da implementare: modalità Manuale/Assistita per edificio, elementi derivati con ID e provenienza, promozione a manuale quando modificati, soppressione persistente quando eliminati. Gli elementi manuali e le porte scelte dall'utente hanno precedenza. Un ridimensionamento impossibile deve mostrare il conflitto; non deve spostare o cancellare in silenzio gli elementi protetti. Aggiornamento locale durante il drag con limite di frequenza; rilascio come singola operazione Undo che ripristina volume e dettagli. Nessun rimescolamento casuale durante il trascinamento.
 
-Nel codice attuale `all_openings()` combina aperture esplicite e aperture derivate dai componenti; il plugin inizializza una porta e una finestra. Questa è una base riutilizzabile, non una facciata adattiva già implementata.
+Nel codice attuale `all_openings()` combina aperture esplicite e aperture derivate dai componenti; il plugin inizializza una porta e una finestra. Il prototipo delle ricette aggiunge `facade_storey_height` e `facade_upper_windows`, un ritmo superiore opzionale che preserva i record manuali. Le singole finestre derivate non hanno ancora editing o soppressione persistente nell'UI: questa è una base riutilizzabile, non la facciata assistita B01 completata.
+
+### Incremento corrente — ricette e scena di prova
+
+L'incremento del 19 settembre distingue tre risultati:
+
+- **Prototipo visivo:** sei ruoli nel borgo (casa, bottega, locanda, fucina,
+  stalla, cappella) e sei varianti nelle case cittadine della scena integrata.
+  Conservare l'impianto generale e i record degli `InteriorPlan`; locanda e
+  cappella adottano ingombri principali maggiori, con accessi aggiornati dal
+  collegamento stradale esistente. La riconoscibilità si valuta alla camera di
+  gioco, anche nelle proporzioni funzionali, non dal solo nome del ruolo.
+- **Base riutilizzabile:** ricette `Resource`, riferimento opzionale nel
+  `BuildingRequest` e applicazione ai normali nodi House Builder. Componenti e
+  dettagli restano dati editabili; la geometria ricostruita è una cache.
+  La nuova composizione riusa anche Balcony per la galleria e aggiunge dettagli
+  gotici/tenda; questi componenti non sostituiscono i rispettivi builder.
+- **Sviluppo futuro:** l'interazione adattiva tipo Tiny Glade resta B01–B03.
+  Le ricette non introducono automaticamente facciate adattive, risoluzione dei
+  raccordi fra tetti, collegamenti strada/porta/terreno o un secondo editor.
+
+Contratto, limiti e verifiche dell'incremento: [BUILDING_RECIPES.md](BUILDING_RECIPES.md).
+Verificati sulla composizione corrente servizio, plugin dell'editor con Undo/Redo,
+persistenza dei 14 tipi di dettaglio, composizione della locanda, aggiornamento
+mirato dei materiali e conservazione dei dodici interni dopo l'applicazione.
+La scena completa passa i dodici ingressi/cutaway e i sei accessi, inclusa
+la scansione della capsula; immagini e costo GPU misurati sulla composizione
+finale. Il confronto artistico con le reference resta aperto. Le pareti esterne
+e i due ingombri possono crescere; quote dei piani e dati degli interni restano
+preservati.
+G01.4 è avviato come catalogo locale; integrazione del planner e sostituibilità
+delle famiglie restano da completare. S02 resta aperto oltre queste dodici case.
+**A07 conserva il confronto R10/R13 ancora da svolgere**: il prototipo delle
+ricette non chiude quel criterio e non anticipa la consegna di B01.
+
+Per l'immediatezza futura riusare selezione, gizmo, ID, protezioni e UndoRedo
+esistenti. Una regia comune deve dare un gesto/una transazione, annullamento
+coerente, anteprima dei dipendenti e conflitti visibili. Aggiornare localmente
+durante il trascinamento, con dettagli costosi finalizzati al rilascio; evitare
+una seconda rappresentazione del mondo da mantenere sincronizzata. Il primo
+caso resta una casa rettangolare con aperture protette, poi campate e raccordi.
 
 ## Obiettivo e vincolo concordato
 
@@ -27,11 +67,14 @@ ripidi, travi, sporti e portici per una famiglia nordica; basamenti, piani agget
 e timpani per una famiglia a graticcio; terrazze, parapetti e cupole per un’altra
 famiglia. Non significa realistico, dipinto, cartoon o pixel art.
 
-**La resa visiva resta quella attuale del progetto.** Questa roadmap non propone
+**La resa visiva resta quella attuale del progetto.** Il concept dipinto della
+scena integrata è documentato separatamente in [ANIME_ART_DIRECTION.md](ANIME_ART_DIRECTION.md).
+Questa roadmap architettonica non propone
 di cambiare shader, palette, illuminazione, postprocess o stile delle texture.
 Materiali e asset esistenti vengono riutilizzati dove possibile. Nuove coperture
 possono richiedere componenti appropriati, ma devono mantenere la resa esistente.
-GI e lightmap restano rimandati.
+Non comprende una nuova pipeline di GI o lightmap; le impostazioni di rendering
+già presenti nella scena di prova restano separate dai criteri architettonici.
 
 Il profilo architettonico propone una soluzione iniziale; non deve impedire di
 aggiungere una torre, cambiare una falda, spostare una parete o mescolare componenti.
@@ -74,7 +117,56 @@ la planimetria sarà una proposta di gameplay coerente con l'involucro, non una
 ricostruzione presunta del riferimento. R11 e R12 forniscono invece indicazioni
 interne visibili da usare come casi di prova.
 
+### Riferimento aggiuntivo: Bergfried, Devlog 00 — 20 settembre 2026
+
+Fonte locale fornita dall'utente:
+[Bergfried — Prototyping the Building System](<C:/Users/jonny/Downloads/Bergfried_ Prototyping the Building System _ Devlog 00_1080p.mp4>).
+Durata 6:02,65, 1920×1080 a 30 fps. Esame visivo di 75 fotogrammi: uno ogni
+12 secondi sull'intero video, poi ogni 4 secondi nei tratti 1:30–2:30 e
+3:06–4:54. Le sequenze ravvicinate servono a distinguere anteprima, posa e
+risultato; non costituiscono una revisione del codice o una misura prestazionale.
+Tavole di consultazione: `captures/reference_bergfried/timeline_1.png`,
+`timeline_2.png` e `detail_timeline_1.png`–`detail_timeline_3.png`.
+
+| Tempo | Osservazione verificata nei fotogrammi | Spunto futuro per i nostri strumenti |
+|---|---|---|
+| 0:36–1:24 | Fotografie di fortezze con linee evidenziate su mura, creste e masse verticali | Leggere la reference per gerarchia e rapporto con il sito prima dei piccoli dettagli; non dedurne un algoritmo già disponibile |
+| 1:30–1:38 | Un tracciato murario bianco cresce lungo un andamento irregolare e compone una corte sul rilievo | A08/A09 e B03: anteprima leggibile della continuità di mura e attacchi; usare i nostri nodi cortina/torre |
+| 1:46–2:14; 2:18–2:26 | Corpi bassi, grandi coperture, torri dominanti, recinti e spazi aperti producono complessi diversi | G01.4/S02: ricette riconoscibili nella silhouette, nel rapporto pieno/vuoto e nei corpi accessori; dimensione e insegna da sole non bastano |
+| 3:14–3:38 | Anteprime bianche delle mura convivono con volumi colorati e parti già costruite; il messaggio UI distingue l'avanzamento di costruzione | Separare visivamente proposta e risultato applicato. Non importare automaticamente turni, costi o simulazione di cantiere nel nostro editor |
+| 3:58–4:22 | La posa mostra la sagoma intera, indicatori direzionali e aree/ingombri ad alto contrasto; il selettore distingue Small Great Hall e Medium House | B01.2: capire orientamento e occupazione prima di confermare; G01.4: scelta per ruolo e forma con anteprima della ricetta |
+| 4:26–4:38 | La sagoma di una casa passa da bianco/verde a rosso mentre si sovrappone a un volume esistente; i contorni di edifici e percorsi restano visibili | B01.2/B03: conflitti immediati nella viewport, intero percorso di accesso evidenziato e conferma solo di una proposta valida |
+| 4:48–4:54 | Una struttura lignea aperta, tettoia, recinti e spazio coltivato compongono un insieme riconoscibile | A03/A06/S02: carattere attraverso struttura e spazio d'uso; comporre i componenti editabili esistenti, oltre al solo corpo rettangolare |
+
+**Non dimostrato dal video:** UndoRedo, persistenza degli override, cancellazioni
+protette, generazione adattiva delle finestre durante il ridimensionamento,
+booleani generali fra tetti o aggiornamento automatico universale del terreno.
+Le immagini dei complessi finiti non provano da sole che ogni raccordo sia
+automatico. Per noi questi comportamenti restano requisiti da progettare e
+verificare, non capacità importate dalla reference.
+
+La direzione Tiny Glade si arricchisce quindi di una preview della composizione
+e dei suoi ingombri, oltre alle maniglie sui singoli elementi. Riutilizzare
+House/Volume, `BuildingRequest`, ricette, guide, validatori e UndoRedo attuali:
+una regia di interazione comune deve mostrare candidato, dipendenze e conflitti.
+Conservare i criteri già aperti di B01–B03 e A07; nessuna card è conclusa da
+questa analisi. Il terreno del nostro gioco mantiene piattaforme piane e quote
+discrete, anche se nel video molte fortezze occupano rilievi continui.
+
 ## Diagnosi: cosa manca davvero
+
+Incremento locanda, 20 settembre 2026: il Volume supporta un raccordo alto
+esplicito su un fianco del tetto a due falde, con quota e inserimento editabili,
+validazione del timpano posteriore e taglio della geometria nascosta. La ricetta
+della locanda ne è il campione verificato. Riusa dati, clipping e UndoRedo del
+builder; non completa B03, i raccordi generali né l'anteprima adattiva durante
+un gesto. Dettagli e limiti in [BUILDING_RECIPES.md](BUILDING_RECIPES.md).
+
+Secondo campione: chiesa con frontone stretto, copertura trasversale raccordata
+e campanile inserito nella navata. L'opzione riutilizzabile `masonry_trim`
+aggiunge cornici e pilastri in pietra al normale House/Volume. Le proporzioni
+restano nella ricetta; raccordi del campanile, orientamento libero delle navate
+e dipendenze adattive sono sviluppi futuri, non chiusure di B02/B03.
 
 Il divario principale è il **vocabolario delle forme**. Cambiare texture o assegnare
 un'etichetta a una casa rettangolare non basta a ottenere gli edifici osservati.
@@ -259,10 +351,10 @@ un lungo refactoring senza qualcosa da provare nel builder.
 |---|---|---|---|---|
 | A00 | FATTO | Analisi delle 21 immagini e roadmap | — | Inventario e vincolo: architettura, resa attuale invariata |
 | A01 | FATTO | Profilo architettonico minimo e contratto versionato | A00 | Preset, editing preservato, container Components e ID persistenti |
-| B01.1 | TODO | Facciata assistita: finestre su volume rettangolare | A07 prima, A01 e aperture esistenti | Allarga/restringi: numero e spaziatura si adattano; porte e finestre manuali preservate; Undo completo |
-| B01.2 | TODO | Editing e diagnostica degli elementi automatici | B01.1 | Seleziona, rendi manuale, elimina senza ricomparsa; conflitti e modalità evidenti nell'UI |
-| B02 | TODO | Campate e dettagli coerenti | B01.2, A03, A05 | Travi, davanzali e cornici seguono facciata e aperture senza ostruire i vani |
-| B03 | TODO | Assistenza nei raccordi fra volumi e accessori | B01.2, A02, A03 | Balcone/portico/volume agganciato aggiorna aperture e struttura; override preservati |
+| B01.1 | TODO | Facciata assistita: finestre su volume rettangolare | A07 prima, A01 e aperture esistenti | Drag con anteprima locale: numero e spaziatura si adattano; porte e finestre manuali preservate; un Undo per gesto e annullamento completo |
+| B01.2 | TODO | Editing e diagnostica degli elementi automatici | B01.1 | Selezione contestuale; automatico/manuale/bloccato evidente; eliminazioni persistenti e conflitti visibili prima di applicare |
+| B02 | TODO | Campate e dettagli coerenti | B01.2, A03, A05 | Travi, davanzali e cornici seguono facciata e aperture senza ostruire i vani; dettagli delle ricette riusati, non secondo generatore |
+| B03 | TODO | Assistenza nei raccordi fra volumi e accessori | B01.2, A02, A03 | Anteprima dei raccordi di balcone/portico/volume; aperture e struttura coerenti, override preservati; relazioni esistenti estese senza duplicare i dati |
 | B04 | TODO | Esempio costruito da reference tramite builder | B01.2, geometrie A necessarie | Casa o piccolo complesso editabile, costruito con gli strumenti senza mesh ad hoc |
 | A02a | IN CORSO | Componenti agganciati: balcone + porta | A01 | Vano, collisione e aggancio aggiornati senza perdere le modifiche manuali |
 | A02 | IN CORSO | Composizione di più volumi rettangolari | A01 | Fucina R04 con corpo e tettoie modificabili indipendentemente |
@@ -332,10 +424,10 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | W03 | TODO | Attraversamenti e rive | Pipeline mondo | Ponti, guadi, approdi, passaggi e accessi alle sponde; terreno/rocce/strade leggono gli stessi vincoli |
 | C01 | TODO | Ingressi di grotta | Pipeline mondo | Apertura reale nel blocco roccioso, soglia percorribile, collisione coerente e leggibilità alla camera fissa |
 | C02 | TODO | Piano di grotta | Pipeline mondo | Stanze/cunicoli con anelli e diramazioni, quote e collegamenti; editing manuale separato dall'involucro esterno |
-| G01.4 | TODO | Catalogo architettonico | Pipeline mondo | Ruoli del piano associati a profili/componenti; famiglie sostituibili senza cambiare il planner |
+| G01.4 | IN CORSO — ricette locali verificate | Catalogo architettonico | Pipeline mondo | Sei ruoli, BuildingRequest opzionale, persistenza/edit/UndoRedo e dodici case di prova verificati; integrazione planner e famiglie sostituibili ancora aperte; BUILDING_RECIPES.md |
 | G01.5 | RIMANDATO | Varietà compositiva del castello | Pipeline mondo | Recinti segmentati, più torri/corpi, corti e gerarchie differenti; preservazione manuale |
 | S01 | RIMANDATO | Composizione urbana organica | Pipeline mondo | Strade principali e secondarie, piazze, porte, edifici gerarchizzati, addensamenti e vuoti; insediamenti su piani/terrazze, collegamenti ai vincoli del paesaggio |
-| S02 | TODO | Edifici urbani più articolati | Pipeline mondo | Volumi aggregati, tetti collegati, facciate e accessori; le città cambiano forma oltre al colore |
+| S02 | TODO | Edifici urbani più articolati | Pipeline mondo | Estendere le ricette oltre le dodici case di prova: volumi aggregati, tetti collegati, facciate/accessori e interni coerenti; varietà strutturale verificata, non solo ruoli o colori |
 | V01 | RIMANDATO | Confronto dei quattro castelli | Pipeline mondo | Quattro richieste/seed tramite tool, scene editabili e stessa camera; almeno due organizzazioni strutturali distinte |
 | V02 | TODO | Vertical slice città–villaggio–POI | Pipeline mondo | Tempi reali di cammino, incontri, visibilità e streaming; aggiornamento delle distanze proposte dal concept |
 <!-- WORLD_PIPELINE_END -->

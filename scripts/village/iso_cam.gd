@@ -1,3 +1,4 @@
+@tool
 extends Camera3D
 ## Top-down orbit camera with narrow perspective and an orthographic fallback.
 ## FOV controls perspective strength; framing matching derives viewing distance
@@ -8,11 +9,24 @@ extends Camera3D
 @export var target_path: NodePath
 
 @export_group("Framing")
-## Narrow perspective preserves the top-down composition while showing depth.
-@export var perspective_enabled := false
-@export_range(10.0, 40.0, 0.5) var perspective_fov := 20.0
+## 0 = orthographic; positive degrees add perspective without changing the focal
+## plane's scale. The integrated gameplay rig starts at a subtle 13 degrees.
+@export_range(0.0, 40.0, 1.0, "suffix:°") var perspective_fov: float = 0.0:
+	set(value):
+		# Camera3D's native perspective projection requires at least 1 degree.
+		perspective_fov = 0.0 if value <= 0.0 else clampf(value, 1.0, 40.0)
+		if is_node_ready():
+			_apply(Engine.is_editor_hint())
+## Hidden compatibility with existing scene files and scripts that toggle a bool.
+@export_storage var perspective_enabled: bool = false:
+	get: return perspective_fov > 0.0
+	set(value):
+		if not value:
+			perspective_fov = 0.0
+		elif perspective_fov <= 0.0:
+			perspective_fov = 20.0
 ## Match ortho_size at the focus plane; distance then follows FOV and combat zoom.
-@export var match_perspective_framing := true
+@export_storage var match_perspective_framing := true
 ## Down-angle. The reference sits near 55 degrees -- high enough to read the ground plan, shallow
 ## enough that roofs and tent sides still show a face.
 @export_range(20.0, 89.0, 0.5) var pitch_deg := 55.0
@@ -26,6 +40,9 @@ extends Camera3D
 ## Metres above the target's origin to actually look at, so a 1.8 m character sits in frame rather
 ## than at the bottom edge.
 @export var focus_height := 1.1
+## Optional directional sun to keep shadows around the focus as FOV moves the lens.
+## Empty leaves lighting unchanged in existing scenes.
+@export var shadow_light_path: NodePath
 
 @export_group("Follow")
 ## Metres per second of catch-up, as an exponential rate. 0 pins the camera to the target exactly.
@@ -70,9 +87,51 @@ var _lock_mix := 0.0
 ## step with _view_yaw while a lock is on, so dropping the lock does not whip the world back to the
 ## angle it started the session at.
 var _free_yaw := 0.0
+var _shadow_light: DirectionalLight3D
+var _shadow_base_distance := 0.0
+
+func _validate_property(property: Dictionary) -> void:
+	# The script owns projection. Avoid showing a second, conflicting FOV slider.
+	if property.name in ["fov", "projection"]:
+		property.usage = int(property.usage) & ~PROPERTY_USAGE_EDITOR
+
+func effective_fov() -> float:
+	# Keep Camera3D's stored lens valid even when projection is orthographic.
+	return maxf(perspective_fov, 1.0)
 
 func locked() -> Node3D:
 	return _lock_target if is_instance_valid(_lock_target) else null
+
+func _dialogue_active() -> bool:
+	if Engine.is_editor_hint() or not is_inside_tree():
+		return false
+	var dialogue := get_tree().root.get_node_or_null("Dialogue")
+	return bool(dialogue.get("active")) if dialogue != null else false
+
+func _preserve_focus_shadows(view_distance: float) -> void:
+	var light := get_node_or_null(shadow_light_path) as DirectionalLight3D if not shadow_light_path.is_empty() else null
+	if light != _shadow_light:
+		if is_instance_valid(_shadow_light):
+			_shadow_light.directional_shadow_max_distance = _shadow_base_distance
+		_shadow_light = light
+		_shadow_base_distance = light.directional_shadow_max_distance if light != null else 0.0
+	if light != null:
+		var visible_margin := maxf(30.0, size * 2.0)
+		var wanted_range := maxf(_shadow_base_distance, view_distance + visible_margin)
+		if not is_equal_approx(light.directional_shadow_max_distance, wanted_range):
+			light.directional_shadow_max_distance = wanted_range
+
+func _exit_tree() -> void:
+	if is_instance_valid(_shadow_light):
+		_shadow_light.directional_shadow_max_distance = _shadow_base_distance
+
+func _notification(what: int) -> void:
+	if not Engine.is_editor_hint():
+		return
+	if what == NOTIFICATION_EDITOR_PRE_SAVE and is_instance_valid(_shadow_light):
+		_shadow_light.directional_shadow_max_distance = _shadow_base_distance
+	elif what == NOTIFICATION_EDITOR_POST_SAVE and _have_focus:
+		_preserve_focus_shadows(global_position.distance_to(_focus))
 
 
 ## THE ONE CASE WHERE TURNING THE CAMERA IS WRONG. Both the right stick and the mouse pick a swing
@@ -80,7 +139,7 @@ func locked() -> Node3D:
 ## player is already aiming at. The lock path refuses to rotate under a released strike for exactly
 ## this reason; free look refuses for the whole of both directional states.
 func _rotation_allowed() -> bool:
-	if not free_rotate or locked() != null or Dialogue.active:
+	if Engine.is_editor_hint() or not free_rotate or locked() != null or _dialogue_active():
 		return false
 	if _target != null and _target.has_method("state_name"):
 		var state: String = _target.state_name()
@@ -89,9 +148,11 @@ func _rotation_allowed() -> bool:
 	return true
 
 func _physics_process(_delta: float) -> void:
+	if Engine.is_editor_hint():
+		return
 	# Poll the action here: this camera lives inside the pixel SubViewport,
 	# where unhandled input can be consumed before reaching the camera.
-	if Dialogue.active:
+	if _dialogue_active():
 		_lock_target = null
 	elif Input.is_action_just_pressed("lock_on"):
 		if locked(): _lock_target = null
@@ -107,6 +168,7 @@ func _physics_process(_delta: float) -> void:
 		if locked(): _lock_marker.global_position = _lock_target.global_position+Vector3.UP*2.0
 
 func _select_lock(cycle := false) -> void:
+	if Engine.is_editor_hint(): return
 	if not is_instance_valid(_target): return
 	var candidates: Array[Node3D] = []
 	for node in get_tree().get_nodes_in_group("enemy"):
@@ -132,7 +194,7 @@ func _select_lock(cycle := false) -> void:
 func _ready() -> void:
 	projection = PROJECTION_PERSPECTIVE if perspective_enabled else PROJECTION_ORTHOGONAL
 	keep_aspect = KEEP_HEIGHT
-	fov = perspective_fov
+	fov = effective_fov()
 	_view_yaw = deg_to_rad(yaw_deg)
 	_free_yaw = _view_yaw
 	size = ortho_size
@@ -146,6 +208,15 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	if Engine.is_editor_hint():
+		# Editor preview reads authored framing, never combat input or autoloads.
+		_view_yaw = deg_to_rad(yaw_deg)
+		_free_yaw = _view_yaw
+		_lock_target = null
+		_lock_mix = 0.0
+		_target = get_node_or_null(target_path) as Node3D if not target_path.is_empty() else null
+		_apply(true)
+		return
 	_apply(false, delta)
 
 
@@ -198,7 +269,7 @@ func _apply(instant: bool, delta := 0.0) -> void:
 		size_goal = maxf(size_goal,maxf(absf(spread.dot(basis_want.y))+4.0,(absf(spread.dot(basis_want.x))+4.0)/aspect))
 	size = size_goal if instant else lerpf(size,size_goal,1.0-exp(-4.0*delta))
 
-	if _target != null:
+	if is_instance_valid(_target):
 		var want := _target.global_position + Vector3.UP * focus_height
 		if in_combat:
 			var pair_focus := _target.global_position.lerp(opponent.global_position,.45)+Vector3.UP*1.1
@@ -221,14 +292,19 @@ func _apply(instant: bool, delta := 0.0) -> void:
 		_have_focus = true
 
 	projection = PROJECTION_PERSPECTIVE if perspective_enabled else PROJECTION_ORTHOGONAL
-	fov = perspective_fov
+	fov = effective_fov()
 	var view_distance := distance
 	if perspective_enabled:
 		if match_perspective_framing:
-			view_distance = size / (2.0*tan(deg_to_rad(perspective_fov)*0.5))
+			view_distance = size / (2.0*tan(deg_to_rad(effective_fov())*0.5))
 		else:
 			view_distance = distance * size / maxf(ortho_size,0.01)
-	far = maxf(distance,view_distance)*2.0+200.0
+	# At near-zero FOV the camera is far away. Keep a finite depth slab around
+	# the focus instead of combining a 5 cm near plane with a kilometre-scale far plane.
+	var depth_margin := maxf(60.0, size * 3.0)
+	near = maxf(0.05, view_distance - depth_margin) if perspective_enabled else 0.05
+	far = maxf(distance * 2.0 + 200.0, view_distance + depth_margin)
+	_preserve_focus_shadows(view_distance)
 	var pos := _focus + basis_want.z * view_distance
 	# Orthographic snapping has no globally consistent pixel size in perspective.
 	if pixel_snap and not perspective_enabled:

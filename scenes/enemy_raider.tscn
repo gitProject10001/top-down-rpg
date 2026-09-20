@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/enemy_duelist.tscn" id="1_body"]
+[ext_resource type="Script" path="res://scripts/combat/pack_brain.gd" id="2_brain"]
+
+[node name="EnemyRaider" instance=ExtResource("1_body")]
+move_speed = 4.4
+
+[node name="Health" parent="." index="4"]
+max_hp = 4
+
+[node name="DuelBrain" parent="." index="11"]
+script = ExtResource("2_brain")
+; A script replacement in an inherited scene retains same-named exported defaults
+; from DuelBrain. Author the changed values explicitly instead of inheriting 6m/.6.
+engage_range = 9.0
+guard_read = 0.2

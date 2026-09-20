@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="ArtStudyProfile" format=3 uid="uid://dx8mmhq6gllv1"]
+
+[ext_resource type="Script" uid="uid://b6l4wjd74rr0b" path="res://scripts/art/art_surface_edit.gd" id="1_bpgib"]
+[ext_resource type="Script" uid="uid://71ruxdq0evxl" path="res://scripts/art/art_study_profile.gd" id="1_profile"]
+
+[resource]
+resource_local_to_scene = true
+script = ExtResource("1_profile")
+ambient_energy = 0.42
+sky_fill_energy = 0.12
+gi_occlusion = true
+contact_occlusion_radius = 0.65
+contact_occlusion_intensity = 1.35
+contact_occlusion_power = 1.45
+sun_angular_distance = 0.5
+grass_palette = PackedColorArray(0.06, 0.1, 0.045, 1, 0.09, 0.16, 0.055, 1, 0.17, 0.22, 0.07, 1)

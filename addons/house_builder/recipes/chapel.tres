@@ -1,0 +1,21 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://addons/house_builder/building_recipe.gd" id="1"]
+[resource]
+script = ExtResource("1")
+recipe_id = "chapel"
+display_name = "Chiesa · frontone raccordato e campanile"
+role = "chapel"
+description = "Facciata in pietra con apertura ogivale attorno alla porta esistente, rosone originale, contrafforti e campanile laterale con bifore aperte e cuspide. Elementi modificabili; il taglio degli interni conserva monconi visibili sopra le collisioni."
+main_properties = {"width": 8.8, "depth": 14.2, "wall_height": 5.0, "roof_height": 4.2, "wall_finish": 1, "masonry_trim": true}
+components = Array[Dictionary]([{"id": "CoperturaPortale", "width_ratio": 0.40, "preferred_walls": [3], "properties": {"structure_kind": 0, "depth": 4.7, "wall_height": 3.0, "roof_height": 2.8, "wall_finish": 1, "masonry_trim": true, "host_offset": 0.0, "attachment_elevation": 3.0, "attachment_inset": 4.0, "roof_junction": true, "openings": []}}])
+details = Array[Dictionary]([
+{"id": "FacciataGotica", "kind": "gothic_facade", "anchor": "left", "rotation_degrees": Vector3(0, -90, 0), "position": Vector3(-0.64, 0, 0), "dimensions": Vector3(5.68, 8.95, 0.8)},
+{"id": "TorreCampanaria", "kind": "gothic_bell_tower", "anchor": "left", "u": -0.75, "rotation_degrees": Vector3(0, -90, 0), "position": Vector3(-0.40, 0, 0), "dimensions": Vector3(2.9, 13.8, 2.6), "palette": PackedColorArray(0.29,0.20,0.12,1, 0.47,0.45,0.40,1, 0.19,0.21,0.20,1, 0.64,0.52,0.29,1, 0.20,0.24,0.27,1, 0.59,0.43,0.23,1, 0.085,0.085,0.072,1)},
+{"id": "VetrataFiancoIngresso", "kind": "gothic_window", "anchor": "left", "u": 0.65, "rotation_degrees": Vector3(0, -90, 0), "position": Vector3(-0.17, 0.75, 0), "dimensions": Vector3(1.5, 3.4, 0.3)},
+{"id": "ContraffortePortale", "kind": "gothic_buttress", "anchor": "left", "u": 0.85, "rotation_degrees": Vector3(0, -90, 0), "position": Vector3(-0.28, 0, 0), "dimensions": Vector3(0.82, 6.1, 1.15)},
+{"id": "ContrafforteRetroA", "kind": "gothic_buttress", "anchor": "right", "u": -0.78, "rotation_degrees": Vector3(0, 90, 0), "position": Vector3(0.25, 0, 0), "dimensions": Vector3(0.82, 5.7, 1.15)},
+{"id": "ContrafforteRetroB", "kind": "gothic_buttress", "anchor": "right", "u": 0.0, "rotation_degrees": Vector3(0, 90, 0), "position": Vector3(0.25, 0, 0), "dimensions": Vector3(0.82, 5.7, 1.15)},
+{"id": "ContrafforteRetroC", "kind": "gothic_buttress", "anchor": "right", "u": 0.78, "rotation_degrees": Vector3(0, 90, 0), "position": Vector3(0.25, 0, 0), "dimensions": Vector3(0.82, 5.7, 1.15)},
+{"id": "VetrataRetroA", "kind": "gothic_window", "anchor": "right", "u": -0.40, "rotation_degrees": Vector3(0, 90, 0), "position": Vector3(0.17, 0.90, 0), "dimensions": Vector3(1.5, 3.4, 0.3)},
+{"id": "VetrataRetroB", "kind": "gothic_window", "anchor": "right", "u": 0.40, "rotation_degrees": Vector3(0, 90, 0), "position": Vector3(0.17, 0.90, 0), "dimensions": Vector3(1.5, 3.4, 0.3)}
+])

@@ -34,6 +34,7 @@ ssao_horizon = 0.05
 ssao_light_affect = 0.15
 sdfgi_enabled = true
 sdfgi_use_occlusion = true
+sdfgi_y_scale = 2
 sdfgi_energy = 0.8
 
 [sub_resource type="QuadMesh" id="post_quad"]
@@ -105,9 +106,11 @@ size = 17.5
 far = 280.0
 script = ExtResource("1_q4no0")
 target_path = NodePath("../Player")
+perspective_fov = 13.0
 pitch_deg = 48.0
 ortho_size = 17.5
 focus_height = 4.0
+shadow_light_path = NodePath("../Sun")
 pixel_rows = 450
 
 [node name="PostPixel" type="MeshInstance3D" parent="Pixel/View/IsoCam" unique_id=1431222476]
@@ -195,6 +198,4 @@ attack_timing = {
 "windup": 0.22
 }
 }
-locomotion_clips = PackedStringArray("idle", "run_fwd", "run_back", "strafe_left", "strafe_right", "aim_idle", "aim_fwd", "aim_back", "aim_left", "aim_right", "atk_h", "atk_b", "atk_d", "atk_combo")
-loop_clips = PackedStringArray()
 face_movement = true

@@ -95,6 +95,7 @@ void fragment(){ architecture_reveal(FRAGCOORD.xy);
   }
   if(anime_painted) {
    ALBEDO=painted_stone(ALBEDO,p,norm);
+   ALBEDO=stone_weather(ALBEDO,p,norm,reveal_world,stone.y);
    ROUGHNESS=1.0; SPECULAR=0.0;
   }
  }

@@ -1,15 +1,29 @@
 @tool
 extends Node3D
+signal recipe_applied
+## Generated meshes/materials have been replaced; presentation can rebind locally.
+signal rebuilt
 ## Exterior authoring node. Only dimensions/opening records are serialized.
 const RoofMesh=preload("res://addons/house_builder/roof_mesh.gd")
 const MeshJoin=preload("res://addons/house_builder/mesh_join.gd")
 const Door=preload("res://addons/house_builder/door.gd")
 const ArchitectureProfile=preload("res://addons/house_builder/architecture_profile.gd")
+const BuildingRecipe=preload("res://addons/house_builder/building_recipe.gd")
 @export_group("Architettura")
 @export var architecture_profile: ArchitectureProfile
-@export_enum("dwelling","shop","hall","forge","tower","keep") var archetype_id := "dwelling"
+@export_enum("dwelling","shop","hall","forge","tower","keep","inn","stable","chapel") var archetype_id := "dwelling"
 @export_storage var authoring_version := 1
 @export_storage var profile_baseline: Dictionary={}
+@export var building_recipe: BuildingRecipe
+@export_storage var recipe_provenance: Dictionary = {}
+var _recipe_retired: Dictionary = {}
+var _recipe_notification_pending := false
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_PREDELETE:
+		for node in _recipe_retired.values():
+			if is_instance_valid(node) and node.get_parent() == null: node.free()
+
 @export_group("Dimensioni")
 var _is_wing_part := false
 const WALL_THICKNESS := 0.24
@@ -23,12 +37,21 @@ const WALL_THICKNESS := 0.24
 	set(value): roof_height=clampf(value,0.01 if _is_wing_part else 0.5,6.0); request_rebuild()
 @export_enum("Intonaco", "Pietra") var wall_finish := 0:
 	set(value): wall_finish=value; request_rebuild()
+## Stone cornices and corner piers instead of the exposed timber grid.
+@export var masonry_trim := false:
+	set(value): masonry_trim=value; request_rebuild()
 @export var weathered := true:
 	set(value): weathered=value; request_rebuild()
 @export var house_seed := 416522:
 	set(value): house_seed=value; request_rebuild()
 @export var openings: Array[Dictionary]=[]:
 	set(value): openings=value.duplicate(true); request_rebuild()
+@export_group("Articolazione della facciata")
+## Exterior rhythm only: this never creates or changes InteriorPlan floors.
+@export_range(0.0,5.0,0.1) var facade_storey_height := 0.0:
+	set(value): facade_storey_height=maxf(0.0,value); request_rebuild()
+@export var facade_upper_windows := false:
+	set(value): facade_upper_windows=value; request_rebuild()
 @export_group("Ala laterale")
 @export var wing_enabled := false:
 	set(value): wing_enabled=value; request_rebuild()
@@ -181,15 +204,15 @@ func _box(center: Vector3,size: Vector3,mat: int) -> void:
 func _wall_box(wall: int,along: float,y: float,w: float,h: float,thick: float,offset: float,mat: int) -> void:
 	var normal := wall_normal(wall).abs()
 	_box(wall_point(wall,along,y,offset),Vector3(thick,h,w) if normal.x>0.5 else Vector3(w,h,thick),mat)
-func _beam(a: Vector3,b: Vector3,thick: float) -> void:
+func _beam(a: Vector3,b: Vector3,thick: float,mat: int=1) -> void:
 	var axis := (b-a).normalized()
 	var reference := Vector3.UP if absf(axis.dot(Vector3.FORWARD))>0.99 else Vector3.FORWARD
 	var right := axis.cross(reference).normalized()*thick*0.5
 	var back := axis.cross(right).normalized()*thick*0.5
 	var p := [a-right-back,a+right-back,a+right+back,a-right+back,b-right-back,b+right-back,b+right+back,b-right+back]
 	for face in [[0,3,2,1],[4,5,6,7],[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7]]:
-		_tri(p[face[0]],p[face[1]],p[face[2]],1)
-		_tri(p[face[0]],p[face[2]],p[face[3]],1)
+		_tri(p[face[0]],p[face[1]],p[face[2]],mat)
+		_tri(p[face[0]],p[face[2]],p[face[3]],mat)
 func _material(quadrant: Vector2,tint: Color) -> ShaderMaterial:
 	var m := ShaderMaterial.new()
 	m.shader=load("res://shaders/pixelart/painted_architecture.gdshader")
@@ -266,6 +289,10 @@ func rebuild() -> void:
 		plan._pending=true
 	update_gizmos()
 	if Engine.is_editor_hint(): update_configuration_warnings()
+	rebuilt.emit()
+	if _recipe_notification_pending:
+		_recipe_notification_pending=false
+		recipe_applied.emit()
 
 func _build_roof() -> ArrayMesh:
 	return RoofMesh.new().generate(width,depth,wall_height,roof_height,house_seed,weathered)
@@ -277,7 +304,18 @@ func _build_shell() -> void:
 		var length := wall_length(wall)
 		_wall_box(wall,0,wall_height*0.5,length,wall_height,WALL_THICKNESS,-WALL_THICKNESS*0.5,0)
 		_wall_box(wall,0,0.14,length+0.10,0.28,WALL_THICKNESS+0.10,-WALL_THICKNESS*0.5,2)
+		if masonry_trim:
+			for y in [0.34,wall_height-0.10]: _wall_box(wall,0,y,length+0.18,0.22,0.24,0.03,2)
+			for side in [-1.0,1.0]:
+				var edge: float=side*(length*.5-.18)
+				for span in _post_segments(wall,edge): _wall_box(wall,edge,(span.x+span.y)*.5,.36,span.y-span.x,.26,.045,2)
+			continue
 		for y in [0.32,wall_height-0.08]: _wall_box(wall,0,y,length+0.12,0.14,0.14,0.04,1)
+		if facade_storey_height>1.5 and facade_storey_height<wall_height-1.2:
+			_wall_box(wall,0,facade_storey_height,length+0.22,0.24,0.23,0.08,1)
+			for side in [-1.0,1.0]:
+				var edge: float=side*(length*0.5-0.16)
+				_beam(wall_point(wall,edge,facade_storey_height+0.22,0.10),wall_point(wall,edge-side*.72,facade_storey_height+1.0,0.10),0.14)
 		var posts := maxi(1,roundi(length/1.7))
 		for i in posts+1:
 			var along := -length*0.5+i*length/posts
@@ -290,9 +328,9 @@ func _build_gables() -> void:
 		var b := Vector3(width*0.5,wall_height,side*depth*0.5)
 		var c := Vector3(0,wall_height+roof_height,side*depth*0.5)
 		_tri(a,b,c,0) if side>0 else _tri(a,c,b,0)
-		_beam(a,c,0.12); _beam(b,c,0.12)
-		_box(Vector3(0,wall_height+roof_height*0.5,side*(depth*0.5+0.035)),Vector3(0.12,roof_height,0.12),1)
-	_box(Vector3(0,wall_height+roof_height+0.06,0),Vector3(0.13,0.15,depth+0.7),1)
+		_beam(a,c,0.22 if masonry_trim else 0.12,2 if masonry_trim else 1); _beam(b,c,0.22 if masonry_trim else 0.12,2 if masonry_trim else 1)
+		if not masonry_trim: _box(Vector3(0,wall_height+roof_height*0.5,side*(depth*0.5+0.035)),Vector3(0.12,roof_height,0.12),1)
+	_box(Vector3(0,wall_height+roof_height+0.06,0),Vector3(0.20,0.18,depth+0.7),2) if masonry_trim else _box(Vector3(0,wall_height+roof_height+0.06,0),Vector3(0.13,0.15,depth+0.7),1)
 
 func _volume_planes(size: Vector2,rise: float,frame: Transform3D,padding: float=0.0) -> Array:
 	var planes: Array=[]
@@ -456,6 +494,12 @@ func set_cutaway(enabled: bool,floor_base: float=0.0,storey_height: float=-1.0) 
 	for child in _generated.get_children():
 		if child is Door: child.set_cutaway(enabled)
 	for volume in authored_volumes(): volume.set_cutaway(enabled,floor_base,storey_height)
+	for component in attached_components():
+		if component.has_method("set_cutaway"): component.set_cutaway(enabled,floor_base,storey_height)
+	var recipe_details := get_node_or_null("RecipeDetails")
+	if recipe_details:
+		for detail in recipe_details.get_children():
+			if detail.has_method("set_cutaway"): detail.set_cutaway(enabled)
 
 
 func architecture_state() -> Dictionary:
@@ -487,12 +531,30 @@ func attached_components() -> Array:
 	return result
 func all_openings() -> Array[Dictionary]:
 	var result: Array[Dictionary]=openings.duplicate(true)
+	result.append_array(facade_openings())
 	for component in attached_components():
 		if component.validation_error().is_empty() and component.create_door and component.door_id.is_empty():
 			result.append(component.opening_record())
 	for volume in authored_volumes():
 		if volume.attached and volume.structure_kind==0 and volume.junction_mode==1 and volume.volume_error().is_empty(): result.append(volume.junction_record())
 		if volume.roof_door_enabled and volume.roof_door_error().is_empty(): result.append(volume.roof_door_record())
+	return result
+func facade_openings() -> Array[Dictionary]:
+	var result: Array[Dictionary]=[]
+	if not facade_upper_windows or facade_storey_height<1.5 or facade_storey_height+2.0>wall_height: return result
+	for wall in 4:
+		var count := maxi(1,floori((wall_length(wall)-0.6)/2.0))
+		for index in count:
+			var record := {"kind":"window","wall":wall,"u":(float(index)+0.5)/count*2.0-1.0,
+				"y":facade_storey_height+1.35,"width":0.92,"height":1.1,"facade_id":"upper_%d_%d"%[wall,index]}
+			var covered := false
+			for volume in authored_volumes():
+				if not volume.attached or volume.structure_kind!=0 or not volume.volume_error().is_empty(): continue
+				if volume.host_wall!=wall: continue
+				var along: float=float(record.u)*wall_length(wall)*.5
+				var volume_along: float=volume.host_offset*wall_length(wall)*.5
+				if absf(along-volume_along)<(float(record.width)+volume.width)*.5+.15 and float(record.y)+float(record.height)*.5>volume.attachment_elevation and float(record.y)-float(record.height)*.5<volume.attachment_elevation+volume.roof_top(): covered=true; break
+			if not covered and opening_fits(record): result.append(record)
 	return result
 func _volume_door_changed(opened: bool,id: String,roof_entry: bool=false) -> void:
 	for volume in authored_volumes():
@@ -549,5 +611,9 @@ func contains_footprint(point: Vector3,margin: float=0.0) -> bool:
 	if absf(point.x)<width*0.5-margin and absf(point.z)<depth*0.5-margin: return true
 	if wing_enabled:
 		var local := wing_transform().affine_inverse()*point
-		return absf(local.x)<wing_span()*0.5-margin and absf(local.z)<(width*0.5+wing_length)*0.5-margin
+		if absf(local.x)<wing_span()*0.5-margin and absf(local.z)<(width*0.5+wing_length)*0.5-margin: return true
+	for volume in authored_volumes():
+		if volume.attached and volume.structure_kind == 0 and volume.volume_error().is_empty():
+			if point.y<volume.position.y-.15: continue
+			if volume.contains_footprint(volume.transform.affine_inverse() * point, margin): return true
 	return false

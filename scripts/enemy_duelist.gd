@@ -52,6 +52,22 @@ func _ready() -> void:
 		light.visible = false
 
 
+func swing_damage() -> int:
+	# Hero traits belong to the hero; enemies do not inherit the player's crits.
+	return 1
+
+
+func _on_died() -> void:
+	super()
+	# Corpses keep their short death animation without blocking the active pack.
+	set_deferred("collision_layer", 0)
+	set_deferred("collision_mask", 0)
+	var hurt:=get_node_or_null("HurtBox") as Area3D
+	if hurt: hurt.set_deferred("collision_layer",0)
+	if intent: intent.clear()
+	get_tree().create_timer(2.0).timeout.connect(queue_free)
+
+
 ## Its own hurt radius, read by Player.hurt_radius_of when the other side sizes up a swing. The
 ## capsule lookup in that function already finds this body's HurtBox shape, so nothing is
 ## overridden here — the note exists because a reader will look for it.

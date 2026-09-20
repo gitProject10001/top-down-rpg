@@ -1,0 +1,11 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://addons/house_builder/building_recipe.gd" id="1"]
+[resource]
+script = ExtResource("1")
+recipe_id = "inn"
+display_name = "Locanda · corpo trasversale e galleria"
+role = "inn"
+description = "Corpo alto con tetto trasversale raccordato, galleria e portico. Due abbaini su falde opposte; aperture manuali e interni esistenti conservati."
+main_properties = {"width": 9.0, "depth": 8.6, "wall_height": 5.9, "roof_height": 3.1, "facade_storey_height": 3.2, "facade_upper_windows": true}
+components = Array[Dictionary]([{ "id": "CorpoCamere", "width_ratio": 0.43, "preferred_walls": [2], "properties": {"structure_kind": 0, "depth": 4.8, "wall_height": 2.8, "roof_height": 2.0, "host_offset": -0.35, "attachment_elevation": 3.2, "attachment_inset": 3.4, "roof_junction": true, "openings": [{"kind": "window", "wall": 0, "u": -0.48, "y": 1.35, "width": 0.8, "height": 1.15},{"kind": "window", "wall": 0, "u": 0.48, "y": 1.35, "width": 0.8, "height": 1.15}]} },{"id": "SalaLaterale", "width_ratio": 0.50, "preferred_walls": [1], "properties": {"structure_kind": 0, "canopy_roof": 0, "depth": 2.4, "wall_height": 2.7, "roof_height": 0.8, "junction_mode": 0}}, {"id": "PorticoIngresso", "width_ratio": 0.64, "preferred_walls": [0], "properties": {"structure_kind": 1, "canopy_roof": 1, "depth": 1.9, "wall_height": 2.55, "roof_height": 0.55, "post_spacing": 2.0}}, {"id": "GalleriaSuperiore", "kind": "balcony", "width_ratio": 0.87, "properties": {"host_id": "main/front", "elevation": 3.45, "projection": 1.45, "create_door": false, "support_posts": false, "exterior_stairs": false}}])
+details = Array[Dictionary]([{"id": "InsegnaLocanda", "kind": "hanging_sign", "motif": "tankard", "anchor": "front", "u": -0.80, "position": Vector3(0, 2.15, 0.3), "dimensions": Vector3(1.15, 1.1, 0.26)}, {"id": "Camino", "kind": "chimney", "anchor": "roof", "u": -0.5, "v": -0.25, "dimensions": Vector3(0.85, 2.0, 0.85)}, {"id": "Abbaino", "kind": "dormer", "anchor": "roof", "u": -0.60, "v": 0.38, "rotation_degrees": Vector3(0, -90, 0), "dimensions": Vector3(1.65, 1.5, 1.25)}, {"id": "AbbainoRetro", "kind": "dormer", "anchor": "roof", "u": 0.60, "v": -0.38, "rotation_degrees": Vector3(0, 90, 0), "dimensions": Vector3(1.65, 1.5, 1.25)}])

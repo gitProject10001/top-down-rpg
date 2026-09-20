@@ -77,6 +77,12 @@ func _fit_trail_to_blade() -> void:
 func _on_dealt_hit(target: Node, _pos: Vector3, applied: int) -> void:
 	if applied <= 0:
 		return
+	var fighter: Node=get_parent()
+	while fighter!=null and not fighter is Player:
+		fighter=fighter.get_parent()
+	# The defender already gives feedback for damage taken. An AI sword must not
+	# also fire the player's successful-hit feedback for that same impact.
+	if fighter is Player and not fighter.is_input_driven(): return
 	# Through the facade, and through its CONTACT door specifically — the layer whose whole point
 	# is that "did this fire on contact or on a beat" is answerable by reading one file.
 	# The FINISHER (step 2 of the chain, atk_c — already its fastest, hardest swing) freezes

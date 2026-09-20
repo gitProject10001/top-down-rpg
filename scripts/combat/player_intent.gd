@@ -4,17 +4,25 @@ extends FighterIntent
 @export var stick_deadzone := 0.45
 @export var mouse_pixels := 26.0
 @export var screen_relative_directions := true
+@export var attack_press_memory := 0.35
 var _mirror_screen := false
 var _mouse_travel := Vector2.ZERO
 var _screen_guard := SwingDir.UP
-var _screen_attack := SwingDir.UP
+var _screen_attack := SwingDir.RIGHT
+var _attack_down := false
+var _attack_press_left := 0.0
 
 func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("attack"):
+		_sample_attack_button(true)
+	elif event.is_action_released("attack"):
+		_sample_attack_button(false)
 	if guard or attack_held:
 		if event is InputEventMouseMotion:
 			_mouse_travel += (event as InputEventMouseMotion).relative
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	_attack_press_left = maxf(0.0, _attack_press_left - delta)
 	var p := fighter()
 	var raw := Input.get_vector("move_left", "move_right", "move_up", "move_down")
 	move = raw
@@ -24,9 +32,10 @@ func _physics_process(_delta: float) -> void:
 			var v := Vector3(raw.x, 0.0, raw.y).rotated(Vector3.UP, rig.global_rotation.y)
 			move = Vector2(v.x, v.z)
 	look = Vector2.ZERO
-	var was_held := attack_held
 	guard = Input.is_action_pressed("block")
-	attack_held = Input.is_action_pressed("attack") or Input.is_action_just_pressed("attack")
+	# Input events latch even a complete click between two physics frames. Polling
+	# also supports Input.action_press and a held button when focus is restored.
+	_sample_attack_button(Input.is_action_pressed("attack"))
 	var d := _direction()
 	if d != SwingDir.NONE:
 		if guard: _screen_guard = d
@@ -34,10 +43,37 @@ func _physics_process(_delta: float) -> void:
 	_update_direction_frame()
 	guard_dir = local_direction(_screen_guard)
 	attack_dir = local_direction(_screen_attack)
-	if was_held and not attack_held:
-		request_release()
 	if not (guard or attack_held):
 		_mouse_travel = Vector2.ZERO
+
+func _sample_attack_button(down: bool) -> void:
+	if down != _attack_down:
+		_attack_down = down
+		if down:
+			_attack_press_left = attack_press_memory
+		else:
+			request_release()
+	attack_held = down
+
+func can_start_attack() -> bool:
+	return _attack_press_left > 0.0
+
+func consume_attack() -> void:
+	super()
+	_attack_press_left = 0.0
+
+## One edge pays for one swing. Holding, key repeat and discarded combo presses
+## cannot start another attack when the state returns to Idle.
+func consume_combo_press() -> bool:
+	if _attack_press_left <= 0.0:
+		return false
+	_attack_press_left = 0.0
+	return true
+
+func clear() -> void:
+	super()
+	_attack_press_left = 0.0
+	# Keep the physical level: an interruption must require a fresh press.
 
 func _update_direction_frame() -> void:
 	var p := fighter()

@@ -2,6 +2,7 @@
 extends Node3D
 ## Authored attachment. Host IDs refer to semantic facades, never mesh triangles.
 @export_storage var component_id := ""
+@export var locked := false
 @export_enum("main/front", "main/back", "main/right", "main/left") var host_id := "main/front":
 	set(value): host_id=value; changed()
 @export_range(-1,1,0.01) var along := 0.0:
@@ -87,8 +88,7 @@ func refresh() -> void:
 	visual=Node3D.new(); visual.name="_Visual"; add_child(visual,false,Node.INTERNAL_MODE_BACK)
 	var h := house()
 	if h==null: return
-	var tangent: Vector3=(h.wall_point(wall(),1,0)-h.wall_point(wall(),0,0)).normalized()
-	transform=Transform3D(Basis(tangent,Vector3.UP,h.wall_normal(wall())),h.wall_point(wall(),effective_along()*h.wall_length(wall())*0.5,effective_elevation()))
+	prepare_attachment()
 	if Engine.is_editor_hint(): update_configuration_warnings()
 	var authored_stair := stair_component()
 	if authored_stair:
@@ -109,6 +109,13 @@ func refresh() -> void:
 			for z in [0.12,projection-0.12]: box(Vector3(x,-rise*0.5-0.08,z),Vector3(0.20,rise-0.16,0.20),material)
 	if has_stairs(): build_stairs(material)
 	update_gizmos()
+func prepare_attachment() -> void:
+	var h := house()
+	if h==null or wall()<0: return
+	var tangent: Vector3=(h.wall_point(wall(),1,0)-h.wall_point(wall(),0,0)).normalized()
+	transform=Transform3D(Basis(tangent,Vector3.UP,h.wall_normal(wall())),h.wall_point(wall(),effective_along()*h.wall_length(wall())*0.5,effective_elevation()))
+func set_cutaway(enabled: bool,floor_base: float=0.0,storey_height: float=2.6) -> void:
+	if is_instance_valid(visual): visual.visible=not enabled or effective_elevation()<=floor_base+storey_height
 func box(center: Vector3,size: Vector3,material: Material,solid: bool=true) -> void:
 	var mesh := MeshInstance3D.new(); var shape := BoxMesh.new(); shape.size=size
 	mesh.mesh=shape; mesh.material_override=material; mesh.position=center; visual.add_child(mesh)

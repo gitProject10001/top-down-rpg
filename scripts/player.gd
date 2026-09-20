@@ -258,11 +258,17 @@ func gamepad_aim() -> bool:
 
 ## Pause or resume the animation clock, never the mixer itself. While paused,
 ## DirAttack evaluates at zero delta so modifiers always receive the authored pose.
+var _action_playback_speed := 1.0
+
+func set_attack_playback_speed(speed: float) -> void:
+	_action_playback_speed = maxf(speed, 0.01)
+	set_tree_active(true)
+
 func set_tree_active(on: bool) -> void:
 	if _tree:
 		_tree.active=true
 		if _fsm.has_state("DirAttack"):
-			_tree["parameters/Slash/ActionClock/scale"] = 1.0 if on else 0.0
+			_tree["parameters/Slash/ActionClock/scale"] = _action_playback_speed if on else 0.0
 		else:
 			_tree.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_PHYSICS if on else AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 
@@ -502,6 +508,7 @@ func _retime(a: Animation, scale: float) -> void:
 ## states needed). Returns the clip's (retimed) length so the caller can time itself. Used by
 ## the combo states for swings and by Jump for its start/air/land pieces.
 func play_clip(clip: String) -> float:
+	set_attack_playback_speed(1.0)
 	if _tree == null or _playback == null:
 		return 0.4
 	# Never point the shared action node at a missing clip (which outputs rest pose).
@@ -1000,7 +1007,7 @@ func _on_damaged(_amount: int, source: Node) -> void:
 				kb = maxf(kb, float(source.get_meta("knockback")))
 			# Sword cuts stagger a person; they do not launch them like a mace.
 			if source and int(source.get_meta("swing_dir", SwingDir.NONE)) != SwingDir.NONE:
-				kb = 1.1
+				kb = 2.8 if bool(source.get_meta("finisher", false)) else 1.1
 				var attacker := _find_entity(source,"on_swing_blocked") as Node3D
 				if attacker:
 					away = global_position-attacker.global_position
@@ -1016,8 +1023,13 @@ func _on_damaged(_amount: int, source: Node) -> void:
 	#   simultaneous multi-hits read as ONE blow, and hp should agree with the read.
 	if _toon != null:
 		_toon.flash(Color(1.0, 0.22, 0.18), 1.0, 0.35)
-	CombatFeedback.contact_taken()
-	health.extend_invulnerable(0.5)
+	if is_input_driven():
+		CombatFeedback.contact_taken()
+		health.extend_invulnerable(0.5)
+	else:
+		# A shared fighter body must not inherit the hero's half-second mercy:
+		# that would silently absorb the next legitimate combo contact.
+		health.extend_invulnerable(0.08)
 	_fsm.transition_to("Hurt")
 
 func _on_died() -> void:

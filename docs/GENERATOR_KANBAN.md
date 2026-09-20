@@ -2,7 +2,7 @@
 
 Board locale versionata, generata dalle tabelle delle roadmap. DOING include le macrofasi parziali; non significa che ci siano più agenti al lavoro. DONE riguarda il criterio della singola card, non l'intero sistema.
 
-**Ramo corrente: acqua — W04.2 confronto A/B con onde locali disponibile; W04.3 GPU e resa visiva in TODO, W01.2 authoring rive ancora aperto.** T01 ha una base accettata provvisoriamente, con tronco/radici corretti e suggerimenti in backlog. La pipeline architettonica riprende da A07: audit eseguito; resta confronto esplicito R10/R13 prima di B01.1. Generazione globale da seed e V01 rimandati; R03.3 in backlog. Le card RIMANDATO restano in TODO con stato esplicito.
+**Incremento corrente: ricette architettoniche locali e dodici case della scena integrata.** G01.4 avvia il catalogo riutilizzabile; prototipo visivo, capacità dei builder e futura interazione adattiva sono distinti in BUILDING_RECIPES.md. B01–B03 e S02 restano TODO; A07 conserva il confronto R10/R13 aperto. Lo studio dipinto e le zone sopraelevate non chiudono le macrofasi ambientali. Generazione globale da seed e V01 rimandati; le card RIMANDATO restano in TODO con stato esplicito. I risultati delle verifiche sono nei documenti degli incrementi, non impliciti nello stato delle macrofasi.
 
 Le card mantengono gli stati delle roadmap. Il criterio di uscita e le dipendenze sono nelle tabelle collegate; prima di iniziare una card TODO, verificare quelle dipendenze.
 
@@ -22,7 +22,7 @@ Aggiornare stati e criteri nelle tabelle, poi eseguire `python tools/update_gene
 | **[A10](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Rovine strutturali controllabili<br>TODO | **[W01](WORLD_GENERATION_ROADMAP.md)** — Laghi editabili<br>IN CORSO — esempio W01.1 | **[A07.7b](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Stanze e contenimento nella pianta poligonale<br>FATTO |
 | **[A11](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Integrazione insediamento e consolidamento<br>TODO | **[W04](WORLD_GENERATION_ROADMAP.md)** — Interazioni acqua locali<br>IN CORSO — W04.1 disponibile | **[A07.8](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Piante poligonali oltre i prismi regolari<br>FATTO |
 | **[T01.2](WORLD_GENERATION_ROADMAP.md)** — Rifinitura visiva alberi<br>TODO | **[W02](WORLD_GENERATION_ROADMAP.md)** — Fiumi editabili<br>IN CORSO — W02.1 disponibile | **[A07.8a](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Sagoma convessa deformabile<br>FATTO |
-| **[T01.2b](WORLD_GENERATION_ROADMAP.md)** — Corteccia e raccordo al terreno<br>TODO |  | **[A07.8b](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Verifica degli agganci durante la deformazione<br>FATTO |
+| **[T01.2b](WORLD_GENERATION_ROADMAP.md)** — Corteccia e raccordo al terreno<br>TODO | **[G01.4](WORLD_GENERATION_ROADMAP.md)** — Catalogo architettonico<br>IN CORSO — ricette locali verificate | **[A07.8b](ARCHITECTURE_GENERATOR_ROADMAP.md)** — Verifica degli agganci durante la deformazione<br>FATTO |
 | **[T01.2c](WORLD_GENERATION_ROADMAP.md)** — Palette e silhouette chioma<br>TODO |  | **[I01](WORLD_GENERATION_ROADMAP.md)** — Scena integrata con strumenti esistenti<br>FATTO |
 | **[T01.2d](WORLD_GENERATION_ROADMAP.md)** — Vento gerarchico<br>TODO |  | **[I01.1](WORLD_GENERATION_ROADMAP.md)** — Primo intervento performance editor<br>FATTO |
 | **[T01.3](WORLD_GENERATION_ROADMAP.md)** — Authoring alberi<br>TODO |  | **[T01.1](WORLD_GENERATION_ROADMAP.md)** — Studio alberi Blender → Godot<br>FATTO |
@@ -37,9 +37,8 @@ Aggiornare stati e criteri nelle tabelle, poi eseguire `python tools/update_gene
 | **[W03](WORLD_GENERATION_ROADMAP.md)** — Attraversamenti e rive<br>TODO |  | **[R03.2](WORLD_GENERATION_ROADMAP.md)** — Accesso alla terrazza<br>FATTO |
 | **[C01](WORLD_GENERATION_ROADMAP.md)** — Ingressi di grotta<br>TODO |  | **[W01.1](WORLD_GENERATION_ROADMAP.md)** — Lago ed emissario di prova<br>FATTO |
 | **[C02](WORLD_GENERATION_ROADMAP.md)** — Piano di grotta<br>TODO |  | **[W01.3a](WORLD_GENERATION_ROADMAP.md)** — Caustiche senza griglia regolare<br>FATTO |
-| **[G01.4](WORLD_GENERATION_ROADMAP.md)** — Catalogo architettonico<br>TODO |  | **[W01.4](WORLD_GENERATION_ROADMAP.md)** — Lago mosso: prima versione visiva<br>FATTO |
-| **[G01.5](WORLD_GENERATION_ROADMAP.md)** — Varietà compositiva del castello<br>RIMANDATO |  | **[W04.1](WORLD_GENERATION_ROADMAP.md)** — Scia del personaggio e spruzzi<br>FATTO |
-| **[S01](WORLD_GENERATION_ROADMAP.md)** — Composizione urbana organica<br>RIMANDATO |  | **[W04.2](WORLD_GENERATION_ROADMAP.md)** — Prototipo A/B onde locali<br>FATTO |
-| **[S02](WORLD_GENERATION_ROADMAP.md)** — Edifici urbani più articolati<br>TODO |  | **[W04.4](WORLD_GENERATION_ROADMAP.md)** — Trasporto onde nel campo artistico<br>FATTO |
-| **[V01](WORLD_GENERATION_ROADMAP.md)** — Confronto dei quattro castelli<br>RIMANDATO |  | **[W02.1](WORLD_GENERATION_ROADMAP.md)** — Fiume curvo con rocce<br>FATTO |
-| **[V02](WORLD_GENERATION_ROADMAP.md)** — Vertical slice città–villaggio–POI<br>TODO |  |  |
+| **[G01.5](WORLD_GENERATION_ROADMAP.md)** — Varietà compositiva del castello<br>RIMANDATO |  | **[W01.4](WORLD_GENERATION_ROADMAP.md)** — Lago mosso: prima versione visiva<br>FATTO |
+| **[S01](WORLD_GENERATION_ROADMAP.md)** — Composizione urbana organica<br>RIMANDATO |  | **[W04.1](WORLD_GENERATION_ROADMAP.md)** — Scia del personaggio e spruzzi<br>FATTO |
+| **[S02](WORLD_GENERATION_ROADMAP.md)** — Edifici urbani più articolati<br>TODO |  | **[W04.2](WORLD_GENERATION_ROADMAP.md)** — Prototipo A/B onde locali<br>FATTO |
+| **[V01](WORLD_GENERATION_ROADMAP.md)** — Confronto dei quattro castelli<br>RIMANDATO |  | **[W04.4](WORLD_GENERATION_ROADMAP.md)** — Trasporto onde nel campo artistico<br>FATTO |
+| **[V02](WORLD_GENERATION_ROADMAP.md)** — Vertical slice città–villaggio–POI<br>TODO |  | **[W02.1](WORLD_GENERATION_ROADMAP.md)** — Fiume curvo con rocce<br>FATTO |

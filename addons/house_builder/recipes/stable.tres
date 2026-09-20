@@ -1,0 +1,10 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://addons/house_builder/building_recipe.gd" id="1"]
+[resource]
+script = ExtResource("1")
+recipe_id = "stable"
+display_name = "Stalla · tettoia lunga e abbeveratoio"
+role = "stable"
+main_properties = {"wall_height": 3.5, "roof_height": 1.65}
+components = Array[Dictionary]([{"id": "TettoiaStalla", "width_ratio": 0.88, "preferred_walls": [2, 3, 1], "properties": {"structure_kind": 1, "canopy_roof": 1, "depth": 2.0, "wall_height": 2.6, "roof_height": 0.6, "post_spacing": 3.0}}])
+details = Array[Dictionary]([{"id": "Abbeveratoio", "kind": "trough", "anchor": "right", "u": -0.42, "position": Vector3(1.7, 0, 0), "rotation_degrees": Vector3(0, 90, 0), "dimensions": Vector3(2.0, 0.65, 0.7)}, {"id": "Staccionata", "kind": "fence", "anchor": "right", "u": -0.95, "position": Vector3(1.2, 0, 0), "dimensions": Vector3(2.7, 1.15, 0.2)}, {"id": "RecintoLaterale", "kind": "fence", "anchor": "right", "u": -0.65, "position": Vector3(2.65, 0, 0), "rotation_degrees": Vector3(0, 90, 0), "dimensions": Vector3(1.8, 1.15, 0.2)}, {"id": "Legna", "kind": "firewood", "anchor": "front", "u": -0.75, "position": Vector3(0, 0, 0.65), "dimensions": Vector3(1.5, 0.95, 0.8)}])

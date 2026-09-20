@@ -56,7 +56,7 @@ func physics_update(delta: float) -> void:
 	if _elapsed >= dash_time:
 		# a press buffered mid-dash flows straight into the swing (dash -> attack, no dead frame)
 		if player.consume_attack_buffer():
-			fsm.transition_to("Attack")
+			fsm.transition_to("DirAttack" if fsm.has_state("DirAttack") else "Attack")
 		else:
 			fsm.transition_to("Move" if player.get_move_input() != Vector2.ZERO else "Idle")
 

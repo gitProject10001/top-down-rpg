@@ -59,6 +59,13 @@ var architecture_choice: OptionButton
 var architecture_info: Label
 var _architecture_ui_key := ""
 var architecture_profiles: Array=[preload("res://addons/house_builder/profiles/compact_timber.tres"),preload("res://addons/house_builder/profiles/nordic_longhouse.tres")]
+const RecipeApply = preload("res://addons/house_builder/recipe_apply.gd")
+var recipe_choice: OptionButton
+var recipe_variant_choice: OptionButton
+var recipe_structural_seed: SpinBox
+var recipe_detail_seed: SpinBox
+var recipe_keep_footprint: CheckBox
+var recipe_catalog: Array = [preload("res://addons/house_builder/recipes/dwelling.tres"), preload("res://addons/house_builder/recipes/shop.tres"), preload("res://addons/house_builder/recipes/inn.tres"), preload("res://addons/house_builder/recipes/forge.tres"), preload("res://addons/house_builder/recipes/stable.tres"), preload("res://addons/house_builder/recipes/chapel.tres")]
 
 func _enter_tree() -> void:
 	outline_gizmos.undo=get_undo_redo(); add_node_3d_gizmo_plugin(outline_gizmos)
@@ -138,6 +145,7 @@ func _enter_tree() -> void:
 		action.pressed.connect(_apply_architecture_profile.bind(adopt)); tabs.get_child(0).add_child(action)
 	architecture_choice.item_selected.connect(func(_index): _architecture_details())
 	_architecture_details()
+	_build_recipe_controls()
 	_refresh_fortification_ui()
 	add_control_to_dock(DOCK_SLOT_RIGHT_UL,scroll)
 	set_input_event_forwarding_always_enabled()
@@ -152,6 +160,9 @@ func _enter_tree() -> void:
 		_test_runner.call_deferred("run",self)
 	if "--house-editor-test" in OS.get_cmdline_user_args():
 		_test_runner=load("res://tools/check_house_editor.gd").new()
+		_test_runner.call_deferred("run",self)
+	if "--recipe-editor-test" in OS.get_cmdline_user_args():
+		_test_runner=load("res://tools/check_recipe_editor.gd").new()
 		_test_runner.call_deferred("run",self)
 func _exit_tree() -> void:
 	remove_node_3d_gizmo_plugin(outline_gizmos)
@@ -613,6 +624,48 @@ func _apply_architecture_profile(adopt: bool) -> void:
 	undo.add_do_method(house,"apply_architecture",after); undo.add_undo_method(house,"apply_architecture",before)
 	undo.add_do_method(self,"_architecture_details"); undo.add_undo_method(self,"_architecture_details"); undo.commit_action()
 	status.text="Profilo aggiornato. Materiali, aperture e dettagli conservati."
+
+func _build_recipe_controls() -> void:
+	var page: Node = tabs.get_child(0)
+	var title := Label.new(); title.text = "Ricette di edifici"; page.add_child(title)
+	recipe_choice = OptionButton.new()
+	for recipe in recipe_catalog: recipe_choice.add_item(recipe.display_name)
+	page.add_child(recipe_choice)
+	recipe_variant_choice = OptionButton.new(); page.add_child(recipe_variant_choice)
+	recipe_choice.item_selected.connect(func(_index: int): _recipe_variants())
+	_recipe_variants()
+	for entry in [["Seed struttura · -1 conserva", true], ["Seed dettagli · -1 conserva", false]]:
+		var row := HBoxContainer.new(); page.add_child(row)
+		var label := Label.new(); label.text = entry[0]; row.add_child(label)
+		var seed_field := SpinBox.new(); seed_field.min_value = -1; seed_field.max_value = 4294967295; seed_field.value = -1; seed_field.step = 1; row.add_child(seed_field)
+		if entry[1]: recipe_structural_seed = seed_field
+		else: recipe_detail_seed = seed_field
+	recipe_keep_footprint=CheckBox.new()
+	recipe_keep_footprint.text="Conserva larghezza e profondità attuali"
+	recipe_keep_footprint.tooltip_text="Disattivato: usa le dimensioni dichiarate dalla ricetta. I collegamenti esterni vanno verificati."
+	page.add_child(recipe_keep_footprint)
+	var apply_button := Button.new(); apply_button.text = "Applica ricetta · conserva interventi"; page.add_child(apply_button)
+	apply_button.pressed.connect(_apply_building_recipe)
+
+func _recipe_variants() -> void:
+	recipe_variant_choice.clear(); recipe_variant_choice.add_item("Variante dal seed")
+	recipe_variant_choice.set_item_metadata(0, "")
+	for variant in recipe_catalog[recipe_choice.selected].variants:
+		recipe_variant_choice.add_item(str(variant.get("display_name", variant.id)))
+		recipe_variant_choice.set_item_metadata(recipe_variant_choice.item_count - 1, variant.id)
+
+func _apply_building_recipe() -> void:
+	var house := _selected_house()
+	if house == null: status.text = "Seleziona una casa."; return
+	var proposal := RecipeApply.propose(house, recipe_catalog[recipe_choice.selected], int(recipe_structural_seed.value), int(recipe_detail_seed.value), str(recipe_variant_choice.get_selected_metadata()), recipe_keep_footprint.button_pressed)
+	if not proposal.ok:
+		_show_plan_error("Applica ricetta", "; ".join(proposal.errors)); return
+	var undo := get_undo_redo(); undo.create_action("Ricetta edificio", UndoRedo.MERGE_DISABLE, house)
+	undo.add_do_method(RecipeApply, "apply", house, proposal.after)
+	undo.add_undo_method(RecipeApply, "apply", house, proposal.before)
+	undo.add_do_method(self, "_architecture_details"); undo.add_undo_method(self, "_architecture_details")
+	undo.commit_action()
+	status.text = "Ricetta applicata. Componenti modificati, blocchi, cancellazioni e interni conservati."
 
 func _build_component_tab() -> void:
 	var page := VBoxContainer.new(); page.name="Componenti"; tabs.add_child(page)

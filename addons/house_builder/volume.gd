@@ -26,6 +26,13 @@ extends "res://addons/house_builder/house.gd"
 	set(value): host_wall=value; request_rebuild()
 @export_range(-1,1,0.01) var host_offset := 0.0:
 	set(value): host_offset=value; request_rebuild()
+## Explicit upper body; this does not create an InteriorPlan floor.
+@export_range(0.0,8.0,0.1) var attachment_elevation := 0.0:
+	set(value): attachment_elevation=maxf(0.0,value); request_rebuild()
+@export_range(0.0,6.0,0.1) var attachment_inset := 0.0:
+	set(value): attachment_inset=maxf(0.0,value); request_rebuild()
+@export var roof_junction := false:
+	set(value): roof_junction=value; request_rebuild()
 @export_group("Porta dal tetto")
 @export var roof_door_enabled := false:
 	set(value): roof_door_enabled=value; request_rebuild()
@@ -53,6 +60,7 @@ func _exit_tree() -> void:
 	if host: host.request_rebuild()
 func _process(delta: float) -> void:
 	var signature := str(dimensions(),battlements_enabled,battlement_spacing,roof_door_enabled,roof_door_floor_id,roof_door_offset,parapet_enabled,automatic_frame,canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
+	signature += str(attachment_elevation,attachment_inset,roof_junction)
 	if signature!=_observed:
 		_observed=signature
 		var host := volume_host()
@@ -62,7 +70,7 @@ func prepare_attachment() -> void:
 	var host := volume_host()
 	if not attached or host==null: return
 	var tangent: Vector3=(host.wall_point(host_wall,1,0)-host.wall_point(host_wall,0,0)).normalized()
-	transform=Transform3D(Basis(tangent,Vector3.UP,host.wall_normal(host_wall)),host.wall_point(host_wall,host_offset*host.wall_length(host_wall)*0.5,0,depth*0.5-WALL_THICKNESS-0.08))
+	transform=Transform3D(Basis(tangent,Vector3.UP,host.wall_normal(host_wall)),host.wall_point(host_wall,host_offset*host.wall_length(host_wall)*0.5,attachment_elevation,depth*0.5-WALL_THICKNESS-0.08-attachment_inset))
 func rebuild() -> void:
 	prepare_attachment()
 	super.rebuild()
@@ -83,11 +91,24 @@ func volume_error() -> String:
 	if host==null: return "Il corpo accessorio deve stare in Casa / Volumes."
 	if (host.has_method("volume_host") and not host.has_method("supports_accessory_volumes")) or host.wing_enabled or wing_enabled: return "Aggancio supportato al corpo principale senza ala legacy."
 	if absf(host_offset*host.wall_length(host_wall)*0.5)+width*0.5>host.wall_length(host_wall)*0.5-0.25: return "Il volume supera il bordo della facciata: riduci larghezza o spostamento."
-	if roof_top()>host.wall_height-0.15: return "Per questo primo raccordo il tetto accessorio deve stare sotto la gronda principale."
+	if roof_junction:
+		if structure_kind!=0 or canopy_roof!=0 or junction_mode!=0 or host_wall<2: return "Il raccordo alto richiede un corpo chiuso a due falde sul fianco del tetto principale."
+		if attachment_elevation<3.0 or attachment_elevation>=host.wall_height: return "Il corpo alto deve partire ad almeno 3 metri e sotto la gronda."
+		if attachment_elevation+roof_top()>host.wall_height+host.roof_height-0.25: return "Il colmo secondario deve restare sotto quello principale."
+		# Bury the whole rear gable inside the host roof, not just its bottom.
+		var rear_x: float = host.width*.5-WALL_THICKNESS-0.08-attachment_inset
+		var host_surface: float = host.wall_height+host.roof_height*(1.0-absf(rear_x)/(host.width*.5))
+		if attachment_elevation+roof_top()>host_surface-0.12: return "Aumenta l'inserimento: il timpano posteriore deve entrare completamente nel tetto principale."
+		if depth-WALL_THICKNESS-0.08-attachment_inset<0.25: return "Il corpo deve sporgere almeno 25 cm dalla facciata."
+	elif attachment_elevation+roof_top()>host.wall_height-0.15:
+		return "Il tetto accessorio deve stare sotto la gronda; attiva Raccordo tetto per un corpo sopraelevato."
+	elif attachment_inset>0.0 or attachment_elevation>0.0:
+		return "Quota e inserimento aggiuntivi richiedono Raccordo tetto."
 	if structure_kind==0 and junction_mode==1 and (junction_width>width-0.5 or junction_height>wall_height-0.2): return "La porta del raccordo supera il corpo: riduci larghezza o altezza della porta."
 	for record in host.openings:
 		var opening: Dictionary=host.resolved_opening(record)
 		if opening.wall==host_wall and absf(opening.along-host_offset*host.wall_length(host_wall)*0.5)<(width+opening.width)*0.5+0.15:
+			if opening.y+opening.height*.5<attachment_elevation-.15: continue
 			if structure_kind==0 and opening.y-opening.height*0.5>roof_top()+0.15: continue
 			if structure_kind==0: return "Il corpo copre un'apertura manuale della casa. Scegli una zona libera."
 			if opening.y+opening.height*0.5>support_height(-depth*0.5+WALL_THICKNESS+0.08)-0.25: return "La copertura interferisce con un'apertura della casa: alza i sostegni o sposta la tettoia."
@@ -112,6 +133,12 @@ func _get_configuration_warnings() -> PackedStringArray:
 	if not access_error.is_empty(): return PackedStringArray([access_error])
 	return PackedStringArray() if structure_kind==1 else super._get_configuration_warnings()
 
+func set_cutaway(enabled: bool,floor_base: float=0.0,storey_height: float=-1.0) -> void:
+	# The parent passes floor heights in its own frame; an upper body has a
+	# different local zero. Geometry remains collidable while upper visuals hide.
+	var offset := attachment_elevation if attached and roof_junction else 0.0
+	super.set_cutaway(enabled,floor_base-offset,storey_height)
+
 func junction_record() -> Dictionary:
 	var host := volume_host()
 	var along: float=host_offset*host.wall_length(host_wall)*0.5+junction_offset*maxf(0,(width-junction_width)*0.5-0.25)
@@ -127,7 +154,13 @@ func opening_fits(record: Dictionary,ignore_index: int=-1) -> bool:
 
 func _build_shell() -> void:
 	if structure_kind==0:
-		super._build_shell(); return
+		super._build_shell()
+		if attachment_elevation>0.0:
+			_box(Vector3(0,.06,0),Vector3(width,.12,depth),2 if masonry_trim else 1)
+			if not masonry_trim:
+				for x in [-width*.5+.2,width*.5-.2]:
+					_beam(Vector3(x,-.42,depth*.5-.9),Vector3(x,0,depth*.5-.12),.18)
+		return
 	if canopy_roof!=0:
 		_build_shed_supports(); return
 	_build_posts()

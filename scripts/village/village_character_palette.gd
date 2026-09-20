@@ -34,6 +34,10 @@ func apply() -> void:
 	_skin(get_parent().get_node_or_null("Duelist"), RIVAL, false)
 
 
+func apply_enemy(enemy: Node) -> void:
+	_skin(enemy,RIVAL,false)
+
+
 func _skin(who: Node, palette: Dictionary, hero: bool) -> void:
 	if not who or who.has_meta("hearth_warden_applied"): return
 	var old_lamp: Node = who.get_node("HeroLight")

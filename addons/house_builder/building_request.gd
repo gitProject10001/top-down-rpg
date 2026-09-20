@@ -2,8 +2,13 @@
 extends Resource
 ## Boundary between settlement planning and building generation. Metres, local +Z entrance.
 const House=preload("res://addons/house_builder/house.gd")
+const BuildingRecipe=preload("res://addons/house_builder/building_recipe.gd")
 @export var architecture_profile: House.ArchitectureProfile
 @export var archetype_id := ""
+@export var recipe: BuildingRecipe
+@export var recipe_variant_id := ""
+@export var recipe_structural_seed := -1
+@export var recipe_detail_seed := -1
 @export_enum("Casa popolana","Bottega","Casa benestante") var building_type := 0
 @export var footprint := Vector2(5,7)
 @export_range(1,3) var storeys := 1
@@ -15,6 +20,12 @@ func data() -> Dictionary:
 		result["schema"]=2; result["archetype"]=archetype_id
 		result["architecture"]=architecture_profile.profile_id if architecture_profile else ""
 		result["proportions"]=architecture_profile.proportions() if architecture_profile else {}
+	if recipe:
+		result["schema"] = 3
+		result["recipe"] = recipe.data()
+		result["recipe_variant"] = recipe_variant_id
+		result["structural_seed"] = recipe_structural_seed
+		result["detail_seed"] = recipe_detail_seed
 	return result
 func errors() -> PackedStringArray:
 	if footprint.x<1.8 or footprint.x>20 or footprint.y<1.8 or footprint.y>24: return PackedStringArray(["Ingombro edificio fuori dai limiti dell'House Builder."])
@@ -35,4 +46,12 @@ func create_house() -> Node3D:
 	for floor_index in range(1,storeys):
 		house.openings.append({"kind":"window","wall":0,"u":0.0,"y":floor_index*2.6+1.3})
 		house.openings.append({"kind":"window","wall":2,"u":0.0,"y":floor_index*2.6+1.3})
+	if recipe:
+		var service = load("res://addons/house_builder/recipe_apply.gd")
+		var proposal: Dictionary = service.propose(house, recipe, seed_value if recipe_structural_seed < 0 else recipe_structural_seed, recipe_detail_seed, recipe_variant_id, true, storeys * 2.6)
+		if not proposal.ok:
+			push_warning("Ricetta edificio non applicata: " + "; ".join(proposal.errors))
+			house.free()
+			return null
+		service.apply(house, proposal.after)
 	return house
