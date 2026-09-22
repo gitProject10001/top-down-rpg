@@ -2,6 +2,12 @@
 extends RefCounted
 ## Parameterized version of the authored relief tiles, used by the house editor.
 ## Returns one mesh surface; no scene access, file I/O or per-tile nodes.
+const Profile=preload("res://addons/house_builder/roof_profile.gd")
+var curvature := 0.0
+var profile_half := 1.0
+var profile_rise := 1.0
+var profile_eaves := 0.0
+var arc := PackedVector2Array()
 var roof_frame := Transform3D.IDENTITY
 var half_span := 2.5
 var ridge_height := 4.72
@@ -16,7 +22,9 @@ var tile_transform := Transform3D.IDENTITY
 var broken_count := 0
 var shifted_count := 0
 
-func generate(width: float, depth: float, height: float, rise: float, seed_value: int, weathered: bool=true, single_slope: bool=false) -> ArrayMesh:
+func generate(width: float, depth: float, height: float, rise: float, seed_value: int, weathered: bool=true, single_slope: bool=false, curve: float=0.0) -> ArrayMesh:
+	curvature=curve
+	profile_half=width*.5; profile_rise=rise; profile_eaves=height
 	half_span=width*0.5+0.3
 	ridge_height=height+rise
 	slope=rise/(width*0.5)
@@ -30,6 +38,9 @@ func generate(width: float, depth: float, height: float, rise: float, seed_value
 		run_width=width
 		sides=[1.0]
 		roof_frame=Transform3D(Basis(Vector3(0,0,1),Vector3.UP,Vector3(-1,0,0)),Vector3(0,0,-depth*0.5-0.3))
+	if curvature>0.0:
+		arc=Profile.arc_table(profile_half,rise,curvature)
+		half_span=arc[-1].x
 	rng.seed=seed_value
 	tile_count=0
 	broken_count=0
@@ -72,11 +83,15 @@ func face(a: Vector3,b: Vector3,c: Vector3,color: Color, cavity: float=1.0) -> v
 		st.set_normal(roof_frame.basis*tile_transform.basis*normal)
 		st.set_color(color)
 		st.set_uv(Vector2(p.z,p.x))
-		st.set_uv2(Vector2((p.z-tile_uv_origin.x)/tile_uv_size.x+0.5,(tile_uv_origin.y-p.x*tile_side)/tile_uv_size.y))
+		var tile_x: float = signf(p.x)*Profile.lookup(arc,absf(p.x),1) if curvature>0.0 else p.x
+		st.set_uv2(Vector2((p.z-tile_uv_origin.x)/tile_uv_size.x+0.5,(tile_uv_origin.y-tile_x*tile_side)/tile_uv_size.y))
 		st.add_vertex(roof_frame*tile_transform*p)
 
 func point(uv: Vector2, side: float, distance: float, z: float, lift: float) -> Vector3:
 	var x := side*(half_span-distance-uv.y)
+	if curvature>0.0:
+		x=signf(x)*Profile.lookup(arc,absf(x),0)
+		return Vector3(x,profile_eaves+Profile.height_at(profile_half,profile_rise,curvature,x)+lift,z+uv.x)
 	return Vector3(x,ridge_height-absf(x)*slope+lift,z+uv.x)
 
 func tile(side: float, distance: float, z: float, width: float, length: float, damage: int=0, shifted: bool=false, front_edge: bool=false) -> void:
@@ -101,7 +116,7 @@ func tile(side: float, distance: float, z: float, width: float, length: float, d
 	if shifted and width>0.20:
 		shifted_count+=1
 		var pivot := point(Vector2(0,length*0.5),side,distance,z,0.10)
-		var roof_normal := Vector3(side*slope,1,0).normalized()
+		var roof_normal := Vector3(-Profile.slope_at(profile_half,profile_rise,curvature,pivot.x),1,0).normalized() if curvature>0.0 else Vector3(side*slope,1,0).normalized()
 		var rotation := Basis(roof_normal,deg_to_rad(11.0 if z>0 else -9.0))
 		var slide := Vector3(side*0.065,-0.062,0.16 if front_edge else -0.035)+roof_normal*0.055
 		tile_transform=Transform3D(rotation,pivot+slide-rotation*pivot)

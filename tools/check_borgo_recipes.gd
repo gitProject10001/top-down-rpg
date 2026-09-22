@@ -134,6 +134,8 @@ func run() -> void:
 		check(house.building_recipe != null and house.recipe_provenance.get("variant_id", "") == Migration.VARIANTS[i], str(house.name)+" variant not saved")
 		var door: Dictionary=house.resolved_opening(house.openings[0])
 		access_check(house,PackedVector3Array([house.wall_point(door.wall,door.along,0,2.4),house.wall_point(door.wall,door.along,0)]))
+	var chapel_lot: Node3D=buildings[5].get_parent()
+	check(chapel_lot.path_surface!=null and chapel_lot.painted_access_active,"church uses shared painted path coverage")
 	var dimensions: Array=[]
 	for house in buildings: dimensions.append(house.dimensions())
 	var style_key:=InputEventKey.new(); style_key.pressed=true; style_key.keycode=KEY_F7
@@ -143,10 +145,12 @@ func run() -> void:
 	check(is_equal_approx(painted_environment.ssao_radius,scene.art_direction.profile.contact_occlusion_radius),"lighting reads the saved profile")
 	scene._unhandled_key_input(style_key)
 	await settle(3)
+	check(not chapel_lot.painted_access_active and chapel_lot._access.visible,"F7 restores the original access ribbon")
 	check(view.get_node("WorldEnvironment").environment!=painted_environment,"F7 restores original environment")
 	scene._unhandled_key_input(style_key)
 	await settle(3)
 	check(view.get_node("WorldEnvironment").environment==painted_environment and is_equal_approx(view.get_node("SoftSkyFill").light_energy,painted_fill),"F7 restores painted environment and fill")
+	check(chapel_lot.painted_access_active and not chapel_lot._access.visible,"painted path does not retain the rectangular overlay")
 	for i in buildings.size(): check(buildings[i].dimensions().is_equal_approx(dimensions[i]),"F7 changed building geometry")
 	check(scene.waters.size()==2,"Water simulation lost")
 	scene.toggle_overview(); check(scene.overview,"Overview did not activate")
@@ -171,6 +175,18 @@ func run() -> void:
 			var door: Dictionary = house.resolved_opening(house.openings[0])
 			var outside: Vector3 = house.to_global(house.wall_point(door.wall, door.along, 0, 1.7)) + Vector3.UP*.6
 			await capture("borgo_"+Migration.ROLES[i],outside,22 if i in [2,5] else 19,house.global_position+Vector3.UP*3.0)
+			if i==5 and "--meadow-comparison" in OS.get_cmdline_user_args():
+				var grass=scene.art_direction.grass
+				var ground: ShaderMaterial=grass.terrain.material_override
+				var region: Vector4=grass.material.get_shader_parameter("meadow_region")
+				check(region.z>0,"local meadow region enabled")
+				check(ground.get_shader_parameter("meadow_region")==region,"shared world pigment region")
+				for state in ["before","still","wind"]:
+					for mat in [grass.material,ground]:
+						mat.set_shader_parameter("meadow_region",Vector4.ZERO if state=="before" else region)
+						mat.set_shader_parameter("meadow_wind_strength",0.0 if state=="still" else 1.0)
+					await capture("meadow_"+state,outside,12,outside+Vector3.UP*.5)
+				grass.bind_meadow(grass.material); grass.bind_meadow(ground)
 			if i==5 and "--portal-closeups" in OS.get_cmdline_user_args():
 				var portal: Node3D=house.get_node("RecipeDetails/FacciataGotica")
 				await capture("church_portal_close",outside,7.5,portal.to_global(Vector3(0,2.0,0)))

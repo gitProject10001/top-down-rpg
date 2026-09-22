@@ -496,3 +496,56 @@ Il controllo della chiesa campiona entrambi i lati della cornice: rileva
 le intersezioni nella copertura originale e verifica che non rimangano
 in quella raccordata. Verifica anche l'aggiornamento dopo lo spostamento
 della facciata nell'editor.
+
+
+### Campione chiesa: rampicanti e soglia (21 settembre 2026)
+
+Le ricette supportano `wall_ivy` e `stone_apron`, normali `RecipeDetails`
+con seed, trasformazione, blocco, tombstone e Undo/Redo del servizio esistente.
+La chiesa contiene `EderaFacciata` (larga), `EderaContrafforte` (verticale)
+e `SogliaLastricata` (pietre basse e parzialmente interrate).
+
+I rampicanti espongono `growth_density`, `growth_color`, `growth_shape` e
+`surface_exclusions` (rettangoli nel piano locale X/Y, in metri). Le aperture
+della casa sono escluse con un margine; le zone manuali permettono di evitare
+altri dettagli. Foglie piegate e rami sono geometria opaca batched, senza
+texture importate. Sono ancorati al piano del componente: questo campione
+non implementa ancora una crescita automatica su superfici curve o attorno
+agli angoli. Il cutaway taglia la parte alta; non hanno collisioni.
+La soglia ha contorni irregolari e rilievo di pochi centimetri; non introduce
+un ostacolo fisico sul percorso esistente.
+
+Il lotto della chiesa salva `path_surface`, risorsa del Village Builder
+(`assets/art/chapel_path_surface.tres`): seed, larghezza, irregolarita' del
+margine e deformazione locale del campionamento del terreno. Il campo e'
+calcolato sulla `access_path` esistente. La preview dipinta lo incorpora
+nella stessa immagine di controllo usata dal terreno e dallo scatter d'erba.
+Il vecchio nastro rettangolare viene nascosto solo durante questa preview;
+F7 lo ripristina. Il resto dei lotti mantiene il comportamento precedente.
+Dopo modifiche al profilo del percorso, usare la rigenerazione di ArtStudyLayers
+per ribattere la maschera e aggiornare lo scatter. I pennelli interattivi e
+le modifiche altimetriche della strada restano fuori da questo campione.
+
+### Falda curva sperimentale
+
+`roof_curvature` è serializzato su House/Volume e nelle transazioni delle ricette.
+Default 0: comportamento precedente. Il campione `curved_cottage.tres` usa 0,65:
+interpolazione lineare/quadratica, colmo e gronda invarianti, sbalzo tangente.
+Le tegole sono distribuite per lunghezza d'arco, i frontoni e i bordi seguono lo
+stesso profilo. Provare `scenes/dev/curved_roof_study.tscn` (sinistra 0, destra 0,65).
+
+Supportato soltanto un corpo indipendente, chiuso, a due falde senza accessori.
+Ali, volumi collegati e dettagli richiedono ancora raccordi dedicati: l'Inspector
+mostra un avviso e la rigenerazione non sostituisce l'ultimo risultato valido.
+Correggere la combinazione segnalata prima di salvare: una scena appena riaperta
+non contiene una cache delle mesh precedenti. Le richieste senza ricetta restano
+compatibili. Il campione non autorizza un'estensione automatica al villaggio.
+
+Verifica ripetibile: `--script res://tools/check_curved_roof.gd`; controlla estremi,
+seed, curvatura zero, frontoni/collisioni, combinazioni rifiutate, cutaway,
+transazione Undo/Redo, aperture e salvataggio/riapertura.
+
+Riscontro locale: controlli del campione, ricette e ArtStudyLayers superati.
+Ricostruzione del corpo curvo 6×7 m: circa **0,40 s** in headless sulla macchina
+attuale (misura di generazione, non costo per frame). Rimane lavoro sincrono:
+un'anteprima continua durante trascinamento richiederà dettaglio differito.

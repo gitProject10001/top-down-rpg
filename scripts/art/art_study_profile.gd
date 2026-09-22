@@ -25,6 +25,14 @@ const MAX_SHADER_EDITS := 32
 @export var grass_palette := PackedColorArray([
 	Color(0.06, 0.10, 0.045), Color(0.09, 0.16, 0.055), Color(0.17, 0.22, 0.07)])
 
+@export_group("Meadow sample")
+@export var grass_study_surface: NodePath
+@export_range(2.0,40.0,.5) var grass_study_radius := 16.0
+@export_range(1.0,20.0,.5) var grass_patch_scale := 8.0
+@export_range(0.0,1.0,.05) var grass_ground_influence := .65
+@export_range(0.0,1.0,.05) var grass_normal_mix := .75
+@export_range(0.0,2.0,.05) var grass_wind_strength := 1.0
+
 @export_group("Surface details")
 @export var weathering_enabled: bool = true
 @export var cliffs_enabled: bool = true

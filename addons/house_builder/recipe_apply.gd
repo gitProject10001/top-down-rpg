@@ -6,10 +6,10 @@ const House = preload("res://addons/house_builder/house.gd")
 const Volume = preload("res://addons/house_builder/volume.gd")
 const Balcony = preload("res://addons/house_builder/balcony.gd")
 const CONTAINERS := ["Volumes", "Components", "RecipeDetails"]
-const MAIN_FIELDS := ["width", "depth", "wall_height", "roof_height", "wall_finish", "masonry_trim", "masonry_finish", "weathered", "house_seed", "archetype_id", "facade_storey_height", "facade_upper_windows"]
+const MAIN_FIELDS := ["width", "depth", "wall_height", "roof_height", "roof_curvature", "wall_finish", "masonry_trim", "masonry_finish", "weathered", "house_seed", "archetype_id", "facade_storey_height", "facade_upper_windows"]
 const BALCONY_FIELDS := ["component_id", "host_id", "along", "elevation", "balcony_width", "projection", "create_door", "floor_id", "door_id", "support_posts", "exterior_stairs", "stair_width", "stair_offset", "ground_level", "door_open", "locked"]
-const VOLUME_FIELDS := ["width", "depth", "wall_height", "roof_height", "wall_finish", "masonry_trim", "masonry_finish", "weathered", "house_seed", "openings", "structure_kind", "canopy_roof", "post_spacing", "post_size", "automatic_frame", "attached", "host_wall", "host_offset", "junction_mode", "junction_width", "junction_height", "junction_offset", "junction_open", "parapet_enabled", "battlements_enabled", "battlement_spacing", "roof_door_enabled", "roof_door_floor_id", "roof_door_offset", "roof_door_open", "volume_id", "attachment_elevation", "attachment_inset", "roof_junction", "facade_storey_height", "facade_upper_windows"]
-const DETAIL_FIELDS := ["kind", "dimensions", "detail_seed", "weathered", "locked", "detail_id", "masonry_finish", "palette", "collision_enabled", "motif", "portal_recess_depth", "rose_recess_depth"]
+const VOLUME_FIELDS := ["width", "depth", "wall_height", "roof_height", "roof_curvature", "wall_finish", "masonry_trim", "masonry_finish", "weathered", "house_seed", "openings", "structure_kind", "canopy_roof", "post_spacing", "post_size", "automatic_frame", "attached", "host_wall", "host_offset", "junction_mode", "junction_width", "junction_height", "junction_offset", "junction_open", "parapet_enabled", "battlements_enabled", "battlement_spacing", "roof_door_enabled", "roof_door_floor_id", "roof_door_offset", "roof_door_open", "volume_id", "attachment_elevation", "attachment_inset", "roof_junction", "facade_storey_height", "facade_upper_windows"]
+const DETAIL_FIELDS := ["kind", "dimensions", "detail_seed", "weathered", "locked", "detail_id", "masonry_finish", "palette", "collision_enabled", "motif", "portal_recess_depth", "rose_recess_depth", "growth_density", "growth_color", "growth_shape", "surface_exclusions"]
 
 static func snapshot(house: Node3D) -> Dictionary:
 	var state := {"properties": _read(house, MAIN_FIELDS), "recipe": house.building_recipe,
@@ -193,6 +193,16 @@ static func propose(house: Node3D, recipe: Recipe, structural_seed := -1, detail
 			if not dimensions is Vector3 or not dimensions.is_finite() or minf(dimensions.x, minf(dimensions.y, dimensions.z)) < .05:
 				problems.append(record.name + ": le tre dimensioni del dettaglio devono essere finite e almeno 0,05 m.")
 		prototype.free()
+	if float(after.properties.get("roof_curvature",0.0))>0.0:
+		var manual_details := false
+		var detail_container := house.get_node_or_null("RecipeDetails")
+		if detail_container:
+			for detail in detail_container.get_children():
+				if not detail.has_meta("recipe_part_id"): manual_details=true
+		if not desired.is_empty() or not ghost.roof_curvature_error().is_empty() or manual_details:
+			problems.append("Curvatura: il campione richiede una casa indipendente senza componenti collegati.")
+	for record: Dictionary in desired:
+		if record.container=="Volumes" and float(record.values.get("roof_curvature",0.0))>0.0: problems.append("Curvatura: raccordi fra volumi non supportati.")
 	ghost.free()
 	if not problems.is_empty(): return {"ok": false, "errors": problems, "before": before}
 	after.parts = desired

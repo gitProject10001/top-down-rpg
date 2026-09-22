@@ -1,4 +1,5 @@
 shader_type spatial;
+#include "res://shaders/pixelart/meadow_field.gdshaderinc"
 uniform sampler2D art_coverage : filter_linear, repeat_disable;
 uniform vec2 art_coverage_center = vec2(0.0);
 uniform vec2 art_coverage_size = vec2(152.0,144.0);
@@ -342,6 +343,7 @@ void fragment() {
 			vec4 authored=texture(art_coverage,art_uv);
 			dirt=authored.r*inside;
 			ALBEDO*=mix(vec3(.91,.98,1.06),vec3(1.05,1.02,.93),authored.b);
+            ALBEDO=mix(ALBEDO,meadow_pigment(pos,authored.b),meadow_weight(pos)*meadow_ground_influence*(1.0-authored.r));
 		}
 		float gravel = smoothstep(0.05, 0.95, mask.g);
 		brush_surface *= (1.0-dirt)*(1.0-gravel);

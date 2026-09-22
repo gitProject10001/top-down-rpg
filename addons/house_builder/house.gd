@@ -4,6 +4,7 @@ signal recipe_applied
 ## Generated meshes/materials have been replaced; presentation can rebind locally.
 signal rebuilt
 ## Exterior authoring node. Only dimensions/opening records are serialized.
+const RoofProfile=preload("res://addons/house_builder/roof_profile.gd")
 const RoofMesh=preload("res://addons/house_builder/roof_mesh.gd")
 const MeshJoin=preload("res://addons/house_builder/mesh_join.gd")
 const Door=preload("res://addons/house_builder/door.gd")
@@ -36,6 +37,21 @@ const WALL_THICKNESS := 0.24
 	set(value): wall_height=clampf(value,1.8,10.5); request_rebuild()
 @export_range(0.5,6.0,0.1) var roof_height := 2.1:
 	set(value): roof_height=clampf(value,0.01 if _is_wing_part else 0.5,6.0); request_rebuild()
+## First version: independent two-slope bodies only; zero preserves legacy geometry.
+@export_range(0.0,1.0,.01) var roof_curvature := 0.0:
+	set(value): roof_curvature=clampf(value,0.0,1.0); request_rebuild()
+
+func roof_curvature_error() -> String:
+	for volume in authored_volumes():
+		if volume.roof_curvature>0.0: return "Curvatura: i volumi accessori curvi non sono ancora supportati."
+	if roof_curvature<=0.0: return ""
+	if wing_enabled or not authored_volumes().is_empty(): return "Curvatura: ali e raccordi fra volumi non ancora supportati."
+	if has_method("volume_host") and (get("attached") or get("canopy_roof")!=0 or get("structure_kind")!=0): return "Curvatura: usare un corpo indipendente chiuso a due falde."
+	for container_name in ["RecipeDetails","Components"]:
+		var container:=get_node_or_null(container_name)
+		if container and container.get_child_count()>0: return "Curvatura: dettagli e componenti collegati non ancora supportati."
+	return ""
+
 @export_enum("Intonaco", "Pietra") var wall_finish := 0:
 	set(value): wall_finish=value; request_rebuild()
 ## Stone cornices and corner piers instead of the exposed timber grid.
@@ -147,6 +163,7 @@ func opening_fits(record: Dictionary,ignore_index: int=-1) -> bool:
 		if normal.dot(wall_normal(b.wall))>0.99 and absf(normal.dot(delta))<0.03 and absf(tangent.dot(delta))<(a.width+b.width)*0.5+0.16 and absf(delta.y)<(a.height+b.height)*0.5+0.16: return false
 	return true
 func _get_configuration_warnings() -> PackedStringArray:
+	if not roof_curvature_error().is_empty(): return PackedStringArray([roof_curvature_error()])
 	for i in openings.size():
 		if int(openings[i].get("wall",0))>=wall_count(): continue
 		if not opening_fits(openings[i],i): return PackedStringArray(["Un'apertura è coperta dall'ala o troppo vicina a un'altra: spostala su una parete libera."])
@@ -265,6 +282,9 @@ func _plaster_material() -> ShaderMaterial:
 func rebuild() -> void:
 	if not is_inside_tree(): _pending=true; return
 	_pending=false
+	if not roof_curvature_error().is_empty():
+		if Engine.is_editor_hint(): update_configuration_warnings()
+		return
 	build_count+=1
 	if is_instance_valid(_generated): _generated.free()
 	_generated=Node3D.new()
@@ -313,7 +333,7 @@ func rebuild() -> void:
 		recipe_applied.emit()
 
 func _build_roof() -> ArrayMesh:
-	return RoofMesh.new().generate(width,depth,wall_height,roof_height,house_seed,weathered)
+	return RoofMesh.new().generate(width,depth,wall_height,roof_height,house_seed,weathered,false,roof_curvature)
 
 func _build_shell() -> void:
 	# Hollow shell: the inner face is 24 cm behind the exterior face.
@@ -341,6 +361,19 @@ func _build_shell() -> void:
 	_build_gables()
 
 func _build_gables() -> void:
+	if roof_curvature>0.0:
+		for end in [-1.0,1.0]:
+			for segment in RoofProfile.segments(width,wall_height,roof_height,roof_curvature,end*depth*.5):
+				var a: Vector3=segment[0]; var b: Vector3=segment[1]
+				var low_a := Vector3(a.x,wall_height,a.z); var low_b := Vector3(b.x,wall_height,b.z)
+				var points := [low_a,low_b,b,a]
+				if (b.x-a.x)*end<0: points.reverse()
+				for i in [1,2]:
+					if (points[i]-points[0]).cross(points[i+1]-points[0]).length_squared()>.00000001: _tri(points[0],points[i],points[i+1],0)
+				_beam(a,b,.22 if masonry_trim else .12,2 if masonry_trim else 1)
+			if not masonry_trim: _box(Vector3(0,wall_height+roof_height*.5,end*(depth*.5+.035)),Vector3(.12,roof_height,.12),1)
+		_box(Vector3(0,wall_height+roof_height+.06,0),Vector3(.20,.18,depth+.7) if masonry_trim else Vector3(.13,.15,depth+.7),2 if masonry_trim else 1)
+		return
 	for side in [-1.0,1.0]:
 		var a := Vector3(-width*0.5,wall_height,side*depth*0.5)
 		var b := Vector3(width*0.5,wall_height,side*depth*0.5)
@@ -632,9 +665,9 @@ func _stone_roof_trim_cutters() -> Array:
 	cutters.append([Plane(Vector3.FORWARD,-depth*.5+.125)])
 	cutters.append([Plane(Vector3.BACK,-depth*.5+.125)])
 	for end in [-1.0,1.0]:
-		for side in [-1.0,1.0]:
-			var a := Vector3(side*width*.5,wall_height,end*depth*.5)
-			var b := Vector3(0,wall_height+roof_height,end*depth*.5)
+		for segment in RoofProfile.segments(width,wall_height,roof_height,roof_curvature,end*depth*.5):
+			var a: Vector3=segment[0]
+			var b: Vector3=segment[1]
 			var axis := (b-a).normalized()
 			var right := axis.cross(Vector3.FORWARD).normalized()
 			var frame := Transform3D(Basis(right,axis,axis.cross(right).normalized()),(a+b)*.5)

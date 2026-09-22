@@ -1452,3 +1452,15 @@ Trovata e corretta una lacuna nel contenimento: ora include gli arredi kind=3, a
 La quinta voce richiede anche un confronto con R10/R13, non solo l'esistenza di una cupola: non lo dichiariamo fatto in assenza di quel confronto. A07 resta IN CORSO per questo unico criterio esplicito. Prossima azione: esaminare R10/R13 e registrare cosa rappresenta il builder e quali forme mancano; nessuna nuova card numerata introdotta. B01 rimane successivo alla chiusura concordata di A07.
 
 Limiti tecnici già noti: piante convesse e numero di vertici fisso; stanze generate rettangolari; coperture segmentate; nessuna promessa di supporto esaustivo di curve elfiche o piante concave. Questi limiti non sono equivalenti a test falliti sui casi consegnati.
+
+### Campione falde curve — 2026-09-22
+
+Disponibile nell'House Builder: `roof_curvature` (0 legacy), profilo condiviso
+per tegole, frontoni, cornici e collisioni del frontone; ricetta `curved_cottage`
+e confronto isolato `scenes/dev/curved_roof_study.tscn` a 0 / 0,65.
+Il campione non modifica chiesa, locanda o lotti del borgo.
+
+Prosecuzione di **A07 / B03**, ancora aperta: intersezioni fra falde curve,
+abbaini, camini e tettoie raccordati allo stesso profilo, con validazione durante
+il gesto. Oggi le composizioni con accessori sono rifiutate; la rigenerazione
+mantiene la geometria valida precedente. Il confronto R10/R13 resta aperto.

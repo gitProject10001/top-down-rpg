@@ -64,6 +64,7 @@ func run() -> void:
 			errors.append(str(house.get_path()) + ": " + "; ".join(proposal.errors)); continue
 		Service.apply(house, proposal.after)
 		if entry.role=="chapel" and entry.has("lot"):
+			if entry.lot.path_surface==null: entry.lot.path_surface=preload("res://assets/art/chapel_path_surface.tres")
 			# This lot's street attachment is at z=6.4. Keep the former front
 			# edge z=5.3 while lengthening the nave away from that connection.
 			# Record the last automatic pose so later hand placement is protected.

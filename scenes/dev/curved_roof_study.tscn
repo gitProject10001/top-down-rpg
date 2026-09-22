@@ -1,0 +1,57 @@
+[gd_scene load_steps=7 format=3]
+[ext_resource type="Script" path="res://addons/house_builder/house.gd" id="1"]
+[ext_resource type="Resource" path="res://addons/house_builder/recipes/curved_cottage.tres" id="2"]
+[sub_resource type="Environment" id="Env"]
+background_mode = 1
+background_color = Color(0.22,0.27,0.3,1)
+ambient_light_source = 3
+ambient_light_color = Color(0.7,0.77,0.86,1)
+ambient_light_energy = 0.4
+ssao_enabled = true
+[sub_resource type="PlaneMesh" id="Ground"]
+size = Vector2(40,30)
+[sub_resource type="StandardMaterial3D" id="GroundMat"]
+albedo_color = Color(0.27,0.3,0.19,1)
+roughness = 1.0
+[sub_resource type="BoxShape3D" id="FloorShape"]
+size = Vector3(40,0.2,30)
+[node name="CurvedRoofStudy" type="Node3D"]
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation_degrees = Vector3(-48,-35,0)
+light_energy = 1.15
+shadow_enabled = true
+[node name="Ground" type="MeshInstance3D" parent="."]
+mesh = SubResource("Ground")
+material_override = SubResource("GroundMat")
+[node name="Floor" type="StaticBody3D" parent="."]
+[node name="Shape" type="CollisionShape3D" parent="Floor"]
+position = Vector3(0,-0.1,0)
+shape = SubResource("FloorShape")
+[node name="Straight" type="Node3D" parent="."]
+position = Vector3(-4.6,0,0)
+script = ExtResource("1")
+width = 6.0
+depth = 7.0
+wall_height = 3.0
+roof_height = 3.4
+house_seed = 416522
+openings = Array[Dictionary]([{"id":"door_sample","kind":"door","wall":0,"u":0.0,"width":1.4,"height":2.3}])
+[node name="Curved" type="Node3D" parent="."]
+position = Vector3(4.6,0,0)
+script = ExtResource("1")
+building_recipe = ExtResource("2")
+width = 6.0
+depth = 7.0
+wall_height = 3.0
+roof_height = 3.4
+roof_curvature = 0.65
+house_seed = 416522
+openings = Array[Dictionary]([{"id":"door_sample","kind":"door","wall":0,"u":0.0,"width":1.4,"height":2.3}])
+[node name="Camera3D" type="Camera3D" parent="."]
+position = Vector3(13,16,23)
+rotation_degrees = Vector3(-26.72,29.48,0)
+projection = 1
+size = 23.0
+current = true

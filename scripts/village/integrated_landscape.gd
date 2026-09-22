@@ -53,7 +53,7 @@ func _ready() -> void:
     var ui:=CanvasLayer.new();add_child(ui)
     var label:=Label.new();label.position=Vector2(20,20);label.text="SCENA INTEGRATA
 WASD movimento · click combo · tieni premuto carica · destro parata · Shift schivata
-4 combattimento · R ricomincia · O panoramica · F7 stile · 1 città / 2 guado / 3 lago / 5 borgo · E porta · F acqua"
+4 combattimento · R ricomincia · O panoramica · F7 stile · P filtro pittorico · 1 città / 2 guado / 3 lago / 5 borgo · E porta · F acqua"
     ui.add_child(label)
     if "--capture-integrated" in OS.get_cmdline_user_args():
         if "--river-view" in OS.get_cmdline_user_args():player.position=Vector3(3,1,21)

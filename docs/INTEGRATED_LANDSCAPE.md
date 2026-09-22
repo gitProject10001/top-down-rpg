@@ -217,3 +217,57 @@ facciata/terreno restano da implementare.
 Il rosone della stessa facciata usa `rose_recess_depth = 0.10`: foro
 circolare nella mesh, bordo svasato e cornice a conci. La vetrata arretrata
 rimane davanti al frontone retrostante e conserva il disegno esistente.
+
+
+Campione strada/vegetazione della chiesa: due componenti `wall_ivy` e una
+`stone_apron` appartengono alla ricetta dell'House Builder. Il lotto usa
+`chapel_path_surface.tres` del Village Builder per fondere l'accesso con
+terreno ed erba attraverso la copertura condivisa. Seed e controlli sono
+salvati; usare ArtStudyLayers per rigenerare dopo una modifica al percorso.
+La scena resta il campione, le capacita' riutilizzabili sono negli addon.
+
+### Campione pigmento prato — 2026-09-22
+
+Il profilo artistico salva un campione locale centrato sulla chiesa (`grass_study_surface`,
+raggio 16 m). Terreno e ciuffi leggono `meadow_field.gdshaderinc`: palette comune,
+macchie grandi/intermedie e pennellate minute in coordinate mondo. Il contributo
+del terreno pesa soprattutto sulle radici. Densità, dodici forme e seed non cambiano.
+Normale iniziale 75% dipinta / 25% geometrica ammorbidita; raffiche noise guidano
+punte e una variazione luminosa lieve. Rimangono AO, ombre ricevute e radici scure;
+nessuna ombra dei singoli fili. Il campione sfuma verso lo shading precedente.
+
+Inspector di ArtStudyProfile: scala macchie, influenza terreno, miscela normali,
+forza vento (0 per fermarlo nel campione), superficie e raggio. Usare la rigenerazione
+di ArtStudyLayers già esistente dopo le modifiche. F7 confronta gli stili completi;
+`check_borgo_recipes.tscn -- --no-enemies --meadow-comparison` produce anche il
+confronto locale before / still / wind senza cambiare camera o luce.
+Le modifiche locali e le cancellazioni continuano a usare gli stessi dati di authoring.
+
+Verifica completa a 1152×648 (`captures/meadow_final.log`): 12 ingressi/uscite,
+sei percorsi, cutaway, F7 e acqua senza errori; frame mediano **16,678 ms**, p95
+**16,796 ms**, GPU mediana **10,59 ms**. Sono misure della scena integrata, non
+un benchmark isolato del solo shader. Confronti in `captures/meadow_before.png`,
+`meadow_still.png` e `meadow_wind.png`. Geometria e densità conservate; nessuna
+estensione della taratura fuori dal campione.
+
+### Esperimento solo post-processing
+
+`PainterlyPost` istanzia `scenes/effects/painterly_post.tscn` dentro il viewport
+3D. **P** attiva/disattiva il pass senza cambiare F7, materiali, modelli,
+illuminazione o tone mapping. La UI esterna al viewport rimane nitida.
+Il vecchio PostPixel resta nella sua configurazione precedente.
+
+Nel nodo Filter, ShaderMaterial nell'Inspector: `palette_strength` (0,72),
+`soften_strength` (0,6), `radius` (1,25 pixel), `edge_preservation` (80),
+`warmth` (0,15). Filtro bilaterale piccolo, palette di 32 colori di base con
+transizioni morbide, nessun dithering o contorno nero aggiunto. La palette è
+una base cromatica, non un limite rigoroso a 32 colori sul framebuffer.
+Il filtro non genera pennellate geometriche; un raggio alto può impastare
+tegole e personaggi. Disabilitare il nodo per bypass completo.
+
+Confronto ripetibile: `res://tools/check_painterly_post.tscn`, immagini
+`captures/painterly_off.png` e `captures/painterly_on.png`, stessa camera e luce.
+
+Prova a 1152×648: off 16,692 ms / on 16,679 ms mediani; p95 on 16,796 ms.
+Entrambi circa 60 fps, con VSync: non si deduce un costo GPU preciso dalla
+differenza fra queste due misure. Shader compilato e bypass P verificato.

@@ -1,5 +1,6 @@
 @tool
 extends Node3D
+const PathSurface=preload("res://addons/village_builder/path_surface_profile.gd")
 const Request=preload("res://addons/house_builder/building_request.gd")
 @export_storage var shared_widths := PackedFloat32Array()
 @export_storage var group_id := ""
@@ -10,6 +11,8 @@ const Request=preload("res://addons/house_builder/building_request.gd")
 @export_storage var baseline_house: Dictionary={}
 @export_storage var zone_id := ""
 @export_storage var access_path: PackedVector3Array=[]
+@export var path_surface: PathSurface
+var painted_access_active := false
 var _access: MeshInstance3D
 func rebuild_access() -> void:
 	if is_instance_valid(_access): _access.free()
@@ -23,7 +26,7 @@ func rebuild_access() -> void:
 	_access=MeshInstance3D.new(); _access.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF; _access.mesh=surface.commit(); add_child(_access,false,Node.INTERNAL_MODE_BACK)
 func _ready() -> void: rebuild_access()
 func _process(_dt: float) -> void:
-	if is_instance_valid(_access): _access.visible=get_parent()==null or get_parent().get("auto_surface")!=true
+	if is_instance_valid(_access): _access.visible=not painted_access_active and (get_parent()==null or get_parent().get("auto_surface")!=true)
 func house_state() -> Dictionary:
 	var h := get_node_or_null("Edificio")
 	if h==null: return {}

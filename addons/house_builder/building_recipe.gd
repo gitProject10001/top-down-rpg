@@ -18,7 +18,7 @@ extends Resource
 func resolved(structural_seed: int, variant_id := "") -> Dictionary:
 	var result := {"main_properties": main_properties.duplicate(true),
 		"components": components.duplicate(true), "details": details.duplicate(true), "variant_id": ""}
-	var facade_defaults := {"facade_storey_height":0.0,"facade_upper_windows":false,"masonry_trim":false,"masonry_finish":null}
+	var facade_defaults := {"facade_storey_height":0.0,"facade_upper_windows":false,"masonry_trim":false,"masonry_finish":null,"roof_curvature":0.0}
 	for key in facade_defaults:
 		if not result.main_properties.has(key): result.main_properties[key]=facade_defaults[key]
 	if variants.is_empty(): return result

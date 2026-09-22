@@ -290,6 +290,9 @@ func keep_player_on_supported_ground(geology: bool) -> void:
 func apply(active: bool) -> void:
     enabled = active
     if is_instance_valid(grass):
+        for lot in grass.authored_paths:
+            if is_instance_valid(lot): lot.painted_access_active=active
+    if is_instance_valid(grass):
         grass.set_enabled(active and profile.grass_enabled and profile.density_multiplier>0)
     var geology: bool = active and profile.cliffs_enabled
     keep_player_on_supported_ground(geology)
@@ -312,4 +315,9 @@ func apply(active: bool) -> void:
             change.object.set_shader_parameter(change.uniform, value)
         else:
             change.object.set(change.property, value)
+    # Visibility changes captured for F7 must not restore the original path overlay.
+    if is_instance_valid(grass):
+        for lot in grass.authored_paths:
+            if is_instance_valid(lot) and is_instance_valid(lot._access):
+                lot._access.visible=not active
     _geology_active=geology

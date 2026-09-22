@@ -3,9 +3,9 @@ extends Node3D
 signal rebuilt
 ## Original procedural building details. The component and its transform are the
 ## authored object; only _GeneratedRecipeDetail is disposable cached geometry.
-const KINDS := ["chimney", "bell_gable", "shop_counter_goods", "forge_workbench", "firewood", "trough", "fence", "hanging_sign", "dormer", "gothic_facade", "gothic_bell_tower", "gothic_buttress", "gothic_window", "market_awning"]
+const KINDS := ["chimney", "bell_gable", "shop_counter_goods", "forge_workbench", "firewood", "trough", "fence", "hanging_sign", "dormer", "gothic_facade", "gothic_bell_tower", "gothic_buttress", "gothic_window", "market_awning", "wall_ivy", "stone_apron"]
 const ROOF_KINDS := ["chimney", "bell_gable", "dormer", "gothic_window"]
-const MASONRY_CUTAWAY_KINDS := ["gothic_facade", "gothic_bell_tower", "gothic_buttress", "market_awning"]
+const MASONRY_CUTAWAY_KINDS := ["wall_ivy", "gothic_facade", "gothic_bell_tower", "gothic_buttress", "market_awning"]
 const CUTAWAY_HEIGHT := 1.05
 const DEFAULT_COLORS := [Color(.29,.20,.12), Color(.47,.45,.38), Color(.19,.21,.20), Color(.64,.52,.29), Color(.40,.21,.12), Color(.59,.43,.23), Color(.085,.085,.072)]
 enum Surface { WOOD, STONE, METAL, PAINT, CLAY, GOODS, DARK }
@@ -17,7 +17,7 @@ const MasonryFinish=preload("res://addons/house_builder/masonry_finish.gd")
 		if masonry_finish and not masonry_finish.changed.is_connected(request_rebuild): masonry_finish.changed.connect(request_rebuild)
 		request_rebuild()
 
-@export_enum("chimney", "bell_gable", "shop_counter_goods", "forge_workbench", "firewood", "trough", "fence", "hanging_sign", "dormer", "gothic_facade", "gothic_bell_tower", "gothic_buttress", "gothic_window", "market_awning") var kind := "chimney":
+@export_enum("chimney", "bell_gable", "shop_counter_goods", "forge_workbench", "firewood", "trough", "fence", "hanging_sign", "dormer", "gothic_facade", "gothic_bell_tower", "gothic_buttress", "gothic_window", "market_awning", "wall_ivy", "stone_apron") var kind := "chimney":
 	set(value): kind = value; request_rebuild()
 @export var dimensions := Vector3(.75, 1.7, .75):
 	set(value): dimensions = value.max(Vector3.ONE * .05); request_rebuild()
@@ -27,6 +27,15 @@ const MasonryFinish=preload("res://addons/house_builder/masonry_finish.gd")
 ## Depth of the rose glass behind the facade; zero retains the legacy relief.
 @export_range(0.0, .65, .01, "suffix:m") var rose_recess_depth := 0.0:
 	set(value): rose_recess_depth = clampf(value,0.0,.65); request_rebuild()
+## Leaf coverage and manual exclusion rectangles in local metres (X/Y).
+@export_range(0.0,2.0,.05) var growth_density := 1.0:
+	set(value): growth_density=value; request_rebuild()
+@export var growth_color := Color(.14,.245,.058):
+	set(value): growth_color=value; request_rebuild()
+@export_enum("Spreading", "Climbing") var growth_shape := 0:
+	set(value): growth_shape=value; request_rebuild()
+@export var surface_exclusions: Array[Rect2] = []:
+	set(value): surface_exclusions=value; request_rebuild()
 @export var detail_seed := 416522:
 	set(value): detail_seed = value; request_rebuild()
 @export var weathered := true:
@@ -62,6 +71,7 @@ static func default_dimensions(detail_kind: String) -> Vector3:
 		"fence": Vector3(2.8,1.15,.18), "hanging_sign": Vector3(.9,1.0,.22),
 		"dormer": Vector3(1.35,1.35,1.0), "gothic_facade": Vector3(10.6,6.7,.8),
 		"gothic_bell_tower": Vector3(2.55,11.8,2.35), "gothic_buttress": Vector3(.72,5.1,1.0),
+		"wall_ivy": Vector3(1.3,3.2,.3), "stone_apron": Vector3(2.4,.08,1.6),
 		"gothic_window": Vector3(1.3,2.6,.3), "market_awning": Vector3(4.6,3.4,2.0)}.get(detail_kind, Vector3.ONE)
 
 var _roof_signature := ""
@@ -144,6 +154,7 @@ func rebuild() -> void:
 		"hanging_sign": _sign()
 		"dormer": _dormer()
 		"gothic_facade", "gothic_bell_tower", "gothic_buttress", "gothic_window": preload("res://addons/house_builder/recipe_gothic.gd").build(self)
+		"wall_ivy", "stone_apron": preload("res://addons/house_builder/recipe_growth.gd").build(self)
 		"market_awning": preload("res://addons/house_builder/recipe_fabric.gd").build(self)
 	var mesh := ArrayMesh.new()
 	for surface in _tools:

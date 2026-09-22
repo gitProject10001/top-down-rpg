@@ -26,6 +26,7 @@ var edge_field := FastNoiseLite.new()
 var pigment_field := FastNoiseLite.new()
 var heading_field := FastNoiseLite.new()
 var height_field := FastNoiseLite.new()
+var authored_paths: Array[Node3D] = []
 var road_mask: Image
 var mask_center: Vector2
 var mask_size: Vector2
@@ -79,6 +80,9 @@ func configure(view: Node, profile: Resource = null) -> void:
     heading_field.frequency = .31
     height_field.seed = density_field.seed+702
     height_field.frequency = .7
+    for candidate in view.find_children("*","Node3D",true,false):
+        if "path_surface" in candidate and candidate.path_surface!=null:
+            authored_paths.append(candidate)
     bake_coverage()
     var data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://assets/models/anime_grass/grass_piece.json"))
     material = ShaderMaterial.new()
@@ -90,6 +94,7 @@ func configure(view: Node, profile: Resource = null) -> void:
             var color: Color = art_profile.grass_palette[index]
             # These are linear pigment coefficients, not sRGB color uniforms.
             material.set_shader_parameter(["root_color","cool_tip","warm_tip"][index],Vector3(color.r,color.g,color.b))
+    bind_meadow(material)
     for variant in MESH_COUNT:
         var mesh := build_variant(data, variant/3, variant%3)
         mesh.surface_set_material(0, material)
@@ -134,8 +139,18 @@ func bake_coverage() -> void:
         for x in 512:
             var uv := (Vector2(x,y)+Vector2.ONE*.5)/512.0
             var p := (uv-Vector2.ONE*.5)*mask_size+mask_center
-            var road_uv:=(p-road_mask_center)/road_mask_size+Vector2.ONE*.5
+            var sample_point := p
+            var access_road := 0.0
+            for lot in authored_paths:
+                var local_path: Vector3=lot.to_local(Vector3(p.x,lot.global_position.y,p.y))
+                var q := Vector2(local_path.x,local_path.z)
+                var offset: Vector2=lot.path_surface.warp(q,lot.access_path)
+                var shifted: Vector3=lot.global_basis*Vector3(offset.x,0,offset.y)
+                sample_point+=Vector2(shifted.x,shifted.z)
+                access_road=maxf(access_road,lot.path_surface.road_amount(q,lot.access_path))
+            var road_uv:=(sample_point-road_mask_center)/road_mask_size+Vector2.ONE*.5
             var road := smoothstep(.12,.82,sample_road(road_uv)+edge_field.get_noise_2d(p.x*3.0,p.y*3.0)*.14)
+            road=maxf(road,access_road)
             var density := .5
             var pigment := clampf(.5+pigment_field.get_noise_2d(p.x,p.y)*1.5,0,1)
             var local := terrain.to_local(Vector3(p.x,.18,p.y))
@@ -155,7 +170,21 @@ func bake_coverage() -> void:
             coverage.set_pixel(x,y,Color(road,density,pigment,1.0))
     shared_coverage = ImageTexture.create_from_image(coverage)
 
+func bind_meadow(target: ShaderMaterial) -> void:
+    if art_profile==null: return
+    var anchor:=study_root.get_node_or_null(art_profile.grass_study_surface) if not art_profile.grass_study_surface.is_empty() else null
+    target.set_shader_parameter("meadow_region",Vector4.ZERO)
+    if anchor:
+        target.set_shader_parameter("meadow_region",Vector4(anchor.global_position.x,anchor.global_position.z,art_profile.grass_study_radius,0))
+    for pair in [["meadow_patch_scale","grass_patch_scale"],["meadow_ground_influence","grass_ground_influence"],["meadow_normal_mix","grass_normal_mix"],["meadow_wind_strength","grass_wind_strength"]]:
+        target.set_shader_parameter(pair[0],art_profile.get(pair[1]))
+    if art_profile.grass_palette.size()>=3:
+        for i in 2:
+            var c: Color=art_profile.grass_palette[i+1]
+            target.set_shader_parameter(["meadow_cool","meadow_warm"][i],Vector3(c.r,c.g,c.b))
+
 func bind_ground(ground_material: ShaderMaterial) -> void:
+    bind_meadow(ground_material)
     ground_material.set_shader_parameter("art_coverage",shared_coverage)
     ground_material.set_shader_parameter("art_coverage_center",mask_center)
     ground_material.set_shader_parameter("art_coverage_size",mask_size)

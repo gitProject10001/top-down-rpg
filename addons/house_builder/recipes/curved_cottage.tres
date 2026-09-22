@@ -1,0 +1,9 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://addons/house_builder/building_recipe.gd" id="1"]
+[resource]
+script = ExtResource("1")
+recipe_id = "curved_cottage"
+display_name = "Campione · falde curve"
+role = "dwelling"
+description = "Corpo indipendente a due falde; raccordi e componenti sul tetto restano successivi."
+main_properties = {"roof_curvature": 0.65, "roof_height": 3.4, "wall_height": 3.0}

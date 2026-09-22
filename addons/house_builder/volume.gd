@@ -60,7 +60,7 @@ func _exit_tree() -> void:
 	if host: host.request_rebuild()
 func _process(delta: float) -> void:
 	var signature := str(dimensions(),battlements_enabled,battlement_spacing,roof_door_enabled,roof_door_floor_id,roof_door_offset,parapet_enabled,automatic_frame,canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
-	signature += str(attachment_elevation,attachment_inset,roof_junction)
+	signature += str(attachment_elevation,attachment_inset,roof_junction,roof_curvature)
 	if signature!=_observed:
 		_observed=signature
 		var host := volume_host()
@@ -72,6 +72,10 @@ func prepare_attachment() -> void:
 	var tangent: Vector3=(host.wall_point(host_wall,1,0)-host.wall_point(host_wall,0,0)).normalized()
 	transform=Transform3D(Basis(tangent,Vector3.UP,host.wall_normal(host_wall)),host.wall_point(host_wall,host_offset*host.wall_length(host_wall)*0.5,attachment_elevation,depth*0.5-WALL_THICKNESS-0.08-attachment_inset))
 func rebuild() -> void:
+	if not roof_curvature_error().is_empty():
+		_pending=false
+		if Engine.is_editor_hint(): update_configuration_warnings()
+		return
 	prepare_attachment()
 	super.rebuild()
 	var stairs := stair_component()
@@ -180,7 +184,7 @@ func support_height(z: float) -> float:
 
 func _build_roof() -> ArrayMesh:
 	if canopy_roof==2: return _flat_roof()
-	return RoofMesh.new().generate(width,depth,wall_height,roof_height,house_seed,weathered,structure_kind==1 and canopy_roof==1)
+	return RoofMesh.new().generate(width,depth,wall_height,roof_height,house_seed,weathered,structure_kind==1 and canopy_roof==1,roof_curvature)
 
 func _build_shed_supports() -> void:
 	_build_posts()
@@ -216,7 +220,7 @@ func _build_posts() -> void:
 			_box(point+Vector3.UP*h*0.5,Vector3(post_size,h,post_size),1)
 
 func post_top(point: Vector3) -> float:
-	return support_height(point.z) if canopy_roof!=0 else wall_height+roof_height*(1.0-absf(point.x)/(width*0.5))
+	return support_height(point.z) if canopy_roof!=0 else wall_height+RoofProfile.height_at(width*.5,roof_height,roof_curvature,point.x)
 
 func _build_links() -> void:
 	var links := get_node_or_null("FrameLinks")

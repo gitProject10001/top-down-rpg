@@ -27,7 +27,7 @@ func check_mesh(detail: Node3D) -> void:
 		detail.kind+": mesh must have actual volume in all axes")
 	check(bounds.position.x >= -extent.x*.55 and bounds.end.x <= extent.x*.55 and bounds.position.z >= -extent.z*.55 and bounds.end.z <= extent.z*.55,
 		detail.kind+": horizontal envelope")
-	check(bounds.position.y >= -extent.y*.015 and bounds.end.y <= extent.y*1.035, detail.kind+": base and top envelope")
+	check(bounds.position.y >= (-.08 if detail.kind=="stone_apron" else -extent.y*.015) and bounds.end.y <= extent.y*1.035, detail.kind+": base and top envelope")
 	for surface in mesh.get_surface_count():
 		var arrays := mesh.surface_get_arrays(surface)
 		var positions: PackedVector3Array = arrays[Mesh.ARRAY_VERTEX]
@@ -58,7 +58,7 @@ func run() -> void:
 		details.append(detail)
 		check_mesh(detail)
 		var body := detail.get_node_or_null("_GeneratedRecipeDetail/DetailCollision")
-		if kind in Detail.ROOF_KINDS or kind == "hanging_sign":
+		if kind in Detail.ROOF_KINDS or kind in ["hanging_sign", "wall_ivy", "stone_apron"]:
 			check(body == null,kind+": no invisible blocker on roof/wall ornament")
 		else:
 			check(body is StaticBody3D and body.get_child_count() in range(1,7),kind+": fitted ground blocker")
@@ -78,7 +78,7 @@ func run() -> void:
 			var cut_visual: MeshInstance3D = detail.get_node("_GeneratedRecipeDetail/DetailMesh")
 			check(cut_visual.mesh.surface_get_material(0).get_shader_parameter("cutaway_enabled") == true,kind+": tall geometry clipped in material")
 			var caps: Node3D = detail.get_node("_GeneratedRecipeDetail/CutawayCaps")
-			check(caps.visible and caps.get_child_count() > 0,kind+": blocked ground footprint remains visibly capped")
+			check(caps.visible and (caps.get_child_count() == 0 if kind=="wall_ivy" else caps.get_child_count()>0),kind+": blocked ground footprint remains visibly capped")
 			for cap in caps.get_children(): check(absf(cap.position.y+.0175-Detail.CUTAWAY_HEIGHT)<.001,kind+": cap exactly at cut plane")
 		detail.set_cutaway(false)
 		detail.detail_seed += 1
@@ -97,7 +97,7 @@ func run() -> void:
 	await physics_frame
 	var space := world.get_world_3d().direct_space_state
 	for detail in details:
-		if detail.kind in Detail.ROOF_KINDS or detail.kind == "hanging_sign": continue
+		if detail.kind in Detail.ROOF_KINDS or detail.kind in ["hanging_sign", "wall_ivy", "stone_apron"]: continue
 		var sample := Vector3(-detail.dimensions.x*.25,0,0)
 		if detail.kind == "gothic_facade": sample.z = -detail.dimensions.z*.25
 		if detail.kind == "market_awning": sample = Vector3(-detail.dimensions.x*.455,0,detail.dimensions.z*.43)
