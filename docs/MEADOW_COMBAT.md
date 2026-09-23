@@ -8,9 +8,9 @@ vegetazione o geometria del concept.
 | --- | --- |
 | 4 | Raggiungi il gruppo e prepara un incontro nuovo |
 | R | Ricomincia l'incontro, ripristinando vita, stamina e nemici |
-| Click sinistro ripetuto | Catena finita di tre colpi |
-| Sinistro tenuto premuto | Carica direzionale; muovere il mouse consente una finta |
-| Destro | Guardia direzionale |
+| Click sinistro ripetuto | Combo ciclica di tre colpi |
+| Sinistro tenuto premuto | Caricato dopo 0,65 s; rilascio con fendente orizzontale e scatto, costo 30 stamina |
+| Destro | Guardia frontale |
 | Shift | Schivata; durante l'attacco resta memorizzata fino al recupero |
 | O | Panoramica e ritorno alla camera di gioco |
 
@@ -37,8 +37,10 @@ alla zona dell'incontro. Nessun modello o texture è copiato da `rpg-3d`.
 
 ## Verifica
 
-- `tools/check_directional_combo.gd`: eventi di input, tre contatti della lama,
-  carica, finte, schivata, reset della catena, portata su capsule normali.
+- `tools/check_charge_death.tscn`: carica, costo, rilascio, annullamento e morte.
+- `tools/check_locomotion.tscn`: camminata, corsa, strafe e recupero.
+- `tools/check_ragdoll_reactions.tscn`: contatti, resistenza, pausa e rilascio fisico.
+- `tools/check_directional_combo.gd`: fixture storica della meccanica direzionale, non accettazione del player corrente.
 - `tools/check_pack_combat.tscn`: turni, separazione, attacchi reali, muri,
   dislivelli, acqua, morte e pausa per dialoghi.
 - `tools/check_meadow_encounter.tscn`: posizionamento sul terreno della scena,
@@ -50,9 +52,13 @@ alla zona dell'incontro. Nessun modello o texture è copiato da `rpg-3d`.
 
 Per confronti artistici senza combattimento usare `-- --no-enemies`, oppure
 disattivare `Combat Encounter Enabled` sul nodo della scena integrata.
-I parametri del ritmo della combo sono descritti in `DIRECTIONAL_COMBO.md`.
+Il player usa `scripts/states/attack.gd`, i timing di `scenes/player/player3.tscn` e la clip `atk_dash` per la carica. `DIRECTIONAL_COMBO.md` è storico.
 
-### Risultato verificato — 19 settembre 2026
+Riserva hero 180, rigenerazione 30/s; colpi normali gratuiti. Carica: danno doppio, soglia 0,65 s, rilascio automatico a 1,30 s; sotto soglia o senza stamina colpo normale. Shift annulla la preparazione. Ragdoll dopo un possibile passo di cedimento, con resistenze articolate temporanee; non un sistema Euphoria completo.
+
+### Misura storica — 19 settembre 2026
+
+Questa misura precede carica, nuove reazioni e post-processing: non certifica il costo della revisione corrente.
 
 Scena completa, Forward+ / D3D12 su RTX 3070, 1152×648: quattro nemici in
 movimento, tre turni per ciascuno durante la finestra di prova, massimo due

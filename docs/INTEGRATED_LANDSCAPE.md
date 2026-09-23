@@ -1,5 +1,14 @@
 # Scena integrata — paesaggio, architettura e prova giocabile
 
+## Stato corrente — 23 settembre 2026
+
+Indice e priorità: [PROJECT_STATUS](PROJECT_STATUS.md). Il resto del documento conserva il diario degli incrementi; i risultati datati si riferiscono a quelle revisioni.
+
+- Player action: click combo, tenere/rilasciare per caricato con scatto, guardia frontale, Shift schivata. Ctrl passo/corsa; negli interni cammina. B reinfodera sul fianco sinistro; attacco/parata estraggono.
+- Camera con prospettiva stretta e zoom interno. O panoramica; F6 **nel gioco** apre il ciclo; F7 confronta lo stile; P apre i cursori del post e del DOF, con pausa. Le regolazioni P non persistono fra sessioni.
+- Quattro NPC locali, circuito borgo–torre temporaneo. Missioni persistenti e ripartenza completa non sono ancora integrate.
+- La prova outline resta sospesa. Capacità generiche e criteri aperti rimangono nelle roadmap.
+
 ## Obiettivo e stato
 
 `scenes/dev/integrated_landscape.tscn` compone i builder in un'unica scena
@@ -253,7 +262,7 @@ estensione della taratura fuori dal campione.
 ### Esperimento solo post-processing
 
 `PainterlyPost` istanzia `scenes/effects/painterly_post.tscn` dentro il viewport
-3D. **P** attiva/disattiva il pass senza cambiare F7, materiali, modelli,
+3D. Nella revisione iniziale **P** attivava/disattivava il pass; ora P apre il pannello con toggle del filtro e cursori. Il toggle abilita/disabilita il pass senza cambiare F7, materiali, modelli,
 illuminazione o tone mapping. La UI esterna al viewport rimane nitida.
 Il vecchio PostPixel resta nella sua configurazione precedente.
 
@@ -272,7 +281,7 @@ Prova a 1152×648: off 16,692 ms / on 16,679 ms mediani; p95 on 16,796 ms.
 Entrambi circa 60 fps, con VSync: non si deduce un costo GPU preciso dalla
 differenza fra queste due misure. Shader compilato e bypass P verificato.
 
-### TODO — Contorno tramite envelope della mesh (idea da valutare)
+### Idea sospesa — Contorno tramite envelope della mesh
 
 Solo ricerca/progettazione futura: nessuna implementazione in questa revisione.
 Riferimento: schizzo dell'utente con mesh nera, involucro blu e raggi dalla camera.
@@ -309,7 +318,7 @@ Borgo e guado esistenti collegati a una torre di prova tramite un sentiero stret
 
 ## Combattimento action — revisione del 23 settembre 2026
 
-La scena usa ora la combo `Attack` per il giocatore: click successivi concatenano tre colpi (due laterali e finale pesante), tenere premuto non carica. Shift schiva; un comando appena prima del contatto viene ricordato per 0,18 s. Destro para frontalmente, senza selezione della direzione. Rimossi gli indicatori direzionali dal HUD di questo personaggio. La mira e il movimento restano disponibili, con impegno breve durante il colpo.
+La scena usa ora la combo `Attack` per il giocatore: click successivi concatenano tre colpi (due laterali e finale pesante), nella prima revisione tenere premuto non caricava; ora la carica è disponibile (sezioni successive). Shift schiva; un comando appena prima del contatto viene ricordato per 0,18 s. Destro para frontalmente, senza selezione della direzione. Rimossi gli indicatori direzionali dal HUD di questo personaggio. La mira e il movimento restano disponibili, con impegno breve durante il colpo.
 
 Slash e scia rendono visibile il contatto; gli attacchi normali non consumano stamina. Riserva del giocatore 180, recupero 30/s fuori dalla guardia; i nemici conservano 100 e 8/s. Il knockback ordinario è contenuto per permettere di collegare la combo, maggiore sul finale. I predoni riusano PackDirector e il driver di animazione windup/release preesistente (internamente chiamato DirAttack); questo non richiede più letture direzionali al giocatore.
 

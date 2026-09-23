@@ -1,33 +1,15 @@
-# Camera: prospettiva leggera
+# Camera corrente
 
-La camera `IsoCam` usa di default l'ortografica fissa, anche durante il lock-on.
-La prospettiva stretta resta selezionabile: FOV verticale 20 gradi,
-pitch della scena 48 gradi.
-Questa nota sostituisce le precedenti descrizioni della camera come esclusivamente ortografica.
+La scena integrata usa `scripts/village/iso_cam.gd`: prospettiva stretta a 13°, rotazione libera e rotazione durante il lock disattivate nella presentazione corrente. Il default dello script per altre scene resta ortografico.
 
-Nell'Inspector dello script:
-- `Free Rotate`: abilita la rotazione manuale (default spento).
-- `Lock Rotate`: abilita la rotazione automatica durante il lock (default spento).
-- `Perspective Enabled`: attiva la prospettiva; disattivare ripristina l'ortografica.
-- `Perspective Fov`: intensita della prospettiva.
-- `Match Perspective Framing`: mantiene l'inquadratura al piano di fuoco.
-- `Ortho Size`: estensione verticale al piano di fuoco, anche in prospettiva con matching.
-- `Distance`: distanza manuale se il matching e disattivato.
+## Inspector
 
-Con estensione 17,5 m e FOV 20 gradi, distanza = 17,5 / (2 tan(10 gradi)) = 49,62 m.
-Il lock-on continua a modificare l'inquadratura; in prospettiva questo cambia la distanza.
-Lo snap di camera e personaggi e escluso in prospettiva, dove la dimensione mondiale
-di un pixel varia con la profondita. Il vecchio snap resta disponibile in ortografica.
+- `Perspective Fov`: 0 = ortografica; valore positivo = prospettiva. Non è un angolo FOV fisico nullo.
+- `Ortho Size`: estensione del piano di fuoco; la distanza si ricava da span / (2 × tan(FOV/2)). Il matching conserva la scala al fuoco.
+- `Pitch Deg`, `Yaw Deg`: orientamento; `Free Rotate` e `Lock Rotate`: opt-in per altre presentazioni.
+- `Interior Zoom Ratio` (0,72) e `Interior Zoom Speed`: avvicinamento morbido negli interni rilevati dallo stesso sistema del cutaway. Uscendo torna normale.
+- La camera preserva lo spazio necessario fra player e bersaglio durante lock. O apre la panoramica; lo snap a pixel si applica soltanto in ortografica.
 
-Test: `tools/check_perspective_camera.gd` verifica proiezione, FOV, distanza,
-quattro orientamenti e ritorno all'ortografica. Non verifica il combattimento end-to-end.
+Il pannello P espone DOF opzionale basato sulla profondità della camera, con banda nitida anteriore/posteriore e fuoco sul personaggio. UI fuori dal viewport filtrato. Le modifiche del pannello sono temporanee.
 
-`PlayerIntent.screen_relative_directions` converte input laterali dello schermo
-nelle direzioni locali del combattente, confrontando asse destro del modello e camera.
-La stessa mappatura invertibile alimenta l'HUD. Alto/basso rimangono overhead/affondo.
-Vicino al profilo la soglia 0,15 mantiene l'ultimo lato: non esiste una corrispondenza
-laterale univoca quando l'asse destro del corpo punta nella profondita dello schermo.
-La regola di mirroring dei colpi in arrivo rimane nel sistema di parata, invariata.
-`tools/check_fixed_camera.gd` verifica camera fissa anche in lock, orbit opzionale,
-orientamenti opposti del personaggio e round-trip input/HUD. Serve ancora una prova
-giocata per valutare leggibilita delle animazioni e cambi di orientamento durante il colpo.
+Verifiche: `tools/check_camera_fov.gd`, `check_overview_camera.gd`, `check_interior_sheath.tscn`, `check_post_controls.tscn`. Le vecchie fixture di mapping direzionale non definiscono più il combattimento del player.

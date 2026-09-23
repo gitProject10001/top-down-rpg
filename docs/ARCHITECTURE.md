@@ -1,4 +1,37 @@
-# Architettura runtime
+# Architettura runtime — stato corrente
+
+## Entrate e composizione
+
+`project.godot` avvia ancora `hearth_village_playable.tscn`. Il laboratorio corrente è `integrated_landscape.tscn`, coordinato da `scripts/village/integrated_landscape.gd`. Gli autoload effettivi sono quelli in `project.godot`; Traits/Run non costituiscono una progressione completa del circuito integrato.
+
+Il mondo 3D e il filtro pittorico vivono nel SubViewport del GameplayPreviewRig. HUD, dialoghi e pannelli debug sono nella Window, fuori dal filtro. La UI può continuare a elaborare mentre il mondo è in pausa.
+
+## Responsabilità
+
+| Sistema | Codice principale | Dati / limiti |
+|---|---|---|
+| World e distribuzione | `addons/world_editor/` | Piano, modifiche locali e streaming; la scena conserva layout e aree protette |
+| Geometria | `addons/house_builder/`, `castle_generator/`, `rock_builder/`, `water_builder/`, `village_builder/` | Capacità riutilizzabili nei rispettivi addon; nessuna rigenerazione globale per correggere un dettaglio |
+| Tempo e luce | `addons/environment_builder/day_cycle.gd` | Unica autorità sull'ora; F7 conserva il tempo |
+| Personaggi | `scripts/player.gd`, `scripts/states/` | Corpo condiviso; PlayerIntent per il giocatore, PackBrain/PackDirector per i gruppi |
+| Contatti | `scripts/sword.gd`, `scripts/components/` | HitBox → HurtBox/Health; annullamento finestre e feedback del colpo |
+| Locomozione / morte | `scripts/combat/locomotion_layers.gd`, `scripts/enemy_duelist.gd`, `scripts/components/ragdoll_reaction.gd` | Strafe in lock, passo di cedimento e resistenza articolata breve; non un solver completo di equilibrio |
+| Camera e post | `scripts/village/iso_cam.gd`, `scripts/art/painterly_post.gd` | FOV stretto/ortografica, zoom interno, pannello P e DOF opzionale |
+| NPC | `addons/npc_ai/npc_dialogue_controller.gd`, `npc_inference_service.gd` | Prossimità, UI, servizio condiviso e memoria per identità; nessuna assegnazione di premi da parte del modello |
+| Circuito | `addons/world_editor/exploration_circuit.gd`, `scripts/village/borgo_exploration_trial.gd` | Checkpoint temporanei; persistenza e missione completa ancora aperte in V02 |
+
+## Combattimento corrente
+
+PlayerIntent → StateMachine/Attack (combo e carica) → Sword/HitBox → HurtBox/Health. Guardia frontale. `DirAttack` resta nell'AI e nelle prove precedenti: la sua presenza nel repository non significa che il player usi ancora combattimento direzionale. Gli stati possono leggere Input per comandi specifici; non vale più l'affermazione storica «nessuno stato legge Input».
+
+Dettagli e verifiche in [MEADOW_COMBAT](MEADOW_COMBAT.md). Camera in [CAMERA](CAMERA.md), perimetro dei sistemi e priorità in [PROJECT_STATUS](PROJECT_STATUS.md).
+
+---
+
+## Archivio: fotografia del runtime hearth precedente
+
+**La descrizione seguente è storica.** Numeri di righe, inventario della scena, comandi direzionali e affermazioni di esclusività non descrivono il laboratorio corrente. Si conserva per capire il codice ereditato, non come specifica da ripristinare.
+
 
 Come gira il gioco, meccanica per meccanica, con i file in cui ogni cosa succede.
 L'inventario file per file sta in [COMPONENTS.md](COMPONENTS.md).

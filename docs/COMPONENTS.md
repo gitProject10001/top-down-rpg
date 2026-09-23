@@ -1,5 +1,7 @@
 # Inventario dei componenti
 
+> **Inventario storico del runtime hearth.** Non è più un elenco completo del progetto. Per sistemi attuali e punti di ingresso usare [ARCHITECTURE](ARCHITECTURE.md) e [PROJECT_STATUS](PROJECT_STATUS.md). Riferimenti numerici e comandi sotto possono essere superati; non usarli per decidere rimozioni di file.
+
 Ogni file di codice del progetto, cosa fa e come entra nel gioco che gira.
 Come le parti si mettono insieme sta in [ARCHITECTURE.md](ARCHITECTURE.md).
 

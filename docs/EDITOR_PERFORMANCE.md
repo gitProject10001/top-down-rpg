@@ -1,5 +1,7 @@
 # Editor: selezione terreno e lavoro a scena ferma
 
+> **Diagnosi specifica e misure storiche della selezione del terreno.** Per cache, generazione incrementale e streaming correnti vedere [PERFORMANCE](PERFORMANCE.md). Nessuna delle due note certifica il frame time su tutta la mappa.
+
 ## Misure del 15 settembre 2026
 
 Le prove riproducono la scena integrata. I tempi editor sotto sono misurati

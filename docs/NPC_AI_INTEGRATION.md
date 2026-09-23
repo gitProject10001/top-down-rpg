@@ -96,3 +96,13 @@ Questo controlla esplicitamente solo l'indice; i lavori estranei non staged sono
 preservati, non certificati dal controllo. Il runner completo accetta
 `-StagedIntegration` per la stessa modalità. Senza lo switch rimane il controllo
 originario del worktree NPC rispetto al suo commit base.
+
+## Lavoro aperto
+
+Sviluppo NPC sospeso finché non ripreso esplicitamente. La vecchia consegna LOCAL_NPC_AI_TODO è archivio; non ricreare il prototipo già integrato.
+
+- Verificare pacchetto esportato su macchina pulita/offline e ciclo avvio/arresto senza processi orfani.
+- Misurare memoria e latenza insieme alla scena, non soltanto nel laboratorio.
+- Rafforzare coerenza con il mondo: il modello può ancora produrre riferimenti esterni o falsità. I prompt non sono una garanzia.
+- Eventuale ponte di eventi canonici dalla progressione: dipende dal contratto V02; il modello non decide premi, inventario o completamenti.
+- Voce e routine autonome restano fuori dall'integrazione corrente.

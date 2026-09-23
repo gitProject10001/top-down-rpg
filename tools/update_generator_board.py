@@ -39,7 +39,7 @@ output = """# Kanban dei generatori
 
 Board locale versionata, generata dalle tabelle delle roadmap. DOING include le macrofasi parziali; non significa che ci siano più agenti al lavoro. DONE riguarda il criterio della singola card, non l'intero sistema.
 
-**Incremento corrente: paesaggio integrato esteso e ciclo giorno–notte.** World conserva piano, modifiche e streaming; Rock e Water Builder producono superfici e fondali. Stato del campione, misure e limiti in EXPANDED_LANDSCAPE.md. R03, W01.2/W01.3 e T01.4 non sono conclusi dalla prova visiva. G01.4, B01–B03, S02 e il confronto A07 restano alle rispettive roadmap. Generazione globale da seed e V01 rimandati; le card RIMANDATO restano in TODO con stato esplicito.
+**Board dei generatori, non di tutto il gioco.** Stato trasversale e ordine di lavoro in [PROJECT_STATUS.md](PROJECT_STATUS.md). Prossimo incremento di gioco: V02 sul circuito esistente; ramo editor: confronto A07 prima di B01.1. Paesaggio esteso e ciclo giorno–notte sono un campione disponibile, con limiti in EXPANDED_LANDSCAPE.md. R03, W01.2/W01.3 e T01.4 restano aperti; generazione globale e V01 rimandati. Le card RIMANDATO restano in TODO con stato esplicito.
 
 Le card mantengono gli stati delle roadmap. Il criterio di uscita e le dipendenze sono nelle tabelle collegate; prima di iniziare una card TODO, verificare quelle dipendenze.
 

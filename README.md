@@ -1,63 +1,42 @@
 # Top-Down RPG
 
-Vertical slice minimale del villaggio giocabile, portata da `rpg-3d`. Questo repository contiene solo il runtime necessario alla scena principale; `rpg-3d` resta il laboratorio e non viene modificato.
+Progetto Godot 4.6 / Forward+ / Jolt: laboratorio di RPG dall'alto e strumenti riutilizzabili per costruire mondo, edifici e paesaggio.
 
-## Documentazione
+## Da dove partire
 
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — come gira il gioco, meccanica per meccanica, con i file in cui ogni cosa succede.
-- [docs/COMPONENTS.md](docs/COMPONENTS.md) — ogni file di codice, cosa fa e come entra nel gioco.
-- [docs/TERRAIN.md](docs/TERRAIN.md) — il materiale del terreno, come si estende senza ripetersi e come si aggiungono strade ed erba.
-- [docs/ROOF_MATERIAL.md](docs/ROOF_MATERIAL.md) — tegole in rilievo, materiale PBR e confronto delle quattro illuminazioni.
-- [docs/HOUSE_BUILDER.md](docs/HOUSE_BUILDER.md) — disegnare case nell'editor, ridimensionarle con maniglie e posizionare porte e finestre.
-- [docs/HOUSE_AUTHORING.md](docs/HOUSE_AUTHORING.md) — interni salvati, stanze, rigenerazione protetta, arredo editabile e Play della casa selezionata.
-- [docs/VILLAGE_BUILDER.md](docs/VILLAGE_BUILDER.md) — perimetri, strade, zone, lotti e case con ingresso leggibile dalla camera fissa; UI contestuale.
+- **[Stato per macrosistemi e priorità](docs/PROJECT_STATUS.md)**: cosa funziona, cosa manca e fonti dei TODO.
+- **Scena di lavoro:** aprire `scenes/dev/integrated_landscape.tscn` e avviare la scena corrente (F6 nell'editor).
+- **F5 / avvio predefinito:** apre ancora `scenes/dev/hearth_village_playable.tscn`, campione precedente. Non confondere i suoi comandi con quelli del laboratorio integrato.
+- [Architettura corrente](docs/ARCHITECTURE.md), [scena integrata](docs/INTEGRATED_LANDSCAPE.md), [combattimento](docs/MEADOW_COMBAT.md), [camera](docs/CAMERA.md).
 
-## Stato attuale
+## Comandi della scena integrata
 
-- Godot 4.6, Forward Plus, Jolt Physics.
-- Scena principale: `scenes/dev/hearth_village_playable.tscn`, aperta direttamente all'avvio.
-- Un villaggio esplorabile con due combattenti identici, HUD e combattimento direzionale.
-- Il duellante è la stessa scena del giocatore con un cervello al posto delle mani. Non esiste una seconda implementazione della meccanica.
-- Dungeon, test, nemico classico, animazione procedurale e asset non raggiungibili dalla scena non fanno parte del runtime.
-- Progressione, dialoghi e ciclo di run esistono nel codice ma non partono in questa scena. La lista completa è in `ARCHITECTURE.md`, sezione *Macchinario dormiente*.
-
-## Comandi
-
-| | |
+| Comando | Azione |
 |---|---|
-| `WASD` / levetta sinistra | movimento |
-| click sinistro | tieni premuto, muovi il mouse per scegliere la direzione, rilascia per attaccare |
-| click destro | guardia direzionale; nei primi 0.24 s è parata |
-| `Shift` | dash |
-| `Spazio` | salto |
-| `L` | torcia |
-| `F6` | alterna mattino, mezzogiorno, tramonto e notte per verificare i materiali |
-| frecce sinistra e destra, levetta destra | ruota la camera, 360 gradi, quando non sei agganciato |
-| tasto centrale del mouse | lock-on |
-| `F3` / `F8` | volumi di debug |
+| WASD / levetta sinistra | Movimento; dentro gli edifici camminata predefinita |
+| Ctrl | Inverte passo/corsa |
+| Click sinistro | Combo; tenere carica il fendente con scatto, rilasciare attacca |
+| Destro / Shift | Guardia frontale / schivata |
+| B | Estrae o reinfodera sul fianco sinistro |
+| Centrale mouse | Lock-on |
+| E | Parla con NPC vicino, altrimenti interagisce con porta |
+| O | Panoramica |
+| F6 nel gioco | Pannello ciclo giorno–notte |
+| F7 | Confronto della resa artistica |
+| P | Pannello filtro pittorico e profondità di campo; P/Esc chiude |
+| 1 / 2 / 3 / 5 | Città / guado / lago / borgo |
+| 4 / R | Prova combattimento / ripartenza incontro |
 
-## Combattimento
+F8 nell'editor ferma il gioco. Le regolazioni del pannello P sono temporanee e il gameplay si ferma mentre è aperto.
 
-`PlayerIntent` raccoglie input e direzione; `FighterIntent` espone uno stato neutro; `SwingDir` definisce `UP`, `DOWN`, `LEFT`, `RIGHT`. `DirAttack` consuma direzione e rilascio, avvia l'animazione e apre la `HitBox` nella fase di impatto.
+## Strumenti e roadmap
 
-```text
-input mouse/stick -> PlayerIntent -> StateMachine/DirAttack
-                                  -> Sword/HitBox -> HurtBox/Health -> CombatFeedback
-```
+Le capacità riutilizzabili appartengono agli addon; la scena contiene composizione e tarature. Si sviluppano qui, riusando quando utile il laboratorio `rpg-3d` senza modificarlo implicitamente.
 
-La direzione si sceglie mentre il colpo è in carica, e cambiarla è una finta. Chi difende deve leggere la direzione giusta: non c'è credito parziale. Lo specchio sinistra/destra dell'attaccante verso il difensore è applicato in un punto solo, `SwingDir.mirror()`.
+- [Roadmap architettura](docs/ARCHITECTURE_GENERATOR_ROADMAP.md): House/Castle e authoring assistito.
+- [Roadmap mondo](docs/WORLD_GENERATION_ROADMAP.md): World, terreno, rocce, acqua, vegetazione e V02.
+- [Kanban generato](docs/GENERATOR_KANBAN.md): aggiornare le roadmap sorgenti, poi `python tools/update_generator_board.py`.
+- [NPC locali](docs/NPC_AI_INTEGRATION.md): quattro interlocutori, fallback e limiti.
+- [Performance](docs/PERFORMANCE.md): cache, streaming e protocolli; i risultati dei campioni non garantiscono 60 fps ovunque.
 
-## Struttura
-
-- `scenes/`: scena principale e prefab runtime.
-- `scripts/player.gd`: orchestratore del personaggio.
-- `scripts/combat/`: intenti, direzioni, guardia e coordinamento.
-- `scripts/states/`: macchina a stati (`Idle`, `Move`, `Attack`, `DirAttack`, `DashAttack`, `Guard`, `Dash`, `Jump`, `Hurt`, `Dead`).
-- `scripts/components/`: salute, hitbox, hurtbox e trail.
-- `scripts/village/`: camera, pixel snapping, palette e beam.
-- `scripts/traits/`: progressione, run e finale.
-- `addons/GPUTrail/`: trail runtime/editor, vendorizzato senza modifiche.
-
-## Regola del progetto
-
-Le nuove funzionalità vengono prima consolidate in `rpg-3d`, poi portate qui solo se necessarie al villaggio. Prima di rimuovere un file si verificano scene, script, autoload, classi globali Godot e le dipendenze binarie dei `.res`, che una ricerca testuale non vede. La lista delle trappole è in fondo a `ARCHITECTURE.md`.
+Il circuito esplorativo è ancora una prova: quest persistenti, ricompense e ripresa completa del mondo giocato restano da realizzare. Nessun download automatico dei modelli NPC e nessun peso in Git.

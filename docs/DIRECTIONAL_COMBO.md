@@ -1,5 +1,7 @@
 # Directional tap combo
 
+> **Historical directional-combat prototype.** This is not the current integrated player: see [MEADOW_COMBAT](MEADOW_COMBAT.md). Keep this document for legacy fixtures and AI-related mechanics; do not restore its controls by mistake.
+
 The integrated player uses `DirAttack`. Three separate clicks now produce a finite
 three-hit phrase. Default direction is right; unchanged input follows right, left,
 overhead using the existing `atk_swing`, `atk_b`, and `atk_c` clips. A deliberate

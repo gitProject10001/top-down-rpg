@@ -7,6 +7,9 @@ funzionalità già disponibili.
 
 ## Direzione attuale — costruzione assistita prima della generazione globale
 
+Indice del progetto: [PROJECT_STATUS](PROJECT_STATUS.md). Questa roadmap governa il ramo degli strumenti, non l'intero gioco. La priorità trasversale V02 non chiude né scavalca i criteri A07/B01; stati invariati durante il riordino documentale.
+
+
 Il numero di villaggi/case/castelli è contenuto: per ora non serve moltiplicare layout completi tramite seed. Priorità alle geometrie architettoniche e agli strumenti con cui utente e assistente costruiscono una scena da disegno, cartina o screenshot. Le quantità citate (quattro villaggi, circa cento case, quattro castelli) sono una motivazione della scelta, non un budget definitivo approvato.
 
 L'interazione desiderata è quella di un builder reattivo: l'utente modifica un volume e regole locali propongono/adattano finestre, campate e dettagli. La reference Tiny Glade descrive questo obiettivo d'interazione; non richiede di copiarne il rendering. Conservare i generatori e i seed esistenti come infrastruttura, ma rimandare varietà del planner, città automatiche e confronto dei quattro castelli generati. Il confronto potrà tornare quando utile allo strumento.
@@ -435,7 +438,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | S01 | RIMANDATO | Composizione urbana organica | Pipeline mondo | Strade principali e secondarie, piazze, porte, edifici gerarchizzati, addensamenti e vuoti; insediamenti su piani/terrazze, collegamenti ai vincoli del paesaggio |
 | S02 | TODO | Edifici urbani più articolati | Pipeline mondo | Estendere le ricette oltre le dodici case di prova: volumi aggregati, tetti collegati, facciate/accessori e interni coerenti; varietà strutturale verificata, non solo ruoli o colori |
 | V01 | RIMANDATO | Confronto dei quattro castelli | Pipeline mondo | Quattro richieste/seed tramite tool, scene editabili e stessa camera; almeno due organizzazioni strutturali distinte |
-| V02 | TODO | Vertical slice città–villaggio–POI | Pipeline mondo | Tempi reali di cammino, incontri, visibilità e streaming; aggiornamento delle distanze proposte dal concept |
+| V02 | TODO | Vertical slice città–villaggio–POI | Pipeline mondo | Sul circuito esistente: assegnazione e conclusione deterministiche, incontro, conseguenza/ricompensa e scorciatoia leggibile; salvataggio/riapertura senza duplicazioni, morte e checkpoint; playtest di orientamento e misure CPU/GPU durante il percorso. Prova temporanea disponibile, ciclo completo non implementato |
 <!-- WORLD_PIPELINE_END -->
 
 

@@ -1,4 +1,6 @@
 > Integrazione nel borgo: [NPC_AI_INTEGRATION.md](NPC_AI_INTEGRATION.md).
+
+> **Manuale del laboratorio NPC.** Per quattro personaggi, prossimità, host condiviso e pausa nella scena integrata vedere [NPC_AI_INTEGRATION](NPC_AI_INTEGRATION.md). I punti finali di «integrazione futura» registrano lo stato precedente all’importazione.
 > Le sezioni sul laboratorio qui sotto documentano il nucleo importato.
 
 # NPC conversazionali con IA locale — runtime, modello e prototipo
@@ -254,7 +256,7 @@ senza errori, senza processi `llama-server` residui e senza file di stato.
   contenuto non cambia, ma `git status` li mostra modificati e `check_perimeter.ps1` li segnala. Riportarli a CRLF
   (per esempio `perl -pi -e 's/\r?\n/\r\n/' <file>`) e non metterli mai in un commit del branch NPC.
 
-## Integrazione futura (non implementata)
+## Integrazione prevista nel laboratorio — registro storico
 
 - Ponte verso l'autoload `Dialogue` (`scripts/dialogue.gd:55`, `start(convo)`): una battuta generata puo' diventare un
   nodo `{speaker, text}`; `Dialogue.active` e' letto da `scripts/states/state_machine.gd:44-46`, `scripts/hud.gd:54`,

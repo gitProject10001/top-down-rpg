@@ -1,5 +1,7 @@
 # Editor, caricamento e streaming — 23 settembre 2026
 
+> **Ambito:** editor, generazione e streaming. Le misure dei campioni restano legate alla revisione provata; carica/ragdoll e DOF recenti richiedono un nuovo percorso di benchmark. Vedere [PROJECT_STATUS](PROJECT_STATUS.md) e V02 nella roadmap mondo.
+
 ## Utilizzo
 
 - In `ArtStudyLayers`, **Preview Quality → Lavoro** è il valore predefinito:

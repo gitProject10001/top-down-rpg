@@ -4,6 +4,9 @@ Il concept delle quattro fazioni è un riferimento **di composizione**, non un r
 
 ## Priorità attuale — 2026-09-23
 
+Indice trasversale: [PROJECT_STATUS](PROJECT_STATUS.md). Prossimo incremento di gioco: V02 sul circuito esistente, prima di espandere il territorio. Il ramo editor conserva la dipendenza A07 → B01.1. Le prove ambientali sotto sono capacità disponibili e lavoro residuo, non un ordine per avviare tutti i TODO.
+
+
 Incremento corrente: paesaggio integrato 304 × 288 m e ciclo giorno–notte. Si riusano World (piano, modifiche, streaming e Undo), Rock Builder (pareti/piattaforme), Water Builder (fondali/limiti) e House Builder (finestre). La scena conserva le composizioni; i dati centrali non vengono rigenerati. Implementazione, misure e limiti in [EXPANDED_LANDSCAPE.md](EXPANDED_LANDSCAPE.md).
 
 È un campione artistico e funzionale: non chiude R03, W01.2, W01.3, T01.4 o il budget dell'intero mondo. Restano il confronto con il concept, la rifinitura dei cigli e i picchi di generazione. G01.4/S02 e B01–B03 conservano i criteri architettonici; A07 conserva il confronto R10/R13 aperto. Generazione globale da seed e confronto V01 restano rimandati.
@@ -115,7 +118,7 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 | S01 | RIMANDATO | Composizione urbana organica | Strade principali e secondarie, piazze, porte, edifici gerarchizzati, addensamenti e vuoti; insediamenti su piani/terrazze, collegamenti ai vincoli del paesaggio |
 | S02 | TODO | Edifici urbani più articolati | Estendere le ricette oltre le dodici case di prova: volumi aggregati, tetti collegati, facciate/accessori e interni coerenti; varietà strutturale verificata, non solo ruoli o colori |
 | V01 | RIMANDATO | Confronto dei quattro castelli | Quattro richieste/seed tramite tool, scene editabili e stessa camera; almeno due organizzazioni strutturali distinte |
-| V02 | TODO | Vertical slice città–villaggio–POI | Tempi reali di cammino, incontri, visibilità e streaming; aggiornamento delle distanze proposte dal concept |
+| V02 | TODO | Vertical slice città–villaggio–POI | Sul circuito esistente: assegnazione e conclusione deterministiche, incontro, conseguenza/ricompensa e scorciatoia leggibile; salvataggio/riapertura senza duplicazioni, morte e checkpoint; playtest di orientamento e misure CPU/GPU durante il percorso. Prova temporanea disponibile, ciclo completo non implementato |
 
 ## Come ottenere le rocce del concept
 
