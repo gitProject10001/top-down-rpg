@@ -1,0 +1,38 @@
+extends "res://tools/check_action_combat_visual.gd"
+func run() -> void:
+ scene=load("res://scenes/dev/integrated_landscape.tscn").instantiate()
+ get_tree().root.add_child(scene)
+ await settle(65)
+ var hero: Player=scene.player
+ hero.intent.set_physics_process(false)
+ hero.intent.clear()
+ hero.health.extend_invulnerable(120)
+ var outside:=hero.global_position
+ var base:float=scene.camera.size
+ hero.toggle_sword_sheath()
+ await settle(3)
+ check(hero.sword_sheathed,"B helper sheath enabled")
+ check(not hero.sword._hitbox._active,"sheathed sword cannot hit")
+ check(hero.visuals.global_basis.x.dot(hero.sword._blade.global_position-hero._hip_socket.global_position)<0,"sword mounted on left hip")
+ var house=scene.plans[0].house()
+ hero.global_position=house.to_global(Vector3(0,1,0))
+ await settle(90)
+ check(hero.indoors,"interior detected")
+ check(scene.camera.size<base*.85,"interior zoom closes in")
+ await snap("interior_sheathed")
+ hero.get_node("StateMachine").transition_to("Attack")
+ await settle(1)
+ check(not hero.sword_sheathed and hero.sword._blade_mesh.visible,"attack draws sword")
+ await settle(45)
+ hero.global_position=outside
+ await settle(90)
+ check(not hero.indoors,"outside detected")
+ check(absf(scene.camera.size-base)<.1,"outside zoom restored")
+ hero.get_node("StateMachine").transition_to("Idle")
+ hero.toggle_sword_sheath()
+ await settle(4)
+ await snap("outside_sheathed")
+ print("INTERIOR_SHEATH_RESULT ",failures)
+ scene.queue_free()
+ await settle(3)
+ get_tree().quit(0 if failures.is_empty() else 1)

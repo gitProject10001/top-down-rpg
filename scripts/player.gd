@@ -130,6 +130,9 @@ var _playback: AnimationNodeStateMachinePlayback
 
 var attack_meta: Dictionary = {}
 
+var sword_sheathed := false
+var _hip_socket: BoneAttachment3D
+var _scabbard: MeshInstance3D
 var _grip_r: BoneAttachment3D                         ## right-hand socket (sword)
 var _grip_l: BoneAttachment3D                         ## left-hand socket (shield)
 var _arm_guard: ArmGuard                              ## procedural shield-up (left-arm override)
@@ -344,6 +347,10 @@ func _setup_weapon_sockets() -> void:
 		return
 	if skel.find_bone("RightHand") < 0 or skel.find_bone("LeftHand") < 0:
 		return
+	_hip_socket = BoneAttachment3D.new()
+	_hip_socket.name = "SwordHip"
+	skel.add_child(_hip_socket)
+	_hip_socket.bone_name = "Hips"
 	_grip_r = BoneAttachment3D.new()
 	_grip_r.name = "GripR"
 	skel.add_child(_grip_r)
@@ -678,7 +685,13 @@ func _process(delta: float) -> void:
 	# arc exactly — the heft-lag that reads nicely while walking makes the swing look detached.
 	var attacking: bool = _fsm.current_state != null \
 			and _fsm.current_state.name in ["Attack", "DashAttack", "DirAttack", "Guard"]
-	if _grips_ready and _grip_r and sword:
+	if sword_sheathed and sword and _hip_socket:
+		var basis := sheath_basis()
+		var palm := _hip_socket.global_position - visuals.global_basis.x.normalized() * .27 + Vector3.UP * .06
+		sword.set_grip(basis, palm)
+		if _scabbard:
+			_scabbard.global_transform = sword._blade.global_transform * sword._blade_mesh.transform
+	elif _grips_ready and _grip_r and sword:
 		var gr := _grip_r.global_transform
 		var sock := Transform3D(gr.basis.orthonormalized(), gr.origin)
 		# Two opinions about which way the blade points, blended: the WRIST's (right during a
@@ -1216,3 +1229,34 @@ func _find_entity(node: Node, method: String) -> Node:
 			return n
 		n = n.get_parent()
 	return null
+
+func sheath_basis() -> Basis:
+	# Blade runs down and slightly backward along the character's left thigh.
+	var down := (Vector3.DOWN + visuals.global_basis.z.normalized() * .30).normalized()
+	var right := visuals.global_basis.x.normalized()
+	return Basis(right, (-down).cross(right).normalized(), -down).orthonormalized()
+
+func set_sword_sheathed(value: bool) -> void:
+	if sword == null: return
+	sword_sheathed = value
+	sword.cancel_swing()
+	sword.charge_feedback(0.0)
+	_sword_basis_ready = false
+	if _scabbard == null:
+		_scabbard = MeshInstance3D.new()
+		_scabbard.name = "Scabbard"
+		var mesh := BoxMesh.new()
+		var bounds := sword._blade_mesh.get_aabb()
+		mesh.size = bounds.size + Vector3(.025,.025,.01)
+		var material := StandardMaterial3D.new()
+		material.albedo_color = Color(.16,.085,.045)
+		material.roughness = .95
+		mesh.material = material
+		_scabbard.mesh = mesh
+		visuals.add_child(_scabbard)
+	_scabbard.visible = value
+	sword._blade_mesh.visible = not value
+
+func toggle_sword_sheath() -> void:
+	if not is_input_driven() or not state_name() in ["Idle","Move"]: return
+	set_sword_sheathed(not sword_sheathed)

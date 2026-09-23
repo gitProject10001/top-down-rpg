@@ -15,6 +15,7 @@ func run() -> void:
 func reaction_case(scenario: String) -> void:
 	var enemy := Raider.instantiate() as Player
 	enemy.position = Vector3(4.2 if scenario == "moving_step" else 0.0, 1, 0)
+	enemy.death_step_distance = 0.0 # Isolate the physical response from the tested presentation step.
 	world.add_child(enemy)
 	enemy.intent.set_physics_process(false)
 	await frames(20)
@@ -36,6 +37,11 @@ func reaction_case(scenario: String) -> void:
 	check(rag.seeded_velocity.is_equal_approx(incoming), scenario+": original locomotion preserved before Hurt")
 	var hips := rag.get_node("pb_Hips") as PhysicalBone3D
 	check(hips.elapsed > 0 and hips.active_reaction, scenario+": posture resistance actually runs in physics callback")
+	var chest = rag.get_node("pb_Chest")
+	check(chest.target_rotation.angle_to(chest.start_rotation) > .05, scenario+": torso has an articulated response")
+	var left_leg = rag.get_node("pb_LeftUpperLeg")
+	var right_leg = rag.get_node("pb_RightUpperLeg")
+	check(not is_equal_approx(left_leg.release_seconds,right_leg.release_seconds),scenario+": support releases asymmetrically")
 	var paused_at: float = hips.elapsed
 	get_tree().paused = true
 	for i in 8: await get_tree().process_frame

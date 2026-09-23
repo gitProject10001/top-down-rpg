@@ -50,6 +50,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Decisions for an AI body arrive through its FighterIntent and nowhere else.
 	if _body != null and not _body.is_input_driven():
 		return
+	if event.is_action_pressed("sheathe_weapon") and not event.is_echo():
+		_body.toggle_sword_sheath()
+		get_viewport().set_input_as_handled()
+		return
 	if current_state:
 		current_state.handle_input(event)
 
@@ -70,5 +74,7 @@ func transition_to(state_name: String) -> void:
 		return
 	if current_state:
 		current_state.exit()
+	if key in ["attack", "dashattack", "dirattack", "guard", "block"] and _body and _body.sword_sheathed:
+		_body.set_sword_sheathed(false)
 	current_state = _states[key]
 	current_state.enter()

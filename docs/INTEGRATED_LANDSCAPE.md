@@ -356,3 +356,18 @@ Verifiche: `check_pack_combat.tscn` e `check_living_reactions.tscn` passano (tes
 - La carica prepara lentamente `atk_dash` (Sword_Dash) e il rilascio completo usa quel fendente orizzontale. Scatto con velocità iniziale 20 m/s rispetto ai 15 del normale DashAttack, stessa decelerazione e collisioni del CharacterBody; nessuna invulnerabilità aggiunta alla carica.
 - Il mixer del player continua a valutare la posa a ogni frame fisico: si ferma soltanto ActionClock, evitando rest pose/T-pose nei modificatori dello scheletro.
 - Ultimo passo portato a 38 cm / 0,42 s; un semplice stagger non lo esclude più. Restano esclusi finisher, knockdown e spazio insufficiente.
+
+#### Rifinitura del cedimento fisico
+- Risposta articolata breve: busto ruota leggermente rispetto al contatto, testa e braccia rispondono con ritardo, il lato colpito perde sostegno prima dell'altro. Profilo esposto tramite `body_response` e `collapse_duration` (0,68 s di base).
+- Obiettivi angolari limitati, con rilascio progressivo; nessun vincolo di posizione o sostegno artificiale verso l'alto. Gravità, collisioni e limiti articolari restano attivi. Finisher abbreviano la risposta.
+- Test: spalle destra/sinistra, ginocchio, movimento presso un gradino, pausa, rilascio completo delle resistenze e stabilità del corpo. Fixture della carica separata dai critici casuali.
+
+### Zoom interno e spada al fianco
+- Entrando in un interno già riconosciuto dal sistema cutaway, la camera riduce gradualmente lo span al 72%; uscita ripristina l'inquadratura. `interior_zoom_ratio` e `interior_zoom_speed` sono esposti sulla camera, senza alterare FOV o scala del mondo. Lock mantiene spazio sufficiente per entrambi i combattenti.
+- B estrae/reinfodera da fermo o in movimento. Spada agganciata al bacino sul fianco sinistro, fodero semplice marrone e lama nascosta; nessuna hitbox attiva. Attacco/parata estraggono automaticamente. Cambio di aggancio immediato: animazione dedicata di estrazione/reinserimento ancora futura.
+- Verificati ingresso/uscita, zoom, aggancio sinistro e ritorno all'attacco in `tools/check_interior_sheath.tscn`, con catture nella scena integrata. La fixture usa il fallback NPC.
+
+### P — regolazione post-processing
+P apre/chiude il pannello nella Window, fuori dal viewport filtrato: palette, ammorbidimento, raggio, conservazione dei bordi e calore. Il toggle interno abilita/bypassa il filtro. Tutte le modifiche sono temporanee per la sessione.
+Profondità di campo opzionale tramite CameraAttributesPractical: fuoco segue il piano della camera sul personaggio, distanze nitide anteriore/posteriore indipendenti, transizione e intensità regolabili. Non è una sfocatura per fasce dello schermo; usa la profondità 3D. HUD e pannello restano nitidi. Nessuna modifica ai materiali o alle mesh.
+Il pannello sospende il gameplay e ripristina lo stato di pausa precedente con P, Esc o Chiudi; evita colpi accidentali mentre si regolano i cursori. Test `check_post_controls.tscn`: nove slider, shader aggiornato, DOF, pausa/ripristino e cattura a 1152×648. Costo GPU del DOF da profilare prima di renderlo predefinito.

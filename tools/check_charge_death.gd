@@ -1,5 +1,7 @@
 extends "res://tools/check_pack_combat.gd"
 func run() -> void:
+	# This fixture measures charge multipliers, independently of random critical hits.
+	get_node("/root/Traits")._mods["crit"] = -1.0
 	world = Node3D.new()
 	add_child(world)
 	box("Floor", Vector3(0,-.25,0), Vector3(20,.5,20))

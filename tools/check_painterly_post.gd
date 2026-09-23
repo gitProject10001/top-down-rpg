@@ -15,10 +15,10 @@ func run() -> void:
 		print("POST_BENCH enabled=",active)
 		await performance()
 	var key:=InputEventKey.new(); key.pressed=true; key.keycode=KEY_P
-	post._unhandled_key_input(key)
-	check(not post.enabled and not post.get_node("Filter").visible,"P bypass")
-	post._unhandled_key_input(key)
-	check(post.enabled and post.get_node("Filter").visible,"P enable")
+	post._input(key)
+	check(post.panel.visible and get_tree().paused,"P opens tuning panel and pauses gameplay")
+	post._input(key)
+	check(not post.panel.visible and not get_tree().paused,"P closes panel and restores gameplay")
 	print("POST_CHECK ",failures)
 	scene.queue_free(); await get_tree().process_frame
 	get_tree().quit(0 if failures.is_empty() else 1)

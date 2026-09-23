@@ -83,6 +83,11 @@ var _lock_marker: Label3D
 @export_range(.7,1.0,.01) var lock_zoom_ratio := .86
 var _view_yaw := 0.0
 var _lock_mix := 0.0
+@export_group("Interior")
+@export_range(.45, 1.0, .01) var interior_zoom_ratio := .72
+@export_range(.5, 8.0, .1) var interior_zoom_speed := 2.5
+var interior_active := false
+var _interior_mix := 0.0
 ## Where free look has left the camera. Seeded from yaw_deg, then owned by the player — and kept in
 ## step with _view_yaw while a lock is on, so dropping the lock does not whip the world back to the
 ## angle it started the session at.
@@ -261,7 +266,8 @@ func _apply(instant: bool, delta := 0.0) -> void:
 
 	var basis_want := Basis.from_euler(
 			Vector3(deg_to_rad(-pitch_deg), _view_yaw, 0.0))
-	var size_goal := ortho_size*lerpf(1.0,lock_zoom_ratio,_lock_mix)
+	_interior_mix = move_toward(_interior_mix, 1.0 if interior_active else 0.0, delta * interior_zoom_speed)
+	var size_goal := ortho_size * minf(lerpf(1.0,lock_zoom_ratio,_lock_mix), lerpf(1.0,interior_zoom_ratio,_interior_mix))
 	if in_combat:
 		var spread := opponent.global_position-_target.global_position
 		var viewport_size := get_viewport().get_visible_rect().size

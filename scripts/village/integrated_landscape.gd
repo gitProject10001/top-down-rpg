@@ -71,7 +71,7 @@ func _ready() -> void:
         npc_dialogues.dialogue_changed.connect(func(opened: bool): exploration_trial.ui.visible=not opened)
     var ui:=CanvasLayer.new();add_child(ui)
     var label:=Label.new();label.position=Vector2(20,20);label.text="SCENA INTEGRATA
-WASD movimento · Ctrl passo/corsa · click combo / tieni carica · destro parata frontale · Shift schivata
+WASD movimento · Ctrl passo/corsa · B spada · click combo / tieni carica · destro parata frontale · Shift schivata
 4 combattimento · R ricomincia · O panoramica · F6 ora · F7 stile · P filtro pittorico · 1 città / 2 guado / 3 lago / 5 borgo · E porta · F acqua"
     ui.add_child(label)
     npc_dialogues.dialogue_changed.connect(func(opened: bool): label.visible=not opened; npc_hud_visibility(opened))
@@ -271,6 +271,7 @@ func _physics_process(delta: float) -> void:
             var distance: float=door.global_position.distance_to(player.global_position)
             door.set_highlight(distance<2.3)
             if distance<closest:closest=distance;nearest_door=door
+    camera.interior_active=player.indoors
     cooldown-=delta
     if cooldown<=0 and player.is_on_floor() and player.velocity.length()>.2:
         for water in waters:water.disturb(player.global_position,player.velocity)

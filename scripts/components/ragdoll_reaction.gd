@@ -1,11 +1,12 @@
 extends PhysicalBoneSimulator3D
 ## Short death transition, not a locomotion or active-balance solver.
 ## Samples live bone motion, adds one local impact, then releases all resistance.
-@export_range(0.0, .8, .01) var collapse_duration := .42
+@export_range(0.0, .8, .01) var collapse_duration := .68
 @export_range(0.0, 5.0, .1) var impact_speed := 2.2
 @export_range(1.0, 2.5, .1) var finisher_multiplier := 1.5
 @export_range(0.0, 1.0, .05) var animation_inertia := .35
 @export_range(0.0, 60.0, 1.0) var posture_strength := 32.0
+@export_range(0.0, 1.0, .05) var body_response := .65
 var impact_bone := ""
 var impact_position := Vector3.ZERO
 var seeded_velocity := Vector3.ZERO
@@ -70,11 +71,39 @@ func start_reaction() -> void:
 		bone.linear_damp = .18
 		var duration := collapse_duration
 		var label := String(bone.bone_name)
-		if "Leg" in label or "Foot" in label: duration *= .35
-		elif "Arm" in label or "Hand" in label: duration *= .65
-		if bone == closest: duration *= .35
+		# React away from the contact with an asymmetric loss of support.
+		# These are small angular targets, never world-position constraints.
+		var skeleton := get_parent() as Skeleton3D
+		var side := signf(skeleton.global_basis.x.dot(_point - skeleton.global_position))
+		if is_zero_approx(side): side = 1.0
+		var struck_side := ("Right" in label and side > 0) or ("Left" in label and side < 0)
+		var axis := Vector3.UP.cross(_direction).normalized()
+		if axis.length_squared() < .1: axis = skeleton.global_basis.x.normalized()
+		var angle := 0.0
+		var delay := 0.0
+		var strength := posture_strength
+		if "Leg" in label or "Foot" in label:
+			duration *= .42 if struck_side else .80
+			angle = -.14 if "LowerLeg" in label else .07
+			strength *= .65
+		elif "Arm" in label or "Hand" in label:
+			duration *= 1.05
+			delay = .10 if struck_side else .17
+			angle = -.30 if "UpperArm" in label else -.18
+			strength *= .70
+		elif label in ["Spine", "Chest", "UpperChest"]:
+			angle = .20
+			delay = .03 if label == "Spine" else .07
+		elif label in ["Head", "Neck"]:
+			angle = -.12
+			delay = .14
+			duration *= .85
+		if bone == closest: duration *= .65
 		if _finisher: duration *= .65
-		bone.begin_resistance(bone.global_basis.orthonormalized().get_rotation_quaternion(), duration, posture_strength)
+		var bend := Quaternion(axis, angle * body_response)
+		if label in ["Chest", "UpperChest"]:
+			bend = Quaternion(Vector3.UP, side * .12 * body_response) * bend
+		bone.begin_resistance(bone.global_basis.orthonormalized().get_rotation_quaternion(), duration, strength, bend, minf(delay, duration*.3))
 		# Relax the authored elbow/knee springs as well, without changing anatomical limits.
 		if bone.joint_type == PhysicalBone3D.JOINT_TYPE_6DOF:
 			var tween := create_tween().set_process_mode(Tween.TWEEN_PROCESS_PHYSICS)
