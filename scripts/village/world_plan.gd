@@ -4,6 +4,9 @@ extends Resource
 @export var version := 1
 @export var seed_value := 2417
 @export var regions: Array[Dictionary] = []
+@export var discrete_terrain := false
+@export var platforms: Array[Dictionary] = []
+@export var bounds := Rect2(-866.0254,-866.0254,1732.0508,1732.0508)
 
 static func generate(seed_number: int) -> Resource:
 	var plan = load("res://scripts/village/world_plan.gd").new()
@@ -20,8 +23,10 @@ static func generate(seed_number: int) -> Resource:
 
 func elevation(p: Vector2) -> float:
 	var h := 0.0
+	for platform in platforms:
+		if Geometry2D.is_point_in_polygon(p,platform.polygon): h=maxf(h,float(platform.height))
 	for region in regions:
-		if region.kind != "upland": continue
+		if discrete_terrain or region.kind != "upland": continue
 		var distance: float = p.distance_to(region.center)/float(region.radius)
 		h = maxf(h,float(region.height)*(1.0-smoothstep(0.2,1.0,distance)))
 	return h

@@ -108,7 +108,7 @@ func _handles(object: Object) -> bool:
 
 func _process(_delta: float) -> void:
 	var root := EditorInterface.get_edited_scene_root()
-	stream = root.get_node_or_null("Pixel/View/WorldStream") if root else null
+	stream = root.find_child("WorldStream",true,false) if root else null
 	panel.visible = is_instance_valid(stream)
 	if not is_instance_valid(stream): return
 	if not is_instance_valid(camera): camera = EditorInterface.get_editor_viewport_3d(0).get_camera_3d()
@@ -118,7 +118,7 @@ func _process(_delta: float) -> void:
 		var focus := origin
 		if direction.y < -0.05:
 			focus = origin + direction * minf(-origin.y/direction.y, 3000.0)
-		stream.editor_center = Vector2(clampf(focus.x,-850,850),clampf(focus.z,-850,850))
+		stream.editor_center = Vector2(focus.x,focus.z).clamp(stream.bounds.position,stream.bounds.end)
 	status.text = "Preview: %.0f, %.0f\nLoaded cells: %d • edits: %d" % [stream.editor_center.x,stream.editor_center.y,stream._chunks.size(),stream.world_edits.size()]
 
 func _forward_3d_gui_input(view_camera: Camera3D, event: InputEvent) -> int:
@@ -138,12 +138,12 @@ func _forward_3d_gui_input(view_camera: Camera3D, event: InputEvent) -> int:
 	if absf(ray.y)<0.0001: return AFTER_GUI_INPUT_PASS
 	var distance := -origin.y/ray.y
 	if distance<0: return AFTER_GUI_INPUT_PASS
-	var ground := stream.get_node_or_null("../Ground")
+	var ground: Node = stream.ground_node()
 	var point := origin+ray*distance
 	if ground and ground.has_method("ray_surface"):
 		point = ground.ray_surface(origin, ray)
 		if not point.is_finite(): return AFTER_GUI_INPUT_PASS
-	if absf(point.x)>863 or absf(point.z)>863: return AFTER_GUI_INPUT_PASS
+	if not stream.bounds.has_point(Vector2(point.x,point.z)): return AFTER_GUI_INPUT_PASS
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		stroke_target = ground if mode.selected>=4 else stream
 		stroke_method = "apply_zones" if mode.selected==7 else "apply_edits"
@@ -178,7 +178,7 @@ func _stamp(point: Vector3) -> void:
 				var angle := rng.randf()*TAU
 				var r := sqrt(rng.randf())*brush.value
 				p += Vector3(cos(angle),0,sin(angle))*r
-			if absf(p.x)>863 or absf(p.z)>863: continue
+			if not stream.bounds.has_point(Vector2(p.x,p.z)): continue
 			pending.append({"kind":"tree", "position":p, "scale":rng.randf_range(0.8,1.25)})
 	# Terrain strokes rebuild once on release; tree preview remains live.
 	if mode.selected<4: stroke_target.apply_edits(pending)
@@ -198,8 +198,15 @@ func _finish() -> void:
 func _generate() -> void:
 	_finish()
 	if not is_instance_valid(stream): return
-	var ground := stream.get_node("../Ground")
+	var ground: Node = stream.ground_node()
 	var plan: Resource = preload("res://scripts/village/world_plan.gd").generate(int(seed_input.value))
+	plan.bounds=stream.bounds
+	if ground.world_plan:
+		plan.platforms=ground.world_plan.platforms.duplicate(true)
+		plan.discrete_terrain=ground.world_plan.discrete_terrain
+	for region in plan.regions:
+		region.center=region.center*stream.bounds.size/1732.0508+stream.bounds.get_center()
+		region.radius*=minf(stream.bounds.size.x,stream.bounds.size.y)/1732.0508
 	var undo := get_undo_redo()
 	undo.create_action("Regenerate procedural regions",UndoRedo.MERGE_DISABLE,ground)
 	undo.add_do_method(ground,"apply_plan",plan)

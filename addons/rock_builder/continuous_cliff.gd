@@ -40,6 +40,8 @@ signal rebuilt
  set(value): wall_rock_size=clampf(value,1.0,15.0); schedule()
 @export var debris_enabled := true:
  set(value): debris_enabled = value; schedule()
+@export var faceted_normals := false:
+ set(value): faceted_normals=value; schedule()
 @export var painted := true:
  set(value): painted = value; schedule()
 @export_group("Zona sopraelevata")
@@ -235,6 +237,7 @@ func generate() -> Dictionary:
   var center: Vector3 = frame.center
   var front: Vector3 = frame.front
   var crest := wall_height * (0.98 + 0.14 * _angular_wave(s * 0.40 + phase) + 0.065 * _angular_wave(s * 1.72 + phase * 0.7))
+  if faceted_normals: crest+=wall_height*.12*_angular_wave(s*.14+phase)
   var cut := _cut_at(s, 1.0, fissures, phase)
   crest -= cut * wall_height * 0.11 * fracture
   var back_depth := wall_depth + 0.20 * sin(s * 0.41 + phase)
@@ -248,6 +251,7 @@ func generate() -> Dictionary:
    # shallow cuts in one face, while vertical fractures reach much farther in.
    var setback := 0.19 + broad * 0.45 + smoothstep(0.02, 0.25, t) * 0.36
    setback += t * lerpf(0.03, 0.65, 0.5 + 0.5 * sin(s * 0.37 + phase * 0.6))
+   if faceted_normals: setback+=wall_depth*.18*(.5+.5*_angular_wave(s*.12+phase+t*.6))
    setback += incision * wall_depth * 0.39 * fracture
    setback += seam * fracture * 0.22 + 0.045 * _angular_wave(s * 1.9 + t * 8.0 + phase)
    setback = minf(setback, back_depth * 0.76)
@@ -328,6 +332,11 @@ func generate() -> Dictionary:
  arrays[Mesh.ARRAY_INDEX] = indices
  var mesh := ArrayMesh.new()
  mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+ if faceted_normals:
+  var flat:=SurfaceTool.new(); flat.begin(Mesh.PRIMITIVE_TRIANGLES); flat.set_smooth_group(-1)
+  for index in indices:
+   flat.set_color(colors[index]); flat.set_uv(uvs[index]); flat.add_vertex(vertices[index])
+  flat.generate_normals(); mesh=flat.commit()
  var material := ShaderMaterial.new()
  material.shader = Masonry
  material.set_shader_parameter("anime_painted", painted)

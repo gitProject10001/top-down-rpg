@@ -63,6 +63,11 @@ func entrance_check(house: Node3D) -> void:
 	if is_instance_valid(scene.nearest_door):
 		var event := InputEventKey.new(); event.pressed=true; event.keycode=KEY_E
 		scene._unhandled_key_input(event)
+		# An NPC prompt deliberately owns E ahead of a nearby door. Close that
+		# conversation before testing the door mechanics and physical passage.
+		if scene.npc_dialogues.active:
+			scene.npc_dialogues.close_dialogue()
+			scene.nearest_door.toggle(scene.player.global_position)
 		await settle(26)
 	var inside := threshold - normal * .85
 	var entered := await move_to(inside, .28, 100)
@@ -152,7 +157,7 @@ func run() -> void:
 	check(view.get_node("WorldEnvironment").environment==painted_environment and is_equal_approx(view.get_node("SoftSkyFill").light_energy,painted_fill),"F7 restores painted environment and fill")
 	check(chapel_lot.painted_access_active and not chapel_lot._access.visible,"painted path does not retain the rectangular overlay")
 	for i in buildings.size(): check(buildings[i].dimensions().is_equal_approx(dimensions[i]),"F7 changed building geometry")
-	check(scene.waters.size()==2,"Water simulation lost")
+	check(scene.waters.size()==3 and view.has_node("Mare"),"River, lake and sea simulation retained")
 	scene.toggle_overview(); check(scene.overview,"Overview did not activate")
 	scene.toggle_overview(); check(not scene.overview and scene.camera.perspective_fov==13.0,"Overview changed normal camera")
 	if "--capture-only" not in OS.get_cmdline_user_args():

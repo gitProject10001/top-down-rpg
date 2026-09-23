@@ -1,6 +1,7 @@
 @tool
 extends Node3D
 var waters: Array=[]
+var day_cycle: Node
 var player: CharacterBody3D
 var camera: Camera3D
 var overview:=false
@@ -38,6 +39,9 @@ func _ready() -> void:
     player=view.get_node("Player");player.position=Vector3(-42,1,10)
     camera=view.get_node("IsoCam")
     add_child(rig)
+    view.get_node("WorldEnvironment").environment=view.get_node("WorldEnvironment").environment.duplicate(true)
+    var ground=view.get_node("TerrenoComposto/Superficie")
+    if ground.has_method("_rebuild"): ground._rebuild()
     for water in waters:
         water.set_simulation(true)
         local_patch(water)
@@ -47,6 +51,7 @@ func _ready() -> void:
     connect_art_geometry(view)
     if layers: layers.regeneration_requested.connect(regenerate_art)
     art_direction.apply(not "--original-art" in OS.get_cmdline_user_args())
+    day_cycle=view.get_node("DayCycle"); day_cycle.configure(view)
     npc_dialogues=preload("res://addons/npc_ai/npc_dialogue_controller.gd").new()
     npc_dialogues.name="NpcDialogues"
     npc_dialogues.force_fallback="--npc-fallback" in OS.get_cmdline_user_args()
@@ -62,7 +67,7 @@ func _ready() -> void:
     var ui:=CanvasLayer.new();add_child(ui)
     var label:=Label.new();label.position=Vector2(20,20);label.text="SCENA INTEGRATA
 WASD movimento · click combo · tieni premuto carica · destro parata · Shift schivata
-4 combattimento · R ricomincia · O panoramica · F7 stile · P filtro pittorico · 1 città / 2 guado / 3 lago / 5 borgo · E porta · F acqua"
+4 combattimento · R ricomincia · O panoramica · F6 ora · F7 stile · P filtro pittorico · 1 città / 2 guado / 3 lago / 5 borgo · E porta · F acqua"
     ui.add_child(label)
     npc_dialogues.dialogue_changed.connect(func(opened: bool): label.visible=not opened; npc_hud_visibility(opened))
     if "--capture-integrated" in OS.get_cmdline_user_args():
@@ -171,6 +176,7 @@ func setup_editor_preview(settings: Resource = null) -> void:
         for child_name in ["WorldEnvironment","Sun","SoftSkyFill","IsoCam","PixelSnap"]:
             var helper=source.get_node(child_name)
             helper.owner=null
+            if helper is WorldEnvironment: helper.environment=helper.environment.duplicate(true)
             source.remove_child(helper)
             add_child(helper,false,Node.INTERNAL_MODE_BACK)
             _editor_helpers.append(helper)
@@ -181,6 +187,8 @@ func setup_editor_preview(settings: Resource = null) -> void:
     art_direction.grass.editor_center=art_preview_center
     art_direction.grass.set_work_mode(layers==null or layers.preview_quality==0)
     art_direction.apply(true)
+    day_cycle=get_node_or_null("DayCycle")
+    if day_cycle: day_cycle.configure(self)
     _preview_busy=false
 func update_preview_quality() -> void:
     var layers := get_node_or_null("ArtStudyLayers")
@@ -193,9 +201,9 @@ func toggle_overview() -> void:
         _overview_fov=camera.perspective_fov
         _overview_size=camera.ortho_size
         camera.perspective_fov=0.0
-        camera.size=145;camera.global_position=Vector3(105,150,105);camera.look_at(Vector3(0,0,-5))
+        camera.size=280;camera.near=.1;camera.far=1000;camera.global_position=Vector3(230,310,230);camera.look_at(Vector3(0,0,-5))
         camera.near=.05
-        camera.far=500.0
+        camera.far=1000.0
         camera._preserve_focus_shadows(camera.global_position.distance_to(Vector3(0,0,-5)))
     else:
         camera.ortho_size=_overview_size
@@ -207,6 +215,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
     if event is InputEventKey and event.pressed and not event.echo:
         if event.keycode==KEY_F7:
             art_direction.apply(not art_direction.enabled)
+            if day_cycle: day_cycle.refresh_materials(); day_cycle.apply_time()
             print("ART_DIRECTION ", "anime dipinto" if art_direction.enabled else "originale")
         if event.keycode==KEY_E and is_instance_valid(npc_dialogues) and npc_dialogues.try_interact():
             get_viewport().set_input_as_handled()
@@ -221,7 +230,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
         if event.keycode==KEY_F:
             for water in waters:water.debug_flow=not water.debug_flow
         if event.keycode in [KEY_1,KEY_2,KEY_3]:
-            player.position=[Vector3(-42,1,10),Vector3(3,1,21),Vector3(34,1,-9)][event.keycode-KEY_1]
+            player.position=[Vector3(-42,1,10),Vector3(3,1,21),Vector3(40,1,2)][event.keycode-KEY_1]
         if event.keycode==KEY_5:
             if overview: toggle_overview()
             player.position=Vector3(27,1,24)

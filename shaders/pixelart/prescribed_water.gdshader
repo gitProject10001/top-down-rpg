@@ -1,8 +1,8 @@
 shader_type spatial;
 render_mode cull_disabled, depth_draw_opaque;
-uniform vec2 boundary[32];
+uniform vec2 boundary[128];
 uniform int edge_count = 0;
-uniform vec2 flow_path[16];
+uniform vec2 flow_path[64];
 uniform int path_count = 0;
 uniform float flow_speed = .55;
 uniform bool river_mode = false;
@@ -11,6 +11,11 @@ uniform vec4 obstacles[12];
 uniform int obstacle_count = 0;
 uniform float rock_flow_influence = 1.0;
 uniform float basin_depth = .4;
+uniform bool bathymetry_enabled = false;
+uniform sampler2D bathymetry : filter_linear, repeat_disable;
+uniform vec4 bathymetry_bounds = vec4(-10,-10,20,20);
+uniform float daylight = 1.0;
+uniform sampler2D screen_color : hint_screen_texture, filter_linear_mipmap, repeat_disable;
 uniform bool debug_flow = false;
 uniform vec2 vortex_center = vec2(-3,-2);
 uniform float vortex_strength = 0.0;
@@ -175,6 +180,8 @@ void fragment() {
     float sim_trough=smoothstep(.00035,.003,-sim_height)*sim_mix;
     float sim_foam=smoothstep(.003,.016,length(sim_gradient))*sim_crest*.18;
     float depth=basin_depth*smoothstep(0.0,1.5,bank);
+    if(bathymetry_enabled) depth=texture(bathymetry,(p-bathymetry_bounds.xy)/bathymetry_bounds.zw).r;
+    caustic*=1.0-smoothstep(.5,2.5,depth);
     vec3 color=mix(vec3(.025,.16,.12),vec3(.004,.035,.045),clamp(depth/.5,0.0,1.0));
     float phase_wave=wind_phase(p)+1.2*exp(-bank*.9);
     float incoming=max(0.0,dot(toward_shore(p),wind_direction));
@@ -204,7 +211,7 @@ void fragment() {
         vec3 shallows = vec3(.012, .23, .29);
         vec3 depths = vec3(.006, .10, .19);
         float brush = noise2(q * 1.1) * .5 + noise2(q * 2.3) * .5;
-        ALBEDO = mix(shallows, depths, clamp(depth / .65, 0.0, 1.0));
+        ALBEDO = mix(shallows, depths, clamp(depth / (bathymetry_enabled ? 6.0 : .65), 0.0, 1.0));
         ALBEDO *= .70 + brush * .45;
         float painted_ripple = smoothstep(.44,.56,noise2(q*2.8+noise2(q*1.3)));
         ALBEDO += vec3(.015,.06,.065) * painted_ripple;
@@ -232,4 +239,16 @@ void fragment() {
     SPECULAR=anime_painted ? .35 : .65;
     ALPHA=anime_painted ? mix(.20,.98,smoothstep(0.0,.85,bank+(noise2(p*5.0)-.5)*.12)) : mix(.45,.82,clamp(depth/.5,0.0,1.0));
     EMISSION=vec3(.025,.05,.04)*caustic*.15+vec3(.15,.23,.2)*ring*.2+vec3(.06,.09,.08)*foam+vec3(.012,.025,.021)*sim_crest;
+    EMISSION*=daylight;
+    if(bathymetry_enabled && !debug_flow) {
+        float fresnel=pow(1.0-clamp(dot(normalize(NORMAL),normalize(VIEW)),0.0,1.0),5.0);
+        float transmission=exp(-depth*.7)*(.72-.35*fresnel);
+        vec2 offset=local_slope.xz*.008*smoothstep(.3,2.0,bank);
+        vec3 bottom=textureLod(screen_color,SCREEN_UV+offset,.0).rgb;
+        ALBEDO*=1.0-transmission;
+        EMISSION+=bottom*transmission;
+        ALPHA=1.0;
+        ROUGHNESS=.29;
+        SPECULAR=.45;
+    }
 }

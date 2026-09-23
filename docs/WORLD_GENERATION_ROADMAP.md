@@ -2,11 +2,11 @@
 
 Il concept delle quattro fazioni è un riferimento **di composizione**, non un risultato finale da copiare. Guida densità, masse, percorsi, spazi liberi e rapporti dimensionali. Non impone texture, colori, città identiche al disegno o un terreno scolpito a mano per imitarlo.
 
-## Priorità attuale — 2026-09-20
+## Priorità attuale — 2026-09-23
 
-Incremento corrente: ricette architettoniche riutilizzabili e applicazione alle dodici case della scena integrata. Restano posizioni dei corpi principali, strade e dati degli interni; locanda e cappella adottano ingombri maggiori e accessi ricalcolati dal collegamento stradale esistente. Questo avvia G01.4 come catalogo locale; non completa la generazione urbana S02 o l'interazione adattiva B01–B03. A07 conserva il confronto R10/R13 aperto prima di B01.1. Generazione globale da seed e confronto V01 restano rimandati.
+Incremento corrente: paesaggio integrato 304 × 288 m e ciclo giorno–notte. Si riusano World (piano, modifiche, streaming e Undo), Rock Builder (pareti/piattaforme), Water Builder (fondali/limiti) e House Builder (finestre). La scena conserva le composizioni; i dati centrali non vengono rigenerati. Implementazione, misure e limiti in [EXPANDED_LANDSCAPE.md](EXPANDED_LANDSCAPE.md).
 
-La scena integrata include ora uno studio dipinto con erba geometrica, alberi rielaborati, pareti continue e due zone sopraelevate percorribili. Sono prove e componenti concreti, documentati in [INTEGRATED_LANDSCAPE.md](INTEGRATED_LANDSCAPE.md) e [ART_STUDY_DATA.md](ART_STUDY_DATA.md); non chiudono automaticamente R03, l'authoring generale del terreno, i pennelli artistici o il budget di un mondo esteso. R03.3, acqua e grotte mantengono i rispettivi criteri e priorità; non avviarli solo perché seguono l'ultima card conclusa.
+È un campione artistico e funzionale: non chiude R03, W01.2, W01.3, T01.4 o il budget dell'intero mondo. Restano il confronto con il concept, la rifinitura dei cigli e i picchi di generazione. G01.4/S02 e B01–B03 conservano i criteri architettonici; A07 conserva il confronto R10/R13 aperto. Generazione globale da seed e confronto V01 restano rimandati.
 
 ## Punto di ripartenza
 
@@ -19,7 +19,7 @@ i criteri aperti sopra indicati.
 
 G01.3b.2b: diagnostica degli ingombri e verifica della rigenerazione nell'editor/Play. Sono disponibili edifici parametrici, torri/cortine, corte singola generata, editing protetto delle posizioni e validazione degli accessori. Non sono ancora disponibili la varietà delle città del concept o una generazione completa di paesaggio roccioso/idrologia/grotte.
 
-Il mondo attuale usa rilievo procedurale ed editing del terreno (da vincolare alla nuova direzione a quote discrete); le rocce distribuite dal WorldStream sono piccole SphereMesh sfaccettate. Non costituiscono un generatore di affioramenti stratificati, pareti o montagne.
+La scena precedente conserva il rilievo procedurale e le piccole SphereMesh del WorldStream. La scena integrata usa invece un piano World a quote discrete, pareti continue del Rock Builder e alberi originali istanziati dal WorldStream. Il catalogo generale delle montagne resta da consolidare.
 
 
 ## Vincolo di terreno e leggibilità — aggiornamento utente
@@ -92,7 +92,7 @@ Ogni elemento generato necessita ID stabile, seed locale, override e lock. Gizmo
 | W01 | IN CORSO — esempio W01.1 | Laghi editabili | Perimetro e quota dell'acqua, riva e bacino, esclusione edifici; superficie d'acqua inizialmente semplice |
 | W01.1 | FATTO | Lago ed emissario di prova | Nodo tool con perimetro, flusso prescritto, vortice opzionale, fondale percorribile e onde locali; camera gameplay e test ingresso/uscita |
 | W01.2 | TODO | Authoring lago e rive | Gizmo contestuali, Undo/Redo, diagnostica perimetro; preview fondale in editor e protezione terreno manuale |
-| W01.3 | TODO | Qualità visiva acqua | Rive naturali, fondale, riflessi e caustiche meno ripetitive; riferimento alla camera gameplay |
+| W01.3 | IN CORSO — campione con fondale | Qualità visiva acqua | Rive naturali, fondale, riflessi e caustiche meno ripetitive; riferimento alla camera gameplay |
 | W01.3a | FATTO | Caustiche senza griglia regolare | Celle deformate e linee discontinue con intensità variabile; rendering gameplay verificato |
 | W01.4 | FATTO | Lago mosso: prima versione visiva | Preset calmo/brezza/mosso, vento, superficie deformata e schiuma pulsante al passaggio delle creste verso riva |
 | W01.4b | TODO | Risacca e impatti sulla costa | Fascia di terreno bagnata con avanzamento/ritiro, spruzzi delle onde sulle rocce e transizione visiva onde/fondale più accurata |

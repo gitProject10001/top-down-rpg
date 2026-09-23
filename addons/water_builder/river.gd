@@ -25,8 +25,9 @@ func rebuild() -> void:
         var left:=PackedVector2Array()
         var right:=PackedVector2Array()
         var path:=PackedVector2Array()
-        for i in 16:
-            var fraction:=float(i)/15.0
+        var samples:=clampi(ceili(length/5.0)+1,16,64)
+        for i in samples:
+            var fraction:=float(i)/float(samples-1)
             var distance:=length*fraction
             var center:=_curve.sample_baked(distance,true)
             var tangent:=_curve.sample_baked(minf(length,distance+.08),true)-_curve.sample_baked(maxf(0,distance-.08),true)

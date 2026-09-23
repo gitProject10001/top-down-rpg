@@ -1,0 +1,9 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://scripts/village/world_plan.gd" id="1"]
+[resource]
+script = ExtResource("1")
+version = 2
+seed_value = 2417
+bounds = Rect2(-152, -144, 304, 288)
+discrete_terrain = true
+regions = Array[Dictionary]([{"kind":"forest", "center":Vector2(-115,-50), "radius":65.0, "height":0.0}, {"kind":"forest", "center":Vector2(-95,65), "radius":48.0, "height":0.0}, {"kind":"forest", "center":Vector2(120,35), "radius":60.0, "height":0.0}, {"kind":"forest", "center":Vector2(85,-112), "radius":45.0, "height":0.0}, {"kind":"forest", "center":Vector2(65,85), "radius":40.0, "height":0.0}])

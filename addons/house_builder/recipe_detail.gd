@@ -229,6 +229,7 @@ func _material(surface: int) -> Material:
 	var material := ShaderMaterial.new()
 	material.shader = preload("res://addons/house_builder/recipe_detail.gdshader")
 	material.set_shader_parameter("surface_kind", surface)
+	material.set_shader_parameter("window_surface",kind.begins_with("gothic_") and surface==3)
 	material.set_shader_parameter("weathered", weathered)
 	material.set_shader_parameter("pattern_seed", float(posmod(detail_seed, 8191)))
 	if masonry_finish and surface in [Surface.STONE,7]:

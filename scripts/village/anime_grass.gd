@@ -155,6 +155,10 @@ func configure(view: Node, profile: Resource = null) -> void:
     road_mask_center=mask_center
     road_mask_size=mask_size
     var coverage_bounds:=Rect2(mask_center-mask_size*.5,mask_size)
+    if terrain.mesh:
+        var terrain_bounds:=terrain.mesh.get_aabb()
+        coverage_bounds=coverage_bounds.expand(Vector2(terrain_bounds.position.x,terrain_bounds.position.z))
+        coverage_bounds=coverage_bounds.expand(Vector2(terrain_bounds.end.x,terrain_bounds.end.z))
     for child in view.get_children():
         var cliff:=child.get_node_or_null("ContinuousCliff")
         if cliff==null or not cliff.raised_zone_enabled: continue
@@ -240,7 +244,7 @@ func bake_coverage() -> void:
     var raised: Array=[]
     for cliff in raised_edit_surfaces:
         raised.append([study_root.get_path_to(cliff),cliff.global_transform,cache.snapshot(cliff.guide),cliff.wall_height,cliff.wall_depth,cliff.raised_zone_depth,cliff.access_ramp_length,cliff.access_ramp_base_height,cliff._elevated_sampler._top_vertices if cliff._elevated_sampler!=null else null,cliff._elevated_sampler._top_indices if cliff._elevated_sampler!=null else null])
-    var key: String=cache.digest([3,cache.sources(["res://scripts/village/anime_grass.gd","res://scripts/art/art_study_profile.gd","res://scripts/art/art_surface_edit.gd","res://addons/village_builder/path_surface_profile.gd","res://addons/rock_builder/continuous_cliff.gd","res://addons/rock_builder/elevated_zone.gd"]),cache.snapshot(art_profile.edits if art_profile!=null else []),study_root.get_path_to(terrain),terrain.global_transform,mask_center,mask_size,road_mask_center,road_mask_size,road_mask.get_data(),paths,raised])
+    var key: String=cache.digest([4,study_root.get_node("ExplorationRoute").points if study_root.has_node("ExplorationRoute") else [],cache.sources(["res://scripts/village/anime_grass.gd","res://scripts/art/art_study_profile.gd","res://scripts/art/art_surface_edit.gd","res://addons/village_builder/path_surface_profile.gd","res://addons/rock_builder/continuous_cliff.gd","res://addons/rock_builder/elevated_zone.gd"]),cache.snapshot(art_profile.edits if art_profile!=null else []),study_root.get_path_to(terrain),terrain.global_transform,mask_center,mask_size,road_mask_center,road_mask_size,road_mask.get_data(),paths,raised])
     var file: String=cache.path_for("coverage",key,".png")
     if FileAccess.file_exists(file):
         coverage=Image.load_from_file(file)
@@ -267,6 +271,8 @@ func bake_coverage() -> void:
                 access_road=maxf(access_road,lot.path_surface.road_amount(q,lot.access_path))
             var road_uv:=(sample_point-road_mask_center)/road_mask_size+Vector2.ONE*.5
             var road := smoothstep(.12,.82,sample_road(road_uv)+edge_field.get_noise_2d(p.x*3.0,p.y*3.0)*.14)
+            var route:=study_root.get_node_or_null("ExplorationRoute")
+            if route: road=maxf(road,1.0-smoothstep(1.0,2.6,route.distance_to_path(p)))
             road=maxf(road,access_road)
             var density := .5
             var pigment := clampf(.5+pigment_field.get_noise_2d(p.x,p.y)*1.5,0,1)

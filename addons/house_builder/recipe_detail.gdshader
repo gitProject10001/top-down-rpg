@@ -4,6 +4,8 @@ render_mode diffuse_burley, specular_disabled;
 #include "res://shaders/pixelart/stone_pigment.gdshaderinc"
 #include "res://addons/house_builder/masonry_finish.gdshaderinc"
 uniform int surface_kind = 0;
+uniform bool window_surface = false;
+uniform float night_strength = 0.0;
 uniform bool weathered = true;
 uniform float pattern_seed = 0.0;
 uniform bool cutaway_enabled = false;
@@ -44,4 +46,5 @@ void fragment() {
   ALBEDO=finish.rgb; AO=finish.a;
   if(masonry_courses) NORMAL=masonry_relief_normal(VERTEX,NORMAL,finish.a*.016);
  }
+ if(window_surface) EMISSION=vec3(.80,.36,.08)*night_strength*(.7+.3*cloud);
 }

@@ -2,6 +2,8 @@
 extends Node3D
 ## One authored exploration loop. Points are world XZ, saved in the scene.
 signal discovered
+@export var ground_path: NodePath=NodePath("../Ground")
+@export var markers_enabled:=true
 @export var points := PackedVector2Array([Vector2(-12,-30),Vector2(-27,-43),Vector2(-38,-62),Vector2(-48,-78),Vector2(-56,-95),Vector2(-73,-89),Vector2(-84,-65),Vector2(-67,-40),Vector2(-43,-27),Vector2(-12,-30)])
 @export var clearing := Vector2(-56,-95)
 @export var clearing_radius := 12.0
@@ -10,7 +12,7 @@ var _signature := 0
 var _generated: Node3D
 
 func _ready() -> void:
-	get_node("../Ground").surface_changed.connect(_rebuild)
+	get_node(ground_path).surface_changed.connect(_rebuild)
 
 func distance_to_path(p: Vector2) -> float:
 	var distance := INF
@@ -26,7 +28,7 @@ func _process(_delta: float) -> void:
 	if signature != _signature:
 		_signature = signature
 		_rebuild()
-	if Engine.is_editor_hint() or _found: return
+	if Engine.is_editor_hint() or _found or not markers_enabled: return
 	var player := get_node_or_null("../Player") as Node3D
 	if player and Vector2(player.position.x,player.position.z).distance_to(clearing)<9:
 		_found = true
@@ -46,9 +48,11 @@ func _process(_delta: float) -> void:
 		tween.tween_callback(layer.queue_free)
 
 func _rebuild() -> void:
-	var ground := get_node_or_null("../Ground") as MeshInstance3D
+	var ground := get_node_or_null(ground_path) as MeshInstance3D
 	if not ground: return
-	var material := ground.get_surface_override_material(0) as ShaderMaterial
+	var material := ground.material_override as ShaderMaterial
+	if not material: material=ground.get_surface_override_material(0) as ShaderMaterial
+	if not material: return
 	var packed := PackedVector2Array()
 	packed.resize(32)
 	for i in range(mini(points.size(),32)): packed[i] = points[i]
@@ -61,6 +65,7 @@ func _rebuild() -> void:
 	_generated = Node3D.new()
 	_generated.name = "RouteDetails"
 	add_child(_generated)
+	if not markers_enabled: return
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	st.set_smooth_group(-1)

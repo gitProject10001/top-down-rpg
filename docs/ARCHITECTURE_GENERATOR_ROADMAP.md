@@ -414,7 +414,7 @@ un lungo refactoring senza qualcosa da provare nel builder.
 | W01 | IN CORSO — esempio W01.1 | Laghi editabili | Pipeline mondo | Perimetro e quota dell'acqua, riva e bacino, esclusione edifici; superficie d'acqua inizialmente semplice |
 | W01.1 | FATTO | Lago ed emissario di prova | Pipeline mondo | Nodo tool con perimetro, flusso prescritto, vortice opzionale, fondale percorribile e onde locali; camera gameplay e test ingresso/uscita |
 | W01.2 | TODO | Authoring lago e rive | Pipeline mondo | Gizmo contestuali, Undo/Redo, diagnostica perimetro; preview fondale in editor e protezione terreno manuale |
-| W01.3 | TODO | Qualità visiva acqua | Pipeline mondo | Rive naturali, fondale, riflessi e caustiche meno ripetitive; riferimento alla camera gameplay |
+| W01.3 | IN CORSO — campione con fondale | Qualità visiva acqua | Pipeline mondo | Rive naturali, fondale, riflessi e caustiche meno ripetitive; riferimento alla camera gameplay |
 | W01.3a | FATTO | Caustiche senza griglia regolare | Pipeline mondo | Celle deformate e linee discontinue con intensità variabile; rendering gameplay verificato |
 | W01.4 | FATTO | Lago mosso: prima versione visiva | Pipeline mondo | Preset calmo/brezza/mosso, vento, superficie deformata e schiuma pulsante al passaggio delle creste verso riva |
 | W01.4b | TODO | Risacca e impatti sulla costa | Pipeline mondo | Fascia di terreno bagnata con avanzamento/ritiro, spruzzi delle onde sulle rocce e transizione visiva onde/fondale più accurata |

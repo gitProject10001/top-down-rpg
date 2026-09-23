@@ -1,6 +1,17 @@
 @tool
 extends Node3D
+signal water_geometry_changed
 ## Prescribed flow and wind with an optional local wave heightfield for A/B tests.
+@export var joins: Array[NodePath] = []
+@export var depth_profile: Resource:
+    set(value):
+        if depth_profile and depth_profile.changed.is_connected(schedule_build): depth_profile.changed.disconnect(schedule_build)
+        depth_profile=value
+        if depth_profile and not depth_profile.changed.is_connected(schedule_build): depth_profile.changed.connect(schedule_build)
+        schedule_build()
+var depth_image: Image
+var depth_bounds:=Rect2()
+var _depth_collision: StaticBody3D
 @export var boundary := PackedVector2Array([Vector2(-8,-4),Vector2(-5,-7),Vector2(0,-7),Vector2(4,-4),Vector2(5,-1),Vector2(12,1),Vector2(16,0),Vector2(17,3),Vector2(12,4),Vector2(5,2),Vector2(2,5),Vector2(-4,5),Vector2(-8,2)]):
     set(value):
         boundary = value
@@ -139,12 +150,12 @@ func _ready() -> void:
 func schedule_build() -> void:
     if not is_inside_tree() or _pending: return
     _pending = true
-    call_deferred("rebuild")
+    call_deferred("_flush_build")
 
 func _get_configuration_warnings() -> PackedStringArray:
-    if boundary.size() < 3 or boundary.size() > 32:
-        return ["Il perimetro richiede da 3 a 32 vertici."]
-    if flow_path.size() > 16: return ["Massimo 16 punti del flusso nel prototipo."]
+    if boundary.size() < 3 or boundary.size() > 128:
+        return ["Il perimetro richiede da 3 a 128 vertici."]
+    if flow_path.size() > 64: return ["Massimo 64 punti del flusso nel prototipo."]
     if Geometry2D.triangulate_polygon(boundary).is_empty(): return ["Perimetro non triangolabile: controllare incroci e punti duplicati."]
     return []
 
@@ -162,8 +173,21 @@ func rebuild() -> void:
     var vertices := PackedVector3Array()
     var normals := PackedVector3Array()
     var uv := PackedVector2Array()
-    for i in range(0,triangles.size(),3):
-        _subdivide_water(boundary[triangles[i]],boundary[triangles[i+1]],boundary[triangles[i+2]],vertices,uv,indices)
+    var contours: Array[PackedVector2Array]=[boundary]
+    for reference in joins:
+        var other:=get_node_or_null(reference)
+        if not other or not other.has_method("contains_point"): continue
+        var polygon:=PackedVector2Array()
+        for point in other.boundary:
+            var local: Vector3=to_local(other.to_global(Vector3(point.x,0,point.y)))
+            polygon.append(Vector2(local.x,local.z))
+        var clipped: Array[PackedVector2Array]=[]
+        for contour in contours: clipped.append_array(Geometry2D.clip_polygons(contour,polygon))
+        contours=clipped
+    for contour in contours:
+        triangles=Geometry2D.triangulate_polygon(contour)
+        for i in range(0,triangles.size(),3):
+            _subdivide_water(contour[triangles[i]],contour[triangles[i+1]],contour[triangles[i+2]],vertices,uv,indices)
     normals.resize(vertices.size())
     normals.fill(Vector3.UP)
     arrays[Mesh.ARRAY_VERTEX] = vertices
@@ -175,9 +199,9 @@ func rebuild() -> void:
     var material := ShaderMaterial.new()
     material.shader = preload("res://shaders/pixelart/prescribed_water.gdshader")
     var edges := boundary.duplicate()
-    edges.resize(32)
+    edges.resize(128)
     var path := flow_path.duplicate()
-    path.resize(16)
+    path.resize(64)
     material.set_shader_parameter("boundary",edges)
     material.set_shader_parameter("edge_count",boundary.size())
     material.set_shader_parameter("flow_path",path)
@@ -192,6 +216,11 @@ func rebuild() -> void:
     material.set_shader_parameter("obstacles",blockers)
     material.set_shader_parameter("obstacle_count",mini(obstacles.size(),12))
     material.set_shader_parameter("basin_depth",basin_depth)
+    if depth_profile:
+        _bake_depth()
+        material.set_shader_parameter("bathymetry_enabled",true)
+        material.set_shader_parameter("bathymetry",ImageTexture.create_from_image(depth_image))
+        material.set_shader_parameter("bathymetry_bounds",Vector4(depth_bounds.position.x,depth_bounds.position.y,depth_bounds.size.x,depth_bounds.size.y))
     material.set_shader_parameter("debug_flow",debug_flow)
     material.set_shader_parameter("vortex_center",vortex_center)
     material.set_shader_parameter("vortex_strength",vortex_strength)
@@ -203,6 +232,7 @@ func rebuild() -> void:
     _surface.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
     add_child(_surface, false, Node.INTERNAL_MODE_BACK)
     _bind_simulation()
+    water_geometry_changed.emit()
 
 func contains_point(point: Vector2) -> bool:
     return Geometry2D.is_point_in_polygon(point,boundary)
@@ -218,7 +248,7 @@ func shore_distance(point: Vector2) -> float:
 
 func bed_height(point: Vector2) -> float:
     var d := shore_distance(point)
-    if contains_point(point): return -.015-basin_depth*smoothstep(0,1.5,d)
+    if contains_point(point): return -depth_at(point) if depth_profile else -.015-basin_depth*smoothstep(0,1.5,d)
     return .18*smoothstep(0,1.1,d)
 
 func ripple(world_point: Vector3, strength := 1.0) -> void:
@@ -297,3 +327,44 @@ func flow_at(point: Vector2) -> Vector2:
     result=result.limit_length(flow_speed*2.5)
     var offset:=point-vortex_center
     return result+Vector2(-offset.y,offset.x)*vortex_strength*exp(-offset.length_squared()*.5)
+
+func depth_at(point: Vector2) -> float:
+    if not contains_point(point): return 0.0
+    if depth_profile: return depth_profile.sample(point,shore_distance(point))
+    return .015+basin_depth*smoothstep(0,1.5,shore_distance(point))
+
+func _bake_depth() -> void:
+    depth_bounds=Rect2(boundary[0],Vector2.ZERO)
+    for p in boundary: depth_bounds=depth_bounds.expand(p)
+    depth_image=Image.create(256,256,false,Image.FORMAT_RF)
+    for z in 256:
+        for x in 256:
+            var p:=depth_bounds.position+Vector2(x,z)/255.0*depth_bounds.size
+            depth_image.set_pixel(x,z,Color(depth_at(p),0,0,1))
+    if is_instance_valid(_depth_collision): _depth_collision.free()
+    if not depth_profile.block_deep_water: return
+    # March the shared depth field at the walking limit, creating a thin vertical
+    # collision curtain. This protects deep water without an invisible flat floor.
+    var faces:=PackedVector3Array()
+    for z in range(0,255,2):
+        for x in range(0,255,2):
+            var points: Array[Vector2]=[]
+            var corners: Array[Vector2i]=[Vector2i(x,z),Vector2i(mini(x+2,255),z),Vector2i(mini(x+2,255),mini(z+2,255)),Vector2i(x,mini(z+2,255))]
+            for i in 4:
+                var a:=corners[i]; var b:=corners[(i+1)%4]
+                var da: float=depth_image.get_pixelv(a).r-depth_profile.wading_limit
+                var db: float=depth_image.get_pixelv(b).r-depth_profile.wading_limit
+                if (da<0)==(db<0): continue
+                var pixel:=Vector2(a).lerp(Vector2(b),da/(da-db))
+                points.append(depth_bounds.position+pixel/255.0*depth_bounds.size)
+            for i in range(0,points.size()-1,2):
+                var a:=Vector3(points[i].x,-1,points[i].y); var b:=Vector3(points[i+1].x,-1,points[i+1].y)
+                var c:=b+Vector3.UP*4; var d:=a+Vector3.UP*4
+                faces.append_array(PackedVector3Array([a,b,c,a,c,d,c,b,a,d,c,a]))
+    if faces.is_empty(): return
+    _depth_collision=StaticBody3D.new(); _depth_collision.name="DeepWaterLimit"; add_child(_depth_collision,false,Node.INTERNAL_MODE_BACK)
+    var shape:=ConcavePolygonShape3D.new(); shape.set_faces(faces)
+    var collider:=CollisionShape3D.new(); collider.shape=shape; _depth_collision.add_child(collider)
+
+func _flush_build() -> void:
+    if _pending: rebuild()

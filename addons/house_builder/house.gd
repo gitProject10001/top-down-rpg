@@ -544,6 +544,7 @@ func rebuild(cooperative: bool=false) -> void:
 		_build_shell()
 		var dark := StandardMaterial3D.new()
 		dark.albedo_color=Color(0.015,0.011,0.009)
+		dark.set_meta("night_window",true)
 		dark.roughness=1.0
 		materials= [_plaster_material(),_material(Vector2(0.5,0),Color(0.60,0.53,0.46)),_stone_trim_material(),dark]
 		var mesh := ArrayMesh.new()

@@ -1,0 +1,6 @@
+[gd_resource type="Resource" load_steps=2 format=3]
+[ext_resource type="Script" path="res://addons/environment_builder/day_cycle_profile.gd" id="1"]
+[resource]
+script = ExtResource("1")
+real_minutes = 30.0
+initial_hour = 10.0

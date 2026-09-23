@@ -271,3 +271,33 @@ Confronto ripetibile: `res://tools/check_painterly_post.tscn`, immagini
 Prova a 1152×648: off 16,692 ms / on 16,679 ms mediani; p95 on 16,796 ms.
 Entrambi circa 60 fps, con VSync: non si deduce un costo GPU preciso dalla
 differenza fra queste due misure. Shader compilato e bypass P verificato.
+
+### TODO — Contorno tramite envelope della mesh (idea da valutare)
+
+Solo ricerca/progettazione futura: nessuna implementazione in questa revisione.
+Riferimento: schizzo dell'utente con mesh nera, involucro blu e raggi dalla camera.
+
+- [ ] Valutare un involucro espanso: colorare il margine visibile dell'envelope
+  dove la mesh originale non lo copre, rispettando la profondità degli altri oggetti.
+- [ ] Provare prima l'approccio **inverted hull** (guscio espanso, facce anteriori
+  scartate e depth test). Per una silhouette esterna il raymarching potrebbe non
+  servire: verificare se rasterizzazione e profondità risolvono già il caso.
+- [ ] Distinguere silhouette esterna da spigoli interni, pieghe e contatti:
+  l'envelope da solo non garantisce tutte le linee disegnate nello schizzo.
+  Confrontare con il contorno depth/normal già presente in `pixel_post.gdshader`.
+- [ ] Studiare spessore stabile in pixel alla camera di gioco (ortografica e FOV 13),
+  normali smussate per l'espansione, crepe sugli spigoli, concavità, intersezioni,
+  cutaway, personaggi animati e fogliame con trasparenza ritagliata.
+- [ ] Solo se necessario valutare raymarching/SDF: definire prima la rappresentazione
+  della superficie, aggiornamento delle mesh dinamiche e costo. Una normale mesh
+  triangolare non fornisce automaticamente un campo di distanza da percorrere.
+- [ ] Confrontare nero, colore scuro locale e linea interrotta pittorica; verificare
+  stabilità in movimento e costo a 1152×648. Nessuna modifica automatica agli asset.
+
+Questa eventuale strada geometrica è distinta dal preset attuale, che rimane
+esclusivamente post-processing. Decisione e integrazione negli addon da progettare.
+
+
+## Estensione e ciclo — 23 settembre 2026
+
+La scena usa ora World per il piano 304 × 288 m e la distribuzione fuori dal nucleo protetto. F6 apre i controlli dell’orario; il ciclo completo dura 30 minuti e si ferma nei dialoghi. Dettagli, verifiche e limiti in [EXPANDED_LANDSCAPE.md](EXPANDED_LANDSCAPE.md). Non usare il generatore iniziale per aggiornare questa scena: le composizioni e le modifiche locali sono dati autoriali.

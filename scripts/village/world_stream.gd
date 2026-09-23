@@ -3,6 +3,12 @@ extends Node3D
 ## Deterministic decoration streaming. Generated nodes are transient, never scene-owned.
 const CELL := 64.0
 const HALF_WORLD := 866.0254
+@export var ground_path: NodePath = NodePath("../Ground")
+@export var tree_scene: PackedScene
+@export var bounds := Rect2(-866.0254,-866.0254,1732.0508,1732.0508)
+@export var protected_core := Rect2()
+var _template: Node3D
+var _template_batches: Array[Dictionary]=[]
 @export var world_seed := 2417
 @export_range(1, 4) var radius := 2
 @export var editor_center := Vector2.ZERO
@@ -22,10 +28,15 @@ var _rock := SphereMesh.new()
 var _rock_material := StandardMaterial3D.new()
 
 func _ready() -> void:
-	var ground := get_node("../Ground")
+	var ground := get_node(ground_path)
 	ground.surface_changed.connect(rebuild)
 	_noise.seed = world_seed
 	_noise.frequency = 0.015
+	if tree_scene:
+		_template=tree_scene.instantiate(); add_child(_template,false,Node.INTERNAL_MODE_BACK); _template.hide()
+		for body in _template.find_children("*","StaticBody3D",true,false): body.collision_layer=0
+		set_process(true)
+		return
 	var forest := get_node("../Camp/PaintedForest")
 	_trunk = forest.get_node("painted_oak/PaintedTrunk_001")
 	_crown = forest.get_node("IllustratedCrown")
@@ -50,7 +61,7 @@ func apply_edits(value: Array[Dictionary]) -> void:
 	rebuild()
 
 func _process(_delta: float) -> void:
-	if not is_instance_valid(_trunk): return
+	if not is_instance_valid(_trunk) and not is_instance_valid(_template): return
 	if _settings != Vector2i(world_seed,radius):
 		_settings = Vector2i(world_seed,radius)
 		rebuild()
@@ -72,7 +83,7 @@ func _process(_delta: float) -> void:
 		for x in range(cell.x-radius, cell.x+radius+1):
 			for z in range(cell.y-radius, cell.y+radius+1):
 				var key := Vector2i(x,z)
-				if not _chunks.has(key) and absf((x+0.5)*CELL) < HALF_WORLD+CELL/2 and absf((z+0.5)*CELL) < HALF_WORLD+CELL/2:
+				if not _chunks.has(key) and Rect2(Vector2(key)*CELL,Vector2.ONE*CELL).intersects(bounds):
 					_queue.append(key)
 		_queue.sort_custom(func(a: Vector2i,b: Vector2i): return a.distance_squared_to(cell) < b.distance_squared_to(cell))
 	# One bounded cell per frame; no whole-world rebuild on player motion.
@@ -98,10 +109,10 @@ func _build(key: Vector2i) -> void:
 		for iz in range(8):
 			var local := Vector3(ix*8.0+rng.randf_range(2,6),0,iz*8.0+rng.randf_range(2,6))
 			var p := local + chunk.position
-			local.y = get_node("../Ground").height_at(p.x,p.z)
-			var ground := get_node("../Ground")
+			local.y = get_node(ground_path).height_at(p.x,p.z)
+			var ground := get_node(ground_path)
 			if absf(ground.height_at(p.x+1,p.z)-local.y)>0.7 or absf(ground.height_at(p.x,p.z+1)-local.y)>0.7: continue
-			if absf(p.x)>HALF_WORLD-3 or absf(p.z)>HALF_WORLD-3 or Vector2(p.x,p.z).length()<32: continue
+			if not bounds.grow(-3).has_point(Vector2(p.x,p.z)) or protected_core.has_point(Vector2(p.x,p.z)) or Vector2(p.x,p.z).length()<32 or local.y<.12: continue
 			if absf(p.x-trail_x(p.z))<5 or absf(p.z-0.35*p.x-90.0)<4: continue
 			var route := get_node_or_null("../ExplorationRoute")
 			if route and route.excludes(Vector2(p.x,p.z)): continue
@@ -114,7 +125,7 @@ func _build(key: Vector2i) -> void:
 			var scale_value := rng.randf_range(0.75,1.3)
 			if rng.randf() < density*0.85:
 				trees.append(Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*scale_value),local))
-			elif rng.randf()<0.08:
+			elif not _template and rng.randf()<0.08:
 				var basis := Basis(Vector3.UP,rng.randf()*TAU).scaled(Vector3(scale_value,scale_value*0.65,scale_value*1.3))
 				rocks.append(Transform3D(basis,local+Vector3.UP*0.25))
 	# Ordered operations allow erase then repaint, across cell boundaries.
@@ -126,7 +137,7 @@ func _build(key: Vector2i) -> void:
 				var offset := trees[i].origin+chunk.position-point
 				if Vector2(offset.x,offset.z).length() <= r: trees.remove_at(i)
 		elif Vector2i(floori(point.x/CELL),floori(point.z/CELL)) == key:
-			point.y = get_node("../Ground").height_at(point.x,point.z)
+			point.y = get_node(ground_path).height_at(point.x,point.z)
 			trees.append(Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*float(edit.scale)),point-chunk.position))
 	for tree in trees:
 		var shape := CylinderShape3D.new()
@@ -137,6 +148,17 @@ func _build(key: Vector2i) -> void:
 		var shape := SphereShape3D.new()
 		shape.radius = 0.7*rock.basis.get_scale().x
 		_collider(body,shape,rock.origin)
+	if _template:
+		if _template_batches.is_empty():
+			for source in _template.find_children("*","MeshInstance3D",true,false):
+				if not source.mesh: continue
+				var shared: Mesh=source.mesh.duplicate()
+				for surface in shared.get_surface_count():
+					var override: Material=source.get_surface_override_material(surface)
+					if override: shared.surface_set_material(surface,override)
+				_template_batches.append({"mesh":shared,"material":source.material_override,"offset":_template.global_transform.affine_inverse()*source.global_transform})
+		for batch in _template_batches: _batch(chunk,batch.mesh,batch.material,trees,batch.offset)
+		return
 	var trunk_transform: Transform3D = _trunk.get_parent().transform * _trunk.transform
 	trunk_transform.origin = Vector3.ZERO
 	var crown_transform := _crown.transform
@@ -168,3 +190,6 @@ func _batch(parent: Node, mesh: Mesh, material: Material, transforms: Array[Tran
 	instance.multimesh = mm
 	instance.material_override = material
 	parent.add_child(instance)
+
+func ground_node() -> Node:
+	return get_node_or_null(ground_path)

@@ -1,0 +1,5 @@
+[gd_scene format=3]
+[ext_resource type="Script" path="res://tools/check_expanded_world.gd" id="1"]
+[node name="CheckExpandedWorld" type="Node"]
+process_mode = 3
+script = ExtResource("1")
