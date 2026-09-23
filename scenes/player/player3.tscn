@@ -10,7 +10,6 @@
 [ext_resource type="Script" uid="uid://s7vc1e3sewvu" path="res://scripts/states/dead.gd" id="8_dead"]
 [ext_resource type="Script" path="res://scripts/states/jump.gd" id="30_jump"]
 [ext_resource type="Script" path="res://scripts/states/guard.gd" id="32_guard"]
-[ext_resource type="Script" path="res://scripts/states/dir_attack.gd" id="33_diratk"]
 [ext_resource type="Script" uid="uid://qnas6r4specb" path="res://scripts/components/health.gd" id="9_health"]
 [ext_resource type="Script" uid="uid://b4vamb0t2g56j" path="res://scripts/components/hurtbox.gd" id="10_hurt"]
 [ext_resource type="PackedScene" path="res://scenes/components/sword.tscn" id="11_sword"]
@@ -111,6 +110,8 @@ height = 1.3281
 ; bottom of the capsule.
 [node name="Player" type="CharacterBody3D" groups=["player"]]
 script = ExtResource("1_player")
+max_stamina = 180.0
+stamina_regen = 30.0
 face_movement = true
 ; UAL's locomotion is EMPTY-HANDED — the fists pump and the wrist rolls, because nothing was meant
 ; to be in them. Measured, a blade obeying that wrist swung 108 deg away from a carried angle
@@ -120,9 +121,9 @@ hand_follow = 0.2
 loop_clips = PackedStringArray("idle_sword", "block")
 locomotion_clips = PackedStringArray("idle_sword", "walk", "jog", "sprint", "atk_a", "atk_b", "atk_c", "atk_dash", "chop", "atk_jab", "atk_swing", "atk_hook")
 attack_timing = {
-"atk_a": {"cancel": 0.7, "speed": 0.9, "strike": 0.45, "tail": 0.9, "windup": 0.16},
-"atk_b": {"cancel": 0.68, "speed": 0.9, "strike": 0.45, "tail": 0.85, "windup": 0.18},
-"atk_c": {"cancel": 0.62, "cancel_min": 0.68, "speed": 1.8, "strike": 0.4, "tail": 0.8, "windup": 0.26},
+"atk_a": {"cancel": 0.7, "speed": 2.0, "strike": 0.45, "tail": 0.9, "windup": 0.12},
+"atk_b": {"cancel": 0.68, "speed": 1.9, "strike": 0.45, "tail": 0.85, "windup": 0.15},
+"atk_c": {"cancel": 0.62, "cancel_min": 0.68, "speed": 2.1, "strike": 0.4, "tail": 0.8, "windup": 0.21},
 "atk_dash": {"cancel": 0.6, "speed": 1.7, "strike": 0.34, "tail": 0.9, "windup": 0.18},
 "atk_hook": {"cancel": 0.68, "speed": 1.1, "strike": 0.45, "tail": 0.88, "windup": 0.16},
 "atk_jab": {"cancel": 0.62, "speed": 1.3, "strike": 0.4, "tail": 0.9, "windup": 0.12},
@@ -195,7 +196,7 @@ script = ExtResource("4_move")
 [node name="Attack" type="Node" parent="StateMachine"]
 script = ExtResource("5_attack")
 chain = PackedStringArray("atk_a", "atk_b", "atk_c")
-opener_clip = "atk_dash"
+opener_clip = ""
 
 [node name="Dash" type="Node" parent="StateMachine"]
 script = ExtResource("6_dash")
@@ -212,16 +213,7 @@ script = ExtResource("30_jump")
 [node name="Guard" type="Node" parent="StateMachine"]
 script = ExtResource("32_guard")
 
-; THE HELD DIRECTIONAL SWING. Coexists with Attack above rather than replacing it: the click
-; combo is still what a body without a direction to give should do, and dash_attack.gd's lunge
-; still chains out of it. Which one a press reaches is decided in idle.gd/move.gd — a body
-; carrying DirAttack takes this path.
-;
-; The four clips were already in player3_anims.tres and unused: an overhead chop, a thrust, and
-; the two side swings. Their beats are in attack_timing at the top of this file, like every other
-; swing on this body.
-[node name="DirAttack" type="Node" parent="StateMachine"]
-script = ExtResource("33_diratk")
+; Human combat uses Attack. AI scenes add their own windup/release state.
 
 ; THE LUNGE. Reached two ways, both without a new binding: hold attack and press dash, or press
 ; attack in the first half of a dash already under way.

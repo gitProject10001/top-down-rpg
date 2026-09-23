@@ -2,6 +2,7 @@ extends Node3D
 ## A repeatable encounter on existing meadow geometry. No separate arena world.
 @export var arena_center:=Vector3(-22,.18,10)
 @export var enemy_count:=4
+@export var hud_enabled:=true
 var player: Player
 var view: Node
 var director: Node
@@ -18,6 +19,7 @@ func configure(world_view: Node, hero: Player) -> void:
 	var layer:=CanvasLayer.new()
 	layer.name="EncounterHUD"
 	add_child(layer)
+	layer.visible=hud_enabled
 	var panel:=Control.new()
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	panel.mouse_filter=Control.MOUSE_FILTER_IGNORE
@@ -34,7 +36,7 @@ func configure(world_view: Node, hero: Player) -> void:
 	status.add_theme_color_override("font_shadow_color",Color(.05,.04,.03))
 	status.add_theme_constant_override("shadow_offset_x",1)
 	status.add_theme_constant_override("shadow_offset_y",1)
-	var attack:=player.get_node("StateMachine/DirAttack")
+	var attack:=player.get_node("StateMachine/Attack")
 	if attack.has_signal("combo_step_started"):
 		attack.combo_step_started.connect(func(index: int,_direction: int,_clip: String):
 			_chain_step=index+1

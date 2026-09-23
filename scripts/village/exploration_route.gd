@@ -5,6 +5,7 @@ signal discovered
 @export var ground_path: NodePath=NodePath("../Ground")
 @export var markers_enabled:=true
 @export var points := PackedVector2Array([Vector2(-12,-30),Vector2(-27,-43),Vector2(-38,-62),Vector2(-48,-78),Vector2(-56,-95),Vector2(-73,-89),Vector2(-84,-65),Vector2(-67,-40),Vector2(-43,-27),Vector2(-12,-30)])
+@export var branches: Array[PackedVector2Array] = []
 @export var clearing := Vector2(-56,-95)
 @export var clearing_radius := 12.0
 var _found := false
@@ -18,13 +19,27 @@ func distance_to_path(p: Vector2) -> float:
 	var distance := INF
 	for i in range(points.size()-1):
 		distance = minf(distance,p.distance_to(Geometry2D.get_closest_point_to_segment(p,points[i],points[i+1])))
+	for branch in branches:
+		for i in range(branch.size()-1):
+			distance=minf(distance,p.distance_to(Geometry2D.get_closest_point_to_segment(p,branch[i],branch[i+1])))
 	return distance
+
+func road_amount(p: Vector2) -> float:
+	var distance:=INF
+	for i in range(points.size()-1):
+		distance=minf(distance,p.distance_to(Geometry2D.get_closest_point_to_segment(p,points[i],points[i+1])))
+	var amount:=1.0-smoothstep(1.0,2.6,distance)
+	for branch in branches:
+		for i in range(branch.size()-1):
+			var d:=p.distance_to(Geometry2D.get_closest_point_to_segment(p,branch[i],branch[i+1]))
+			amount=maxf(amount,1.0-smoothstep(.55,1.35,d))
+	return amount
 
 func excludes(p: Vector2) -> bool:
 	return distance_to_path(p)<4.5 or p.distance_to(clearing)<clearing_radius
 
 func _process(_delta: float) -> void:
-	var signature := hash([points,clearing,clearing_radius])
+	var signature := hash([points,branches,clearing,clearing_radius])
 	if signature != _signature:
 		_signature = signature
 		_rebuild()
@@ -58,6 +73,14 @@ func _rebuild() -> void:
 	for i in range(mini(points.size(),32)): packed[i] = points[i]
 	material.set_shader_parameter("exploration_points",packed)
 	material.set_shader_parameter("exploration_count",mini(points.size(),32))
+	var segments: Array[Vector4]=[]
+	for branch in branches:
+		for i in range(branch.size()-1):
+			segments.append(Vector4(branch[i].x,branch[i].y,branch[i+1].x,branch[i+1].y))
+	var count:=mini(segments.size(),64)
+	segments.resize(64)
+	material.set_shader_parameter("exploration_branches",segments)
+	material.set_shader_parameter("exploration_branch_count",count)
 	material.set_shader_parameter("exploration_clearing",Vector3(clearing.x,clearing.y,clearing_radius))
 	if is_instance_valid(_generated):
 		remove_child(_generated)

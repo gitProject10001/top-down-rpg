@@ -13,6 +13,9 @@ func physics_update(delta: float) -> void:
 	# the player have to be reachable from the intent both of them write. PlayerIntent latches the
 	# press, so a person loses no responsiveness by coming through here.
 	if player.intent:
+		if not fsm.has_state("DirAttack") and player.intent.can_start_attack():
+			fsm.transition_to("Attack")
+			return
 		if fsm.has_state("DirAttack") and player.intent.can_start_attack() and player.stamina>=12.0:
 			fsm.transition_to("DirAttack")
 			return

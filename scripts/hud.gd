@@ -199,6 +199,9 @@ func _build_guard_dial(layer: CanvasLayer) -> void:
 ## Gold for your guard, red for their wind-up, and red wins when they coincide — the one thing you
 ## must not miss is the blow you are not covering.
 func _update_guard_dial() -> void:
+	if _dial != null and _player != null and not _player.has_node("StateMachine/DirAttack"):
+		_dial.hide()
+		return
 	if _dial == null:
 		return
 	var mine := SwingDir.NONE

@@ -106,6 +106,10 @@ func _try_hit(area: Area3D) -> void:
 	# Thanks to collision masks, anything we detect is already an opposing HurtBox.
 	if area is HurtBox and area not in _already_hit:
 		_already_hit.append(area)
+		if get_parent().has_method("impact_sample"):
+			var sample: Dictionary = get_parent().impact_sample(area.global_position)
+			set_meta("contact_point", sample.point)
+			set_meta("impact_direction", sample.direction)
 		var applied: int = (area as HurtBox).apply_hit(damage, self)
 		var pos := area.global_position
 		dealt_hit.emit(area, pos, applied)

@@ -1,19 +1,7 @@
 extends State
-## THE DIRECTIONAL GUARD — the defensive half of the Bannerlord mechanic.
-##
-## Holding the guard button raises the sword; the right stick (or a flick of the mouse) chooses
-## WHICH WAY it is held. A strike is stopped only if the guard is pointing the way the strike came
-## from. Get it wrong and the blow lands in full: there is no partial credit, because a guard that
-## half-works is a guard you do not have to aim.
-##
-## WHY THIS REPLACED THE OMNI-GUARD. The older guard answered any frontal hit inside a 75-degree
-## cone with no direction to it. This one is a strict superset: a directionless hit still falls
-## through to that same behaviour, so nothing that already worked had to change to make room.
-##
-## HEAVY, ON PURPOSE. Guarding costs you the ground: move_scale drops you to a walk, and the body
-## locks its facing onto whatever it has acquired instead of tracking the cursor. Between the two,
-## a guarded fighter cannot casually reposition — which is the point. Position is the resource the
-## mechanic spends, and it only reads as a resource if raising the guard makes it expensive.
+## Front-facing parry shared by the action hero and AI. Raising it takes time;
+## aim chooses the facing, never a separate left/right/up/down guard command.
+## directional_guard remains opt-in for legacy duel fixtures.
 
 const GUARD_CLIP := "block"
 
@@ -25,6 +13,7 @@ const GUARD_CLIP := "block"
 ## frames disagree by a flip on exactly one axis. See SwingDir's header for why it lives there and
 ## why it must be applied here and nowhere else. Off = block the direction the attacker named.
 @export var mirror_incoming := true
+@export var directional_guard := false
 
 ## How far out the guard will look for something to face. Beyond this it holds the cursor's
 ## direction instead — locking onto a distant enemy while you fight a near one is worse than not
@@ -41,7 +30,7 @@ func enter() -> void:
 	_t = 0.0
 	_blend = 0.0
 	_switch_time=.12
-	_dir = player.intent.guard_dir
+	_dir = player.intent.guard_dir if directional_guard else SwingDir.UP
 	if player.shield:
 		player.shield.raise()
 	elif player.has_clip(GUARD_CLIP):
@@ -58,7 +47,7 @@ func exit() -> void:
 
 func physics_update(delta: float) -> void:
 	_t += delta
-	if _dir != player.intent.guard_dir:
+	if directional_guard and _dir != player.intent.guard_dir:
 		_dir=player.intent.guard_dir
 		_switch_time=.12
 	_switch_time=maxf(0.0,_switch_time-delta)
@@ -87,8 +76,8 @@ func physics_update(delta: float) -> void:
 	# ATTACK OUT OF THE GUARD, without dropping it first. Bannerlord's exchanges are guard-swing-
 	# guard with no neutral in between, and routing back through Idle would put a dead frame in
 	# the middle of every riposte.
-	if player.intent.can_start_attack() and fsm.has_state("DirAttack") and player.stamina>=12.0:
-		fsm.transition_to("DirAttack")
+	if player.intent.can_start_attack() and player.stamina>=12.0:
+		fsm.transition_to("DirAttack" if fsm.has_state("DirAttack") else "Attack")
 		return
 
 	# release, or GUARD BREAK when the stamina runs dry
@@ -115,6 +104,7 @@ func guard_dir() -> int:
 ## Does this guard answer a swing thrown in `attack_dir` (the ATTACKER's frame)?
 func blocks(attack_dir: int) -> bool:
 	if _switch_time>0.0 or _blend<.65: return false
+	if not directional_guard: return true
 	if attack_dir == SwingDir.NONE or _dir == SwingDir.NONE:
 		return false
 	return _dir == (SwingDir.mirror(attack_dir) if mirror_incoming else attack_dir)

@@ -318,6 +318,7 @@ func on_swing_blocked() -> void:
 
 
 func _ready() -> void:
+	stamina = max_stamina
 	health.damaged.connect(_on_damaged)
 	health.died.connect(_on_died)
 	_toon = get_node_or_null("ToonSkin")   # the body's flash channel; every current hero has one
@@ -1006,7 +1007,7 @@ func _on_damaged(_amount: int, source: Node) -> void:
 			if source and source.has_meta("knockback"):
 				kb = maxf(kb, float(source.get_meta("knockback")))
 			# Sword cuts stagger a person; they do not launch them like a mace.
-			if source and int(source.get_meta("swing_dir", SwingDir.NONE)) != SwingDir.NONE:
+			if source and source.has_meta("swing_dir"):
 				kb = 2.8 if bool(source.get_meta("finisher", false)) else 1.1
 				var attacker := _find_entity(source,"on_swing_blocked") as Node3D
 				if attacker:

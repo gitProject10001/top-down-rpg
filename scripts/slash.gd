@@ -4,25 +4,27 @@ extends MeshInstance3D
 ## the sweep for the alternating combo.
 
 var flipped := false
+var outer_radius := 1.6
 
 func _ready() -> void:
-	mesh = _build_arc(0.7, 2.2, 150.0, 12)
+	mesh = _build_arc(outer_radius * .73, outer_radius, 135.0, 20)
 	var mat := StandardMaterial3D.new()
 	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.cull_mode = BaseMaterial3D.CULL_DISABLED
 	mat.emission_enabled = true
 	mat.emission = Color(0.7, 0.9, 1.0)
-	mat.emission_energy_multiplier = 5.0
-	mat.albedo_color = Color(0.85, 0.95, 1.0, 0.85)
+	mat.emission_energy_multiplier = 1.2
+	mat.albedo_color = Color(0.96, 0.91, 0.73, 0.75)
 	material_override = mat
 	if flipped:
 		scale.x = -1.0
-	rotation.x = deg_to_rad(-18.0)          # slight tilt so it reads as a diagonal cut
+	rotation.x = deg_to_rad(-5.0)
+	rotation.y = -.30 if flipped else .30
 	var t := create_tween().set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	t.tween_property(mat, "albedo_color:a", 0.0, 0.16)
 	t.parallel().tween_property(mat, "emission_energy_multiplier", 0.0, 0.16)
-	t.parallel().tween_property(self, "scale:z", scale.z * 1.25, 0.16)
+	t.parallel().tween_property(self, "rotation:y", .30 if flipped else -.30, 0.16)
 	t.chain().tween_callback(queue_free)
 
 # Crescent ribbon in the XZ plane, arcing toward -Z (front), tapered thin at the ends.

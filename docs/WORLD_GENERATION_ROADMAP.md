@@ -8,6 +8,8 @@ Incremento corrente: paesaggio integrato 304 × 288 m e ciclo giorno–notte. Si
 
 È un campione artistico e funzionale: non chiude R03, W01.2, W01.3, T01.4 o il budget dell'intero mondo. Restano il confronto con il concept, la rifinitura dei cigli e i picchi di generazione. G01.4/S02 e B01–B03 conservano i criteri architettonici; A07 conserva il confronto R10/R13 aperto. Generazione globale da seed e confronto V01 restano rimandati.
 
+Il primo circuito giocabile riusa borgo e guado e aggiunge una torre con incontro e ritorno nel bosco: [BORGO_EXPLORATION_CIRCUIT.md](BORGO_EXPLORATION_CIRCUIT.md). Checkpoint temporanei e misura del percorso sono disponibili; quest persistenti e scorciatoie condizionate restano future. Nessun cambiamento allo stato delle macrofasi.
+
 ## Punto di ripartenza
 
 Campione chiesa aggiornato: navata 8,8 × 14,2 m, frontone collegato al tetto,

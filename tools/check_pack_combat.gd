@@ -121,6 +121,8 @@ func run() -> void:
 	water.queue_free()
 	await frames(2)
 	await real_combo()
+	await death_physics()
+	await action_controls()
 	await live_pack()
 	print("PACK_COMBAT_CHECK failures=", failures, " damage_events=", damage_events)
 	world.queue_free()
@@ -132,6 +134,8 @@ func real_combo() -> void:
 	hero.name = "ComboHero"
 	hero.position = Vector3(0, 1, 0)
 	world.add_child(hero)
+	check(hero.max_stamina == 180.0 and hero.stamina == 180.0, "hero spawns with the full larger reserve")
+	check(not hero.has_node("StateMachine/DirAttack"), "human uses action combo, no directional attack state")
 	hero.intent.set_physics_process(false)
 	hero.intent.clear()
 	hero.intent.look = Vector2(0, -1)
@@ -143,7 +147,7 @@ func real_combo() -> void:
 	receiver.intent.set_physics_process(false)
 	receiver.intent.clear()
 	await frames(25)
-	var attack := hero.get_node("StateMachine/DirAttack")
+	var attack := hero.get_node("StateMachine/Attack")
 	var contacts: Array[int] = []
 	var windows: Array[int] = []
 	receiver.health.damaged.connect(func(_amount: int, _source: Node) -> void: contacts.append(attack.combo_index()))
@@ -156,7 +160,7 @@ func real_combo() -> void:
 	hero.intent._sample_attack_button(false)
 	await frames(100)
 	check(windows == [0, 1, 2], "real human body opens exactly three buffered combo windows")
-	check(contacts == [0, 1, 2], "all three swept sword strokes contact the real raider capsule")
+	check(contacts == [0, 1, 2], "all three action combo strokes contact the real raider capsule")
 	print("PACK_REAL_COMBO windows=", windows, " contacts=", contacts,
 		" hero=", hero.global_position, " raider=", receiver.global_position, " hp=", receiver.health.hp)
 	hero.queue_free()
@@ -219,3 +223,73 @@ func live_pack() -> void:
 	for raider in raiders: raider.queue_free()
 	hero.queue_free()
 	director.queue_free()
+
+func death_physics() -> void:
+	var enemy := Raider.instantiate() as Player
+	enemy.position = Vector3(3, 1, 0)
+	world.add_child(enemy)
+	enemy.intent.set_physics_process(false)
+	await frames(20)
+	var rag := enemy.find_child("Ragdoll", true, false) as PhysicalBoneSimulator3D
+	check(rag != null and rag.get_child_count() == 18, "raider inherits eighteen authored physical bones")
+	check(not rag.is_simulating_physics(), "living enemy has no active corpse simulation")
+	var origin := enemy.global_position
+	var source := Node3D.new()
+	world.add_child(source)
+	source.global_position = origin + Vector3.FORWARD
+	source.set_meta("finisher", true)
+	enemy.health.take_damage(100, source)
+	await frames(4)
+	check(rag.is_simulating_physics(), "lethal blow starts physical ragdoll")
+	check(not enemy._tree.active and not enemy._fsm.is_physics_processing(), "corpse has no competing animation or movement")
+	check(not enemy.sword.get_node("HitBox")._active, "death closes sword damage window")
+	check(enemy.collision_layer == 0, "corpse releases character collision")
+	await frames(150)
+	var hips := rag.get_node("pb_Hips") as PhysicalBone3D
+	check(hips.global_position.is_finite() and hips.global_position.distance_to(origin) < 5, "ragdoll settles locally without exploding")
+	check(hips.global_position.y > -.15 and hips.global_position.y < .8, "corpse falls onto the floor rather than standing or tunneling")
+	print("PACK_RAGDOLL hips=", hips.global_position, " velocity=", hips.linear_velocity)
+	enemy.queue_free()
+	source.queue_free()
+	await frames(2)
+
+func action_controls() -> void:
+	var hero := Hero.instantiate() as Player
+	hero.position = Vector3(0,1,0)
+	world.add_child(hero)
+	hero.intent.set_physics_process(false)
+	await frames(20)
+	var attack := hero.get_node("StateMachine/Attack")
+	var starts: Array[int] = []
+	attack.combo_step_started.connect(func(index: int, _dir: int, _clip: String): starts.append(index))
+	hero.intent._sample_attack_button(true)
+	await frames(80)
+	check(starts == [0], "holding click produces one action swing, no charge or automatic combo")
+	hero.intent._sample_attack_button(false)
+	await frames(2)
+	hero.intent._sample_attack_button(true)
+	hero.intent._sample_attack_button(false)
+	await frames(3)
+	var dodge := InputEventAction.new()
+	dodge.action = "dash"
+	dodge.pressed = true
+	attack.handle_input(dodge)
+	var dodged := false
+	for i in 18:
+		await frames(1)
+		if hero.state_name() == "Dash": dodged = true
+	check(dodged, "early dodge input is buffered until sword contact")
+	await frames(50)
+	hero.intent.guard = true
+	hero.get_node("StateMachine").transition_to("Guard")
+	await frames(14)
+	var guard := hero.get_node("StateMachine/Guard")
+	for direction in SwingDir.ALL:
+		check(guard.blocks(direction), "frontal guard accepts any cut direction")
+	hero.intent.guard = false
+	hero.get_node("StateMachine").transition_to("Idle")
+	hero.stamina = 100.0
+	hero._update_resources(1.0)
+	check(is_equal_approx(hero.stamina,130.0), "one second recovers thirty stamina outside guard")
+	hero.queue_free()
+	await frames(2)

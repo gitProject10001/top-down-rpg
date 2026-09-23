@@ -1,4 +1,6 @@
 extends State
+signal combo_step_started(index: int, direction: int, clip: String)
+signal damage_window_opened(index: int, duration: float)
 ## A click-chained looping melee combo (horizontal → backhand → downward → repeat).
 ##
 ## Built on the Death's Door pattern (docs/deaths-door-study.md): per-clip strike/cancel timing,
@@ -64,6 +66,7 @@ var _strike := 0.4
 var _cancel := 0.55
 var _hit := false
 var _queued := false
+var _dodge_buffer := 0.0
 var _target: Node3D
 var _clip := ""                    ## the clip this swing is actually playing (may be the opener)
 var _step_vel := Vector3.ZERO
@@ -71,11 +74,20 @@ var _step_until := 0.0             ## seconds into the clip that the step keeps 
 
 
 func enter() -> void:
+	_dodge_buffer = 0.0
 	_step = 0
 	_start_step()
 
 
+func combo_index() -> int:
+	return _step
+
+func exit() -> void:
+	player.sword.cancel_swing()
+	if player.intent: player.intent.consume_attack()
+
 func _start_step() -> void:
+	if player.intent: player.intent.consume_attack()
 	_t = 0.0
 	_hit = false
 	_queued = false
@@ -101,6 +113,7 @@ func _start_step() -> void:
 	_strike = meta.strike
 	_cancel = meta.cancel
 	_aim_step()
+	combo_step_started.emit(_step, SwingDir.NONE, _clip)
 	player.sword.begin_swing(_step, _len)        # blade glow + streak (the crescent fires with the hit)
 
 
@@ -143,6 +156,9 @@ func _aim_step() -> void:
 
 
 func physics_update(delta: float) -> void:
+	_dodge_buffer = maxf(0.0, _dodge_buffer - delta)
+	if player.intent is PlayerIntent and player.intent.consume_combo_press():
+		_queued = true
 	_t += delta
 	player.apply_gravity(delta)
 	if _t < _step_until:
@@ -161,11 +177,14 @@ func physics_update(delta: float) -> void:
 		# damage window + slash crescent together, at this clip's strike moment
 		player.sword.hit(hit_dur, _step % 2 == 0, player.swing_damage())
 		_hit = true
+		damage_window_opened.emit(_step, hit_dur)
 
 	# A buffered press past this clip's cancel point chains into the next swing, skipping the
 	# recovery tail; the chain WRAPS (…-> atk_d -> atk_h -> …) so mashing keeps the flurry going.
 	# Only an un-queued swing plays its recovery — the natural combo ender.
-	if _queued and _hit and f >= _cancel:
+	if _dodge_buffer > 0 and _hit and player.can_dash():
+		fsm.transition_to("Dash")
+	elif _queued and _hit and f >= _cancel:
 		_step = (_step + 1) % chain.size()
 		_start_step()
 	elif _hit and f >= _cancel and player.get_move_input() != Vector2.ZERO:
@@ -187,7 +206,9 @@ func handle_input(event: InputEvent) -> void:
 	# cannot be cancelled, so how much of the combo to spend is a decision rather than a reflex.
 	#
 	# After `_hit` it is free again, which is what keeps the combo fluid instead of trapping.
-	if event.is_action_pressed("dash") and player.can_dash() and _hit:
-		fsm.transition_to("Dash")                # dash-cancel out of the combo
+	if event.is_action_pressed("dash") and player.can_dash():
+		_dodge_buffer = .18
+		if _hit: fsm.transition_to("Dash")                # dash-cancel out of the combo
 	elif event.is_action_pressed("attack"):
-		_queued = true                           # buffer the next swing
+		_queued = true
+		if player.intent: player.intent.consume_attack()

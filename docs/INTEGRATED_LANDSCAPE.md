@@ -301,3 +301,30 @@ esclusivamente post-processing. Decisione e integrazione negli addon da progetta
 ## Estensione e ciclo — 23 settembre 2026
 
 La scena usa ora World per il piano 304 × 288 m e la distribuzione fuori dal nucleo protetto. F6 apre i controlli dell’orario; il ciclo completo dura 30 minuti e si ferma nei dialoghi. Dettagli, verifiche e limiti in [EXPANDED_LANDSCAPE.md](EXPANDED_LANDSCAPE.md). Non usare il generatore iniziale per aggiornare questa scena: le composizioni e le modifiche locali sono dati autoriali.
+
+
+## Primo circuito del borgo
+
+Borgo e guado esistenti collegati a una torre di prova tramite un sentiero stretto, percorso anche al ritorno; rimossi cartelli e bivio ridondante. Due predoni usano il combattimento già presente. Dati, comandi e limiti in [BORGO_EXPLORATION_CIRCUIT.md](BORGO_EXPLORATION_CIRCUIT.md). È una prova di percorrenza e progressione temporanea; non un nuovo sistema completo di quest.
+
+## Combattimento action — revisione del 23 settembre 2026
+
+La scena usa ora la combo `Attack` per il giocatore: click successivi concatenano tre colpi (due laterali e finale pesante), tenere premuto non carica. Shift schiva; un comando appena prima del contatto viene ricordato per 0,18 s. Destro para frontalmente, senza selezione della direzione. Rimossi gli indicatori direzionali dal HUD di questo personaggio. La mira e il movimento restano disponibili, con impegno breve durante il colpo.
+
+Slash e scia rendono visibile il contatto; gli attacchi normali non consumano stamina. Riserva del giocatore 180, recupero 30/s fuori dalla guardia; i nemici conservano 100 e 8/s. Il knockback ordinario è contenuto per permettere di collegare la combo, maggiore sul finale. I predoni riusano PackDirector e il driver di animazione windup/release preesistente (internamente chiamato DirAttack); questo non richiede più letture direzionali al giocatore.
+
+Il ragdoll riutilizza i vincoli articolari del progetto gemello `rpg-3d`, salvati nel prefab `scenes/components/humanoid_ragdoll.tscn`: 18 corpi, collisione con il terreno, attivazione soltanto alla morte, animazione e IK disattivati, armi agganciate alle mani. Il corpo non blocca i combattenti e viene rimosso dopo sei secondi. Non è un cambio dei modelli.
+
+Verifica: `tools/check_pack_combat.tscn` controlla tre contatti reali, click prolungato, schivata anticipata, parata indipendente dalla direzione, riserva/recupero, ragdoll stabile a terra e attacchi coordinati di quattro nemici. `tools/check_action_combat_visual.tscn` verifica combo e morte nella scena integrata e salva `captures/action_slash.png` e `captures/action_ragdoll.png`. Il vecchio test `check_directional_combo.gd` riguarda la modalità duello precedente e non è l'accettazione di questo personaggio. Le prove headless segnalano ancora il warning di cleanup ObjectDB/PagedAllocator, non risolto da questa revisione. Il feeling e il bilanciamento restano da provare manualmente; le catture non costituiscono una misura prestazionale.
+
+### Cedimento fisico progressivo
+
+Il prefab ragdoll ora usa due componenti piccoli: `scripts/components/ragdoll_reaction.gd` campiona il movimento delle ossa vive e gestisce il passaggio alla fisica; `ragdoll_muscle.gd` applica una breve resistenza angolare nel callback fisico. Durata di cedimento (0,42 s), intensità, inerzia e moltiplicatore del finale sono nell'Inspector del nodo Ragdoll. Gambe e parte colpita rilasciano prima, poi braccia e busto; anche le molle di ginocchia/gomiti si rilasciano. Gravità, collisioni e limiti anatomici restano attivi. Il controllo non ancora l'anca a una posizione nel mondo e non tenta di mantenere l'equilibrio.
+
+La velocità viene registrata prima che Hurt/Dead la sostituiscano. Movimento delle ossa e del personaggio sono miscelati senza sommarli due volte; i teletrasporti non generano inerzia. Un solo impulso raggiunge l'osso più vicino al contatto, con leva limitata e intensità maggiore sul finale. La spinta verticale fissa è rimossa. Masse distribuite maggiormente su bacino, busto e cosce, rimbalzo nullo. Il contatto dei colpi action è una stima dalla lama visibile per ogni bersaglio, non un'intersezione esatta dei triangoli né un nuovo sistema di danni per zona.
+
+L'addon `procedural_anim` di rpg-3d è stato consultato (molle e inerzia), non importato: gait, IK e solver dell'orco restano fuori. La libreria gemella prevede `hurt_chest`, `hurt_head` e `hurt_knockback`; una selezione contestuale per i personaggi vivi potrà riutilizzarle dopo verifica del retargeting. Passi di recupero, mani protettive e rialzata non sono implementati. Questa revisione è una breve transizione fisica alla morte, non una replica di Euphoria.
+
+Test aggiuntivo `tools/check_ragdoll_reactions.tscn`: spalla sinistra/destra, ginocchio, movimento verso gradino; selezione della parte colpita, inerzia, callback attivo, pausa, rilascio completo e stabilità dei 18 corpi. Risultato: zero fallimenti. Verifica visiva integrata riuscita, con catture `action_ragdoll_early.png`, `action_ragdoll_collapse.png`, `action_ragdoll.png`. Il warning di shutdown PagedAllocator preesistente resta. Nessuna nuova misura comparativa delle prestazioni.
+
+API fisiche verificate sulla [documentazione Godot PhysicalBone3D](https://docs.godotengine.org/en/stable/classes/class_physicalbone3d.html): impulsi singoli all'impatto, controllo continuo nel callback di integrazione.

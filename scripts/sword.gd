@@ -146,9 +146,10 @@ func _maybe_fear(target: Node) -> void:
 ## clip in the chain has a different length after the wind-up compression in player.gd.
 func begin_swing(step: int, dur := 0.4, directional := false) -> void:
 	_swing_step = step
-	# Read a committed duel from the steel, not an opaque fantasy fan that
-	# obscures both hands and makes the collision look wider than the blade.
-	if directional: return
+	# AI windups retain the blade sweep; show a short trail at release.
+	if directional:
+		_trail.burst(minf(dur, .22), .5)
+		return
 	_glow_blade()
 	_trail.burst(dur, trail_fade)
 
@@ -165,7 +166,8 @@ func begin_swing(step: int, dur := 0.4, directional := false) -> void:
 ## for exactly the same reason — take_damage's shared signature has no room for it.
 ## Directional swings use the swept visible blade; legacy combos retain the box.
 func hit(dur := 0.12, flip := false, dmg := 1, dir := SwingDir.NONE) -> void:
-	if dir==SwingDir.NONE: _spawn_slash(flip)
+	if dir == SwingDir.NONE or dir in [SwingDir.LEFT, SwingDir.RIGHT]:
+		_spawn_slash(dir == SwingDir.LEFT if dir != SwingDir.NONE else flip)
 	_window_id+=1
 	var window:=_window_id
 	_hitbox.manual_contact=dir!=SwingDir.NONE
@@ -187,6 +189,7 @@ func hit(dur := 0.12, flip := false, dmg := 1, dir := SwingDir.NONE) -> void:
 		if window==_window_id: cancel_swing())
 
 func cancel_swing() -> void:
+	_trail.stop(.06)
 	_window_id+=1
 	_hitbox.deactivate()
 	_sweep_ready=false
@@ -393,5 +396,19 @@ func _spawn_slash(flip: bool) -> void:
 		return
 	var s := (scene as PackedScene).instantiate()
 	s.flipped = flip
+	s.outer_radius = clampf(reach(), 1.0, 1.7)
 	add_child(s)
 	(s as Node3D).position = Vector3(0.0, 0.8, 0.0)
+
+## Closest point on the visible blade for this target, not a mesh-triangle hit.
+func impact_sample(target: Vector3) -> Dictionary:
+	var segment := blade_segment()
+	var point := Geometry3D.get_closest_point_to_segment(target, segment[0], segment[1])
+	var forward := -global_basis.z
+	var direction := target - global_position
+	direction.y = 0.0
+	if direction.length_squared() < .001: direction = forward
+	# Across-cut component gives lateral strikes a readable shoulder rotation.
+	var lateral := global_basis.x * (-1.0 if _swing_step % 2 == 0 else 1.0)
+	direction = (direction.normalized() + lateral * .45).normalized()
+	return {"point": point, "direction": direction}

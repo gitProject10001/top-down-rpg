@@ -17,8 +17,8 @@ func _process_modification() -> void:
 	var fighter: Node=skel
 	while fighter and not fighter is Player: fighter=fighter.get_parent()
 	if not fighter: return
-	var attack: Node=fighter.get_node("StateMachine/DirAttack")
-	var phase:float=attack.pose_fraction() if fighter.state_name()=="DirAttack" else -1.0
+	var attack: Node=fighter.get_node_or_null("StateMachine/DirAttack")
+	var phase:float=attack.pose_fraction() if attack != null and fighter.state_name()=="DirAttack" else -1.0
 	var attacking:=phase>=0.0
 	_weight=amount
 	var pose_dir:int=dir

@@ -57,15 +57,56 @@ func swing_damage() -> int:
 	return 1
 
 
+func _on_damaged(amount: int, source: Node) -> void:
+	# Capture BEFORE Hurt replaces locomotion velocity and before Dead clears it.
+	if health.hp == 0:
+		var rag := find_child("Ragdoll", true, false)
+		if rag and rag.has_method("capture_impact"):
+			var point := global_position + Vector3.UP * .35
+			var direction := -visuals.global_basis.z
+			if source is Node3D:
+				direction = global_position - source.global_position
+				direction.y = 0.0
+				point = source.get_meta("contact_point", point)
+				direction = source.get_meta("impact_direction", direction)
+			rag.capture_impact(point, direction, velocity, source != null and source.get_meta("finisher", false))
+	super(amount, source)
+
 func _on_died() -> void:
 	super()
-	# Corpses keep their short death animation without blocking the active pack.
 	set_deferred("collision_layer", 0)
 	set_deferred("collision_mask", 0)
-	var hurt:=get_node_or_null("HurtBox") as Area3D
-	if hurt: hurt.set_deferred("collision_layer",0)
-	if intent: intent.clear()
-	get_tree().create_timer(2.0).timeout.connect(queue_free)
+	var hurt := get_node_or_null("HurtBox") as Area3D
+	if hurt: hurt.set_deferred("collision_layer", 0)
+	if intent:
+		intent.clear()
+		intent.set_physics_process(false)
+	# Defer until collider changes have flushed; never let live animation/IK fight physics.
+	_start_death_physics.call_deferred()
+	get_tree().create_timer(6.0).timeout.connect(queue_free)
+
+func _start_death_physics() -> void:
+	var rag := find_child("Ragdoll", true, false) as PhysicalBoneSimulator3D
+	if rag == null: return # Bodies without authored physics retain the death clip.
+	set_process(false)
+	_fsm.set_physics_process(false)
+	if _tree: _tree.active = false
+	var skeleton := rag.get_parent() as Skeleton3D
+	for child in skeleton.get_children():
+		if child is SkeletonModifier3D and child != rag:
+			child.active = false
+	# Preserve the last hand pose while the body falls, without the live grip solver.
+	if sword and _grip_r:
+		sword.reparent(_grip_r, true)
+	if shield and _grip_l:
+		shield.reparent(_grip_l, true)
+	var blob := get_node_or_null("BlobShadow")
+	if blob: blob.hide()
+	if rag.has_method("start_reaction"):
+		rag.start_reaction()
+	else:
+		rag.physical_bones_start_simulation()
+
 
 
 ## Its own hurt radius, read by Player.hurt_radius_of when the other side sizes up a swing. The

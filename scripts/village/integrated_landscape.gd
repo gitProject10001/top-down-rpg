@@ -2,6 +2,7 @@
 extends Node3D
 var waters: Array=[]
 var day_cycle: Node
+var exploration_trial: Node
 var player: CharacterBody3D
 var camera: Camera3D
 var overview:=false
@@ -64,9 +65,13 @@ func _ready() -> void:
         combat_encounter.name="MeadowEncounter"
         view.add_child(combat_encounter)
         combat_encounter.configure(view,player)
+    exploration_trial=view.get_node_or_null("BorgoCircuit")
+    if exploration_trial:
+        exploration_trial.setup(view,player,combat_encounter_enabled and not "--no-enemies" in OS.get_cmdline_user_args())
+        npc_dialogues.dialogue_changed.connect(func(opened: bool): exploration_trial.ui.visible=not opened)
     var ui:=CanvasLayer.new();add_child(ui)
     var label:=Label.new();label.position=Vector2(20,20);label.text="SCENA INTEGRATA
-WASD movimento · click combo · tieni premuto carica · destro parata · Shift schivata
+WASD movimento · click combo · destro parata frontale · Shift schivata
 4 combattimento · R ricomincia · O panoramica · F6 ora · F7 stile · P filtro pittorico · 1 città / 2 guado / 3 lago / 5 borgo · E porta · F acqua"
     ui.add_child(label)
     npc_dialogues.dialogue_changed.connect(func(opened: bool): label.visible=not opened; npc_hud_visibility(opened))
@@ -235,6 +240,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
             if overview: toggle_overview()
             player.position=Vector3(27,1,24)
             player.velocity=Vector3.ZERO
+        if event.keycode==KEY_R and is_instance_valid(exploration_trial) and exploration_trial.retry_if_active():
+            get_viewport().set_input_as_handled(); return
         if event.keycode in [KEY_4,KEY_R] and is_instance_valid(combat_encounter):
             if overview: toggle_overview()
             combat_encounter.call_deferred("reset_encounter",true)

@@ -98,6 +98,8 @@ uniform float road_edge_noise : hint_range(0.0, 0.3) = 0.08;
 varying vec3 world_position;
 uniform vec2 exploration_points[32];
 uniform int exploration_count = 0;
+uniform vec4 exploration_branches[64];
+uniform int exploration_branch_count = 0;
 uniform vec3 exploration_clearing = vec3(0.0);
 
 
@@ -372,7 +374,16 @@ void fragment() {
 		float t = clamp(dot(pos-a,ab)/max(dot(ab,ab),0.001),0.0,1.0);
 		route_distance = min(route_distance,length(pos-a-ab*t));
 	}
+	float branch_distance=100000.0;
+	for (int i = 0; i < 64; i++) {
+		if (i >= exploration_branch_count) { break; }
+		vec2 a=exploration_branches[i].xy;
+		vec2 ab=exploration_branches[i].zw-a;
+		float t=clamp(dot(pos-a,ab)/max(dot(ab,ab),0.001),0.0,1.0);
+		branch_distance=min(branch_distance,length(pos-a-ab*t));
+	}
 	float route_wear = 1.0-smoothstep(1.0,2.6,route_distance+(ground_noise(pos*2.0)-0.5)*0.6);
+	route_wear=max(route_wear,1.0-smoothstep(0.55,1.35,branch_distance+(ground_noise(pos*2.0)-.5)*.25));
 	float clearing_wear = (1.0-smoothstep(5.0,max(6.0,exploration_clearing.z),length(pos-exploration_clearing.xy)))*0.65;
 	if (exploration_count > 1) {
 		float amount = max(route_wear,clearing_wear)*(1.0-stamp);
