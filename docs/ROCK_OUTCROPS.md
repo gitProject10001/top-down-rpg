@@ -75,3 +75,9 @@ Aprire `scenes/dev/rock_parameter_study.tscn` e premere F6. Riutilizza `gameplay
 `tools/check_rock_parameter_study.gd` verifica che il personaggio poggi sul terreno, si muova e abbia la camera del gioco. Il generatore `tools/build_rock_parameter_study.gd` ricrea la scena: non eseguirlo dopo avervi fatto modifiche da conservare.
 
 La variante molto schiacciata resta un riferimento per un futuro terreno roccioso; non è ancora un preset distinto.
+
+### Pareti nella scena integrata
+
+I due `Affioramento_0/ContinuousCliff` e `Affioramento_1/ContinuousCliff` usano `layered_rock_wall`: le masse del nuovo generatore sostituiscono le fasce del fronte, con collisione triangolare della stessa geometria. `Wall Rock Size` regola la larghezza lungo la guida. La fascia di raccordo superiore, il pianoro e le rampe conservano la geometria esistente; la fascia di passaggio davanti alla guida rimane libera.
+
+Verifica `tools/check_integrated_rock_walls.gd`: confronto esatto dei vertici di pianoro/rampe, sostituzione del fronte e rispetto del corridoio per entrambe le pareti. Il test generale dei percorsi è passato sulla scena corrente saltando in una copia temporanea soltanto il vecchio conteggio fisso degli alberi (81 attuali contro 91 previsti dal test); resta un messaggio PagedAllocator in uscita.

@@ -4,6 +4,7 @@ extends Node3D
 ## Add as a child of the source Path3D, then configure_from(source). The source
 ## remains the authority for its transform; this node uses identity locally.
 const Masonry = preload("res://shaders/pixelart/solid_masonry.gdshader")
+const FracturedBoulder = preload("res://addons/rock_builder/fractured_boulder.gd")
 const Rock = preload("res://addons/rock_builder/rock.gd")
 const ElevatedZone = preload("res://addons/rock_builder/elevated_zone.gd")
 signal rebuilt
@@ -32,6 +33,11 @@ signal rebuilt
  set(value): stone_color = value; schedule()
 @export var collisions_enabled := true:
  set(value): collisions_enabled = value; schedule()
+## Replace the old stratified front with full-height fractured rock masses.
+@export var layered_rock_wall := false:
+ set(value): layered_rock_wall=value; schedule()
+@export_range(1.0,15.0,0.25) var wall_rock_size := 5.5:
+ set(value): wall_rock_size=clampf(value,1.0,15.0); schedule()
 @export var debris_enabled := true:
  set(value): debris_enabled = value; schedule()
 @export var painted := true:
@@ -272,6 +278,7 @@ func generate() -> Dictionary:
    # The terrain takes over the exact roof edge; drawing both coplanar surfaces
    # would cause z-fighting and duplicate collision triangles on the ridge.
    if raised_zone_enabled and j in [front_vertex_count - 1, front_vertex_count]: continue
+   if layered_rock_wall and j<front_vertex_count-2: continue
    var j_next := (j + 1) % ring_size
    var a := i * ring_size + j
    var b := (i + 1) * ring_size + j
@@ -293,6 +300,9 @@ func generate() -> Dictionary:
    var c: int = end * ring_size + cap[k + 2]
    if end == 0: indices.append_array(PackedInt32Array([a, b, c]))
    else: indices.append_array(PackedInt32Array([a, c, b]))
+
+ if layered_rock_wall:
+  _append_rock_wall(vertices,indices,colors,uvs,stations,crests,length_value)
 
  var corridor := _corridor(baked)
  if _invades_corridor(vertices, indices, corridor):
@@ -336,6 +346,30 @@ func generate() -> Dictionary:
    return {"error": "Il terreno rialzato invade la fascia libera su una curva stretta. Allarga la guida o riduci la profondità."}
   result.elevated = elevated
  return result
+
+func _append_rock_wall(vertices: PackedVector3Array,indices: PackedInt32Array,colors: PackedColorArray,uvs: PackedVector2Array,stations: Array[float],crests: PackedVector3Array,length_value: float) -> void:
+ var rng := RandomNumberGenerator.new(); rng.seed=cliff_seed
+ var start := 0.0; var piece := 0
+ while start<length_value:
+  var width := minf(wall_rock_size*rng.randf_range(0.8,1.25),length_value-start)
+  var mesh := FracturedBoulder._solid(cliff_seed+piece*3571,stone_color,false,true)
+  var arrays := mesh.surface_get_arrays(0)
+  var source: PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
+  var tint: PackedColorArray=arrays[Mesh.ARRAY_COLOR]
+  var base := vertices.size()
+  for i in source.size():
+   var v := source[i]
+   var distance_value := clampf(start+(v.x+0.5)*width*1.1-width*0.05,0,length_value)
+   var frame := _frame(distance_value,length_value)
+   var upper := 1
+   while upper<stations.size()-1 and stations[upper]<distance_value: upper+=1
+   var weight := inverse_lerp(stations[upper-1],stations[upper],distance_value)
+   var crest := lerpf(crests[upper-1].y,crests[upper].y,weight)
+   var depth := 0.18+(0.5-v.z)*wall_depth
+   vertices.append(frame.center-frame.front*depth+Vector3.UP*(v.y*(crest+0.12)-0.12))
+   colors.append(tint[i]); uvs.append(Vector2(distance_value,v.y*crest))
+   indices.append(base+i)
+  start+=width; piece+=1
 
 func _frame(s: float, length_value: float) -> Dictionary:
  var p := guide.sample_baked(s)
