@@ -1,0 +1,255 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scripts/dev/rock_parameter_study.gd" id="1_v3qng"]
+[ext_resource type="Script" path="res://addons/rock_builder/outcrop.gd" id="2_rmyop"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rel80"]
+albedo_color = Color(0.2, 0.26, 0.18, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_m224j"]
+size = Vector2(180, 180)
+
+[sub_resource type="Environment" id="Environment_c8gsn"]
+background_mode = 1
+background_color = Color(0.36, 0.45, 0.55, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.8, 0.87, 1, 1)
+ambient_light_energy = 0.65
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_q604l"]
+size = Vector3(180, 1, 180)
+
+[node name="RockParameterStudy" type="Node3D" unique_id=708790636]
+script = ExtResource("1_v3qng")
+
+[node name="Ground" type="MeshInstance3D" parent="." unique_id=1124578948]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.13, 0)
+material_override = SubResource("StandardMaterial3D_rel80")
+mesh = SubResource("PlaneMesh_m224j")
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1163391088]
+transform = Transform3D(0.8660254, 0.37157243, -0.33456528, 0, 0.66913056, 0.74314487, 0.5, -0.64358234, 0.57948405, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Environment" type="WorldEnvironment" parent="." unique_id=2146656711]
+environment = SubResource("Environment_c8gsn")
+
+[node name="Montagna" type="Node3D" parent="." unique_id=1317925962]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0, -25)
+script = ExtResource("2_rmyop")
+formation_style = 1
+shape_kind = 2
+outline = PackedVector2Array(-5, -4, 5, -4, 5, 4, -5, 4)
+height = 18.0
+volume_size = Vector2(20, 24)
+walkable = false
+natural_rock_size = 8.0
+medium_rock_size = 3.0
+small_rock_size = 0.65
+
+[node name="Montagna_Label" type="Label3D" parent="." unique_id=182142995]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 2, -11)
+pixel_size = 0.016
+billboard = 1
+no_depth_test = true
+text = "Montagna
+Taglia 8.0 m | H 18.0 m"
+font_size = 48
+
+[node name="Catena_allungata" type="Node3D" parent="." unique_id=1805004987]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0, -25)
+script = ExtResource("2_rmyop")
+formation_style = 1
+shape_kind = 2
+outline = PackedVector2Array(-5, -4, 5, -4, 5, 4, -5, 4)
+height = 12.0
+volume_size = Vector2(10, 30)
+walkable = false
+natural_rock_size = 6.0
+medium_rock_size = 2.0
+small_rock_size = 0.45
+
+[node name="Catena_allungata_Label" type="Label3D" parent="." unique_id=2113209845]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 2, -8)
+pixel_size = 0.016
+billboard = 1
+no_depth_test = true
+text = "Catena allungata
+Taglia 6.0 m | H 12.0 m"
+font_size = 48
+
+[node name="Parete_rocciosa" type="Node3D" parent="." unique_id=114159050]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 0, -24)
+script = ExtResource("2_rmyop")
+formation_style = 1
+shape_kind = 2
+outline = PackedVector2Array(-5, -4, 5, -4, 5, 4, -5, 4)
+height = 8.0
+volume_size = Vector2(4, 25)
+walkable = false
+natural_rock_size = 4.0
+medium_rock_size = 1.4
+small_rock_size = 0.3
+
+[node name="Parete_rocciosa_Label" type="Label3D" parent="." unique_id=343979894]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 28, 2, -9.5)
+pixel_size = 0.016
+billboard = 1
+no_depth_test = true
+text = "Parete rocciosa
+Taglia 4.0 m | H 8.0 m"
+font_size = 48
+
+[node name="Campo_piccole_rocce" type="Node3D" parent="." unique_id=1981263907]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 0, 7)
+script = ExtResource("2_rmyop")
+formation_style = 1
+shape_kind = 2
+outline = PackedVector2Array(-5, -4, 5, -4, 5, 4, -5, 4)
+height = 1.1
+volume_size = Vector2(13, 16)
+walkable = false
+natural_rock_size = 1.1
+natural_min_spacing = 1.0
+natural_density = 0.65
+medium_rock_size = 0.4
+small_rock_size = 0.15
+
+[node name="Campo_piccole_rocce_Label" type="Label3D" parent="." unique_id=1533993873]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -26, 2, 17)
+pixel_size = 0.016
+billboard = 1
+no_depth_test = true
+text = "Campo piccole rocce
+Taglia 1.1 m | H 1.1 m"
+font_size = 48
+
+[node name="Affioramento_medio" type="Node3D" parent="." unique_id=94815184]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 6)
+script = ExtResource("2_rmyop")
+formation_style = 1
+shape_kind = 2
+outline = PackedVector2Array(-5, -4, 5, -4, 5, 4, -5, 4)
+height = 6.0
+volume_size = Vector2(8, 13)
+walkable = false
+
+[node name="Affioramento_medio_Label" type="Label3D" parent="." unique_id=708654731]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2, 14.5)
+pixel_size = 0.016
+billboard = 1
+no_depth_test = true
+text = "Affioramento medio
+Taglia 5.5 m | H 6.0 m"
+font_size = 48
+
+[node name="Parete_bassa" type="Node3D" parent="." unique_id=1057627997]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 0, 6)
+script = ExtResource("2_rmyop")
+formation_style = 1
+shape_kind = 2
+outline = PackedVector2Array(-5, -4, 5, -4, 5, 4, -5, 4)
+volume_size = Vector2(3, 18)
+walkable = false
+natural_rock_size = 2.5
+medium_rock_size = 0.8
+small_rock_size = 0.2
+
+[node name="Parete_bassa_Label" type="Label3D" parent="." unique_id=418960540]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 26, 2, 17)
+pixel_size = 0.016
+billboard = 1
+no_depth_test = true
+text = "Parete bassa
+Taglia 2.5 m | H 3.0 m"
+font_size = 48
+
+[node name="Pianoro_con_apertura" type="Node3D" parent="." unique_id=1835437561]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 0, 35)
+script = ExtResource("2_rmyop")
+formation_style = 1
+outline = PackedVector2Array(-6, -6, 6, -6, 6, 6, -6, 6)
+holes = Array[PackedVector2Array]([PackedVector2Array(-1.6, -1.6, 1.6, -1.6, 1.6, 1.6, -1.6, 1.6)])
+height = 4.0
+volume_size = Vector2(12, 12)
+natural_rock_size = 4.0
+medium_rock_size = 1.3
+small_rock_size = 0.25
+
+[node name="Pianoro_con_apertura_Label" type="Label3D" parent="." unique_id=852486686]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -24, 2, 43)
+pixel_size = 0.016
+billboard = 1
+no_depth_test = true
+text = "Pianoro con apertura
+Taglia 4.0 m | H 4.0 m"
+font_size = 48
+
+[node name="Dettaglio_sulle_superfici" type="Node3D" parent="." unique_id=599085586]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0, 32)
+script = ExtResource("2_rmyop")
+formation_style = 1
+shape_kind = 2
+outline = PackedVector2Array(-5, -4, 5, -4, 5, 4, -5, 4)
+height = 5.0
+volume_size = Vector2(8, 10)
+walkable = false
+natural_rock_size = 4.5
+medium_rock_size = 1.1
+small_rock_size = 0.45
+small_rock_density = 0.9
+small_surface_ratio = 1.0
+
+[node name="Dettaglio_sulle_superfici_Label" type="Label3D" parent="." unique_id=1408776139]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 2, 39)
+pixel_size = 0.016
+billboard = 1
+no_depth_test = true
+text = "Dettaglio sulle superfici
+Taglia 4.5 m | H 5.0 m"
+font_size = 48
+
+[node name="Solo_masse_principali" type="Node3D" parent="." unique_id=1412753841]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 0, 33)
+script = ExtResource("2_rmyop")
+formation_style = 1
+shape_kind = 2
+outline = PackedVector2Array(-5, -4, 5, -4, 5, 4, -5, 4)
+height = 5.0
+volume_size = Vector2(8, 10)
+walkable = false
+natural_rock_size = 4.5
+medium_rock_size = 1.1
+medium_rock_density = 0.0
+small_rock_size = 0.45
+small_rock_density = 0.0
+
+[node name="Solo_masse_principali_Label" type="Label3D" parent="." unique_id=1070763152]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 25, 2, 40)
+pixel_size = 0.016
+billboard = 1
+no_depth_test = true
+text = "Solo masse principali
+Taglia 4.5 m | H 5.0 m"
+font_size = 48
+
+[node name="Controls" type="CanvasLayer" parent="." unique_id=1993150704]
+
+[node name="@Label@1168" type="Label" parent="Controls" unique_id=920156350]
+offset_left = 20.0
+offset_top = 18.0
+offset_right = 20.0
+offset_bottom = 18.0
+theme_override_colors/font_shadow_color = Color(0, 0, 0, 1)
+theme_override_constants/shadow_offset_x = 2
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 20
+text = "ROCK LAB — personaggio e camera del gioco
+WASD: movimento | Controlli di salto e combattimento del gioco
+Modifica i nodi in Inspector: Distribuzione naturale / Rocce medie / Rocce piccole"
+
+[node name="GroundCollision" type="StaticBody3D" parent="." unique_id=841177877]
+
+[node name="@CollisionShape3D@1169" type="CollisionShape3D" parent="GroundCollision" unique_id=610649468]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.63, 0)
+shape = SubResource("BoxShape3D_q604l")

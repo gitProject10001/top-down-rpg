@@ -1,0 +1,80 @@
+[gd_scene format=3 uid="uid://bbsup078s6ty2"]
+
+[ext_resource type="Script" uid="uid://ykjy4n28i6dn" path="res://addons/rock_builder/outcrop.gd" id="1_o2kty"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8cve1"]
+albedo_color = Color(0.19, 0.24, 0.16, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_3woii"]
+size = Vector2(60, 40)
+
+[sub_resource type="Environment" id="Environment_ja4lx"]
+background_mode = 1
+background_color = Color(0.18, 0.21, 0.24, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.8, 0.85, 1, 1)
+ambient_light_energy = 0.6
+
+[node name="RockOutcropPlayground" type="Node3D" unique_id=1884710055]
+
+[node name="Terreno" type="MeshInstance3D" parent="." unique_id=1872653041]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -4.292861, -0.1, -3.5148697)
+material_override = SubResource("StandardMaterial3D_8cve1")
+mesh = SubResource("PlaneMesh_3woii")
+
+[node name="AreaConBuco" type="Node3D" parent="." unique_id=838265234]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -43.660637, 0, 0)
+script = ExtResource("1_o2kty")
+formation_style = 1
+outline = PackedVector2Array(-5, -4, 0, -5, 21.918655, -9.1019745, 6, 1, 3, 4, -2.020465, 13.562278, -9.41472, 3.839264)
+holes = Array[PackedVector2Array]([PackedVector2Array(-1.5, -1.5, 1.5, -1.5, 1.5, 1.5, -1.5, 1.5)])
+height = 25.498322
+
+[node name="PercorsoRoccioso" type="Node3D" parent="." unique_id=1277202476]
+transform = Transform3D(0.9999219, -0.012496232, 0, 0.012496232, 0.9999219, 0, 0, 0, 1, 6.9230804, 0, 0)
+script = ExtResource("1_o2kty")
+formation_style = 1
+shape_kind = 1
+outline = PackedVector2Array(-0.14819336, 6.2381954, -2.905325, 1.7675667, 1.569067, -0.5621605, 1.6471233, -11.29713)
+height = 14.6
+path_width = 9.6
+walkable = false
+rock_spacing = 0.75
+medium_rock_size = 5.199999999999999
+medium_rock_density = 0.45
+small_rock_size = 1.3
+small_rock_density = 0.75
+small_surface_ratio = 0.85
+
+[node name="PercorsoRoccioso2" type="Node3D" parent="." unique_id=464938040]
+transform = Transform3D(0.9999219, -0.012496232, 0, 0.012496232, 0.9999219, 0, 0, 0, 1, -17.29309, 0, 0)
+script = ExtResource("1_o2kty")
+formation_style = 1
+shape_kind = 1
+outline = PackedVector2Array(0.2889862, 8.441255, -2.905325, 1.7675667, 1.569067, -0.5621605, 1.6471233, -11.29713)
+height = 11.939617
+path_width = 6.7639694
+walkable = false
+
+[node name="VolumeRoccioso" type="Node3D" parent="." unique_id=1967894352]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 46.221733, 0, 0)
+script = ExtResource("1_o2kty")
+formation_style = 1
+shape_kind = 2
+outline = PackedVector2Array(-5, -4, 5, -4, 5, 4, -5, 4)
+height = 15.060102
+volume_size = Vector2(16.158508, 26.124842)
+walkable = false
+
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=675746312]
+transform = Transform3D(0.90630776, 0.34618863, -0.24240388, 0, 0.57357645, 0.81915206, 0.42261827, -0.74240386, 0.5198368, 0, 0, 0)
+shadow_enabled = true
+
+[node name="Environment" type="WorldEnvironment" parent="." unique_id=528234175]
+environment = SubResource("Environment_ja4lx")
+
+[node name="Camera" type="Camera3D" parent="." unique_id=2102321449]
+transform = Transform3D(0.85328186, -0.29537737, 0.42972356, 0, 0.82409346, 0.5664538, -0.52145004, -0.48334476, 0.703184, 22, 29, 36)
+projection = 1
+current = true
+size = 34.0
