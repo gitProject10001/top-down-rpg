@@ -1,0 +1,46 @@
+extends "res://tools/check_action_combat_visual.gd"
+func run() -> void:
+ scene=load("res://scenes/dev/integrated_landscape.tscn").instantiate()
+ get_tree().root.add_child(scene)
+ await settle(60)
+ await scene.combat_encounter.reset_encounter(true)
+ await settle(25)
+ var hero: Player=scene.player
+ hero.intent.set_physics_process(false)
+ hero.intent.clear()
+ hero.health.extend_invulnerable(60)
+ var foe: EnemyDuelist=scene.combat_encounter.fighters[0]
+ for enemy in scene.combat_encounter.fighters:
+  enemy.intent.set_physics_process(false)
+  enemy.intent.clear()
+  enemy.get_node("StateMachine").transition_to("Idle")
+ foe.global_position=hero.global_position+Vector3(0,0,-1.3)
+ foe.health.max_hp=20
+ foe.health.revive()
+ hero.intent.look=Vector2(0,-1)
+ hero.visuals.rotation.y=0
+ scene.camera._apply(true)
+ await settle(20)
+ hero.intent._sample_attack_button(true)
+ await settle(42)
+ await snap("charged_windup")
+ hero.intent._sample_attack_button(false)
+ await settle(8)
+ await snap("charged_release")
+ await settle(90)
+ foe.get_node("StateMachine").transition_to("Idle")
+ var source:=Node3D.new()
+ scene.add_child(source)
+ source.global_position=foe.global_position+Vector3(0,0,-1)
+ foe.health.set_invulnerable(false)
+ foe.health._invuln_until=0
+ foe.health.take_damage(100,source)
+ await settle(8)
+ await snap("death_last_step")
+ await settle(40)
+ check(foe.find_child("Ragdoll",true,false).is_simulating_physics(),"visual death reaches physics")
+ await snap("death_after_step")
+ print("CHARGE_VISUAL_RESULT ",failures)
+ scene.queue_free()
+ await settle(3)
+ get_tree().quit(0 if failures.is_empty() else 1)

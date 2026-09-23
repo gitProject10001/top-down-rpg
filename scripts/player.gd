@@ -8,6 +8,9 @@ extends CharacterBody3D
 ##
 ## CharacterBody3D (not RigidBody3D) is chosen for arcade-precise, predictable control.
 
+@export var walk_speed := 2.2
+var indoors := false
+var _locomotion_layers := false
 @export var move_speed := 6.0           ## Top running speed (m/s).
 @export var acceleration := 40.0        ## How fast we reach / leave top speed (m/s^2).
 @export var rotation_speed := 12.0      ## How fast the visuals swing to face the cursor.
@@ -267,13 +270,13 @@ func set_attack_playback_speed(speed: float) -> void:
 func set_tree_active(on: bool) -> void:
 	if _tree:
 		_tree.active=true
-		if _fsm.has_state("DirAttack"):
+		if (_tree.tree_root as AnimationNodeStateMachine).get_node("Slash") is AnimationNodeBlendTree:
 			_tree["parameters/Slash/ActionClock/scale"] = _action_playback_speed if on else 0.0
 		else:
 			_tree.callback_mode_process=AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_PHYSICS if on else AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL
 
 func evaluate_held_pose() -> void:
-	if _tree and not _fsm.has_state("DirAttack"):
+	if _tree and _tree.callback_mode_process == AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_MANUAL:
 		_tree.advance(0.0)
 
 func update_combat_animation(delta: float) -> void:
@@ -324,6 +327,7 @@ func _ready() -> void:
 	_toon = get_node_or_null("ToonSkin")   # the body's flash channel; every current hero has one
 	_setup_intent()
 	_setup_animations()
+	_locomotion_layers = preload("res://scripts/combat/locomotion_layers.gd").install(self)
 	_setup_weapon_sockets()
 	_setup_tools()
 	# The dodge smear is NOT oriented here: it lies flat across the dash direction, which is only
@@ -394,6 +398,11 @@ func _setup_animations() -> void:
 		for clip in locomotion_clips:
 			if _tree.has_animation(clip):
 				_strip_root_drift(_tree.get_animation(clip))
+		for reaction in ["hurt_chest", "hurt_head", "hurt_knockback", "getup"]:
+			if _tree.has_animation(reaction):
+				var clip := _tree.get_animation(reaction)
+				_strip_root_drift(clip)
+				clip.loop_mode = Animation.LOOP_NONE
 		for clip in loop_clips:
 			if _tree.has_animation(clip):
 				_tree.get_animation(clip).loop_mode = Animation.LOOP_LINEAR
@@ -431,6 +440,18 @@ func _setup_animations() -> void:
 		# modifier (ArmGuard) runs — otherwise the animation overwrites the procedural guard.
 		if _fsm.has_state("DirAttack"):
 			load("res://scripts/combat/combat_animation_layers.gd").install(_tree)
+		else:
+			# Keep evaluating the pose every physics frame, including at zero speed.
+			# Switching the whole mixer to manual leaves SkeletonModifiers without
+			# a fresh authored pose and can expose the skeleton's rest pose.
+			var sm := _tree.tree_root as AnimationNodeStateMachine
+			var action := sm.get_node("Slash")
+			var layers := AnimationNodeBlendTree.new()
+			layers.add_node("Action", action)
+			layers.add_node("ActionClock", AnimationNodeTimeScale.new())
+			layers.connect_node("ActionClock", 0, "Action")
+			layers.connect_node("output", 0, "ActionClock")
+			sm.replace_node("Slash", layers)
 		_tree.callback_mode_process = AnimationMixer.ANIMATION_CALLBACK_MODE_PROCESS_PHYSICS
 		_tree.active = true
 		_playback = _tree["parameters/playback"]
@@ -556,7 +577,7 @@ func _process(delta: float) -> void:
 	# facing it reads correctly as a backward run).
 	if _playback:
 		var state_name: String = String(_fsm.current_state.name) if _fsm.current_state else ""
-		if state_name in ["Attack", "DashAttack", "Jump", "DirAttack"] or (state_name == "Hurt" and has_clip("hurt_chest")):
+		if state_name in ["Attack", "DashAttack", "Jump", "DirAttack", "Dead"] or (state_name == "Hurt" and has_clip("hurt_chest")):
 			# These states drive the Slash node themselves, swapping its clip per swing (or per
 			# jump phase). Anything that also writes the tree here would fight them — and the
 			# locomotion branch below WOULD, because a lunge (or a running jump) is moving fast
@@ -588,7 +609,7 @@ func _process(delta: float) -> void:
 			_tree["parameters/Aim/blend_position"] = Vector2(right.dot(dir), fwd.dot(dir)) * amount
 			if _playback.get_current_node() != "Aim":
 				_playback.travel("Aim")
-		elif run > 0.15:
+		elif planar > .12:
 			# Move is a 2D blend of the sword-and-shield locomotion clips (they carry the
 			# weapons): forward/back + strafe left/right, placed in the character's FACING
 			# frame (x = strafe right, y = forward) — same convention as the Aim blend. So
@@ -598,7 +619,19 @@ func _process(delta: float) -> void:
 			# Move is a 1D SPEED ramp instead — walk through jog to sprint, normalized 0..1 against
 			# move_speed. The body is already pointed down its travel direction, so speed is the
 			# only thing left to say.
-			if face_movement:
+			if _locomotion_layers:
+				var v := Vector3(velocity.x,0,velocity.z)
+				var direction := Vector2(visuals.global_basis.x.dot(v),(-visuals.global_basis.z).dot(v)).normalized()
+				_tree["parameters/Move/Free/blend_position"] = run
+				var mix := clampf((planar-walk_speed)/maxf(move_speed-walk_speed,.1),0,1)
+				_tree["parameters/Move/WalkClock/scale"] = clampf(planar/walk_speed,.15,1.5)
+				_tree["parameters/Move/RunClock/scale"] = clampf(planar/move_speed,.15,1.5)
+				_tree["parameters/Move/FreeClock/scale"] = clampf(lerpf(planar/walk_speed,planar/move_speed,mix),.15,1.5)
+				_tree["parameters/Move/Walk/blend_position"] = direction
+				_tree["parameters/Move/Run/blend_position"] = direction
+				_tree["parameters/Move/Speed/blend_amount"] = clampf((planar-walk_speed)/maxf(move_speed-walk_speed,.1),0,1)
+				_tree["parameters/Move/Locked/blend_amount"] = 1.0 if combat_lock_target() else 0.0
+			elif face_movement:
 				_tree["parameters/Move/blend_position"] = run
 			else:
 				var fwd := -visuals.global_transform.basis.z
@@ -722,9 +755,17 @@ var water_slow := 1.0
 ## attacking / blocking / shooting; with input == 0 this naturally decelerates (acts as friction).
 func apply_movement(input: Vector2, delta: float, speed_scale := 1.0) -> void:
 	var dir := Vector3(input.x, 0.0, input.y).normalized()
-	var target := dir * move_speed * speed_scale * water_slow
+	var amount := minf(input.length(), 1.0) if is_input_driven() else 1.0
+	var speed := movement_speed()
+	var target := dir * speed * amount * speed_scale * water_slow
 	velocity.x = move_toward(velocity.x, target.x, acceleration * delta)
 	velocity.z = move_toward(velocity.z, target.z, acceleration * delta)
+
+func movement_speed() -> float:
+	if not is_input_driven(): return move_speed
+	var walk := Input.is_action_pressed("walk_modifier")
+	# The modifier reverses the context: outdoors walk, indoors deliberately run.
+	return walk_speed if indoors != walk else move_speed
 
 func apply_friction(delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, acceleration * delta)
@@ -1031,7 +1072,11 @@ func _on_damaged(_amount: int, source: Node) -> void:
 		# A shared fighter body must not inherit the hero's half-second mercy:
 		# that would silently absorb the next legitimate combo contact.
 		health.extend_invulnerable(0.08)
-	_fsm.transition_to("Hurt")
+	var hurt := get_node_or_null("StateMachine/Hurt")
+	if hurt and hurt.has_method("receive_hit"):
+		hurt.receive_hit(source)
+	else:
+		_fsm.transition_to("Hurt")
 
 func _on_died() -> void:
 	_fsm.transition_to("Dead")

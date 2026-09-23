@@ -14,5 +14,8 @@ func enter() -> void:
 		EventBus.enemy_died.emit(player)
 
 func physics_update(_delta: float) -> void:
+	if player is EnemyDuelist and player.death_stepping:
+		player.advance_death_step(_delta)
+		return
 	player.velocity = Vector3.ZERO
 	player.move_and_slide()

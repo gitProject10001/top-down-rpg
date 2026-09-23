@@ -1,4 +1,5 @@
 extends "res://tools/check_borgo_recipes.gd"
+var living_captured := false
 func run() -> void:
  scene=load("res://scenes/dev/integrated_landscape.tscn").instantiate()
  get_tree().root.add_child(scene)
@@ -29,10 +30,15 @@ func run() -> void:
    hero.intent._sample_attack_button(true)
    hero.intent._sample_attack_button(false)
   if index == 0: snap.call_deferred("action_slash")
+  if index == 2: living_sequence.call_deferred()
  )
  hero.intent._sample_attack_button(true)
  hero.intent._sample_attack_button(false)
- await settle(100)
+ for i in 400:
+  await settle(1)
+  if living_captured: break
+ check(living_captured,"living reaction captured before lethal fixture")
+ await settle(45)
  check(hits == [0,1,2], "integrated click phrase has three contacts")
  foe.health.set_invulnerable(false)
  foe.health._invuln_until=0
@@ -52,3 +58,18 @@ func run() -> void:
 func snap(label: String) -> void:
  await RenderingServer.frame_post_draw
  get_viewport().get_texture().get_image().save_png("res://captures/"+label+".png")
+
+func living_sequence() -> void:
+ var foe: Player=scene.combat_encounter.fighters[0]
+ var hurt: Node=foe.get_node("StateMachine/Hurt")
+ for i in 150:
+  await settle(1)
+  if hurt.knocked_down and not hurt.recovering and hurt._elapsed >= hurt.fall_duration*.7:
+   await snap("action_knockdown")
+   break
+ for i in 150:
+  await settle(1)
+  if hurt.recovering and hurt._elapsed >= hurt.rise_duration*.45:
+   await snap("action_getup")
+   living_captured=true
+   break

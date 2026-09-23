@@ -323,8 +323,36 @@ Il prefab ragdoll ora usa due componenti piccoli: `scripts/components/ragdoll_re
 
 La velocità viene registrata prima che Hurt/Dead la sostituiscano. Movimento delle ossa e del personaggio sono miscelati senza sommarli due volte; i teletrasporti non generano inerzia. Un solo impulso raggiunge l'osso più vicino al contatto, con leva limitata e intensità maggiore sul finale. La spinta verticale fissa è rimossa. Masse distribuite maggiormente su bacino, busto e cosce, rimbalzo nullo. Il contatto dei colpi action è una stima dalla lama visibile per ogni bersaglio, non un'intersezione esatta dei triangoli né un nuovo sistema di danni per zona.
 
-L'addon `procedural_anim` di rpg-3d è stato consultato (molle e inerzia), non importato: gait, IK e solver dell'orco restano fuori. La libreria gemella prevede `hurt_chest`, `hurt_head` e `hurt_knockback`; una selezione contestuale per i personaggi vivi potrà riutilizzarle dopo verifica del retargeting. Passi di recupero, mani protettive e rialzata non sono implementati. Questa revisione è una breve transizione fisica alla morte, non una replica di Euphoria.
+L'addon `procedural_anim` di rpg-3d è stato consultato (molle e inerzia), non importato: gait, IK e solver dell'orco restano fuori. La libreria gemella prevede `hurt_chest`, `hurt_head` e `hurt_knockback`; la revisione successiva descritta sotto le collega ai personaggi vivi. Passi di recupero dell’equilibrio e mani protettive non sono implementati. La rialzata animata è aggiunta dalla revisione successiva. Questa revisione è una breve transizione fisica alla morte, non una replica di Euphoria.
 
 Test aggiuntivo `tools/check_ragdoll_reactions.tscn`: spalla sinistra/destra, ginocchio, movimento verso gradino; selezione della parte colpita, inerzia, callback attivo, pausa, rilascio completo e stabilità dei 18 corpi. Risultato: zero fallimenti. Verifica visiva integrata riuscita, con catture `action_ragdoll_early.png`, `action_ragdoll_collapse.png`, `action_ragdoll.png`. Il warning di shutdown PagedAllocator preesistente resta. Nessuna nuova misura comparativa delle prestazioni.
 
 API fisiche verificate sulla [documentazione Godot PhysicalBone3D](https://docs.godotengine.org/en/stable/classes/class_physicalbone3d.html): impulsi singoli all'impatto, controllo continuo nel callback di integrazione.
+
+### Reazioni dei nemici vivi e rialzata
+
+`StateMachine/Hurt` seleziona `hurt_head` per un contatto stimato vicino alla testa e `hurt_chest` negli altri casi. Un finale della combo non letale usa `hurt_knockback` seguito da `getup`; entrambe erano già nella libreria retargettata locale. Nessun asset copiato e nessuna dipendenza aggiunta dall'addon dell'orco. Durate iniziali: caduta 0,55 s, rialzata 0,65 s; attivazione e durate sono esportate nell'Inspector di Hurt.
+
+I contatti ordinari riavviano il breve flinch quando applicano danno. Durante caduta/rialzata il nemico non attacca; altri colpi possono danneggiarlo ma non riavviano la sequenza all'infinito. La morte interrompe la reazione e attiva il ragdoll dalla posa corrente. Alla fine della rialzata il clock dell'animazione torna a 1 e PackBrain può riprendere i turni. Il giocatore conserva il breve stun precedente. Nessun danno maggiorato alla testa e nessun controllo fisico dell'equilibrio: sono reazioni animate contestuali. La capsula di movimento rimane quella del personaggio, non un corpo fisico disteso per i nemici vivi.
+
+Verifiche: `check_pack_combat.tscn` e `check_living_reactions.tscn` passano (testa/busto, finale, nessun riavvio durante caduta, pausa nella rialzata, ritorno a Idle, morte durante caduta). Le catture integrate sono `action_knockdown.png` e `action_getup.png`; restano i warning di cleanup già documentati. La difficoltà del knockdown e la durata dell'apertura vanno tarate giocando.
+
+### Camminata, lock e passo di recupero
+
+- All'aperto: corsa predefinita (6 m/s), Ctrl premuto per camminare (2,2 m/s). Dentro gli edifici: camminata predefinita, Ctrl per correre volontariamente. Lo stesso modificatore è associato alla pressione dello stick sinistro; l'inclinazione dello stick dosa direttamente la velocità. Shift resta schivata.
+- Il contesto interno riusa il controllo della pianta/quote che guida già il cutaway: nessuna seconda rete di aree. Uscendo torna il comportamento esterno.
+- Durante lock, il corpo guarda il bersaglio mentre un blend a quattro direzioni gestisce camminata/corsa avanti, indietro e laterale. Sei clip retargettate sono riusate da rpg-3d; il filtro delle gambe conserva la postura UAL della spada. Il ritmo dei passi segue la velocità effettiva. Sbloccando torna il movimento orientato verso la marcia.
+- Il secondo colpo della combo può causare un breve passo di recupero del predone: circa 35 cm in 0,30 s dopo il flinch, direzione della spinta, animazione coerente e controllo delle collisioni. Il PackDirector esistente controlla anche terreno e acqua. Se manca spazio il passo si ferma. Il finale conserva caduta/rialzata.
+
+`check_locomotion.tscn` verifica velocità per contesto, modificatore, input analogico, direzioni sotto lock e recupero libero/contro muro. `check_locomotion_visual.tscn` controlla ingresso/uscita reali dal contesto interno e cattura otto combinazioni di andatura/direzione nella scena. Questo rimane un recupero animato con collisioni, non un solver fisico dell'equilibrio.
+
+### Carica e ultimo passo (prova di combattimento)
+- Click breve: combo esistente. Tenere il primo colpo trattiene la preparazione; rilascio dopo 0,65 s: danno doppio, reazione pesante e costo di 30 stamina. Rilascio automatico a 1,30 s; sotto soglia o senza stamina resta un colpo normale. La schivata annulla la preparazione. I colpi concatenati restano rapidi.
+- Morte ordinaria da posizione stabile: possibile ultimo passo di 28 cm in 0,30 s, poi ragdoll; nemico già morto, senza attacchi. Muri, assenza di appoggio, caduta in corso e finisher saltano il passo. La pausa arresta la transizione. Campionamento della posa aggiornato al passaggio alla fisica.
+- È una transizione animata con controllo dello spazio e successiva fisica, non un sistema di equilibrio Euphoria. Non introduce animazioni di appoggio delle mani o un solver di foot placement.
+- Verifica: `check_charge_death.tscn`, regressione `check_pack_combat.tscn`, confronto nella scena con `check_charge_visual.tscn` (runtime NPC disabilitato).
+
+#### Correzione della carica e leggibilità del cedimento
+- La carica prepara lentamente `atk_dash` (Sword_Dash) e il rilascio completo usa quel fendente orizzontale. Scatto con velocità iniziale 20 m/s rispetto ai 15 del normale DashAttack, stessa decelerazione e collisioni del CharacterBody; nessuna invulnerabilità aggiunta alla carica.
+- Il mixer del player continua a valutare la posa a ogni frame fisico: si ferma soltanto ActionClock, evitando rest pose/T-pose nei modificatori dello scheletro.
+- Ultimo passo portato a 38 cm / 0,42 s; un semplice stagger non lo esclude più. Restano esclusi finisher, knockdown e spazio insufficiente.

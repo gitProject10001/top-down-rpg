@@ -89,3 +89,12 @@ func start_reaction() -> void:
 		var speed := impact_speed * (finisher_multiplier if _finisher else 1.0)
 		closest.apply_impulse(_direction * speed * closest.mass, lever)
 	set_physics_process(false)
+
+func resume_pose_sampling() -> void:
+	_captured = false
+
+func finish_pose_sampling(displacement: Vector3, incoming: Vector3) -> void:
+	_physics_process(1.0 / Engine.physics_ticks_per_second)
+	_captured = true
+	_point += displacement
+	_incoming = incoming.limit_length(6.0)

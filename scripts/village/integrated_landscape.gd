@@ -71,7 +71,7 @@ func _ready() -> void:
         npc_dialogues.dialogue_changed.connect(func(opened: bool): exploration_trial.ui.visible=not opened)
     var ui:=CanvasLayer.new();add_child(ui)
     var label:=Label.new();label.position=Vector2(20,20);label.text="SCENA INTEGRATA
-WASD movimento · click combo · destro parata frontale · Shift schivata
+WASD movimento · Ctrl passo/corsa · click combo / tieni carica · destro parata frontale · Shift schivata
 4 combattimento · R ricomincia · O panoramica · F6 ora · F7 stile · P filtro pittorico · 1 città / 2 guado / 3 lago / 5 borgo · E porta · F acqua"
     ui.add_child(label)
     npc_dialogues.dialogue_changed.connect(func(opened: bool): label.visible=not opened; npc_hud_visibility(opened))
@@ -253,11 +253,13 @@ func _physics_process(delta: float) -> void:
         if water.contains_point(Vector2(local.x,local.z)) and water.wave_field.bounds.get_center().distance_to(Vector2(local.x,local.z))>7:
             local_patch(water)
     nearest_door=null
+    player.indoors=false
     var closest:=2.3
     for plan in plans:
         var house=plan.house()
         var p: Vector3=house.to_local(player.global_position)
         var inside: bool=house.contains_footprint(p,.12) and p.y>-.5 and p.y<house.wall_height
+        player.indoors = player.indoors or inside
         var floor_index: int=clampi(floori(maxf(0,p.y-.8)/plan.floor_height),0,maxi(0,plan.levels().size()-1))
         var state:=Vector2i(int(inside),floor_index)
         if interior_states.get(plan.get_instance_id(),Vector2i(-1,-1))!=state:

@@ -57,9 +57,18 @@ func swing_damage() -> int:
 	return 1
 
 
+@export_range(0.0, .5, .01) var death_step_distance := .38
+@export_range(.1, .6, .01) var death_step_duration := .42
+var death_stepping := false
+var _death_step_candidate := false
+var _death_direction := Vector3.ZERO
+var _death_elapsed := 0.0
+var _death_origin := Vector3.ZERO
+
 func _on_damaged(amount: int, source: Node) -> void:
 	# Capture BEFORE Hurt replaces locomotion velocity and before Dead clears it.
 	if health.hp == 0:
+		_death_step_candidate = is_on_floor() and death_step_distance > 0 and not (source != null and source.get_meta("finisher", false)) and not (state_name() == "Hurt" and _fsm.current_state.knocked_down)
 		var rag := find_child("Ragdoll", true, false)
 		if rag and rag.has_method("capture_impact"):
 			var point := global_position + Vector3.UP * .35
@@ -69,23 +78,64 @@ func _on_damaged(amount: int, source: Node) -> void:
 				direction.y = 0.0
 				point = source.get_meta("contact_point", point)
 				direction = source.get_meta("impact_direction", direction)
+			_death_direction = Vector3(direction.x, 0, direction.z).normalized()
 			rag.capture_impact(point, direction, velocity, source != null and source.get_meta("finisher", false))
 	super(amount, source)
 
 func _on_died() -> void:
 	super()
 	set_deferred("collision_layer", 0)
-	set_deferred("collision_mask", 0)
+	set_deferred("collision_mask", 1)
 	var hurt := get_node_or_null("HurtBox") as Area3D
 	if hurt: hurt.set_deferred("collision_layer", 0)
 	if intent:
 		intent.clear()
 		intent.set_physics_process(false)
 	# Defer until collider changes have flushed; never let live animation/IK fight physics.
-	_start_death_physics.call_deferred()
+	_begin_death_transition.call_deferred()
 	get_tree().create_timer(6.0).timeout.connect(queue_free)
 
+func _death_path_clear(distance: float) -> bool:
+	if _death_direction.length_squared() < .1: return false
+	if test_move(global_transform, _death_direction * distance): return false
+	if intent is PackBrain and is_instance_valid(intent.director):
+		if not intent.director.safe_step(self, Vector2(_death_direction.x, _death_direction.z), distance): return false
+	var foot := global_position + _death_direction * distance
+	var ray := PhysicsRayQueryParameters3D.create(foot + Vector3.UP * .15, foot - Vector3.UP * 1.3, 1, [get_rid()])
+	return not get_world_3d().direct_space_state.intersect_ray(ray).is_empty()
+
+func _begin_death_transition() -> void:
+	if not _death_step_candidate or not has_clip("recover_walk_back") or not _death_path_clear(death_step_distance):
+		_start_death_physics()
+		return
+	death_stepping = true
+	_death_origin = global_position
+	_death_elapsed = 0.0
+	var local_dir := visuals.global_basis.inverse() * _death_direction
+	var clip := "recover_walk_back"
+	if absf(local_dir.x) > absf(local_dir.z): clip = "recover_walk_right" if local_dir.x > 0 else "recover_walk_left"
+	elif local_dir.z < 0: clip = "walk"
+	play_clip(clip)
+	var rag := find_child("Ragdoll", true, false)
+	if rag: rag.resume_pose_sampling()
+
+func advance_death_step(delta: float) -> void:
+	if not death_stepping: return
+	_death_elapsed += delta
+	var travel := minf(death_step_distance/death_step_duration*delta, maxf(0, death_step_distance - global_position.distance_to(_death_origin)))
+	if _death_elapsed >= death_step_duration or not _death_path_clear(maxf(travel*2,.10)):
+		death_stepping = false
+		var rag := find_child("Ragdoll", true, false)
+		if rag: rag.finish_pose_sampling(global_position - _death_origin, velocity)
+		_start_death_physics()
+		return
+	velocity.x = _death_direction.x * travel / delta
+	velocity.z = _death_direction.z * travel / delta
+	apply_gravity(delta)
+	move_and_slide()
+
 func _start_death_physics() -> void:
+	set_deferred("collision_mask", 0)
 	var rag := find_child("Ragdoll", true, false) as PhysicalBoneSimulator3D
 	if rag == null: return # Bodies without authored physics retain the death clip.
 	set_process(false)

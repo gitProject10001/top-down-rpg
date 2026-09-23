@@ -264,7 +264,7 @@ func action_controls() -> void:
 	attack.combo_step_started.connect(func(index: int, _dir: int, _clip: String): starts.append(index))
 	hero.intent._sample_attack_button(true)
 	await frames(80)
-	check(starts == [0], "holding click produces one action swing, no charge or automatic combo")
+	check(starts == [0], "holding click produces one action swing, no automatic combo")
 	hero.intent._sample_attack_button(false)
 	await frames(2)
 	hero.intent._sample_attack_button(true)

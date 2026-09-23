@@ -183,6 +183,7 @@ func hit(dur := 0.12, flip := false, dmg := 1, dir := SwingDir.NONE) -> void:
 	# WEIGHT: a kill by the finisher throws the ragdoll harder than a kill by an opener (F=ma
 	# reads off this same number everywhere — living shoves and corpses alike).
 	_hitbox.set_meta("finisher", _swing_step >= 2)
+	_hitbox.set_meta("recovery_step", _swing_step == 1)
 	_hitbox.set_meta("knockback", 9.0 if _swing_step >= 2 else 5.0)
 	_hitbox.activate()
 	get_tree().create_timer(dur).timeout.connect(func():
@@ -412,3 +413,9 @@ func impact_sample(target: Vector3) -> Dictionary:
 	var lateral := global_basis.x * (-1.0 if _swing_step % 2 == 0 else 1.0)
 	direction = (direction.normalized() + lateral * .45).normalized()
 	return {"point": point, "direction": direction}
+
+## Persistent warm glow while winding up; reset on every interruption.
+func charge_feedback(amount: float) -> void:
+	if _blade_mat:
+		_blade_mat.emission = Color(1.0, .55, .12)
+		_blade_mat.emission_energy_multiplier = amount * 3.0

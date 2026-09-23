@@ -59,6 +59,16 @@ signal damage_window_opened(index: int, duration: float)
 @export var opener_clip := ""
 @export var opener_min_gap := 0.3  ## metres short of contact before the lunge is worth playing
 
+@export_range(.3, 1.5, .05) var charge_time := .65
+@export var charge_stamina := 30.0
+@export var charge_clip := "atk_dash"
+@export_range(10.0, 25.0, .5) var charge_lunge_speed := 20.0
+var _charge_pose := false
+var charge_elapsed := 0.0
+var charged := false
+var _charge_allowed := false
+var _charge_released := false
+
 var _step := 0
 var _t := 0.0
 var _len := 0.4
@@ -76,6 +86,11 @@ var _step_until := 0.0             ## seconds into the clip that the step keeps 
 func enter() -> void:
 	_dodge_buffer = 0.0
 	_step = 0
+	_charge_pose = false
+	charge_elapsed = 0.0
+	charged = false
+	_charge_allowed = player.is_input_driven() and player.intent.attack_held
+	_charge_released = not _charge_allowed
 	_start_step()
 
 
@@ -83,6 +98,8 @@ func combo_index() -> int:
 	return _step
 
 func exit() -> void:
+	player.set_attack_playback_speed(1.0)
+	player.sword.charge_feedback(0.0)
 	player.sword.cancel_swing()
 	if player.intent: player.intent.consume_attack()
 
@@ -159,9 +176,49 @@ func physics_update(delta: float) -> void:
 	_dodge_buffer = maxf(0.0, _dodge_buffer - delta)
 	if player.intent is PlayerIntent and player.intent.consume_combo_press():
 		_queued = true
+	# Hold the opener before contact. A short click keeps its original strike timing.
+	if _charge_allowed and not _charge_released:
+		charge_elapsed += delta
+		if not player.intent.attack_held or charge_elapsed >= charge_time + .65:
+			_charge_released = true
+			charged = charge_elapsed >= charge_time and player.stamina >= charge_stamina
+			if charged:
+				player.stamina -= charge_stamina
+				_clip = charge_clip if player.has_clip(charge_clip) else chain[0]
+				_len = player.play_attack(_clip)
+				var meta: Dictionary = player.attack_meta.get(_clip, {"strike": .34, "cancel": .6})
+				_strike = meta.strike
+				_cancel = meta.cancel
+				_t = 0.0
+				player.sword.begin_swing(2, _len)
+			if not charged and _charge_pose:
+				_len = player.play_attack(_clip)
+				_t = 0.0
+			player.sword.charge_feedback(0.0)
+			player.set_attack_playback_speed(1.0)
+			_aim_step()
+		elif _t >= _len * _strike * .45:
+			if not _charge_pose and player.has_clip(charge_clip):
+				_charge_pose = true
+				player.play_clip(charge_clip)
+				player._tree.advance(.02)
+			# Slowly draw the blade back, then hold before the contact frame.
+			player.set_attack_playback_speed(.12)
+			if charge_elapsed >= charge_time: player.set_tree_active(false)
+			player.sword.charge_feedback(minf(charge_elapsed/charge_time,1.0))
+			player.apply_gravity(delta)
+			player.apply_friction(delta)
+			player.move_and_slide()
+			return
 	_t += delta
 	player.apply_gravity(delta)
-	if _t < _step_until:
+	if charged:
+		# Same horizontal Sword_Dash clip and decaying lunge as DashAttack.
+		var direction := -player.visuals.global_basis.z
+		var speed := charge_lunge_speed * exp(-4.5 * _t / maxf(_len, .01))
+		player.velocity.x = direction.x * speed
+		player.velocity.z = direction.z * speed
+	elif _t < _step_until:
 		# The step OWNS the body until contact. Running apply_movement here instead is what made a
 		# running attack lurch to a near-stop: it decelerates 6 m/s to 2.1 m/s in a tenth of a
 		# second, which both kills the momentum and leaves you short of the target you were
@@ -175,7 +232,7 @@ func physics_update(delta: float) -> void:
 	var f := _t / maxf(_len, 0.01)
 	if not _hit and f >= _strike:
 		# damage window + slash crescent together, at this clip's strike moment
-		player.sword.hit(hit_dur, _step % 2 == 0, player.swing_damage())
+		player.sword.hit(hit_dur, _step % 2 == 0, player.swing_damage() * (2 if charged else 1))
 		_hit = true
 		damage_window_opened.emit(_step, hit_dur)
 
@@ -185,6 +242,8 @@ func physics_update(delta: float) -> void:
 	if _dodge_buffer > 0 and _hit and player.can_dash():
 		fsm.transition_to("Dash")
 	elif _queued and _hit and f >= _cancel:
+		charged = false
+		_charge_allowed = false
 		_step = (_step + 1) % chain.size()
 		_start_step()
 	elif _hit and f >= _cancel and player.get_move_input() != Vector2.ZERO:
@@ -207,6 +266,9 @@ func handle_input(event: InputEvent) -> void:
 	#
 	# After `_hit` it is free again, which is what keeps the combo fluid instead of trapping.
 	if event.is_action_pressed("dash") and player.can_dash():
+		if _charge_allowed and not _charge_released:
+			fsm.transition_to("Dash")
+			return
 		_dodge_buffer = .18
 		if _hit: fsm.transition_to("Dash")                # dash-cancel out of the combo
 	elif event.is_action_pressed("attack"):
