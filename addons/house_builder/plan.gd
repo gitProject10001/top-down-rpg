@@ -63,6 +63,7 @@ func _ready() -> void:
 	_pending=true
 	organize_furniture.call_deferred()
 func _process(_dt: float) -> void:
+	if house().interactive_edit_active(): return
 	_editor_poll+=_dt
 	# Geometry edits marked dirty remain immediate; audit unchanged hierarchy at 10 Hz.
 	if Engine.is_editor_hint() and not _pending and _editor_poll<0.1: return

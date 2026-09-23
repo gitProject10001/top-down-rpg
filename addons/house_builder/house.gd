@@ -4,6 +4,7 @@ signal recipe_applied
 ## Generated meshes/materials have been replaced; presentation can rebind locally.
 signal rebuilt
 ## Exterior authoring node. Only dimensions/opening records are serialized.
+const GenerationCache=preload("res://scripts/generation_cache.gd")
 const RoofProfile=preload("res://addons/house_builder/roof_profile.gd")
 const RoofMesh=preload("res://addons/house_builder/roof_mesh.gd")
 const MeshJoin=preload("res://addons/house_builder/mesh_join.gd")
@@ -59,9 +60,9 @@ func roof_curvature_error() -> String:
 	set(value): masonry_trim=value; request_rebuild()
 @export var masonry_finish: MasonryFinish:
 	set(value):
-		if masonry_finish and masonry_finish.changed.is_connected(request_rebuild): masonry_finish.changed.disconnect(request_rebuild)
+		if masonry_finish and masonry_finish.changed.is_connected(_masonry_changed): masonry_finish.changed.disconnect(_masonry_changed)
 		masonry_finish=value
-		if masonry_finish and not masonry_finish.changed.is_connected(request_rebuild): masonry_finish.changed.connect(request_rebuild)
+		if masonry_finish and not masonry_finish.changed.is_connected(_masonry_changed): masonry_finish.changed.connect(_masonry_changed)
 		request_rebuild()
 @export var weathered := true:
 	set(value): weathered=value; request_rebuild()
@@ -92,6 +93,87 @@ var _collision_shell: ArrayMesh
 var _generated: Node3D
 var _buffers: Array[SurfaceTool]=[]
 var build_count := 0
+var build_timings: Dictionary = {}
+var _profile_mark := 0
+var _profile_wait := 0
+var _profile_wait_mark := 0
+var _profile_counters: Dictionary={}
+var build_counters: Dictionary={}
+# One entry per pipeline stage; source references keep instance IDs unambiguous.
+var _phase_meshes: Dictionary={}
+var _base_geometry_key: Array=[]
+var _base_geometry: Array=[]
+var _raw_roof: ArrayMesh
+var _raw_roof_key: Array=[]
+var _finish_block_size := Vector2.ZERO
+
+func _masonry_changed() -> void:
+	if masonry_finish==null or masonry_finish.block_size!=_finish_block_size or _editor_running or not is_instance_valid(_generated):
+		request_rebuild(); return
+	# Colour/weathering are uniforms, not geometry dependencies.
+	var todo: Array[Node]=[_generated]
+	var seen: Dictionary={}
+	while not todo.is_empty():
+		var node: Node=todo.pop_back()
+		todo.append_array(node.get_children(true))
+		if not node is MeshInstance3D or node.mesh==null: continue
+		for surface in node.mesh.get_surface_count():
+			var material=node.get_active_material(surface)
+			if not material is ShaderMaterial or seen.has(material): continue
+			seen[material]=true
+			if material.get_shader_parameter("masonry_finish_enabled")==true:
+				material.set_shader_parameter("masonry_tint",Vector3(masonry_finish.stone_color.r,masonry_finish.stone_color.g,masonry_finish.stone_color.b))
+				material.set_shader_parameter("masonry_weathering",masonry_finish.weathering)
+
+func _base_dependencies() -> Array:
+	# Unknown subclasses build additional geometry; retain their full fallback.
+	if get_script().resource_path not in ["res://addons/house_builder/house.gd","res://addons/house_builder/volume.gd"]: return []
+	if has_method("volume_host") and (get("structure_kind")!=0 or get("canopy_roof")!=0): return []
+	var resolved: Array=[]
+	for opening in all_openings(): resolved.append(resolved_opening(opening))
+	return [dimensions(),wing_settings(),house_seed,wall_finish,weathered,masonry_trim,GenerationCache.snapshot(masonry_finish),facade_storey_height,facade_upper_windows,resolved,get("attachment_elevation"),roof_curvature,_is_wing_part]
+
+func _cached_roof() -> ArrayMesh:
+	if get_script().resource_path not in ["res://addons/house_builder/house.gd","res://addons/house_builder/volume.gd"]: return _build_roof()
+	# Flat slabs have access/parapet dependencies handled by the volume builder.
+	if has_method("volume_host") and get("canopy_roof")==2: return _build_roof()
+	var key: Array=[width,depth,wall_height,roof_height,house_seed,weathered,roof_curvature,get("structure_kind"),get("canopy_roof")]
+	if _raw_roof==null or key!=_raw_roof_key:
+		_raw_roof=_build_roof()
+		_raw_roof_key=key
+	return _raw_roof
+
+func _cached_clip(source: ArrayMesh,cutters: Array,stage_name: String) -> ArrayMesh:
+	if cutters.is_empty(): return source
+	var dependencies: Array=[]
+	var bounds := source.get_aabb()
+	for cutter in cutters:
+		var active: Array=[]
+		var outside := false
+		for plane: Plane in cutter:
+			var distance := plane.distance_to(bounds.get_center())
+			var radius := plane.normal.abs().dot(bounds.size*.5)
+			if distance-radius>0.0001: outside=true; break
+			if distance+radius>=-0.0001: active.append(plane)
+		if not outside: dependencies.append(active)
+	var previous: Array=_phase_meshes.get(stage_name,[])
+	if not previous.is_empty() and previous[0]==source and previous[1]==dependencies: return previous[2]
+	var result := ArrayMesh.new()
+	await MeshJoin.append(result,source,Transform3D.IDENTITY,cutters,self if _cooperative else null)
+	if not _cooperative or _build_is_current():
+		_phase_meshes[stage_name]=[source,dependencies,result]
+	return result
+
+func _profile_stage(label: String) -> void:
+	var now := Time.get_ticks_usec()
+	var counts: Dictionary={}
+	for key in MeshJoin.counters: counts[key]=MeshJoin.counters[key]-_profile_counters.get(key,0)
+	build_counters[label]=counts
+	_profile_counters=MeshJoin.counters.duplicate()
+	build_timings[label]=(now-_profile_mark-(_profile_wait-_profile_wait_mark))/1000.0
+	_profile_mark=now
+	_profile_wait_mark=_profile_wait
+
 
 func wing_span() -> float: return minf(wing_width,minf(maxf(1.8,depth-0.6),width))
 func wing_transform() -> Transform3D:
@@ -107,15 +189,157 @@ func _wall_size(wall: int) -> Vector2:
 	return Vector2(wing_span(),width*0.5+wing_length) if wall>=4 else Vector2(width,depth)
 
 func _ready() -> void:
+	# A containing house builds its authored volumes after its own shell.
+	if has_method("volume_host"):
+		var host: Node3D=call("volume_host")
+		if host and not host.is_node_ready(): return
 	rebuild()
+var _editing := false
+var _editor_running := false
+var _cooperative := false
+var _edit_epoch := 0
+var _job_epoch := 0
+var _slice_deadline := 0
+var _preview: MeshInstance3D
+
+func begin_interactive_edit() -> void:
+	if _editing: return
+	_editing=true
+	_edit_epoch+=1
+	var host: Node3D=call("volume_host") if has_method("volume_host") else null
+	if host: host.begin_interactive_edit()
+	update_interactive_preview()
+
+func end_interactive_edit() -> void:
+	_editing=false
+	request_rebuild()
+	_cooldown=0.0
+	var host: Node3D=call("volume_host") if has_method("volume_host") else null
+	if host: host.end_interactive_edit()
+
+func interactive_edit_active() -> bool:
+	if _editing or _editor_running: return true
+	var host: Node3D=call("volume_host") if has_method("volume_host") else null
+	return host!=null and (host._editing or host._editor_running)
+
+func update_interactive_preview() -> void:
+	if not is_inside_tree(): return
+	if _preview==null:
+		_preview=MeshInstance3D.new()
+		_preview.name="_InteractivePreview"
+		var material := StandardMaterial3D.new()
+		material.albedo_color=Color(.64,.53,.37)
+		material.roughness=1.0
+		_preview.material_override=material
+		add_child(_preview,false,Node.INTERNAL_MODE_BACK)
+	var tool := SurfaceTool.new()
+	tool.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var w := width*.5
+	var d := depth*.5
+	var points := [Vector3(-w,0,-d),Vector3(w,0,-d),Vector3(w,0,d),Vector3(-w,0,d),Vector3(-w,wall_height,-d),Vector3(w,wall_height,-d),Vector3(w,wall_height,d),Vector3(-w,wall_height,d),Vector3(0,wall_height+roof_height,-d),Vector3(0,wall_height+roof_height,d)]
+	for face in [[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7],[4,5,8],[7,9,6],[4,8,9,7],[8,5,6,9]]:
+		for i in range(1,face.size()-1):
+			for index in [face[0],face[i+1],face[i]]: tool.add_vertex(points[index])
+	tool.generate_normals()
+	_preview.mesh=tool.commit()
+	_preview.visible=true
+	if is_instance_valid(_generated): _generated.visible=false
+	for volume in authored_volumes():
+		volume.prepare_attachment()
+		volume.update_interactive_preview()
+
 func request_rebuild() -> void:
 	_pending=true
-	if is_inside_tree(): update_gizmos()
+	_edit_epoch+=1
+	_cooldown=.2 if Engine.is_editor_hint() else 0.0
+	if is_inside_tree():
+		if _editing: update_interactive_preview()
+		update_gizmos()
+
+func _build_is_current() -> bool:
+	if _job_epoch!=_edit_epoch or _editing: return false
+	if has_method("volume_host"):
+		var host: Node3D=call("volume_host")
+		if host and host._cooperative: return host._build_is_current()
+	return true
+
+func yield_build() -> bool:
+	if not _cooperative: return true
+	if has_method("volume_host"):
+		var host: Node3D=call("volume_host")
+		if host and host._cooperative:
+			var wait_before: int=host._profile_wait
+			var valid: bool=await host.yield_build()
+			_profile_wait+=host._profile_wait-wait_before
+			_slice_deadline=host._slice_deadline
+			return valid and _job_epoch==_edit_epoch and not _editing
+	if _job_epoch!=_edit_epoch: return false
+	if Time.get_ticks_usec()>=_slice_deadline:
+		var waited := Time.get_ticks_usec()
+		await get_tree().process_frame
+		_profile_wait+=Time.get_ticks_usec()-waited
+		_slice_deadline=Time.get_ticks_usec()+8000
+	return _job_epoch==_edit_epoch and not _editing
+
+func _roof_jobs() -> Array:
+	var jobs: Array=[]
+	var single: bool=has_method("volume_host") and get("structure_kind")==1 and get("canopy_roof")==1
+	if not has_method("volume_host") or get("canopy_roof")!=2:
+		jobs.append([width,depth,wall_height,roof_height,house_seed,weathered,single,roof_curvature])
+	if wing_enabled:
+		jobs.append([wing_span(),width*.5+wing_length,wall_height,roof_height*wing_span()/width,house_seed+1039,weathered,false,0.0])
+	for volume in authored_volumes(): jobs.append_array(volume._roof_jobs())
+	return jobs
+
+func _run_editor_rebuild() -> void:
+	if not roof_curvature_error().is_empty():
+		_pending=false
+		if is_instance_valid(_preview): _preview.free(); _preview=null
+		if is_instance_valid(_generated): _generated.visible=true
+		if Engine.is_editor_hint(): update_configuration_warnings()
+		return
+	GenerationCache.hold_writes(self)
+	var finalization_started := Time.get_ticks_usec()
+	_profile_wait=0
+	_editor_running=true
+	_job_epoch=_edit_epoch
+	update_interactive_preview()
+	_cooperative=true
+	_slice_deadline=Time.get_ticks_usec()+8000
+	var roof_cpu := 0
+	for parameters in _roof_jobs():
+		var started := Time.get_ticks_usec()
+		var job := RoofMesh.new()
+		job.callv("begin",parameters)
+		roof_cpu+=Time.get_ticks_usec()-started
+		while job.result==null:
+			if not await yield_build():
+				_editor_running=false; _cooperative=false
+				GenerationCache.release_writes(self)
+				return
+			started=Time.get_ticks_usec()
+			job.advance(maxi(1,_slice_deadline-started))
+			roof_cpu+=Time.get_ticks_usec()-started
+	var roof_wait := _profile_wait
+	if _job_epoch==_edit_epoch:
+		await rebuild(true)
+	build_timings["roof_prepare"]=roof_cpu/1000.0
+	build_timings["finalize_ms"]=(Time.get_ticks_usec()-finalization_started)/1000.0
+	build_timings["frame_wait_ms"]=(roof_wait+_profile_wait)/1000.0
+	build_timings["cpu_total_ms"]=build_timings["finalize_ms"]-build_timings["frame_wait_ms"]
+	GenerationCache.release_writes(self)
+	_editor_running=false
+	_cooperative=false
+
 func _process(delta: float) -> void:
+	if _editing or _editor_running: return
+	if has_method("volume_host"):
+		var host: Node3D=call("volume_host")
+		if host and (host.interactive_edit_active() or host._pending): return
 	_cooldown=maxf(0.0,_cooldown-delta)
 	if _pending and _cooldown<=0.0:
-		rebuild()
-		_cooldown=0.10
+		if Engine.is_editor_hint(): _run_editor_rebuild()
+		else: rebuild()
 
 func dimensions() -> Vector4:
 	return Vector4(width,depth,wall_height,roof_height)
@@ -279,54 +503,104 @@ func _plaster_material() -> ShaderMaterial:
 	material.set_shader_parameter("masonry_height",wall_height)
 	return material
 
-func rebuild() -> void:
+func rebuild(cooperative: bool=false) -> void:
+	if _editing or (_editor_running and not cooperative):
+		_pending=true
+		return
+	_cooperative=cooperative
 	if not is_inside_tree(): _pending=true; return
 	_pending=false
 	if not roof_curvature_error().is_empty():
 		if Engine.is_editor_hint(): update_configuration_warnings()
 		return
 	build_count+=1
-	if is_instance_valid(_generated): _generated.free()
+	build_timings.clear()
+	build_counters.clear()
+	_profile_counters=MeshJoin.counters.duplicate()
+	_profile_wait=0; _profile_wait_mark=0
+	_profile_mark=Time.get_ticks_usec()
+	var previous := _generated
+	if is_instance_valid(previous): previous.name="_PreviousGenerated"
 	_generated=Node3D.new()
+	_generated.visible=not cooperative
+	if cooperative: _generated.process_mode=Node.PROCESS_MODE_DISABLED
 	_generated.name="_Generated"
 	add_child(_generated,false,Node.INTERNAL_MODE_BACK)
-	_buffers.clear()
-	for i in 4:
-		var buffer := SurfaceTool.new()
-		buffer.begin(Mesh.PRIMITIVE_TRIANGLES)
-		_buffers.append(buffer)
-	_build_shell()
-	var dark := StandardMaterial3D.new()
-	dark.albedo_color=Color(0.015,0.011,0.009)
-	dark.roughness=1.0
-	var materials := [_plaster_material(),_material(Vector2(0.5,0),Color(0.60,0.53,0.46)),_stone_trim_material(),dark]
-	var mesh := ArrayMesh.new()
-	for i in _buffers.size():
-		var arrays := _buffers[i].commit_to_arrays()
-		if arrays[Mesh.ARRAY_VERTEX]==null: continue
-		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
-		mesh.surface_set_material(mesh.get_surface_count()-1,materials[i])
-	var body := MeshInstance3D.new()
-	body.name="Walls"
-	body.mesh=mesh
-	_generated.add_child(body)
-	var roof := MeshInstance3D.new()
-	roof.name="Roof"
-	roof.mesh=_build_roof()
-	_generated.add_child(roof)
-	_collision_shell=body.mesh
-	if wing_enabled: _join_wing(body,roof)
-	preload("res://addons/house_builder/masonry_cladding.gd").append_to(self,body)
-	_clip_authored_volumes(body,roof)
-	_clip_facade_roof_trim(roof)
-	if not _is_wing_part: _finish_openings(body,materials)
+	var base_key := _base_dependencies()
+	var body := MeshInstance3D.new(); body.name="Walls"
+	var roof := MeshInstance3D.new(); roof.name="Roof"
+	_generated.add_child(body); _generated.add_child(roof)
+	var materials: Array=[]
+	if not base_key.is_empty() and base_key==_base_geometry_key and not _base_geometry.is_empty():
+		body.mesh=_base_geometry[0]; roof.mesh=_base_geometry[1]
+		_collision_shell=_base_geometry[2]; materials=_base_geometry[3]
+		_profile_stage("base_reuse")
+	else:
+		_buffers.clear()
+		for i in 4:
+			var buffer := SurfaceTool.new()
+			buffer.begin(Mesh.PRIMITIVE_TRIANGLES)
+			_buffers.append(buffer)
+		_build_shell()
+		var dark := StandardMaterial3D.new()
+		dark.albedo_color=Color(0.015,0.011,0.009)
+		dark.roughness=1.0
+		materials= [_plaster_material(),_material(Vector2(0.5,0),Color(0.60,0.53,0.46)),_stone_trim_material(),dark]
+		var mesh := ArrayMesh.new()
+		for i in _buffers.size():
+			var arrays := _buffers[i].commit_to_arrays()
+			if arrays[Mesh.ARRAY_VERTEX]==null: continue
+			mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES,arrays)
+			mesh.surface_set_material(mesh.get_surface_count()-1,materials[i])
+		body.mesh=mesh
+		_profile_stage("shell")
+		roof.mesh=_cached_roof()
+		_profile_stage("roof")
+		_collision_shell=body.mesh
+		if wing_enabled: await _join_wing(body,roof)
+		_profile_stage("wing")
+		if await yield_build(): await preload("res://addons/house_builder/masonry_cladding.gd").append_to(self,body)
+		_profile_stage("masonry")
+		if not base_key.is_empty() and (not cooperative or _build_is_current()):
+			_base_geometry_key=base_key
+			_base_geometry=[body.mesh,roof.mesh,_collision_shell,materials]
+	if await yield_build(): await _clip_authored_volumes(body,roof)
+	_profile_stage("volume_cuts")
+	if await yield_build(): await _clip_facade_roof_trim(roof)
+	_profile_stage("trim_cuts")
+	if not _is_wing_part and await yield_build(): await _finish_openings(body,materials)
+	_profile_stage("openings_collision")
+	if cooperative and not await yield_build():
+		_generated.free()
+		_generated=previous
+		if is_instance_valid(previous): previous.name="_Generated"
+		_cooperative=false
+		_pending=true
+		return
 	for component in attached_components(): component.refresh()
-	for volume in authored_volumes(): volume.rebuild()
+	for volume in authored_volumes():
+		volume._job_epoch=volume._edit_epoch
+		volume._slice_deadline=_slice_deadline
+		await volume.rebuild(cooperative)
+	if cooperative and not await yield_build():
+		_generated.free()
+		_generated=previous
+		if is_instance_valid(previous): previous.name="_Generated"
+		_cooperative=false
+		_pending=true
+		return
+	if is_instance_valid(previous): previous.free()
+	_generated.visible=true
+	_generated.process_mode=Node.PROCESS_MODE_INHERIT
+	if is_instance_valid(_preview): _preview.free(); _preview=null
+	_finish_block_size=masonry_finish.block_size if masonry_finish else Vector2.ZERO
+	_profile_stage("publish_dependents")
 	var plan := get_node_or_null("InteriorPlan")
 	if plan and plan.has_method("editor_view"):
 		plan._pending=true
 	update_gizmos()
 	if Engine.is_editor_hint(): update_configuration_warnings()
+	_cooperative=false
 	rebuilt.emit()
 	if _recipe_notification_pending:
 		_recipe_notification_pending=false
@@ -433,17 +707,17 @@ func _join_wing(body: MeshInstance3D,roof: MeshInstance3D) -> void:
 	var wing_size := Vector2(wing.width,wing.depth)
 	wing._generated.get_child(0).mesh.surface_set_material(0,body.mesh.surface_get_material(0))
 	var merged := ArrayMesh.new()
-	MeshJoin.append(merged,body.mesh,Transform3D.IDENTITY,[_volume_planes(wing_size,wing.roof_height,frame,0.002)])
-	MeshJoin.append(merged,wing._generated.get_child(0).mesh,frame,[_volume_planes(main_size,roof_height,Transform3D.IDENTITY,-0.002)])
+	await MeshJoin.append(merged,body.mesh,Transform3D.IDENTITY,[_volume_planes(wing_size,wing.roof_height,frame,0.002)],self if _cooperative else null)
+	await MeshJoin.append(merged,wing._generated.get_child(0).mesh,frame,[_volume_planes(main_size,roof_height,Transform3D.IDENTITY,-0.002)],self if _cooperative else null)
 	body.mesh=merged
 	var collision_merged := ArrayMesh.new()
-	MeshJoin.append(collision_merged,_collision_shell,Transform3D.IDENTITY,[_volume_planes(wing_size,wing.roof_height,frame,0.002)])
-	MeshJoin.append(collision_merged,wing._collision_shell,frame,[_volume_planes(main_size,roof_height,Transform3D.IDENTITY,-0.002)])
+	await MeshJoin.append(collision_merged,_collision_shell,Transform3D.IDENTITY,[_volume_planes(wing_size,wing.roof_height,frame,0.002)],self if _cooperative else null)
+	await MeshJoin.append(collision_merged,wing._collision_shell,frame,[_volume_planes(main_size,roof_height,Transform3D.IDENTITY,-0.002)],self if _cooperative else null)
 	_collision_shell=collision_merged
 	# Both surfaces are cut on the same vertical valley planes, preserving tile relief.
 	var joined_roof := ArrayMesh.new()
-	MeshJoin.append(joined_roof,roof.mesh,Transform3D.IDENTITY,_roof_cutters(main_size,roof_height,Transform3D.IDENTITY,wing_size,wing.roof_height,frame))
-	MeshJoin.append(joined_roof,wing._generated.get_node("Roof").mesh,frame,_roof_cutters(wing_size,wing.roof_height,frame,main_size,roof_height,Transform3D.IDENTITY))
+	await MeshJoin.append(joined_roof,roof.mesh,Transform3D.IDENTITY,_roof_cutters(main_size,roof_height,Transform3D.IDENTITY,wing_size,wing.roof_height,frame),self if _cooperative else null)
+	await MeshJoin.append(joined_roof,wing._generated.get_node("Roof").mesh,frame,_roof_cutters(wing_size,wing.roof_height,frame,main_size,roof_height,Transform3D.IDENTITY),self if _cooperative else null)
 	roof.mesh=joined_roof
 	wing.free()
 
@@ -469,10 +743,10 @@ func _finish_openings(body: MeshInstance3D,materials: Array) -> void:
 		cutters.append(_opening_cut(o)); active.append(o)
 	if not cutters.is_empty():
 		var shell := ArrayMesh.new()
-		MeshJoin.append(shell,body.mesh,Transform3D.IDENTITY,cutters)
+		await MeshJoin.append(shell,body.mesh,Transform3D.IDENTITY,cutters,self if _cooperative else null)
 		body.mesh=shell
 		var collision_shell := ArrayMesh.new()
-		MeshJoin.append(collision_shell,_collision_shell,Transform3D.IDENTITY,cutters)
+		await MeshJoin.append(collision_shell,_collision_shell,Transform3D.IDENTITY,cutters,self if _cooperative else null)
 		_collision_shell=collision_shell
 	_buffers.clear()
 	for i in 4:
@@ -651,9 +925,9 @@ func _clip_authored_volumes(body: MeshInstance3D,roof: MeshInstance3D) -> void:
 		var host: Node3D=call("volume_host")
 		if host and call("volume_error").is_empty(): cutters.append(host._volume_planes(Vector2(host.width,host.depth),host.roof_height,transform.affine_inverse(),-0.001))
 	if cutters.is_empty(): return
-	var collision_clip := ArrayMesh.new(); MeshJoin.append(collision_clip,_collision_shell,Transform3D.IDENTITY,cutters); _collision_shell=collision_clip
+	_collision_shell=await _cached_clip(_collision_shell,cutters,"volume_collision")
 	for instance in [body,roof]:
-		var clipped := ArrayMesh.new(); MeshJoin.append(clipped,instance.mesh,Transform3D.IDENTITY,cutters); instance.mesh=clipped
+		instance.mesh=await _cached_clip(instance.mesh,cutters,"volume_"+str(instance.name))
 
 func _stone_roof_trim_cutters() -> Array:
 	var cutters: Array=[]
@@ -694,9 +968,7 @@ func _clip_facade_roof_trim(roof: MeshInstance3D) -> void:
 		for detail in details.get_children():
 			if detail.has_method("roof_trim_cutters"): cutters.append_array(detail.roof_trim_cutters(self))
 	if cutters.is_empty(): return
-	var trimmed := ArrayMesh.new()
-	MeshJoin.append(trimmed,roof.mesh,Transform3D.IDENTITY,cutters)
-	roof.mesh=trimmed
+	roof.mesh=await _cached_clip(roof.mesh,cutters,"roof_trim")
 
 func cutaway_cutters(floor_base: float,storey_height: float) -> Array:
 	return [[Plane(Vector3.DOWN,-floor_base-storey_height)],[Plane(Vector3.LEFT,-width*0.5+0.35),Plane(Vector3.DOWN,-floor_base-0.8)],[Plane(Vector3.FORWARD,-depth*0.5+0.35),Plane(Vector3.DOWN,-floor_base-0.8)]]

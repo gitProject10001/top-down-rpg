@@ -208,8 +208,9 @@ func _build_roof() -> ArrayMesh:
 		MeshJoin.append(result,box,Transform3D(Basis.IDENTITY,center),[])
 	return result
 
-func rebuild() -> void:
-	super.rebuild()
+func rebuild(cooperative: bool=false) -> void:
+	await super.rebuild(cooperative)
+	if cooperative and _job_epoch!=_edit_epoch: return
 	if walkway_profile!=1 or _walkway_collision==null or not is_instance_valid(_generated): return
 	var body := _generated.get_node_or_null("HouseCollision")
 	if body and body.get_child_count()>0:

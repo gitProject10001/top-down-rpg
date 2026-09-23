@@ -1,7 +1,7 @@
 @tool
 extends RefCounted
 ## Parameterized version of the authored relief tiles, used by the house editor.
-## Returns one mesh surface; no scene access, file I/O or per-tile nodes.
+## Cached deterministic mesh, with resumable tile generation for editor requests.
 const Profile=preload("res://addons/house_builder/roof_profile.gd")
 var curvature := 0.0
 var profile_half := 1.0
@@ -13,8 +13,12 @@ var half_span := 2.5
 var ridge_height := 4.72
 var slope := 0.96
 var st: SurfaceTool
+var timings: Dictionary={}
+var _tile_usec := 0
 var rng := RandomNumberGenerator.new()
 var tile_count := 0
+var _tile_groups: Array=[]
+var _vertex_count := 0
 var tile_uv_origin := Vector2.ZERO
 var tile_uv_size := Vector2.ONE
 var tile_side := 1.0
@@ -22,15 +26,52 @@ var tile_transform := Transform3D.IDENTITY
 var broken_count := 0
 var shifted_count := 0
 
+const Cache=preload("res://scripts/generation_cache.gd")
+static var memory: Dictionary={}
+var result: ArrayMesh
+var cache_key := ""
+var run_width := 0.0
+var sides: Array=[]
+var damage_rng: RandomNumberGenerator
+var rows := 0
+var step := 0.0
+var row := 0
+var side_index := 0
+var column := 0
+var z := 0.0
+var stage := 0
+var aged := true
+
 func generate(width: float, depth: float, height: float, rise: float, seed_value: int, weathered: bool=true, single_slope: bool=false, curve: float=0.0) -> ArrayMesh:
+	begin(width,depth,height,rise,seed_value,weathered,single_slope,curve)
+	while not advance(1000000): pass
+	# Callers clip/recolour roofs; never hand out the immutable cached mesh.
+	return result.duplicate(true)
+
+func begin(width: float, depth: float, height: float, rise: float, seed_value: int, weathered: bool=true, single_slope: bool=false, curve: float=0.0) -> void:
+	_tile_groups=[]; _vertex_count=0; _tile_usec=0; timings={}
+	cache_key=Cache.digest([2,width,depth,height,rise,seed_value,weathered,single_slope,curve,Cache.sources(["res://addons/house_builder/roof_mesh.gd","res://addons/house_builder/roof_profile.gd","res://shaders/pixelart/roof_clay.gdshader"])])
+	result=memory.get(cache_key)
+	var file := Cache.path_for("roof",cache_key,".res")
+	if result==null and FileAccess.file_exists(file):
+		result=ResourceLoader.load(file,"ArrayMesh",ResourceLoader.CACHE_MODE_IGNORE) as ArrayMesh
+	if result!=null:
+		if memory.size()>=128: memory.erase(memory.keys()[0])
+		memory[cache_key]=result
+		tile_count=result.get_meta("tile_count",0)
+		broken_count=result.get_meta("broken_count",0)
+		shifted_count=result.get_meta("shifted_count",0)
+		return
+	aged=weathered
+	row=0; side_index=0; column=0; stage=0
 	curvature=curve
 	profile_half=width*.5; profile_rise=rise; profile_eaves=height
 	half_span=width*0.5+0.3
 	ridge_height=height+rise
 	slope=rise/(width*0.5)
 	roof_frame=Transform3D.IDENTITY
-	var run_width := depth
-	var sides := [-1.0,1.0]
+	run_width=depth
+	sides=[-1.0,1.0]
 	if single_slope:
 		half_span=depth+0.6
 		slope=rise/depth
@@ -45,43 +86,77 @@ func generate(width: float, depth: float, height: float, rise: float, seed_value
 	tile_count=0
 	broken_count=0
 	shifted_count=0
-	var damage_rng := RandomNumberGenerator.new()
+	damage_rng=RandomNumberGenerator.new()
 	damage_rng.seed=seed_value+7919
 	st=SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
-	var rows := ceili(half_span/0.25)
-	var step := half_span/rows
-	for side in sides:
-		for row in rows:
-			var distance := row*step
-			var length := minf(step*1.6,half_span-distance)
-			var z := -run_width*0.5-0.3
-			var column := 0
-			while z<run_width*0.5+0.29:
-				var width_tile := minf(0.35+rng.randf_range(-0.04,0.04),run_width*0.5+0.3-z)
-				if column==0 and row%2==1: width_tile*=0.5
-				# Independent seeded samples avoid the former repeating diagonal damage.
-				var damaged := weathered and damage_rng.randf()<0.022
-				var moved := weathered and damage_rng.randf()<0.016
-				var damage := damage_rng.randi_range(1,2) if damaged else 0
-				tile(side,distance,z+width_tile*0.5,maxf(width_tile-0.024,0.006),length,damage,moved)
-				z+=width_tile
-				column+=1
-	st.generate_tangents()
-	st.index()
-	var mesh := st.commit()
+	rows= ceili(half_span/0.25)
+	step= half_span/rows
+	z=-run_width*.5-.3
+
+func advance(budget_usec: int=2000) -> bool:
+	if result!=null: return true
+	var started := Time.get_ticks_usec()
+	var deadline := started+budget_usec
+	while stage==0 and Time.get_ticks_usec()<deadline:
+		var distance := row*step
+		var length := minf(step*1.6,half_span-distance)
+		var width_tile := minf(.35+rng.randf_range(-.04,.04),run_width*.5+.3-z)
+		if column==0 and row%2==1: width_tile*=.5
+		var damaged := aged and damage_rng.randf()<.022
+		var moved := aged and damage_rng.randf()<.016
+		var damage := damage_rng.randi_range(1,2) if damaged else 0
+		tile(sides[side_index],distance,z+width_tile*.5,maxf(width_tile-.024,.006),length,damage,moved)
+		z+=width_tile
+		column+=1
+		if z>=run_width*.5+.29:
+			z=-run_width*.5-.3
+			column=0
+			row+=1
+			if row==rows:
+				row=0
+				side_index+=1
+				if side_index==sides.size(): stage=1
+	_tile_usec+=Time.get_ticks_usec()-started
+	if stage==0: return false
+	# These engine operations are indivisible; run at most one per advance.
+	if stage==1:
+		timings["tiles"]=_tile_usec/1000.0
+		started=Time.get_ticks_usec()
+		st.generate_tangents()
+		timings["tangents"]=(Time.get_ticks_usec()-started)/1000.0
+		stage=2
+		return false
+	if stage==2:
+		started=Time.get_ticks_usec()
+		st.index()
+		timings["index"]=(Time.get_ticks_usec()-started)/1000.0
+		stage=3
+		return false
+	result=st.commit()
+	# Each closed tile is independent for tangent generation. Keep conservative
+	# bounds and index spans through later clipping instead of rediscovering them.
+	result.set_meta("clip_groups",{0:_tile_groups})
+	st=null
 	var material := ShaderMaterial.new()
 	material.shader=load("res://shaders/pixelart/roof_clay.gdshader")
-	material.set_shader_parameter("cavity_strength",0.78)
-	mesh.surface_set_material(0,material)
-	return mesh
+	material.set_shader_parameter("cavity_strength",.78)
+	result.surface_set_material(0,material)
+	result.set_meta("tile_count",tile_count)
+	result.set_meta("broken_count",broken_count)
+	result.set_meta("shifted_count",shifted_count)
+	if memory.size()>=128: memory.erase(memory.keys()[0])
+	memory[cache_key]=result
+	Cache.queue_save(result,Cache.path_for("roof",cache_key,".res"))
+	return true
 
 func face(a: Vector3,b: Vector3,c: Vector3,color: Color, cavity: float=1.0) -> void:
+	_vertex_count+=3
 	var normal := (b-a).cross(c-a).normalized()
 	color.a=cavity
+	st.set_normal(roof_frame.basis*tile_transform.basis*normal)
+	st.set_color(color)
 	for p in [a,c,b]:
-		st.set_normal(roof_frame.basis*tile_transform.basis*normal)
-		st.set_color(color)
 		st.set_uv(Vector2(p.z,p.x))
 		var tile_x: float = signf(p.x)*Profile.lookup(arc,absf(p.x),1) if curvature>0.0 else p.x
 		st.set_uv2(Vector2((p.z-tile_uv_origin.x)/tile_uv_size.x+0.5,(tile_uv_origin.y-tile_x*tile_side)/tile_uv_size.y))
@@ -95,6 +170,7 @@ func point(uv: Vector2, side: float, distance: float, z: float, lift: float) -> 
 	return Vector3(x,ridge_height-absf(x)*slope+lift,z+uv.x)
 
 func tile(side: float, distance: float, z: float, width: float, length: float, damage: int=0, shifted: bool=false, front_edge: bool=false) -> void:
+	var first_vertex := _vertex_count
 	tile_count+=1
 	tile_uv_origin=Vector2(z,half_span-distance)
 	tile_uv_size=Vector2(width,length)
@@ -126,6 +202,7 @@ func tile(side: float, distance: float, z: float, width: float, length: float, d
 	pigment.a=1.0
 	var lift := rng.randf_range(0.0,0.016)
 	var tilt := rng.randf_range(-0.065,0.065)
+	var backing_points: Array[Vector3]=[]
 	if damage>0 and width>0.20:
 		# Black recessed backing covers the exposed fracture, above the lower course.
 		# Same surface/material: zero pigment and zero specular remain black at every hour.
@@ -133,6 +210,7 @@ func tile(side: float, distance: float, z: float, width: float, length: float, d
 		var p1 := point(Vector2(w,-0.025),side,distance,z,0.105)
 		var p2 := point(Vector2(w,length*0.58),side,distance,z,0.067)
 		var p3 := point(Vector2(-w,length*0.58),side,distance,z,0.067)
+		backing_points=[p0,p1,p2,p3]
 		if side>0:
 			face(p0,p2,p1,Color.BLACK,0.0)
 			face(p0,p3,p2,Color.BLACK,0.0)
@@ -167,3 +245,11 @@ func tile(side: float, distance: float, z: float, width: float, length: float, d
 			face(top[i],rim[i],rim[j],pigment)
 			face(rim[i],bottom[j],rim[j],pigment,0.45)
 			face(rim[i],bottom[i],bottom[j],pigment,0.45)
+
+	var low := Vector3(INF,INF,INF)
+	var high := -low
+	for points in [bottom,rim,top,backing_points,[center,underside]]:
+		for p: Vector3 in points:
+			var point_world := roof_frame*tile_transform*p
+			low=low.min(point_world); high=high.max(point_world)
+	_tile_groups.append([first_vertex,_vertex_count,(low+high)*.5,(high-low)*.5])

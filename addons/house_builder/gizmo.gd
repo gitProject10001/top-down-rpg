@@ -57,9 +57,14 @@ func _redraw(gizmo: EditorNode3DGizmo) -> void:
 			lines.append(frame*wing_corners[i]); lines.append(frame*wing_corners[(i+1)%4])
 			lines.append(frame*wing_corners[i]); lines.append(frame*(wing_corners[i]+Vector3.UP*h))
 	if n==focus and context<2: gizmo.add_lines(lines,get_material("outline",gizmo))
-	if is_instance_valid(n._generated):
-		for child in n._generated.get_children():
-			if child is MeshInstance3D: gizmo.add_collision_triangles(child.mesh.generate_triangle_mesh())
+	# Selection uses a small proxy, independent of tile/stone triangle count.
+	var proxy := BoxMesh.new()
+	proxy.size=Vector3(n.width,n.wall_height+n.roof_height,n.depth)
+	var triangles := proxy.get_faces()
+	for i in triangles.size(): triangles[i].y+=proxy.size.y*.5
+	var selection := TriangleMesh.new()
+	selection.create_from_faces(triangles)
+	gizmo.add_collision_triangles(selection)
 func _get_handle_name(_gizmo: EditorNode3DGizmo,id: int,_secondary: bool) -> String:
 	var node=_gizmo.get_node_3d()
 	if id==5 and node.has_method("roof_top") and node.canopy_roof==2: return "Altezza parapetto"
@@ -70,6 +75,7 @@ func _get_handle_value(gizmo: EditorNode3DGizmo,_id: int,_secondary: bool) -> Va
 	return {"dimensions":n.dimensions(),"openings":n.openings.duplicate(true),"wing":n.wing_settings()}
 func _set_handle(gizmo: EditorNode3DGizmo,id: int,_secondary: bool,camera: Camera3D,screen_pos: Vector2) -> void:
 	var n=gizmo.get_node_3d()
+	n.begin_interactive_edit()
 	var origin := camera.project_ray_origin(screen_pos)
 	var direction := camera.project_ray_normal(screen_pos)
 	if id>=10000:
@@ -123,6 +129,7 @@ func _commit_handle(gizmo: EditorNode3DGizmo,_id: int,_secondary: bool,restore: 
 	if cancel:
 		n.set_dimensions(restore.dimensions); n.openings=restore.openings
 		n.set_wing_settings(restore.wing)
+		n.end_interactive_edit()
 		return
 	undo.create_action("Modifica casa",UndoRedo.MERGE_DISABLE,n)
 	undo.add_do_method(n,"set_dimensions",n.dimensions())
@@ -132,3 +139,4 @@ func _commit_handle(gizmo: EditorNode3DGizmo,_id: int,_secondary: bool,restore: 
 	undo.add_undo_property(n,"openings",restore.openings)
 	undo.add_undo_method(n,"set_wing_settings",restore.wing)
 	undo.commit_action(false)
+	n.end_interactive_edit()

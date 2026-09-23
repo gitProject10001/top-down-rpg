@@ -51,6 +51,48 @@ extends "res://addons/house_builder/house.gd"
 	set(value): junction_offset=value; request_rebuild()
 @export_storage var junction_open := false
 var _observed := ""
+var _built_dependencies: Array=[]
+
+func _authored_dependencies(node: Node) -> Array:
+	var values: Array=[node.name,node.transform if node is Node3D else null]
+	for property in node.get_property_list():
+		if property.usage & PROPERTY_USAGE_SCRIPT_VARIABLE and property.usage & PROPERTY_USAGE_STORAGE:
+			values.append([property.name,preload("res://scripts/generation_cache.gd").snapshot(node.get(property.name))])
+	for child in node.get_children(): values.append(_authored_dependencies(child))
+	return values
+
+func _local_cut_dependencies(cutters: Array) -> Array:
+	# Remove only planes that provably cannot affect this body's conservative
+	# bounds. A distant host edge then does not invalidate an unchanged portal.
+	var center := Vector3(0,(wall_height+roof_height)*.5,0)
+	var extent := Vector3(width*.5+1,(wall_height+roof_height)*.5+1,depth*.5+1)
+	var result: Array=[]
+	for cutter in cutters:
+		var active: Array=[]
+		var outside := false
+		for plane: Plane in cutter:
+			var distance := plane.distance_to(center)
+			var radius := plane.normal.abs().dot(extent)
+			if distance-radius>0.0001: outside=true; break
+			if distance+radius>=-0.0001: active.append(plane)
+		if not outside: result.append(active)
+	return result
+
+func _build_dependencies() -> Array:
+	var result := _authored_dependencies(self)
+	var host := volume_host()
+	if attached and host:
+		result.append(volume_error())
+		if structure_kind!=0 or canopy_roof==2 or roof_junction:
+			# Walkable roofs/supports depend on host access and interior levels too.
+			result.append([host.dimensions(),host.openings,host.wing_settings(),roof_access_error()])
+		result.append(_local_cut_dependencies([host._volume_planes(Vector2(host.width,host.depth),host.roof_height,transform.affine_inverse(),-0.001)]))
+		var details := host.get_node_or_null("RecipeDetails")
+		if details:
+			for detail in details.get_children():
+				if detail.has_method("roof_trim_cutters"): result.append(_local_cut_dependencies(detail.roof_trim_cutters(self)))
+	return result
+
 func volume_host() -> Node3D:
 	return get_parent().get_parent() if get_parent() and get_parent().name=="Volumes" else null
 func _enter_tree() -> void:
@@ -59,25 +101,39 @@ func _exit_tree() -> void:
 	var host := volume_host()
 	if host: host.request_rebuild()
 func _process(delta: float) -> void:
-	var signature := str(dimensions(),battlements_enabled,battlement_spacing,roof_door_enabled,roof_door_floor_id,roof_door_offset,parapet_enabled,automatic_frame,canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
-	signature += str(attachment_elevation,attachment_inset,roof_junction,roof_curvature)
+	if interactive_edit_active(): return
+	var signature := _geometry_signature()
 	if signature!=_observed:
 		_observed=signature
 		var host := volume_host()
 		if host: host.request_rebuild()
 	super._process(delta)
+func _geometry_signature() -> String:
+	var signature := str(dimensions(),battlements_enabled,battlement_spacing,roof_door_enabled,roof_door_floor_id,roof_door_offset,parapet_enabled,automatic_frame,canopy_roof,structure_kind,post_size,post_spacing,openings,junction_mode,junction_width,junction_height,junction_offset,attached,host_wall,host_offset,transform if not attached else Transform3D.IDENTITY)
+	signature += str(attachment_elevation,attachment_inset,roof_junction,roof_curvature)
+	return signature
 func prepare_attachment() -> void:
 	var host := volume_host()
 	if not attached or host==null: return
 	var tangent: Vector3=(host.wall_point(host_wall,1,0)-host.wall_point(host_wall,0,0)).normalized()
 	transform=Transform3D(Basis(tangent,Vector3.UP,host.wall_normal(host_wall)),host.wall_point(host_wall,host_offset*host.wall_length(host_wall)*0.5,attachment_elevation,depth*0.5-WALL_THICKNESS-0.08-attachment_inset))
-func rebuild() -> void:
+func rebuild(cooperative: bool=false) -> void:
+	if _editing: return
 	if not roof_curvature_error().is_empty():
 		_pending=false
 		if Engine.is_editor_hint(): update_configuration_warnings()
 		return
 	prepare_attachment()
-	super.rebuild()
+	var dependencies := _build_dependencies()
+	if is_instance_valid(_generated) and dependencies==_built_dependencies:
+		_pending=false
+		_profile_wait=0
+		if is_instance_valid(_preview): _preview.free(); _preview=null
+		_generated.visible=true
+		_observed=_geometry_signature()
+		return
+	await super.rebuild(cooperative)
+	if cooperative and (_pending or not _build_is_current()): return
 	var stairs := stair_component()
 	if stairs:
 		stairs.visible=roof_access_error().is_empty() and stairs.enabled
@@ -89,6 +145,8 @@ func rebuild() -> void:
 			var shape := CollisionShape3D.new(); shape.shape=_generated.get_node("Roof").mesh.create_trimesh_shape(); collision.add_child(shape)
 		var roof: MeshInstance3D=_generated.get_node("Roof")
 		if roof_is_walkable(): roof.mesh=preload("res://addons/house_builder/flagstone_floor.gd").apply(self,roof.mesh)
+	_observed=_geometry_signature()
+	_built_dependencies=_build_dependencies()
 func volume_error() -> String:
 	var host := volume_host()
 	if not attached: return ""

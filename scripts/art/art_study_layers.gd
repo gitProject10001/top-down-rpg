@@ -5,9 +5,14 @@ extends Node3D
 ## settings and emits a request without erasing local edits or generated children.
 const Profile = preload("res://scripts/art/art_study_profile.gd")
 signal regeneration_requested(profile: Profile)
+signal preview_quality_changed
 
 @export var profile: Profile = preload("res://assets/art/default_art_study_profile.tres")
 @export var preview_enabled: bool = true
+@export_enum("Lavoro", "Completa") var preview_quality := 0:
+	set(value):
+		preview_quality=value
+		if is_inside_tree() and Engine.is_editor_hint(): preview_quality_changed.emit()
 @export_tool_button("Regenerate art preview", "Reload") var regenerate_action: Callable = regenerate
 
 func regenerate() -> void:

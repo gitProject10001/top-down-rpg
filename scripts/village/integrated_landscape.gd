@@ -120,6 +120,7 @@ func refresh_house_art() -> void:
             var state: Vector2i=interior_states.get(plan.get_instance_id(),Vector2i.ZERO)
             house.set_cutaway(state.x==1,state.y*plan.floor_height,plan.floor_height)
         art_direction.refresh_architecture(house)
+        if is_instance_valid(art_direction.grass): art_direction.grass.invalidate_chunks()
 
 func sync_cliff_guides(view: Node) -> void:
     for child in view.get_children():
@@ -146,6 +147,8 @@ func setup_editor_preview(settings: Resource = null) -> void:
     art_direction.clear()
     var layers = get_node_or_null("ArtStudyLayers")
     if layers:
+        if not layers.preview_quality_changed.is_connected(update_preview_quality):
+            layers.preview_quality_changed.connect(update_preview_quality)
         if not layers.regeneration_requested.is_connected(regenerate_art):
             layers.regeneration_requested.connect(regenerate_art)
         if settings==null: settings=layers.profile
@@ -166,8 +169,13 @@ func setup_editor_preview(settings: Resource = null) -> void:
     art_direction.configure(self,settings)
     connect_art_geometry(self)
     art_direction.grass.editor_center=art_preview_center
+    art_direction.grass.set_work_mode(layers==null or layers.preview_quality==0)
     art_direction.apply(true)
     _preview_busy=false
+func update_preview_quality() -> void:
+    var layers := get_node_or_null("ArtStudyLayers")
+    if layers and is_instance_valid(art_direction.grass):
+        art_direction.grass.set_work_mode(layers.preview_quality==0)
 func toggle_overview() -> void:
     if not is_instance_valid(camera): return
     overview=not overview;camera.set_process(not overview);camera.set_physics_process(not overview)

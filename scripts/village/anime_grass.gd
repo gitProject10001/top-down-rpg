@@ -34,6 +34,105 @@ var road_mask_center: Vector2
 var road_mask_size: Vector2
 var ground_ray_top:=16.0
 var enabled := true
+signal work_resumed
+var work_mode := false
+var budget_usec := 2000
+var last_work_usec := 0
+var max_work_usec := 0
+var _deadline := 0
+var _building := false
+var _revision := 0
+var _focus := Vector2i(2147483647,2147483647)
+var _wanted: Array[Vector2i] = []
+var _used: Dictionary = {}
+var _clock := 0
+var _last_stream_frame := -1
+var _retired: Array[Node] = []
+var _world_dirty := false
+var _audit_elapsed := 0.0
+var _obstacles: Array[StaticBody3D]=[]
+var _obstacle_poses: Dictionary={}
+var _watch_shapes: Dictionary={}
+
+func _exit_tree() -> void:
+    # Release locals held by a suspended sampler/upload before the signal owner
+    # disappears (notably a MultiMesh which has not yet been attached).
+    _revision+=1
+    _wanted.clear()
+    if _building: work_resumed.emit()
+
+func _on_static_added(node: Node) -> void:
+    if not is_instance_valid(study_root) or not study_root.is_ancestor_of(node): return
+    if node is StaticBody3D or (node is CollisionShape3D and node.get_parent() is StaticBody3D):
+        invalidate_chunks()
+
+func watch_obstacles() -> void:
+    _obstacles.clear()
+    _obstacle_poses.clear()
+    _watch_shapes.clear()
+    if not is_instance_valid(study_root): return
+    for node in study_root.find_children("*","StaticBody3D",true,false):
+        _obstacles.append(node)
+        _obstacle_poses[node.get_instance_id()]=node.global_transform
+        for child in node.get_children():
+            if child is CollisionShape3D and child.shape!=null:
+                if not child.shape.changed.is_connected(invalidate_chunks):
+                    child.shape.changed.connect(invalidate_chunks)
+                _watch_shapes[child.get_instance_id()]=[weakref(child),child.transform,child.disabled,child.shape.get_rid()]
+
+func audit_obstacles(delta: float) -> void:
+    _audit_elapsed+=delta
+    if _audit_elapsed<.25: return
+    _audit_elapsed=0.0
+    for obstacle in _obstacles:
+        if not is_instance_valid(obstacle) or _obstacle_poses.get(obstacle.get_instance_id())!=obstacle.global_transform:
+            invalidate_chunks()
+            return
+    for record in _watch_shapes.values():
+        var shape: CollisionShape3D=record[0].get_ref()
+        if shape==null or shape.transform!=record[1] or shape.disabled!=record[2] or shape.shape==null or shape.shape.get_rid()!=record[3]:
+            invalidate_chunks()
+            return
+
+
+func invalidate_chunks() -> void:
+    _world_dirty = true
+
+func set_work_mode(value: bool) -> void:
+    if work_mode == value: return
+    work_mode = value
+    invalidate_chunks()
+
+func _retire(chunk: Node) -> void:
+    chunk.visible = false
+    _retired.append(chunk)
+
+func _discard_one() -> void:
+    if _retired.is_empty(): return
+    var chunk := _retired[0]
+    if chunk.get_child_count() > 0:
+        chunk.get_child(0).free()
+    else:
+        chunk.free()
+        _retired.pop_front()
+
+func _update_demand(center: Vector2i) -> void:
+    _focus = center
+    _wanted.clear()
+    var radius := 1 if work_mode else 3
+    for z in range(center.y-radius,center.y+radius+1):
+        for x in range(center.x-radius,center.x+radius+1):
+            _wanted.append(Vector2i(x,z))
+    _wanted.sort_custom(func(a: Vector2i,b: Vector2i) -> bool:
+        return a.distance_squared_to(center)<b.distance_squared_to(center))
+    for key in chunks:
+        chunks[key].visible = _chunk_visible(key)
+        if key in _wanted: _used[key]=_clock
+
+func _chunk_visible(key: Vector2i) -> bool:
+    var radius := 1 if work_mode else 2
+    return absi(key.x-_focus.x)<=radius and absi(key.y-_focus.y)<=radius
+
 
 func configure(view: Node, profile: Resource = null) -> void:
     study_root = view
@@ -109,6 +208,9 @@ func configure(view: Node, profile: Resource = null) -> void:
     stone_material.vertex_color_use_as_albedo = true
     stone_material.roughness = .95
     pebble_mesh.material = stone_material
+    watch_obstacles()
+    if not get_tree().node_added.is_connected(_on_static_added):
+        get_tree().node_added.connect(_on_static_added)
 
 func weighted_family(rng: RandomNumberGenerator, weights: Vector4) -> int:
     var total := maxf(.0001,weights.x+weights.y+weights.z+weights.w)
@@ -131,6 +233,21 @@ func sample_road(uv: Vector2) -> float:
     return lerpf(lerpf(a,b,f.x),lerpf(c,d,f.x),f.y)
 
 func bake_coverage() -> void:
+    var cache = preload("res://scripts/generation_cache.gd")
+    var paths: Array=[]
+    for lot in authored_paths:
+        paths.append([lot.global_transform,lot.access_path,cache.snapshot(lot.path_surface)])
+    var raised: Array=[]
+    for cliff in raised_edit_surfaces:
+        raised.append([study_root.get_path_to(cliff),cliff.global_transform,cache.snapshot(cliff.guide),cliff.wall_height,cliff.wall_depth,cliff.raised_zone_depth,cliff.access_ramp_length,cliff.access_ramp_base_height,cliff._elevated_sampler._top_vertices if cliff._elevated_sampler!=null else null,cliff._elevated_sampler._top_indices if cliff._elevated_sampler!=null else null])
+    var key: String=cache.digest([3,cache.sources(["res://scripts/village/anime_grass.gd","res://scripts/art/art_study_profile.gd","res://scripts/art/art_surface_edit.gd","res://addons/village_builder/path_surface_profile.gd","res://addons/rock_builder/continuous_cliff.gd","res://addons/rock_builder/elevated_zone.gd"]),cache.snapshot(art_profile.edits if art_profile!=null else []),study_root.get_path_to(terrain),terrain.global_transform,mask_center,mask_size,road_mask_center,road_mask_size,road_mask.get_data(),paths,raised])
+    var file: String=cache.path_for("coverage",key,".png")
+    if FileAccess.file_exists(file):
+        coverage=Image.load_from_file(file)
+        if coverage!=null and coverage.get_size()==Vector2i(512,512):
+            if coverage.get_format()!=Image.FORMAT_RGBA8: coverage.convert(Image.FORMAT_RGBA8)
+            shared_coverage=ImageTexture.create_from_image(coverage)
+            return
     # This single control image is consumed by both terrain shading and scatter.
     # R=road pigment, G=authored density, B=palette, A=dry bank coverage.
     coverage = Image.create(512,512,false,Image.FORMAT_RGBA8)
@@ -168,6 +285,7 @@ func bake_coverage() -> void:
             # Exact polygon tests remain in placement; shoreline blending is
             # height-based in the terrain shader so wet beds stay uncovered.
             coverage.set_pixel(x,y,Color(road,density,pigment,1.0))
+    coverage.save_png(file)
     shared_coverage = ImageTexture.create_from_image(coverage)
 
 func bind_meadow(target: ShaderMaterial) -> void:
@@ -250,25 +368,61 @@ func set_enabled(active: bool) -> void:
     visible = active
 
 func _physics_process(_delta: float) -> void:
-    if not enabled:
-        return
-    var focus := player.global_position if is_instance_valid(player) else editor_center
+    if not enabled: return
+    # Physics may catch up several ticks in one rendered frame. Spend the
+    # streaming allowance only once; manual profiler calls disable processing.
+    var process_frame := Engine.get_process_frames()
+    if is_physics_processing() and process_frame==_last_stream_frame: return
+    _last_stream_frame=process_frame
+    var started := Time.get_ticks_usec()
+    _deadline = started+budget_usec
+    _clock += 1
+    audit_obstacles(_delta)
+    var focus := player.global_position if not Engine.is_editor_hint() and is_instance_valid(player) else editor_center
     var center := Vector2i(floori(focus.x / CHUNK), floori(focus.z / CHUNK))
-    for key in chunks.keys():
-        if absi(key.x-center.x)>2 or absi(key.y-center.y)>2:
-            chunks[key].queue_free()
-            chunks.erase(key)
-    var budget := 2
-    for z in range(center.y-2, center.y+3):
-        for x in range(center.x-2, center.x+3):
-            var key := Vector2i(x,z)
-            if not chunks.has(key):
-                build_chunk(key)
-                budget -= 1
-                if budget == 0:
-                    return
+    if _world_dirty:
+        _world_dirty=false
+        watch_obstacles()
+        _revision+=1
+        for chunk in chunks.values(): _retire(chunk)
+        chunks.clear()
+        _used.clear()
+        _focus=Vector2i(2147483647,2147483647)
+    if center!=_focus: _update_demand(center)
+    _discard_one()
+    if _building:
+        work_resumed.emit()
+    while not _building and Time.get_ticks_usec()<_deadline:
+        var found := false
+        for key in _wanted:
+            if chunks.has(key): continue
+            _building=true
+            build_chunk(key)
+            found=true
+            break
+        if not found: break
+    last_work_usec=Time.get_ticks_usec()-started
+    max_work_usec=maxi(max_work_usec,last_work_usec)
+
+func _job_valid(key: Vector2i, revision: int) -> bool:
+    return revision==_revision and key in _wanted
+
+func _evict_oldest() -> void:
+    if chunks.size()<81: return
+    var oldest: Variant=null
+    var age := 2147483647
+    for key in chunks:
+        if key in _wanted: continue
+        if int(_used.get(key,0))<age:
+            oldest=key
+            age=int(_used.get(key,0))
+    if oldest!=null:
+        _retire(chunks[oldest])
+        chunks.erase(oldest)
+        _used.erase(oldest)
 
 func build_chunk(key: Vector2i) -> void:
+    var revision := _revision
     var rng := RandomNumberGenerator.new()
     rng.seed = hash(key) + (712 if art_profile==null else art_profile.scatter_seed)
     var transforms: Array = []
@@ -281,11 +435,17 @@ func build_chunk(key: Vector2i) -> void:
     var space := get_world_3d().direct_space_state
     var base := Vector2(key) * CHUNK
     var multiplier: float = 1.3 if art_profile==null else art_profile.density_multiplier
-    var spacing := STEP/sqrt(maxf(.05,multiplier))
+    var spacing := STEP/sqrt(maxf(.05,multiplier * (.25 if work_mode else 1.0)))
     var cells := ceili(CHUNK/spacing)
     spacing = CHUNK/cells
     for z in range(cells):
         for x in range(cells):
+            if Time.get_ticks_usec()>=_deadline:
+                await work_resumed
+                if not _job_valid(key,revision):
+                    _building=false
+                    return
+                space=get_world_3d().direct_space_state
             var p := base + Vector2(x + rng.randf(), z + rng.randf()) * spacing
             var patch := clampf(.50+density_field.get_noise_2d(p.x,p.y)*1.4,0,1)
             var ragged := edge_field.get_noise_2d(p.x,p.y)*.18
@@ -350,16 +510,31 @@ func build_chunk(key: Vector2i) -> void:
             colors[variant].append(Color(pigment,pigment,rng.randf(),patch))
     var chunk := Node3D.new()
     chunk.name = "Grass_%d_%d" % [key.x,key.y]
+    chunk.visible=false
     add_child(chunk)
     for kind in MESH_COUNT:
+        if Time.get_ticks_usec()>=_deadline:
+            await work_resumed
+            if not _job_valid(key,revision):
+                _retire(chunk)
+                _building=false
+                return
         var instance := MultiMeshInstance3D.new()
         instance.name = VARIANTS[kind/3]+"_%d"%(kind%3)
+        chunk.add_child(instance)
         var multi := MultiMesh.new()
         multi.transform_format = MultiMesh.TRANSFORM_3D
         multi.use_custom_data = true
         multi.mesh = blades[kind]
         multi.instance_count = transforms[kind].size()
         for i in transforms[kind].size():
+            if i%32==0 and Time.get_ticks_usec()>=_deadline:
+                await work_resumed
+                if not _job_valid(key,revision):
+                    instance.free()
+                    _retire(chunk)
+                    _building=false
+                    return
             multi.set_instance_transform(i, transforms[kind][i])
             multi.set_instance_custom_data(i, colors[kind][i])
         instance.multimesh = multi
@@ -367,17 +542,27 @@ func build_chunk(key: Vector2i) -> void:
         # Keep receiving tree/world shadows; root shading and SSAO anchor blades.
         instance.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
         instance.extra_cull_margin = .15
-        chunk.add_child(instance)
     var stone_instances := MultiMeshInstance3D.new()
     stone_instances.name = "PathPebbles"
+    chunk.add_child(stone_instances)
     var stone_multi := MultiMesh.new()
     stone_multi.transform_format = MultiMesh.TRANSFORM_3D
     stone_multi.use_colors = true
     stone_multi.mesh = pebble_mesh
     stone_multi.instance_count = stones.size()
     for i in stones.size():
+        if i%32==0 and Time.get_ticks_usec()>=_deadline:
+            await work_resumed
+            if not _job_valid(key,revision):
+                stone_instances.free()
+                _retire(chunk)
+                _building=false
+                return
         stone_multi.set_instance_transform(i,stones[i])
         stone_multi.set_instance_color(i,stone_colors[i])
     stone_instances.multimesh = stone_multi
-    chunk.add_child(stone_instances)
+    _evict_oldest()
     chunks[key] = chunk
+    _used[key] = _clock
+    chunk.visible = _chunk_visible(key)
+    _building = false

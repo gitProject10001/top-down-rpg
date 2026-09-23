@@ -1,0 +1,4354 @@
+{
+  "engine": "Godot 4.6.3 stable",
+  "platform": "Windows headless",
+  "frame_limit_hz": 60,
+  "baseline_samples_per_fixture": 3,
+  "samples_per_fixture": 20,
+  "cold_dimension_step_m": 0.0037,
+  "baseline_dimension_step_m": 0.037,
+  "scope": "Release to final geometry, without Inspector debounce. Cold uses previously unseen dimensions; warm repeats the process with the same disk cache namespace. No GPU timing in this pass.",
+  "runs": {
+    "before": [
+      {
+        "fixture": "simple",
+        "width": 4.237,
+        "wall_ms": 617.121,
+        "frames": 37,
+        "host_builds": 1
+      },
+      {
+        "fixture": "simple",
+        "width": 4.274,
+        "wall_ms": 610.462,
+        "frames": 37,
+        "host_builds": 1
+      },
+      {
+        "fixture": "simple",
+        "width": 4.311,
+        "wall_ms": 633.154,
+        "frames": 38,
+        "host_builds": 1
+      },
+      {
+        "fixture": "wing",
+        "width": 4.237,
+        "wall_ms": 3730.987,
+        "frames": 222,
+        "host_builds": 1
+      },
+      {
+        "fixture": "wing",
+        "width": 4.274,
+        "wall_ms": 3943.422,
+        "frames": 235,
+        "host_builds": 1
+      },
+      {
+        "fixture": "wing",
+        "width": 4.311,
+        "wall_ms": 3792.999,
+        "frames": 226,
+        "host_builds": 1
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.837,
+        "wall_ms": 19103.497,
+        "frames": 1132,
+        "host_builds": 1
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.874,
+        "wall_ms": 19452.834,
+        "frames": 1154,
+        "host_builds": 1
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.911,
+        "wall_ms": 19741.737,
+        "frames": 1170,
+        "host_builds": 1
+      }
+    ],
+    "cold": [
+      {
+        "fixture": "simple",
+        "width": 4.2037,
+        "wall_ms": 102.107,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.118,
+          "roof": 0.81,
+          "wing": 0.009,
+          "masonry": 9.947,
+          "volume_cuts": 0.032,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.284,
+          "publish_dependents": 0.355,
+          "roof_prepare": 48.906,
+          "finalize_ms": 102.079,
+          "frame_wait_ms": 40.454,
+          "cpu_total_ms": 61.625
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2074,
+        "wall_ms": 99.688,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.926,
+          "roof": 0.704,
+          "wing": 0.01,
+          "masonry": 9.94,
+          "volume_cuts": 0.027,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.275,
+          "publish_dependents": 0.347,
+          "roof_prepare": 50.169,
+          "finalize_ms": 99.668,
+          "frame_wait_ms": 37.151,
+          "cpu_total_ms": 62.517
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2111,
+        "wall_ms": 99.789,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.025,
+          "roof": 0.732,
+          "wing": 0.008,
+          "masonry": 10.02,
+          "volume_cuts": 0.029,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.28,
+          "publish_dependents": 0.349,
+          "roof_prepare": 48.553,
+          "finalize_ms": 99.768,
+          "frame_wait_ms": 38.647,
+          "cpu_total_ms": 61.121
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2148,
+        "wall_ms": 99.814,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.948,
+          "roof": 0.76,
+          "wing": 0.01,
+          "masonry": 10.238,
+          "volume_cuts": 0.028,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.289,
+          "publish_dependents": 0.342,
+          "roof_prepare": 49.388,
+          "finalize_ms": 99.794,
+          "frame_wait_ms": 37.577,
+          "cpu_total_ms": 62.217
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2185,
+        "wall_ms": 99.447,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.968,
+          "roof": 0.685,
+          "wing": 0.009,
+          "masonry": 9.583,
+          "volume_cuts": 0.025,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.27,
+          "publish_dependents": 0.326,
+          "roof_prepare": 48.063,
+          "finalize_ms": 99.43,
+          "frame_wait_ms": 39.375,
+          "cpu_total_ms": 60.055
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2222,
+        "wall_ms": 99.686,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.95,
+          "roof": 0.764,
+          "wing": 0.011,
+          "masonry": 9.492,
+          "volume_cuts": 0.026,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.264,
+          "publish_dependents": 0.329,
+          "roof_prepare": 47.863,
+          "finalize_ms": 99.668,
+          "frame_wait_ms": 39.861,
+          "cpu_total_ms": 59.807
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2259,
+        "wall_ms": 99.741,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.181,
+          "roof": 0.714,
+          "wing": 0.009,
+          "masonry": 9.571,
+          "volume_cuts": 0.025,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.257,
+          "publish_dependents": 0.326,
+          "roof_prepare": 48.342,
+          "finalize_ms": 99.724,
+          "frame_wait_ms": 39.048,
+          "cpu_total_ms": 60.676
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2296,
+        "wall_ms": 99.625,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.936,
+          "roof": 0.695,
+          "wing": 0.008,
+          "masonry": 9.215,
+          "volume_cuts": 0.024,
+          "trim_cuts": 0.006,
+          "openings_collision": 0.268,
+          "publish_dependents": 0.335,
+          "roof_prepare": 49.11,
+          "finalize_ms": 99.607,
+          "frame_wait_ms": 38.895,
+          "cpu_total_ms": 60.712
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2333,
+        "wall_ms": 100.49,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.94,
+          "roof": 0.675,
+          "wing": 0.009,
+          "masonry": 10.088,
+          "volume_cuts": 0.027,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.275,
+          "publish_dependents": 0.342,
+          "roof_prepare": 50.124,
+          "finalize_ms": 100.47,
+          "frame_wait_ms": 37.879,
+          "cpu_total_ms": 62.591
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.237,
+        "wall_ms": 99.794,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.904,
+          "roof": 0.768,
+          "wing": 0.01,
+          "masonry": 9.858,
+          "volume_cuts": 0.052,
+          "trim_cuts": 0.009,
+          "openings_collision": 0.308,
+          "publish_dependents": 0.365,
+          "roof_prepare": 50.222,
+          "finalize_ms": 99.771,
+          "frame_wait_ms": 37.157,
+          "cpu_total_ms": 62.614
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2407,
+        "wall_ms": 99.412,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.921,
+          "roof": 0.878,
+          "wing": 0.014,
+          "masonry": 9.752,
+          "volume_cuts": 0.025,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.283,
+          "publish_dependents": 0.337,
+          "roof_prepare": 48.103,
+          "finalize_ms": 99.391,
+          "frame_wait_ms": 38.95,
+          "cpu_total_ms": 60.441
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2444,
+        "wall_ms": 99.984,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.954,
+          "roof": 0.693,
+          "wing": 0.01,
+          "masonry": 9.822,
+          "volume_cuts": 0.025,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.273,
+          "publish_dependents": 0.344,
+          "roof_prepare": 47.385,
+          "finalize_ms": 99.966,
+          "frame_wait_ms": 40.35,
+          "cpu_total_ms": 59.616
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2481,
+        "wall_ms": 99.597,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.129,
+          "roof": 0.773,
+          "wing": 0.009,
+          "masonry": 9.362,
+          "volume_cuts": 0.025,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.27,
+          "publish_dependents": 0.331,
+          "roof_prepare": 46.552,
+          "finalize_ms": 99.579,
+          "frame_wait_ms": 41.028,
+          "cpu_total_ms": 58.551
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2518,
+        "wall_ms": 99.853,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.989,
+          "roof": 0.678,
+          "wing": 0.01,
+          "masonry": 9.522,
+          "volume_cuts": 0.025,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.274,
+          "publish_dependents": 0.347,
+          "roof_prepare": 46.928,
+          "finalize_ms": 99.836,
+          "frame_wait_ms": 40.946,
+          "cpu_total_ms": 58.89
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2555,
+        "wall_ms": 100.069,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.193,
+          "roof": 0.797,
+          "wing": 0.01,
+          "masonry": 9.428,
+          "volume_cuts": 0.025,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.566,
+          "publish_dependents": 0.354,
+          "roof_prepare": 47.5,
+          "finalize_ms": 100.052,
+          "frame_wait_ms": 40.071,
+          "cpu_total_ms": 59.981
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2592,
+        "wall_ms": 99.29,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.076,
+          "roof": 0.862,
+          "wing": 0.01,
+          "masonry": 9.23,
+          "volume_cuts": 0.025,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.281,
+          "publish_dependents": 0.344,
+          "roof_prepare": 46.957,
+          "finalize_ms": 99.271,
+          "frame_wait_ms": 40.383,
+          "cpu_total_ms": 58.888
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2629,
+        "wall_ms": 100.128,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.051,
+          "roof": 0.712,
+          "wing": 0.01,
+          "masonry": 9.563,
+          "volume_cuts": 0.024,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.277,
+          "publish_dependents": 0.392,
+          "roof_prepare": 46.189,
+          "finalize_ms": 100.109,
+          "frame_wait_ms": 41.77,
+          "cpu_total_ms": 58.339
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2666,
+        "wall_ms": 99.927,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.038,
+          "roof": 0.875,
+          "wing": 0.01,
+          "masonry": 9.663,
+          "volume_cuts": 0.025,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.281,
+          "publish_dependents": 0.339,
+          "roof_prepare": 46.39,
+          "finalize_ms": 99.909,
+          "frame_wait_ms": 41.173,
+          "cpu_total_ms": 58.736
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2703,
+        "wall_ms": 99.391,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.913,
+          "roof": 0.96,
+          "wing": 0.009,
+          "masonry": 9.631,
+          "volume_cuts": 0.025,
+          "trim_cuts": 0.006,
+          "openings_collision": 0.279,
+          "publish_dependents": 0.338,
+          "roof_prepare": 46.413,
+          "finalize_ms": 99.372,
+          "frame_wait_ms": 40.704,
+          "cpu_total_ms": 58.668
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.274,
+        "wall_ms": 100.198,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.004,
+          "roof": 0.917,
+          "wing": 0.01,
+          "masonry": 9.621,
+          "volume_cuts": 0.026,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.287,
+          "publish_dependents": 0.343,
+          "roof_prepare": 47.467,
+          "finalize_ms": 100.178,
+          "frame_wait_ms": 40.401,
+          "cpu_total_ms": 59.777
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2037,
+        "wall_ms": 244.202,
+        "frames": 14,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.917,
+          "roof": 0.753,
+          "wing": 99.418,
+          "masonry": 14.196,
+          "volume_cuts": 0.03,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.577,
+          "publish_dependents": 1.921,
+          "roof_prepare": 41.67,
+          "finalize_ms": 244.18,
+          "frame_wait_ms": 84.583,
+          "cpu_total_ms": 159.597
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2074,
+        "wall_ms": 232.117,
+        "frames": 14,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.947,
+          "roof": 0.719,
+          "wing": 99.252,
+          "masonry": 14.499,
+          "volume_cuts": 0.03,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.61,
+          "publish_dependents": 1.716,
+          "roof_prepare": 42.491,
+          "finalize_ms": 232.098,
+          "frame_wait_ms": 71.724,
+          "cpu_total_ms": 160.374
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2111,
+        "wall_ms": 234.472,
+        "frames": 14,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.919,
+          "roof": 0.769,
+          "wing": 100.355,
+          "masonry": 14.766,
+          "volume_cuts": 0.035,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.602,
+          "publish_dependents": 1.609,
+          "roof_prepare": 43.441,
+          "finalize_ms": 234.45,
+          "frame_wait_ms": 71.837,
+          "cpu_total_ms": 162.613
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2148,
+        "wall_ms": 232.999,
+        "frames": 14,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.919,
+          "roof": 0.671,
+          "wing": 101.135,
+          "masonry": 14.615,
+          "volume_cuts": 0.033,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.596,
+          "publish_dependents": 1.622,
+          "roof_prepare": 43.573,
+          "finalize_ms": 232.977,
+          "frame_wait_ms": 69.705,
+          "cpu_total_ms": 163.272
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2185,
+        "wall_ms": 242.001,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.917,
+          "roof": 0.71,
+          "wing": 99.972,
+          "masonry": 22.963,
+          "volume_cuts": 0.032,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.579,
+          "publish_dependents": 1.755,
+          "roof_prepare": 42.529,
+          "finalize_ms": 241.965,
+          "frame_wait_ms": 72.4,
+          "cpu_total_ms": 169.565
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2222,
+        "wall_ms": 240.578,
+        "frames": 14,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.243,
+          "roof": 0.764,
+          "wing": 100.044,
+          "masonry": 15.002,
+          "volume_cuts": 0.031,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.583,
+          "publish_dependents": 1.975,
+          "roof_prepare": 41.842,
+          "finalize_ms": 240.553,
+          "frame_wait_ms": 78.956,
+          "cpu_total_ms": 161.597
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2259,
+        "wall_ms": 238.067,
+        "frames": 14,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.936,
+          "roof": 0.887,
+          "wing": 102.969,
+          "masonry": 14.452,
+          "volume_cuts": 0.032,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.644,
+          "publish_dependents": 1.758,
+          "roof_prepare": 42.639,
+          "finalize_ms": 238.044,
+          "frame_wait_ms": 73.608,
+          "cpu_total_ms": 164.436
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2296,
+        "wall_ms": 237.201,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.926,
+          "roof": 0.684,
+          "wing": 100.408,
+          "masonry": 21.914,
+          "volume_cuts": 0.033,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.622,
+          "publish_dependents": 1.848,
+          "roof_prepare": 42.627,
+          "finalize_ms": 237.178,
+          "frame_wait_ms": 67.988,
+          "cpu_total_ms": 169.19
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2333,
+        "wall_ms": 249.812,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.907,
+          "roof": 0.694,
+          "wing": 100.424,
+          "masonry": 21.711,
+          "volume_cuts": 0.059,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.637,
+          "publish_dependents": 1.85,
+          "roof_prepare": 42.398,
+          "finalize_ms": 249.789,
+          "frame_wait_ms": 80.992,
+          "cpu_total_ms": 168.797
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.237,
+        "wall_ms": 249.649,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.228,
+          "roof": 0.906,
+          "wing": 100.023,
+          "masonry": 21.955,
+          "volume_cuts": 0.035,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.665,
+          "publish_dependents": 1.721,
+          "roof_prepare": 42.859,
+          "finalize_ms": 249.627,
+          "frame_wait_ms": 80.115,
+          "cpu_total_ms": 169.512
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2407,
+        "wall_ms": 249.687,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.918,
+          "roof": 0.814,
+          "wing": 100.127,
+          "masonry": 22.404,
+          "volume_cuts": 0.032,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.6,
+          "publish_dependents": 1.671,
+          "roof_prepare": 42.688,
+          "finalize_ms": 249.653,
+          "frame_wait_ms": 80.287,
+          "cpu_total_ms": 169.366
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2444,
+        "wall_ms": 251.749,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.892,
+          "roof": 0.653,
+          "wing": 100.873,
+          "masonry": 23.759,
+          "volume_cuts": 0.033,
+          "trim_cuts": 0.006,
+          "openings_collision": 0.601,
+          "publish_dependents": 1.968,
+          "roof_prepare": 42.191,
+          "finalize_ms": 251.727,
+          "frame_wait_ms": 80.641,
+          "cpu_total_ms": 171.086
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2481,
+        "wall_ms": 252.808,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.159,
+          "roof": 0.744,
+          "wing": 104.733,
+          "masonry": 26.402,
+          "volume_cuts": 0.034,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.589,
+          "publish_dependents": 1.771,
+          "roof_prepare": 42.79,
+          "finalize_ms": 252.788,
+          "frame_wait_ms": 74.446,
+          "cpu_total_ms": 178.342
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2518,
+        "wall_ms": 245.249,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.024,
+          "roof": 0.741,
+          "wing": 100.487,
+          "masonry": 21.813,
+          "volume_cuts": 0.085,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.673,
+          "publish_dependents": 1.798,
+          "roof_prepare": 43.977,
+          "finalize_ms": 245.227,
+          "frame_wait_ms": 74.516,
+          "cpu_total_ms": 170.711
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2555,
+        "wall_ms": 249.759,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.945,
+          "roof": 0.635,
+          "wing": 99.637,
+          "masonry": 22.082,
+          "volume_cuts": 0.114,
+          "trim_cuts": 0.01,
+          "openings_collision": 0.656,
+          "publish_dependents": 1.853,
+          "roof_prepare": 43.137,
+          "finalize_ms": 249.739,
+          "frame_wait_ms": 80.564,
+          "cpu_total_ms": 169.175
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2592,
+        "wall_ms": 266.674,
+        "frames": 16,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.953,
+          "roof": 0.662,
+          "wing": 99.734,
+          "masonry": 30.557,
+          "volume_cuts": 0.037,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.628,
+          "publish_dependents": 2.069,
+          "roof_prepare": 42.972,
+          "finalize_ms": 266.65,
+          "frame_wait_ms": 88.929,
+          "cpu_total_ms": 177.721
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2629,
+        "wall_ms": 248.669,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.983,
+          "roof": 0.658,
+          "wing": 100.093,
+          "masonry": 21.665,
+          "volume_cuts": 0.034,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.632,
+          "publish_dependents": 0.913,
+          "roof_prepare": 42.918,
+          "finalize_ms": 248.649,
+          "frame_wait_ms": 80.637,
+          "cpu_total_ms": 168.012
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2666,
+        "wall_ms": 250.049,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.933,
+          "roof": 0.654,
+          "wing": 101.335,
+          "masonry": 22.28,
+          "volume_cuts": 0.129,
+          "trim_cuts": 0.009,
+          "openings_collision": 0.623,
+          "publish_dependents": 1.036,
+          "roof_prepare": 41.151,
+          "finalize_ms": 250.029,
+          "frame_wait_ms": 81.779,
+          "cpu_total_ms": 168.25
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2703,
+        "wall_ms": 250.017,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.019,
+          "roof": 0.667,
+          "wing": 100.666,
+          "masonry": 22.009,
+          "volume_cuts": 0.032,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.614,
+          "publish_dependents": 0.934,
+          "roof_prepare": 41.579,
+          "finalize_ms": 249.995,
+          "frame_wait_ms": 82.367,
+          "cpu_total_ms": 167.628
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.274,
+        "wall_ms": 249.653,
+        "frames": 15,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.938,
+          "roof": 0.682,
+          "wing": 101.353,
+          "masonry": 22.008,
+          "volume_cuts": 0.032,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.68,
+          "publish_dependents": 1.088,
+          "roof_prepare": 40.547,
+          "finalize_ms": 249.631,
+          "frame_wait_ms": 82.192,
+          "cpu_total_ms": 167.439
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0037,
+        "wall_ms": 303.034,
+        "frames": 18,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.024,
+          "roof": 0.637,
+          "wing": 0.008,
+          "masonry": 27.386,
+          "volume_cuts": 25.637,
+          "trim_cuts": 0.021,
+          "openings_collision": 0.42,
+          "publish_dependents": 22.957,
+          "roof_prepare": 104.643,
+          "finalize_ms": 302.985,
+          "frame_wait_ms": 120.086,
+          "cpu_total_ms": 182.899
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0074,
+        "wall_ms": 285.667,
+        "frames": 17,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.055,
+          "roof": 0.63,
+          "wing": 0.007,
+          "masonry": 27.661,
+          "volume_cuts": 25.49,
+          "trim_cuts": 0.021,
+          "openings_collision": 0.419,
+          "publish_dependents": 17.446,
+          "roof_prepare": 104.696,
+          "finalize_ms": 285.61,
+          "frame_wait_ms": 108.025,
+          "cpu_total_ms": 177.585
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0111,
+        "wall_ms": 297.717,
+        "frames": 18,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.054,
+          "roof": 0.634,
+          "wing": 0.008,
+          "masonry": 27.308,
+          "volume_cuts": 25.501,
+          "trim_cuts": 0.019,
+          "openings_collision": 0.464,
+          "publish_dependents": 23.481,
+          "roof_prepare": 104.809,
+          "finalize_ms": 297.543,
+          "frame_wait_ms": 114.099,
+          "cpu_total_ms": 183.444
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0148,
+        "wall_ms": 285.979,
+        "frames": 17,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.056,
+          "roof": 0.624,
+          "wing": 0.008,
+          "masonry": 27.372,
+          "volume_cuts": 26.678,
+          "trim_cuts": 0.017,
+          "openings_collision": 0.453,
+          "publish_dependents": 17.946,
+          "roof_prepare": 106.05,
+          "finalize_ms": 285.936,
+          "frame_wait_ms": 105.561,
+          "cpu_total_ms": 180.375
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0185,
+        "wall_ms": 314.14,
+        "frames": 19,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.083,
+          "roof": 0.637,
+          "wing": 0.007,
+          "masonry": 27.587,
+          "volume_cuts": 25.971,
+          "trim_cuts": 0.019,
+          "openings_collision": 0.415,
+          "publish_dependents": 24.274,
+          "roof_prepare": 106.505,
+          "finalize_ms": 314.088,
+          "frame_wait_ms": 127.422,
+          "cpu_total_ms": 186.666
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0222,
+        "wall_ms": 297.004,
+        "frames": 18,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.051,
+          "roof": 0.63,
+          "wing": 0.007,
+          "masonry": 27.04,
+          "volume_cuts": 27.43,
+          "trim_cuts": 0.018,
+          "openings_collision": 0.454,
+          "publish_dependents": 18.182,
+          "roof_prepare": 106.775,
+          "finalize_ms": 296.962,
+          "frame_wait_ms": 115.214,
+          "cpu_total_ms": 181.748
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0259,
+        "wall_ms": 301.539,
+        "frames": 18,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.045,
+          "roof": 0.632,
+          "wing": 0.008,
+          "masonry": 27.47,
+          "volume_cuts": 25.853,
+          "trim_cuts": 0.02,
+          "openings_collision": 0.407,
+          "publish_dependents": 23.968,
+          "roof_prepare": 106.835,
+          "finalize_ms": 301.494,
+          "frame_wait_ms": 115.083,
+          "cpu_total_ms": 186.411
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0296,
+        "wall_ms": 285.434,
+        "frames": 17,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.043,
+          "roof": 0.606,
+          "wing": 0.008,
+          "masonry": 27.378,
+          "volume_cuts": 25.659,
+          "trim_cuts": 0.02,
+          "openings_collision": 0.399,
+          "publish_dependents": 17.667,
+          "roof_prepare": 103.833,
+          "finalize_ms": 285.256,
+          "frame_wait_ms": 108.491,
+          "cpu_total_ms": 176.765
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0333,
+        "wall_ms": 315.754,
+        "frames": 19,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.108,
+          "roof": 0.639,
+          "wing": 0.007,
+          "masonry": 27.018,
+          "volume_cuts": 26.752,
+          "trim_cuts": 0.021,
+          "openings_collision": 0.42,
+          "publish_dependents": 25.128,
+          "roof_prepare": 107.826,
+          "finalize_ms": 315.709,
+          "frame_wait_ms": 126.617,
+          "cpu_total_ms": 189.092
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.037,
+        "wall_ms": 285.553,
+        "frames": 17,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.064,
+          "roof": 0.615,
+          "wing": 0.008,
+          "masonry": 27.688,
+          "volume_cuts": 27.502,
+          "trim_cuts": 0.018,
+          "openings_collision": 0.504,
+          "publish_dependents": 16.709,
+          "roof_prepare": 104.821,
+          "finalize_ms": 285.514,
+          "frame_wait_ms": 106.424,
+          "cpu_total_ms": 179.09
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0407,
+        "wall_ms": 298.305,
+        "frames": 18,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.082,
+          "roof": 0.952,
+          "wing": 0.011,
+          "masonry": 27.617,
+          "volume_cuts": 26.522,
+          "trim_cuts": 0.019,
+          "openings_collision": 0.406,
+          "publish_dependents": 23.781,
+          "roof_prepare": 109.09,
+          "finalize_ms": 298.256,
+          "frame_wait_ms": 108.617,
+          "cpu_total_ms": 189.639
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0444,
+        "wall_ms": 282.052,
+        "frames": 17,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.048,
+          "roof": 0.648,
+          "wing": 0.007,
+          "masonry": 28.251,
+          "volume_cuts": 27.066,
+          "trim_cuts": 0.029,
+          "openings_collision": 0.476,
+          "publish_dependents": 17.426,
+          "roof_prepare": 106.313,
+          "finalize_ms": 282.009,
+          "frame_wait_ms": 100.579,
+          "cpu_total_ms": 181.43
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0481,
+        "wall_ms": 297.567,
+        "frames": 18,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.118,
+          "roof": 0.622,
+          "wing": 0.008,
+          "masonry": 27.145,
+          "volume_cuts": 25.54,
+          "trim_cuts": 0.023,
+          "openings_collision": 0.551,
+          "publish_dependents": 23.769,
+          "roof_prepare": 104.694,
+          "finalize_ms": 297.515,
+          "frame_wait_ms": 113.878,
+          "cpu_total_ms": 183.637
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0518,
+        "wall_ms": 301.116,
+        "frames": 18,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.042,
+          "roof": 0.688,
+          "wing": 0.009,
+          "masonry": 27.09,
+          "volume_cuts": 26.325,
+          "trim_cuts": 0.022,
+          "openings_collision": 0.502,
+          "publish_dependents": 24.808,
+          "roof_prepare": 105.95,
+          "finalize_ms": 300.964,
+          "frame_wait_ms": 114.362,
+          "cpu_total_ms": 186.602
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0555,
+        "wall_ms": 284.257,
+        "frames": 17,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.031,
+          "roof": 0.63,
+          "wing": 0.007,
+          "masonry": 27.347,
+          "volume_cuts": 26.101,
+          "trim_cuts": 0.022,
+          "openings_collision": 0.578,
+          "publish_dependents": 17.959,
+          "roof_prepare": 105.66,
+          "finalize_ms": 284.219,
+          "frame_wait_ms": 104.726,
+          "cpu_total_ms": 179.493
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0592,
+        "wall_ms": 296.576,
+        "frames": 18,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.09,
+          "roof": 0.632,
+          "wing": 0.007,
+          "masonry": 27.906,
+          "volume_cuts": 25.297,
+          "trim_cuts": 0.023,
+          "openings_collision": 0.432,
+          "publish_dependents": 23.796,
+          "roof_prepare": 106.02,
+          "finalize_ms": 296.299,
+          "frame_wait_ms": 110.935,
+          "cpu_total_ms": 185.364
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0629,
+        "wall_ms": 302.873,
+        "frames": 18,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.097,
+          "roof": 0.713,
+          "wing": 0.009,
+          "masonry": 28.558,
+          "volume_cuts": 26.678,
+          "trim_cuts": 0.022,
+          "openings_collision": 0.434,
+          "publish_dependents": 18.103,
+          "roof_prepare": 111.497,
+          "finalize_ms": 302.736,
+          "frame_wait_ms": 115.4,
+          "cpu_total_ms": 187.336
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0666,
+        "wall_ms": 301.594,
+        "frames": 18,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.044,
+          "roof": 0.632,
+          "wing": 0.007,
+          "masonry": 26.523,
+          "volume_cuts": 27.597,
+          "trim_cuts": 0.02,
+          "openings_collision": 0.478,
+          "publish_dependents": 24.885,
+          "roof_prepare": 105.769,
+          "finalize_ms": 301.554,
+          "frame_wait_ms": 114.445,
+          "cpu_total_ms": 187.109
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0703,
+        "wall_ms": 280.942,
+        "frames": 17,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.065,
+          "roof": 0.7,
+          "wing": 0.009,
+          "masonry": 27.414,
+          "volume_cuts": 25.689,
+          "trim_cuts": 0.018,
+          "openings_collision": 0.563,
+          "publish_dependents": 18.083,
+          "roof_prepare": 104.218,
+          "finalize_ms": 280.818,
+          "frame_wait_ms": 102.885,
+          "cpu_total_ms": 177.933
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.074,
+        "wall_ms": 313.879,
+        "frames": 19,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.125,
+          "roof": 0.617,
+          "wing": 0.008,
+          "masonry": 27.281,
+          "volume_cuts": 26.171,
+          "trim_cuts": 0.019,
+          "openings_collision": 0.457,
+          "publish_dependents": 23.911,
+          "roof_prepare": 107.942,
+          "finalize_ms": 313.829,
+          "frame_wait_ms": 126.122,
+          "cpu_total_ms": 187.707
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8037,
+        "wall_ms": 870.726,
+        "frames": 49,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.989,
+          "roof": 0.93,
+          "wing": 0.017,
+          "masonry": 34.522,
+          "volume_cuts": 56.3,
+          "trim_cuts": 100.762,
+          "openings_collision": 28.867,
+          "publish_dependents": 69.725,
+          "roof_prepare": 254.82,
+          "finalize_ms": 870.695,
+          "frame_wait_ms": 323.515,
+          "cpu_total_ms": 547.18
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8074,
+        "wall_ms": 855.738,
+        "frames": 48,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.984,
+          "roof": 0.898,
+          "wing": 0.017,
+          "masonry": 34.935,
+          "volume_cuts": 56.374,
+          "trim_cuts": 95.968,
+          "openings_collision": 28.705,
+          "publish_dependents": 68.219,
+          "roof_prepare": 259.781,
+          "finalize_ms": 855.709,
+          "frame_wait_ms": 309.566,
+          "cpu_total_ms": 546.143
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8111,
+        "wall_ms": 836.068,
+        "frames": 47,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.924,
+          "roof": 0.892,
+          "wing": 0.016,
+          "masonry": 35.026,
+          "volume_cuts": 56.189,
+          "trim_cuts": 97.627,
+          "openings_collision": 29.163,
+          "publish_dependents": 66.926,
+          "roof_prepare": 250.238,
+          "finalize_ms": 836.038,
+          "frame_wait_ms": 298.793,
+          "cpu_total_ms": 537.245
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8148,
+        "wall_ms": 834.701,
+        "frames": 47,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.874,
+          "roof": 0.832,
+          "wing": 0.02,
+          "masonry": 34.231,
+          "volume_cuts": 56.254,
+          "trim_cuts": 97.39,
+          "openings_collision": 28.595,
+          "publish_dependents": 67.293,
+          "roof_prepare": 248.955,
+          "finalize_ms": 834.672,
+          "frame_wait_ms": 299.979,
+          "cpu_total_ms": 534.693
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8185,
+        "wall_ms": 872.546,
+        "frames": 49,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.956,
+          "roof": 0.918,
+          "wing": 0.019,
+          "masonry": 35.597,
+          "volume_cuts": 56.588,
+          "trim_cuts": 100.258,
+          "openings_collision": 31.057,
+          "publish_dependents": 70.548,
+          "roof_prepare": 259.543,
+          "finalize_ms": 872.512,
+          "frame_wait_ms": 316.775,
+          "cpu_total_ms": 555.737
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8222,
+        "wall_ms": 870.159,
+        "frames": 49,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.925,
+          "roof": 0.928,
+          "wing": 0.019,
+          "masonry": 33.936,
+          "volume_cuts": 57.005,
+          "trim_cuts": 101.215,
+          "openings_collision": 29.129,
+          "publish_dependents": 71.47,
+          "roof_prepare": 256.085,
+          "finalize_ms": 870.128,
+          "frame_wait_ms": 319.119,
+          "cpu_total_ms": 551.009
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8259,
+        "wall_ms": 854.814,
+        "frames": 48,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.963,
+          "roof": 0.933,
+          "wing": 0.02,
+          "masonry": 33.417,
+          "volume_cuts": 55.841,
+          "trim_cuts": 96.541,
+          "openings_collision": 29.372,
+          "publish_dependents": 67.478,
+          "roof_prepare": 257.438,
+          "finalize_ms": 854.785,
+          "frame_wait_ms": 312.543,
+          "cpu_total_ms": 542.242
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8296,
+        "wall_ms": 837.021,
+        "frames": 47,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.928,
+          "roof": 0.923,
+          "wing": 0.018,
+          "masonry": 34.225,
+          "volume_cuts": 57.054,
+          "trim_cuts": 96.809,
+          "openings_collision": 29.694,
+          "publish_dependents": 66.202,
+          "roof_prepare": 250.681,
+          "finalize_ms": 836.993,
+          "frame_wait_ms": 300.222,
+          "cpu_total_ms": 536.771
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8333,
+        "wall_ms": 869.038,
+        "frames": 49,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.928,
+          "roof": 0.951,
+          "wing": 0.018,
+          "masonry": 35.015,
+          "volume_cuts": 57.346,
+          "trim_cuts": 102.073,
+          "openings_collision": 30.376,
+          "publish_dependents": 70.763,
+          "roof_prepare": 254.73,
+          "finalize_ms": 869.006,
+          "frame_wait_ms": 316.566,
+          "cpu_total_ms": 552.44
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.837,
+        "wall_ms": 867.952,
+        "frames": 49,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.913,
+          "roof": 0.909,
+          "wing": 0.019,
+          "masonry": 35.065,
+          "volume_cuts": 55.922,
+          "trim_cuts": 100.89,
+          "openings_collision": 28.835,
+          "publish_dependents": 69.746,
+          "roof_prepare": 256.574,
+          "finalize_ms": 867.922,
+          "frame_wait_ms": 318.804,
+          "cpu_total_ms": 549.118
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8407,
+        "wall_ms": 857.876,
+        "frames": 48,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 1.166,
+          "roof": 1.11,
+          "wing": 0.024,
+          "masonry": 34.33,
+          "volume_cuts": 56.49,
+          "trim_cuts": 98.231,
+          "openings_collision": 28.91,
+          "publish_dependents": 68.138,
+          "roof_prepare": 261.592,
+          "finalize_ms": 857.844,
+          "frame_wait_ms": 307.579,
+          "cpu_total_ms": 550.265
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8444,
+        "wall_ms": 837.51,
+        "frames": 47,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.922,
+          "roof": 0.941,
+          "wing": 0.019,
+          "masonry": 34.545,
+          "volume_cuts": 56.788,
+          "trim_cuts": 97.37,
+          "openings_collision": 29.215,
+          "publish_dependents": 67.58,
+          "roof_prepare": 251.355,
+          "finalize_ms": 837.48,
+          "frame_wait_ms": 298.504,
+          "cpu_total_ms": 538.976
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8481,
+        "wall_ms": 833.904,
+        "frames": 47,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.94,
+          "roof": 0.97,
+          "wing": 0.017,
+          "masonry": 34.436,
+          "volume_cuts": 54.974,
+          "trim_cuts": 97.46,
+          "openings_collision": 29.638,
+          "publish_dependents": 69.573,
+          "roof_prepare": 248.946,
+          "finalize_ms": 833.874,
+          "frame_wait_ms": 296.687,
+          "cpu_total_ms": 537.187
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8518,
+        "wall_ms": 832.358,
+        "frames": 47,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.927,
+          "roof": 0.958,
+          "wing": 0.019,
+          "masonry": 33.641,
+          "volume_cuts": 55.051,
+          "trim_cuts": 94.831,
+          "openings_collision": 29.236,
+          "publish_dependents": 69.265,
+          "roof_prepare": 248.187,
+          "finalize_ms": 832.327,
+          "frame_wait_ms": 299.971,
+          "cpu_total_ms": 532.356
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8555,
+        "wall_ms": 866.244,
+        "frames": 49,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.899,
+          "roof": 0.925,
+          "wing": 0.021,
+          "masonry": 33.871,
+          "volume_cuts": 66.121,
+          "trim_cuts": 102.296,
+          "openings_collision": 30.032,
+          "publish_dependents": 65.489,
+          "roof_prepare": 246.97,
+          "finalize_ms": 866.216,
+          "frame_wait_ms": 319.35,
+          "cpu_total_ms": 546.866
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8592,
+        "wall_ms": 832.86,
+        "frames": 47,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.911,
+          "roof": 0.933,
+          "wing": 0.017,
+          "masonry": 34.91,
+          "volume_cuts": 54.454,
+          "trim_cuts": 97.492,
+          "openings_collision": 28.982,
+          "publish_dependents": 66.379,
+          "roof_prepare": 247.451,
+          "finalize_ms": 832.83,
+          "frame_wait_ms": 301.054,
+          "cpu_total_ms": 531.776
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8629,
+        "wall_ms": 834.08,
+        "frames": 47,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.911,
+          "roof": 0.935,
+          "wing": 0.017,
+          "masonry": 34.137,
+          "volume_cuts": 56.369,
+          "trim_cuts": 97.137,
+          "openings_collision": 29.227,
+          "publish_dependents": 68.79,
+          "roof_prepare": 250.751,
+          "finalize_ms": 834.051,
+          "frame_wait_ms": 295.516,
+          "cpu_total_ms": 538.535
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8666,
+        "wall_ms": 833.378,
+        "frames": 47,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.966,
+          "roof": 0.951,
+          "wing": 0.018,
+          "masonry": 34.276,
+          "volume_cuts": 55.555,
+          "trim_cuts": 97.511,
+          "openings_collision": 30.519,
+          "publish_dependents": 68.425,
+          "roof_prepare": 250.804,
+          "finalize_ms": 833.346,
+          "frame_wait_ms": 294.023,
+          "cpu_total_ms": 539.323
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8703,
+        "wall_ms": 833.477,
+        "frames": 47,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.965,
+          "roof": 0.938,
+          "wing": 0.016,
+          "masonry": 34.705,
+          "volume_cuts": 54.295,
+          "trim_cuts": 97.572,
+          "openings_collision": 28.206,
+          "publish_dependents": 66.788,
+          "roof_prepare": 248.095,
+          "finalize_ms": 833.444,
+          "frame_wait_ms": 301.631,
+          "cpu_total_ms": 531.813
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.874,
+        "wall_ms": 839.688,
+        "frames": 47,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 1.233,
+          "roof": 0.973,
+          "wing": 0.02,
+          "masonry": 34.56,
+          "volume_cuts": 54.668,
+          "trim_cuts": 97.493,
+          "openings_collision": 30.118,
+          "publish_dependents": 71.43,
+          "roof_prepare": 246.822,
+          "finalize_ms": 839.349,
+          "frame_wait_ms": 301.782,
+          "cpu_total_ms": 537.567
+        }
+      }
+    ],
+    "warm": [
+      {
+        "fixture": "simple",
+        "width": 4.2037,
+        "wall_ms": 23.009,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.878,
+          "roof": 0.777,
+          "wing": 0.009,
+          "masonry": 10.27,
+          "volume_cuts": 0.14,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.435,
+          "publish_dependents": 0.342,
+          "roof_prepare": 2.11,
+          "finalize_ms": 22.987,
+          "frame_wait_ms": 7.971,
+          "cpu_total_ms": 15.016
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2074,
+        "wall_ms": 13.137,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.825,
+          "roof": 0.6,
+          "wing": 0.007,
+          "masonry": 8.811,
+          "volume_cuts": 0.017,
+          "trim_cuts": 0.006,
+          "openings_collision": 0.234,
+          "publish_dependents": 0.3,
+          "roof_prepare": 2.213,
+          "finalize_ms": 13.122,
+          "frame_wait_ms": 0.064,
+          "cpu_total_ms": 13.058
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2111,
+        "wall_ms": 19.104,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.982,
+          "roof": 0.662,
+          "wing": 0.008,
+          "masonry": 9.391,
+          "volume_cuts": 0.023,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.26,
+          "publish_dependents": 0.369,
+          "roof_prepare": 2.59,
+          "finalize_ms": 19.087,
+          "frame_wait_ms": 4.734,
+          "cpu_total_ms": 14.353
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2148,
+        "wall_ms": 13.682,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.826,
+          "roof": 0.615,
+          "wing": 0.008,
+          "masonry": 9.256,
+          "volume_cuts": 0.022,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.257,
+          "publish_dependents": 0.32,
+          "roof_prepare": 2.241,
+          "finalize_ms": 13.667,
+          "frame_wait_ms": 0.065,
+          "cpu_total_ms": 13.602
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2185,
+        "wall_ms": 15.367,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.842,
+          "roof": 0.658,
+          "wing": 0.009,
+          "masonry": 9.174,
+          "volume_cuts": 0.019,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.246,
+          "publish_dependents": 0.379,
+          "roof_prepare": 2.162,
+          "finalize_ms": 15.349,
+          "frame_wait_ms": 1.804,
+          "cpu_total_ms": 13.545
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2222,
+        "wall_ms": 20.176,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.845,
+          "roof": 0.632,
+          "wing": 0.009,
+          "masonry": 9.282,
+          "volume_cuts": 0.021,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.271,
+          "publish_dependents": 0.316,
+          "roof_prepare": 2.912,
+          "finalize_ms": 20.159,
+          "frame_wait_ms": 5.812,
+          "cpu_total_ms": 14.347
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2259,
+        "wall_ms": 13.582,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.807,
+          "roof": 0.595,
+          "wing": 0.008,
+          "masonry": 9.215,
+          "volume_cuts": 0.02,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.283,
+          "publish_dependents": 0.323,
+          "roof_prepare": 2.173,
+          "finalize_ms": 13.567,
+          "frame_wait_ms": 0.077,
+          "cpu_total_ms": 13.49
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2296,
+        "wall_ms": 15.449,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.829,
+          "roof": 0.618,
+          "wing": 0.008,
+          "masonry": 8.876,
+          "volume_cuts": 0.019,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.244,
+          "publish_dependents": 0.322,
+          "roof_prepare": 2.236,
+          "finalize_ms": 15.433,
+          "frame_wait_ms": 2.219,
+          "cpu_total_ms": 13.214
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2333,
+        "wall_ms": 16.535,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.851,
+          "roof": 0.611,
+          "wing": 0.008,
+          "masonry": 9.076,
+          "volume_cuts": 0.02,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.247,
+          "publish_dependents": 0.314,
+          "roof_prepare": 2.07,
+          "finalize_ms": 16.509,
+          "frame_wait_ms": 3.258,
+          "cpu_total_ms": 13.251
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.237,
+        "wall_ms": 16.537,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.804,
+          "roof": 0.586,
+          "wing": 0.007,
+          "masonry": 9.295,
+          "volume_cuts": 0.021,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.266,
+          "publish_dependents": 0.319,
+          "roof_prepare": 2.102,
+          "finalize_ms": 16.522,
+          "frame_wait_ms": 3.057,
+          "cpu_total_ms": 13.465
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2407,
+        "wall_ms": 19.877,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.828,
+          "roof": 0.625,
+          "wing": 0.008,
+          "masonry": 9.224,
+          "volume_cuts": 0.02,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.266,
+          "publish_dependents": 0.314,
+          "roof_prepare": 2.281,
+          "finalize_ms": 19.862,
+          "frame_wait_ms": 6.237,
+          "cpu_total_ms": 13.625
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2444,
+        "wall_ms": 16.99,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.791,
+          "roof": 0.602,
+          "wing": 0.008,
+          "masonry": 9.94,
+          "volume_cuts": 0.021,
+          "trim_cuts": 0.006,
+          "openings_collision": 0.396,
+          "publish_dependents": 0.333,
+          "roof_prepare": 2.122,
+          "finalize_ms": 16.974,
+          "frame_wait_ms": 2.706,
+          "cpu_total_ms": 14.268
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2481,
+        "wall_ms": 16.286,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.964,
+          "roof": 0.917,
+          "wing": 0.008,
+          "masonry": 9.637,
+          "volume_cuts": 0.023,
+          "trim_cuts": 0.009,
+          "openings_collision": 0.265,
+          "publish_dependents": 0.377,
+          "roof_prepare": 2.013,
+          "finalize_ms": 16.267,
+          "frame_wait_ms": 2.004,
+          "cpu_total_ms": 14.263
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2518,
+        "wall_ms": 16.507,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.868,
+          "roof": 0.604,
+          "wing": 0.008,
+          "masonry": 9.468,
+          "volume_cuts": 0.023,
+          "trim_cuts": 0.035,
+          "openings_collision": 0.298,
+          "publish_dependents": 0.416,
+          "roof_prepare": 2.298,
+          "finalize_ms": 16.494,
+          "frame_wait_ms": 2.421,
+          "cpu_total_ms": 14.073
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2555,
+        "wall_ms": 16.36,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.857,
+          "roof": 0.662,
+          "wing": 0.007,
+          "masonry": 9.336,
+          "volume_cuts": 0.022,
+          "trim_cuts": 0.006,
+          "openings_collision": 0.308,
+          "publish_dependents": 0.336,
+          "roof_prepare": 2.442,
+          "finalize_ms": 16.33,
+          "frame_wait_ms": 2.259,
+          "cpu_total_ms": 14.071
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2592,
+        "wall_ms": 17.205,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.92,
+          "roof": 0.688,
+          "wing": 0.01,
+          "masonry": 9.645,
+          "volume_cuts": 0.024,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.549,
+          "publish_dependents": 0.378,
+          "roof_prepare": 2.706,
+          "finalize_ms": 17.186,
+          "frame_wait_ms": 2.2,
+          "cpu_total_ms": 14.986
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2629,
+        "wall_ms": 16.189,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.881,
+          "roof": 0.628,
+          "wing": 0.008,
+          "masonry": 9.912,
+          "volume_cuts": 0.024,
+          "trim_cuts": 0.006,
+          "openings_collision": 0.352,
+          "publish_dependents": 0.36,
+          "roof_prepare": 2.25,
+          "finalize_ms": 16.17,
+          "frame_wait_ms": 1.698,
+          "cpu_total_ms": 14.472
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2666,
+        "wall_ms": 13.6,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.871,
+          "roof": 0.607,
+          "wing": 0.008,
+          "masonry": 9.309,
+          "volume_cuts": 0.018,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.255,
+          "publish_dependents": 0.321,
+          "roof_prepare": 2.069,
+          "finalize_ms": 13.584,
+          "frame_wait_ms": 0.07,
+          "cpu_total_ms": 13.514
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.2703,
+        "wall_ms": 19.486,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.934,
+          "roof": 0.623,
+          "wing": 0.009,
+          "masonry": 9.718,
+          "volume_cuts": 0.025,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.283,
+          "publish_dependents": 0.358,
+          "roof_prepare": 2.734,
+          "finalize_ms": 19.467,
+          "frame_wait_ms": 4.707,
+          "cpu_total_ms": 14.76
+        }
+      },
+      {
+        "fixture": "simple",
+        "width": 4.274,
+        "wall_ms": 13.665,
+        "frames": 1,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.884,
+          "roof": 0.579,
+          "wing": 0.007,
+          "masonry": 9.241,
+          "volume_cuts": 0.018,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.34,
+          "publish_dependents": 0.372,
+          "roof_prepare": 2.052,
+          "finalize_ms": 13.648,
+          "frame_wait_ms": 0.098,
+          "cpu_total_ms": 13.55
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2037,
+        "wall_ms": 190.914,
+        "frames": 11,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.934,
+          "roof": 1.065,
+          "wing": 102.428,
+          "masonry": 14.547,
+          "volume_cuts": 0.033,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.592,
+          "publish_dependents": 1.436,
+          "roof_prepare": 2.429,
+          "finalize_ms": 190.881,
+          "frame_wait_ms": 67.351,
+          "cpu_total_ms": 123.53
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2074,
+        "wall_ms": 173.184,
+        "frames": 10,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.948,
+          "roof": 0.689,
+          "wing": 104.744,
+          "masonry": 14.766,
+          "volume_cuts": 0.03,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.588,
+          "publish_dependents": 1.539,
+          "roof_prepare": 2.789,
+          "finalize_ms": 173.166,
+          "frame_wait_ms": 47.009,
+          "cpu_total_ms": 126.157
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2111,
+        "wall_ms": 164.313,
+        "frames": 10,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.221,
+          "roof": 0.715,
+          "wing": 101.907,
+          "masonry": 14.574,
+          "volume_cuts": 0.031,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.596,
+          "publish_dependents": 1.495,
+          "roof_prepare": 2.54,
+          "finalize_ms": 164.293,
+          "frame_wait_ms": 41.15,
+          "cpu_total_ms": 123.143
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2148,
+        "wall_ms": 165.722,
+        "frames": 10,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.887,
+          "roof": 0.622,
+          "wing": 102.87,
+          "masonry": 14.03,
+          "volume_cuts": 0.031,
+          "trim_cuts": 0.006,
+          "openings_collision": 0.588,
+          "publish_dependents": 1.553,
+          "roof_prepare": 2.545,
+          "finalize_ms": 165.701,
+          "frame_wait_ms": 42.513,
+          "cpu_total_ms": 123.188
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2185,
+        "wall_ms": 191.065,
+        "frames": 12,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.881,
+          "roof": 0.62,
+          "wing": 102.792,
+          "masonry": 21.816,
+          "volume_cuts": 0.032,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.574,
+          "publish_dependents": 1.622,
+          "roof_prepare": 2.585,
+          "finalize_ms": 191.036,
+          "frame_wait_ms": 60.048,
+          "cpu_total_ms": 130.988
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2222,
+        "wall_ms": 175.453,
+        "frames": 10,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.946,
+          "roof": 0.658,
+          "wing": 101.674,
+          "masonry": 14.463,
+          "volume_cuts": 0.035,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.604,
+          "publish_dependents": 1.112,
+          "roof_prepare": 3.068,
+          "finalize_ms": 175.433,
+          "frame_wait_ms": 52.805,
+          "cpu_total_ms": 122.628
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2259,
+        "wall_ms": 170.576,
+        "frames": 10,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.811,
+          "roof": 0.606,
+          "wing": 101.746,
+          "masonry": 14.878,
+          "volume_cuts": 0.032,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.59,
+          "publish_dependents": 1.67,
+          "roof_prepare": 2.421,
+          "finalize_ms": 170.558,
+          "frame_wait_ms": 47.741,
+          "cpu_total_ms": 122.817
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2296,
+        "wall_ms": 170.605,
+        "frames": 11,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.863,
+          "roof": 0.592,
+          "wing": 101.447,
+          "masonry": 20.75,
+          "volume_cuts": 0.033,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.59,
+          "publish_dependents": 1.615,
+          "roof_prepare": 2.331,
+          "finalize_ms": 170.587,
+          "frame_wait_ms": 42.299,
+          "cpu_total_ms": 128.288
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2333,
+        "wall_ms": 182.558,
+        "frames": 11,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.922,
+          "roof": 0.633,
+          "wing": 102.079,
+          "masonry": 20.928,
+          "volume_cuts": 0.03,
+          "trim_cuts": 0.006,
+          "openings_collision": 0.582,
+          "publish_dependents": 1.676,
+          "roof_prepare": 3.132,
+          "finalize_ms": 182.538,
+          "frame_wait_ms": 52.49,
+          "cpu_total_ms": 130.048
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.237,
+        "wall_ms": 184.337,
+        "frames": 11,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.014,
+          "roof": 0.72,
+          "wing": 100.565,
+          "masonry": 20.945,
+          "volume_cuts": 0.029,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.576,
+          "publish_dependents": 1.675,
+          "roof_prepare": 3.305,
+          "finalize_ms": 184.316,
+          "frame_wait_ms": 55.421,
+          "cpu_total_ms": 128.895
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2407,
+        "wall_ms": 198.757,
+        "frames": 12,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.91,
+          "roof": 0.761,
+          "wing": 102.209,
+          "masonry": 21.41,
+          "volume_cuts": 0.036,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.584,
+          "publish_dependents": 1.697,
+          "roof_prepare": 2.854,
+          "finalize_ms": 198.726,
+          "frame_wait_ms": 68.202,
+          "cpu_total_ms": 130.524
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2444,
+        "wall_ms": 183.348,
+        "frames": 11,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.099,
+          "roof": 0.986,
+          "wing": 101.891,
+          "masonry": 21.641,
+          "volume_cuts": 0.031,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.662,
+          "publish_dependents": 1.825,
+          "roof_prepare": 2.819,
+          "finalize_ms": 183.325,
+          "frame_wait_ms": 52.308,
+          "cpu_total_ms": 131.017
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2481,
+        "wall_ms": 189.249,
+        "frames": 11,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.057,
+          "roof": 0.662,
+          "wing": 110.107,
+          "masonry": 27.032,
+          "volume_cuts": 0.037,
+          "trim_cuts": 0.008,
+          "openings_collision": 0.706,
+          "publish_dependents": 1.806,
+          "roof_prepare": 3.22,
+          "finalize_ms": 189.228,
+          "frame_wait_ms": 44.531,
+          "cpu_total_ms": 144.697
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2518,
+        "wall_ms": 193.662,
+        "frames": 12,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.021,
+          "roof": 0.656,
+          "wing": 102.179,
+          "masonry": 21.27,
+          "volume_cuts": 0.034,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.653,
+          "publish_dependents": 1.837,
+          "roof_prepare": 2.506,
+          "finalize_ms": 193.629,
+          "frame_wait_ms": 63.404,
+          "cpu_total_ms": 130.225
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2555,
+        "wall_ms": 182.856,
+        "frames": 11,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.398,
+          "roof": 0.687,
+          "wing": 101.015,
+          "masonry": 20.827,
+          "volume_cuts": 0.031,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.593,
+          "publish_dependents": 1.736,
+          "roof_prepare": 2.884,
+          "finalize_ms": 182.836,
+          "frame_wait_ms": 53.597,
+          "cpu_total_ms": 129.239
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2592,
+        "wall_ms": 216.646,
+        "frames": 13,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.171,
+          "roof": 0.868,
+          "wing": 103.258,
+          "masonry": 28.817,
+          "volume_cuts": 0.03,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.62,
+          "publish_dependents": 1.848,
+          "roof_prepare": 2.889,
+          "finalize_ms": 216.627,
+          "frame_wait_ms": 77.059,
+          "cpu_total_ms": 139.568
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2629,
+        "wall_ms": 186.148,
+        "frames": 11,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.972,
+          "roof": 0.649,
+          "wing": 104.993,
+          "masonry": 22.192,
+          "volume_cuts": 0.031,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.654,
+          "publish_dependents": 1.874,
+          "roof_prepare": 2.504,
+          "finalize_ms": 186.126,
+          "frame_wait_ms": 52.192,
+          "cpu_total_ms": 133.934
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2666,
+        "wall_ms": 179.979,
+        "frames": 11,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.114,
+          "roof": 0.654,
+          "wing": 100.192,
+          "masonry": 20.993,
+          "volume_cuts": 0.032,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.607,
+          "publish_dependents": 1.732,
+          "roof_prepare": 2.63,
+          "finalize_ms": 179.959,
+          "frame_wait_ms": 51.943,
+          "cpu_total_ms": 128.016
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.2703,
+        "wall_ms": 188.041,
+        "frames": 11,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 1.462,
+          "roof": 0.738,
+          "wing": 102.835,
+          "masonry": 21.84,
+          "volume_cuts": 0.032,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.612,
+          "publish_dependents": 2.202,
+          "roof_prepare": 2.532,
+          "finalize_ms": 188.021,
+          "frame_wait_ms": 55.703,
+          "cpu_total_ms": 132.318
+        }
+      },
+      {
+        "fixture": "wing",
+        "width": 4.274,
+        "wall_ms": 194.194,
+        "frames": 12,
+        "host_builds": 1,
+        "dependent_builds": {},
+        "phases": {
+          "shell": 0.979,
+          "roof": 0.669,
+          "wing": 104.187,
+          "masonry": 21.348,
+          "volume_cuts": 0.031,
+          "trim_cuts": 0.007,
+          "openings_collision": 0.615,
+          "publish_dependents": 0.929,
+          "roof_prepare": 3.04,
+          "finalize_ms": 194.176,
+          "frame_wait_ms": 62.315,
+          "cpu_total_ms": 131.861
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0037,
+        "wall_ms": 134.771,
+        "frames": 8,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.128,
+          "roof": 0.715,
+          "wing": 0.009,
+          "masonry": 25.888,
+          "volume_cuts": 24.142,
+          "trim_cuts": 0.021,
+          "openings_collision": 0.427,
+          "publish_dependents": 22.651,
+          "roof_prepare": 4.143,
+          "finalize_ms": 134.745,
+          "frame_wait_ms": 55.529,
+          "cpu_total_ms": 79.216
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0074,
+        "wall_ms": 120.03,
+        "frames": 7,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 0.985,
+          "roof": 0.609,
+          "wing": 0.006,
+          "masonry": 26.746,
+          "volume_cuts": 24.569,
+          "trim_cuts": 0.02,
+          "openings_collision": 0.421,
+          "publish_dependents": 17.159,
+          "roof_prepare": 3.776,
+          "finalize_ms": 119.992,
+          "frame_wait_ms": 45.621,
+          "cpu_total_ms": 74.371
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0111,
+        "wall_ms": 130.554,
+        "frames": 8,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.139,
+          "roof": 0.846,
+          "wing": 0.008,
+          "masonry": 26.955,
+          "volume_cuts": 24.095,
+          "trim_cuts": 0.02,
+          "openings_collision": 0.412,
+          "publish_dependents": 22.955,
+          "roof_prepare": 3.912,
+          "finalize_ms": 130.509,
+          "frame_wait_ms": 50.084,
+          "cpu_total_ms": 80.425
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0148,
+        "wall_ms": 118.257,
+        "frames": 7,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.03,
+          "roof": 0.629,
+          "wing": 0.008,
+          "masonry": 27.002,
+          "volume_cuts": 24.762,
+          "trim_cuts": 0.022,
+          "openings_collision": 0.428,
+          "publish_dependents": 16.898,
+          "roof_prepare": 3.964,
+          "finalize_ms": 118.214,
+          "frame_wait_ms": 43.391,
+          "cpu_total_ms": 74.823
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0185,
+        "wall_ms": 129.932,
+        "frames": 8,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.241,
+          "roof": 0.765,
+          "wing": 0.008,
+          "masonry": 26.313,
+          "volume_cuts": 23.771,
+          "trim_cuts": 0.023,
+          "openings_collision": 0.495,
+          "publish_dependents": 22.378,
+          "roof_prepare": 3.691,
+          "finalize_ms": 129.905,
+          "frame_wait_ms": 51.138,
+          "cpu_total_ms": 78.767
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0222,
+        "wall_ms": 119.553,
+        "frames": 7,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.002,
+          "roof": 0.63,
+          "wing": 0.008,
+          "masonry": 26.652,
+          "volume_cuts": 24.589,
+          "trim_cuts": 0.024,
+          "openings_collision": 0.46,
+          "publish_dependents": 16.941,
+          "roof_prepare": 3.738,
+          "finalize_ms": 119.515,
+          "frame_wait_ms": 45.391,
+          "cpu_total_ms": 74.124
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0259,
+        "wall_ms": 129.986,
+        "frames": 8,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.177,
+          "roof": 0.976,
+          "wing": 0.01,
+          "masonry": 26.039,
+          "volume_cuts": 23.743,
+          "trim_cuts": 0.018,
+          "openings_collision": 0.399,
+          "publish_dependents": 23.106,
+          "roof_prepare": 3.685,
+          "finalize_ms": 129.959,
+          "frame_wait_ms": 50.722,
+          "cpu_total_ms": 79.237
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0296,
+        "wall_ms": 120.252,
+        "frames": 7,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.046,
+          "roof": 1.127,
+          "wing": 0.009,
+          "masonry": 26.584,
+          "volume_cuts": 25.475,
+          "trim_cuts": 0.023,
+          "openings_collision": 0.495,
+          "publish_dependents": 16.981,
+          "roof_prepare": 3.884,
+          "finalize_ms": 120.126,
+          "frame_wait_ms": 44.419,
+          "cpu_total_ms": 75.707
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0333,
+        "wall_ms": 129.042,
+        "frames": 8,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.42,
+          "roof": 0.819,
+          "wing": 0.008,
+          "masonry": 26.306,
+          "volume_cuts": 23.686,
+          "trim_cuts": 0.019,
+          "openings_collision": 0.417,
+          "publish_dependents": 22.857,
+          "roof_prepare": 3.754,
+          "finalize_ms": 129.018,
+          "frame_wait_ms": 49.646,
+          "cpu_total_ms": 79.372
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.037,
+        "wall_ms": 119.933,
+        "frames": 7,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.173,
+          "roof": 0.911,
+          "wing": 0.008,
+          "masonry": 27.193,
+          "volume_cuts": 25.899,
+          "trim_cuts": 0.021,
+          "openings_collision": 0.45,
+          "publish_dependents": 16.91,
+          "roof_prepare": 3.719,
+          "finalize_ms": 119.895,
+          "frame_wait_ms": 43.531,
+          "cpu_total_ms": 76.364
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0407,
+        "wall_ms": 129.434,
+        "frames": 8,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.349,
+          "roof": 1.018,
+          "wing": 0.008,
+          "masonry": 27.13,
+          "volume_cuts": 24.303,
+          "trim_cuts": 0.021,
+          "openings_collision": 0.425,
+          "publish_dependents": 22.675,
+          "roof_prepare": 3.907,
+          "finalize_ms": 129.411,
+          "frame_wait_ms": 48.493,
+          "cpu_total_ms": 80.918
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0444,
+        "wall_ms": 120.142,
+        "frames": 7,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 0.985,
+          "roof": 0.597,
+          "wing": 0.007,
+          "masonry": 27.475,
+          "volume_cuts": 25.039,
+          "trim_cuts": 0.019,
+          "openings_collision": 0.4,
+          "publish_dependents": 17.093,
+          "roof_prepare": 3.76,
+          "finalize_ms": 120.018,
+          "frame_wait_ms": 44.564,
+          "cpu_total_ms": 75.454
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0481,
+        "wall_ms": 129.427,
+        "frames": 8,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.212,
+          "roof": 0.854,
+          "wing": 0.009,
+          "masonry": 27.4,
+          "volume_cuts": 24.272,
+          "trim_cuts": 0.018,
+          "openings_collision": 0.406,
+          "publish_dependents": 22.727,
+          "roof_prepare": 3.745,
+          "finalize_ms": 129.389,
+          "frame_wait_ms": 48.653,
+          "cpu_total_ms": 80.736
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0518,
+        "wall_ms": 134.279,
+        "frames": 8,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 0.976,
+          "roof": 0.606,
+          "wing": 0.007,
+          "masonry": 27.099,
+          "volume_cuts": 24.89,
+          "trim_cuts": 0.021,
+          "openings_collision": 0.421,
+          "publish_dependents": 23.289,
+          "roof_prepare": 3.949,
+          "finalize_ms": 134.142,
+          "frame_wait_ms": 52.8,
+          "cpu_total_ms": 81.342
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0555,
+        "wall_ms": 117.829,
+        "frames": 7,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 0.99,
+          "roof": 0.655,
+          "wing": 0.008,
+          "masonry": 27.148,
+          "volume_cuts": 23.902,
+          "trim_cuts": 0.019,
+          "openings_collision": 0.423,
+          "publish_dependents": 16.383,
+          "roof_prepare": 3.75,
+          "finalize_ms": 117.785,
+          "frame_wait_ms": 44.426,
+          "cpu_total_ms": 73.359
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0592,
+        "wall_ms": 132.14,
+        "frames": 8,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 0.996,
+          "roof": 0.617,
+          "wing": 0.009,
+          "masonry": 26.327,
+          "volume_cuts": 25.4,
+          "trim_cuts": 0.021,
+          "openings_collision": 0.41,
+          "publish_dependents": 23.007,
+          "roof_prepare": 3.845,
+          "finalize_ms": 132.011,
+          "frame_wait_ms": 51.297,
+          "cpu_total_ms": 80.714
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0629,
+        "wall_ms": 116.991,
+        "frames": 7,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 0.994,
+          "roof": 0.658,
+          "wing": 0.007,
+          "masonry": 27.215,
+          "volume_cuts": 23.915,
+          "trim_cuts": 0.02,
+          "openings_collision": 0.491,
+          "publish_dependents": 16.519,
+          "roof_prepare": 3.715,
+          "finalize_ms": 116.949,
+          "frame_wait_ms": 43.334,
+          "cpu_total_ms": 73.615
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0666,
+        "wall_ms": 132.4,
+        "frames": 8,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.035,
+          "roof": 1.006,
+          "wing": 0.011,
+          "masonry": 27.244,
+          "volume_cuts": 26.012,
+          "trim_cuts": 0.022,
+          "openings_collision": 0.432,
+          "publish_dependents": 23.111,
+          "roof_prepare": 4.499,
+          "finalize_ms": 132.264,
+          "frame_wait_ms": 48.802,
+          "cpu_total_ms": 83.462
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.0703,
+        "wall_ms": 117.921,
+        "frames": 7,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 1.065,
+          "roof": 0.664,
+          "wing": 0.009,
+          "masonry": 27.599,
+          "volume_cuts": 24.347,
+          "trim_cuts": 0.034,
+          "openings_collision": 0.484,
+          "publish_dependents": 17.382,
+          "roof_prepare": 3.898,
+          "finalize_ms": 117.878,
+          "frame_wait_ms": 42.314,
+          "cpu_total_ms": 75.564
+        }
+      },
+      {
+        "fixture": "volume",
+        "width": 6.074,
+        "wall_ms": 129.752,
+        "frames": 8,
+        "host_builds": 1,
+        "dependent_builds": {
+          "@Node3D@61": 1
+        },
+        "phases": {
+          "shell": 0.994,
+          "roof": 0.761,
+          "wing": 0.008,
+          "masonry": 26.258,
+          "volume_cuts": 24.821,
+          "trim_cuts": 0.02,
+          "openings_collision": 0.446,
+          "publish_dependents": 22.63,
+          "roof_prepare": 4.213,
+          "finalize_ms": 129.726,
+          "frame_wait_ms": 49.491,
+          "cpu_total_ms": 80.235
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8037,
+        "wall_ms": 518.3,
+        "frames": 31,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.851,
+          "roof": 0.797,
+          "wing": 0.015,
+          "masonry": 34.295,
+          "volume_cuts": 56.679,
+          "trim_cuts": 100.474,
+          "openings_collision": 30.707,
+          "publish_dependents": 70.479,
+          "roof_prepare": 6.54,
+          "finalize_ms": 518.269,
+          "frame_wait_ms": 217.339,
+          "cpu_total_ms": 300.93
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8074,
+        "wall_ms": 499.929,
+        "frames": 30,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 1.005,
+          "roof": 1.023,
+          "wing": 0.022,
+          "masonry": 33.707,
+          "volume_cuts": 55.565,
+          "trim_cuts": 99.078,
+          "openings_collision": 30.817,
+          "publish_dependents": 69.022,
+          "roof_prepare": 6.815,
+          "finalize_ms": 499.897,
+          "frame_wait_ms": 202.752,
+          "cpu_total_ms": 297.145
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8111,
+        "wall_ms": 499.6,
+        "frames": 30,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.821,
+          "roof": 0.788,
+          "wing": 0.099,
+          "masonry": 33.401,
+          "volume_cuts": 57.842,
+          "trim_cuts": 100.503,
+          "openings_collision": 29.183,
+          "publish_dependents": 69.791,
+          "roof_prepare": 7.201,
+          "finalize_ms": 499.571,
+          "frame_wait_ms": 199.849,
+          "cpu_total_ms": 299.722
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8148,
+        "wall_ms": 483.452,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.842,
+          "roof": 0.852,
+          "wing": 0.016,
+          "masonry": 34.312,
+          "volume_cuts": 57.171,
+          "trim_cuts": 97.783,
+          "openings_collision": 28.554,
+          "publish_dependents": 71.001,
+          "roof_prepare": 7.001,
+          "finalize_ms": 483.421,
+          "frame_wait_ms": 185.8,
+          "cpu_total_ms": 297.621
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8185,
+        "wall_ms": 482.818,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.908,
+          "roof": 0.851,
+          "wing": 0.016,
+          "masonry": 33.497,
+          "volume_cuts": 55.96,
+          "trim_cuts": 99.262,
+          "openings_collision": 29.005,
+          "publish_dependents": 69.656,
+          "roof_prepare": 6.676,
+          "finalize_ms": 482.786,
+          "frame_wait_ms": 186.861,
+          "cpu_total_ms": 295.925
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8222,
+        "wall_ms": 482.99,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.85,
+          "roof": 0.808,
+          "wing": 0.016,
+          "masonry": 33.509,
+          "volume_cuts": 56.976,
+          "trim_cuts": 101.372,
+          "openings_collision": 28.978,
+          "publish_dependents": 70.252,
+          "roof_prepare": 6.536,
+          "finalize_ms": 482.96,
+          "frame_wait_ms": 183.567,
+          "cpu_total_ms": 299.393
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8259,
+        "wall_ms": 482.765,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.851,
+          "roof": 0.814,
+          "wing": 0.016,
+          "masonry": 32.701,
+          "volume_cuts": 56.5,
+          "trim_cuts": 97.816,
+          "openings_collision": 29.248,
+          "publish_dependents": 68.438,
+          "roof_prepare": 6.788,
+          "finalize_ms": 482.733,
+          "frame_wait_ms": 189.465,
+          "cpu_total_ms": 293.268
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8296,
+        "wall_ms": 482.992,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 1.0,
+          "roof": 0.904,
+          "wing": 0.018,
+          "masonry": 34.845,
+          "volume_cuts": 56.842,
+          "trim_cuts": 97.496,
+          "openings_collision": 29.328,
+          "publish_dependents": 68.545,
+          "roof_prepare": 6.685,
+          "finalize_ms": 482.966,
+          "frame_wait_ms": 187.197,
+          "cpu_total_ms": 295.769
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8333,
+        "wall_ms": 482.984,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 1.024,
+          "roof": 0.925,
+          "wing": 0.016,
+          "masonry": 33.845,
+          "volume_cuts": 56.453,
+          "trim_cuts": 96.626,
+          "openings_collision": 28.839,
+          "publish_dependents": 69.157,
+          "roof_prepare": 6.413,
+          "finalize_ms": 482.946,
+          "frame_wait_ms": 189.56,
+          "cpu_total_ms": 293.386
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.837,
+        "wall_ms": 490.173,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.973,
+          "roof": 1.157,
+          "wing": 0.017,
+          "masonry": 33.783,
+          "volume_cuts": 56.22,
+          "trim_cuts": 96.346,
+          "openings_collision": 29.499,
+          "publish_dependents": 72.02,
+          "roof_prepare": 6.506,
+          "finalize_ms": 489.774,
+          "frame_wait_ms": 193.162,
+          "cpu_total_ms": 296.612
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8407,
+        "wall_ms": 475.792,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.892,
+          "roof": 0.867,
+          "wing": 0.019,
+          "masonry": 34.203,
+          "volume_cuts": 57.406,
+          "trim_cuts": 98.937,
+          "openings_collision": 29.769,
+          "publish_dependents": 69.548,
+          "roof_prepare": 7.14,
+          "finalize_ms": 475.76,
+          "frame_wait_ms": 176.845,
+          "cpu_total_ms": 298.915
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8444,
+        "wall_ms": 482.861,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 1.115,
+          "roof": 0.947,
+          "wing": 0.016,
+          "masonry": 33.43,
+          "volume_cuts": 55.892,
+          "trim_cuts": 97.377,
+          "openings_collision": 29.242,
+          "publish_dependents": 70.705,
+          "roof_prepare": 6.354,
+          "finalize_ms": 482.831,
+          "frame_wait_ms": 187.655,
+          "cpu_total_ms": 295.176
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8481,
+        "wall_ms": 499.94,
+        "frames": 30,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.816,
+          "roof": 0.939,
+          "wing": 0.018,
+          "masonry": 33.987,
+          "volume_cuts": 55.546,
+          "trim_cuts": 98.507,
+          "openings_collision": 30.179,
+          "publish_dependents": 71.572,
+          "roof_prepare": 6.48,
+          "finalize_ms": 499.908,
+          "frame_wait_ms": 201.775,
+          "cpu_total_ms": 298.133
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8518,
+        "wall_ms": 483.086,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.887,
+          "roof": 1.216,
+          "wing": 0.019,
+          "masonry": 34.04,
+          "volume_cuts": 55.847,
+          "trim_cuts": 98.59,
+          "openings_collision": 28.855,
+          "publish_dependents": 66.948,
+          "roof_prepare": 6.753,
+          "finalize_ms": 483.053,
+          "frame_wait_ms": 189.798,
+          "cpu_total_ms": 293.255
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8555,
+        "wall_ms": 482.727,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.825,
+          "roof": 0.853,
+          "wing": 0.028,
+          "masonry": 33.639,
+          "volume_cuts": 55.113,
+          "trim_cuts": 98.938,
+          "openings_collision": 28.667,
+          "publish_dependents": 69.107,
+          "roof_prepare": 6.406,
+          "finalize_ms": 482.698,
+          "frame_wait_ms": 189.032,
+          "cpu_total_ms": 293.666
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8592,
+        "wall_ms": 482.98,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.855,
+          "roof": 0.855,
+          "wing": 0.017,
+          "masonry": 34.141,
+          "volume_cuts": 56.971,
+          "trim_cuts": 99.721,
+          "openings_collision": 28.409,
+          "publish_dependents": 68.459,
+          "roof_prepare": 6.367,
+          "finalize_ms": 482.943,
+          "frame_wait_ms": 187.053,
+          "cpu_total_ms": 295.89
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8629,
+        "wall_ms": 482.982,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.827,
+          "roof": 0.807,
+          "wing": 0.016,
+          "masonry": 33.75,
+          "volume_cuts": 55.686,
+          "trim_cuts": 99.129,
+          "openings_collision": 29.657,
+          "publish_dependents": 70.188,
+          "roof_prepare": 6.389,
+          "finalize_ms": 482.956,
+          "frame_wait_ms": 186.412,
+          "cpu_total_ms": 296.544
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8666,
+        "wall_ms": 482.775,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.806,
+          "roof": 0.877,
+          "wing": 0.016,
+          "masonry": 34.074,
+          "volume_cuts": 56.834,
+          "trim_cuts": 97.673,
+          "openings_collision": 29.094,
+          "publish_dependents": 68.299,
+          "roof_prepare": 6.382,
+          "finalize_ms": 482.747,
+          "frame_wait_ms": 188.563,
+          "cpu_total_ms": 294.184
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8703,
+        "wall_ms": 483.064,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.818,
+          "roof": 1.13,
+          "wing": 0.024,
+          "masonry": 34.288,
+          "volume_cuts": 56.252,
+          "trim_cuts": 98.096,
+          "openings_collision": 28.955,
+          "publish_dependents": 69.179,
+          "roof_prepare": 6.26,
+          "finalize_ms": 483.032,
+          "frame_wait_ms": 187.942,
+          "cpu_total_ms": 295.09
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.874,
+        "wall_ms": 483.031,
+        "frames": 29,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.832,
+          "roof": 0.812,
+          "wing": 0.018,
+          "masonry": 34.3,
+          "volume_cuts": 55.782,
+          "trim_cuts": 98.717,
+          "openings_collision": 29.023,
+          "publish_dependents": 67.414,
+          "roof_prepare": 6.505,
+          "finalize_ms": 483.002,
+          "frame_wait_ms": 189.51,
+          "cpu_total_ms": 293.492
+        }
+      }
+    ],
+    "opening": [
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 106.428,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.88,
+          "roof": 0.017,
+          "wing": 0.011,
+          "masonry": 9.705,
+          "volume_cuts": 17.888,
+          "trim_cuts": 0.073,
+          "openings_collision": 31.866,
+          "publish_dependents": 2.165,
+          "roof_prepare": 1.075,
+          "finalize_ms": 106.401,
+          "frame_wait_ms": 42.629,
+          "cpu_total_ms": 63.772
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 98.603,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.856,
+          "roof": 0.013,
+          "wing": 0.007,
+          "masonry": 10.106,
+          "volume_cuts": 17.484,
+          "trim_cuts": 0.069,
+          "openings_collision": 30.547,
+          "publish_dependents": 2.491,
+          "roof_prepare": 1.067,
+          "finalize_ms": 98.58,
+          "frame_wait_ms": 35.86,
+          "cpu_total_ms": 62.72
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 85.571,
+        "frames": 5,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.861,
+          "roof": 0.012,
+          "wing": 0.01,
+          "masonry": 10.068,
+          "volume_cuts": 16.613,
+          "trim_cuts": 0.071,
+          "openings_collision": 29.476,
+          "publish_dependents": 2.398,
+          "roof_prepare": 1.014,
+          "finalize_ms": 85.549,
+          "frame_wait_ms": 24.95,
+          "cpu_total_ms": 60.599
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 97.687,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 1.155,
+          "roof": 0.015,
+          "wing": 0.011,
+          "masonry": 9.997,
+          "volume_cuts": 16.745,
+          "trim_cuts": 0.071,
+          "openings_collision": 30.969,
+          "publish_dependents": 2.594,
+          "roof_prepare": 1.179,
+          "finalize_ms": 97.659,
+          "frame_wait_ms": 34.84,
+          "cpu_total_ms": 62.819
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 99.701,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.917,
+          "roof": 0.013,
+          "wing": 0.011,
+          "masonry": 9.764,
+          "volume_cuts": 17.043,
+          "trim_cuts": 0.07,
+          "openings_collision": 31.358,
+          "publish_dependents": 2.509,
+          "roof_prepare": 1.089,
+          "finalize_ms": 99.678,
+          "frame_wait_ms": 36.821,
+          "cpu_total_ms": 62.857
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 99.429,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.913,
+          "roof": 0.012,
+          "wing": 0.01,
+          "masonry": 10.041,
+          "volume_cuts": 16.882,
+          "trim_cuts": 0.069,
+          "openings_collision": 31.239,
+          "publish_dependents": 2.445,
+          "roof_prepare": 1.096,
+          "finalize_ms": 99.396,
+          "frame_wait_ms": 36.611,
+          "cpu_total_ms": 62.785
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 100.237,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.832,
+          "roof": 0.012,
+          "wing": 0.008,
+          "masonry": 10.154,
+          "volume_cuts": 17.235,
+          "trim_cuts": 0.082,
+          "openings_collision": 31.857,
+          "publish_dependents": 2.132,
+          "roof_prepare": 1.059,
+          "finalize_ms": 100.207,
+          "frame_wait_ms": 36.758,
+          "cpu_total_ms": 63.449
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 99.358,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.807,
+          "roof": 0.013,
+          "wing": 0.008,
+          "masonry": 9.796,
+          "volume_cuts": 17.213,
+          "trim_cuts": 0.068,
+          "openings_collision": 31.49,
+          "publish_dependents": 2.579,
+          "roof_prepare": 1.023,
+          "finalize_ms": 99.331,
+          "frame_wait_ms": 36.253,
+          "cpu_total_ms": 63.078
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 100.09,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.9,
+          "roof": 0.014,
+          "wing": 0.009,
+          "masonry": 10.167,
+          "volume_cuts": 16.752,
+          "trim_cuts": 0.07,
+          "openings_collision": 31.954,
+          "publish_dependents": 2.126,
+          "roof_prepare": 1.073,
+          "finalize_ms": 100.063,
+          "frame_wait_ms": 36.916,
+          "cpu_total_ms": 63.147
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 99.466,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.903,
+          "roof": 0.013,
+          "wing": 0.009,
+          "masonry": 9.558,
+          "volume_cuts": 17.295,
+          "trim_cuts": 0.069,
+          "openings_collision": 30.645,
+          "publish_dependents": 2.455,
+          "roof_prepare": 1.031,
+          "finalize_ms": 99.437,
+          "frame_wait_ms": 37.353,
+          "cpu_total_ms": 62.084
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 99.397,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.896,
+          "roof": 0.013,
+          "wing": 0.011,
+          "masonry": 9.656,
+          "volume_cuts": 17.26,
+          "trim_cuts": 0.07,
+          "openings_collision": 31.348,
+          "publish_dependents": 2.601,
+          "roof_prepare": 1.035,
+          "finalize_ms": 99.374,
+          "frame_wait_ms": 36.406,
+          "cpu_total_ms": 62.968
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 99.784,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.931,
+          "roof": 0.015,
+          "wing": 0.009,
+          "masonry": 10.142,
+          "volume_cuts": 16.965,
+          "trim_cuts": 0.067,
+          "openings_collision": 31.237,
+          "publish_dependents": 2.629,
+          "roof_prepare": 1.289,
+          "finalize_ms": 99.755,
+          "frame_wait_ms": 36.389,
+          "cpu_total_ms": 63.366
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 100.893,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.927,
+          "roof": 0.012,
+          "wing": 0.011,
+          "masonry": 10.661,
+          "volume_cuts": 17.471,
+          "trim_cuts": 0.071,
+          "openings_collision": 32.989,
+          "publish_dependents": 2.089,
+          "roof_prepare": 1.314,
+          "finalize_ms": 100.87,
+          "frame_wait_ms": 35.247,
+          "cpu_total_ms": 65.623
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 100.479,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 1.03,
+          "roof": 0.014,
+          "wing": 0.011,
+          "masonry": 11.28,
+          "volume_cuts": 17.305,
+          "trim_cuts": 0.072,
+          "openings_collision": 31.827,
+          "publish_dependents": 3.238,
+          "roof_prepare": 1.54,
+          "finalize_ms": 100.45,
+          "frame_wait_ms": 34.032,
+          "cpu_total_ms": 66.418
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 110.205,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.962,
+          "roof": 0.014,
+          "wing": 0.011,
+          "masonry": 10.744,
+          "volume_cuts": 18.014,
+          "trim_cuts": 0.074,
+          "openings_collision": 30.752,
+          "publish_dependents": 2.457,
+          "roof_prepare": 1.052,
+          "finalize_ms": 110.181,
+          "frame_wait_ms": 46.014,
+          "cpu_total_ms": 64.167
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 94.166,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 1.076,
+          "roof": 0.014,
+          "wing": 0.011,
+          "masonry": 10.148,
+          "volume_cuts": 17.538,
+          "trim_cuts": 0.07,
+          "openings_collision": 31.239,
+          "publish_dependents": 2.712,
+          "roof_prepare": 1.019,
+          "finalize_ms": 94.14,
+          "frame_wait_ms": 30.235,
+          "cpu_total_ms": 63.905
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 92.615,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.936,
+          "roof": 0.014,
+          "wing": 0.012,
+          "masonry": 10.492,
+          "volume_cuts": 17.59,
+          "trim_cuts": 0.07,
+          "openings_collision": 29.878,
+          "publish_dependents": 2.316,
+          "roof_prepare": 1.293,
+          "finalize_ms": 92.593,
+          "frame_wait_ms": 29.917,
+          "cpu_total_ms": 62.676
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 100.654,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.837,
+          "roof": 0.012,
+          "wing": 0.008,
+          "masonry": 9.709,
+          "volume_cuts": 17.296,
+          "trim_cuts": 0.071,
+          "openings_collision": 30.462,
+          "publish_dependents": 2.856,
+          "roof_prepare": 1.027,
+          "finalize_ms": 100.627,
+          "frame_wait_ms": 38.267,
+          "cpu_total_ms": 62.36
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 99.143,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.997,
+          "roof": 0.02,
+          "wing": 0.018,
+          "masonry": 10.447,
+          "volume_cuts": 17.575,
+          "trim_cuts": 0.073,
+          "openings_collision": 31.567,
+          "publish_dependents": 2.924,
+          "roof_prepare": 1.121,
+          "finalize_ms": 99.116,
+          "frame_wait_ms": 34.288,
+          "cpu_total_ms": 64.828
+        }
+      },
+      {
+        "fixture": "chapel",
+        "width": 8.8,
+        "wall_ms": 99.144,
+        "frames": 6,
+        "host_builds": 1,
+        "dependent_builds": {
+          "CoperturaPortale": 1
+        },
+        "phases": {
+          "shell": 0.927,
+          "roof": 0.014,
+          "wing": 0.012,
+          "masonry": 10.161,
+          "volume_cuts": 17.797,
+          "trim_cuts": 0.074,
+          "openings_collision": 29.908,
+          "publish_dependents": 2.622,
+          "roof_prepare": 1.049,
+          "finalize_ms": 99.121,
+          "frame_wait_ms": 36.472,
+          "cpu_total_ms": 62.649
+        }
+      }
+    ]
+  },
+  "full_editor_chapel": [
+    {
+      "scene_settled_ms": 1605.878,
+      "phases": {
+        "shell": 0.966,
+        "roof": 0.952,
+        "wing": 0.019,
+        "masonry": 34.543,
+        "volume_cuts": 57.767,
+        "trim_cuts": 103.277,
+        "openings_collision": 30.638,
+        "publish_dependents": 71.572,
+        "roof_prepare": 274.125,
+        "finalize_ms": 1504.404,
+        "frame_wait_ms": 930.233,
+        "cpu_total_ms": 574.171
+      }
+    },
+    {
+      "scene_settled_ms": 1659.535,
+      "phases": {
+        "shell": 0.958,
+        "roof": 1.107,
+        "wing": 0.02,
+        "masonry": 34.808,
+        "volume_cuts": 57.21,
+        "trim_cuts": 101.495,
+        "openings_collision": 28.845,
+        "publish_dependents": 71.539,
+        "roof_prepare": 280.904,
+        "finalize_ms": 1558.014,
+        "frame_wait_ms": 980.795,
+        "cpu_total_ms": 577.219
+      }
+    },
+    {
+      "scene_settled_ms": 1682.931,
+      "phases": {
+        "shell": 0.982,
+        "roof": 0.99,
+        "wing": 0.017,
+        "masonry": 35.012,
+        "volume_cuts": 57.457,
+        "trim_cuts": 105.73,
+        "openings_collision": 31.823,
+        "publish_dependents": 74.426,
+        "roof_prepare": 262.504,
+        "finalize_ms": 1574.276,
+        "frame_wait_ms": 1005.051,
+        "cpu_total_ms": 569.225
+      }
+    }
+  ],
+  "chapel_counter_sample": {
+    "shell": {
+      "groups": 0,
+      "triangles_tested": 0,
+      "triangles_clipped": 0,
+      "triangles_kept": 0,
+      "tangent_context_triangles": 0
+    },
+    "roof": {
+      "groups": 0,
+      "triangles_tested": 0,
+      "triangles_clipped": 0,
+      "triangles_kept": 0,
+      "tangent_context_triangles": 0
+    },
+    "wing": {
+      "groups": 0,
+      "triangles_tested": 0,
+      "triangles_clipped": 0,
+      "triangles_kept": 0,
+      "tangent_context_triangles": 0
+    },
+    "masonry": {
+      "groups": 0,
+      "triangles_tested": 0,
+      "triangles_clipped": 0,
+      "triangles_kept": 0,
+      "tangent_context_triangles": 0
+    },
+    "volume_cuts": {
+      "groups": 2143,
+      "triangles_tested": 4752,
+      "triangles_clipped": 1098,
+      "triangles_kept": 99665,
+      "tangent_context_triangles": 926
+    },
+    "trim_cuts": {
+      "groups": 1488,
+      "triangles_tested": 7354,
+      "triangles_clipped": 2692,
+      "triangles_kept": 59635,
+      "tangent_context_triangles": 2651
+    },
+    "openings_collision": {
+      "groups": 492,
+      "triangles_tested": 2456,
+      "triangles_clipped": 298,
+      "triangles_kept": 30463,
+      "tangent_context_triangles": 0
+    },
+    "publish_dependents": {
+      "groups": 867,
+      "triangles_tested": 7854,
+      "triangles_clipped": 2143,
+      "triangles_kept": 23557,
+      "tangent_context_triangles": 1727
+    }
+  }
+}
