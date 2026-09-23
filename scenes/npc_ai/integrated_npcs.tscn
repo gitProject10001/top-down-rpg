@@ -1,0 +1,35 @@
+[gd_scene load_steps=6 format=3]
+[ext_resource type="Script" path="res://addons/npc_ai/npc_actor.gd" id="actor"]
+[ext_resource type="Resource" path="res://assets/npc_ai/integrated_bruno.tres" id="bruno"]
+[ext_resource type="Resource" path="res://assets/npc_ai/integrated_mira.tres" id="mira"]
+[ext_resource type="Resource" path="res://assets/npc_ai/integrated_ada.tres" id="ada"]
+[ext_resource type="Resource" path="res://assets/npc_ai/integrated_tullio.tres" id="tullio"]
+[node name="ConversationalNPCs" type="Node3D"]
+[node name="Bruno" type="StaticBody3D" parent="."]
+script = ExtResource("actor")
+profile = ExtResource("bruno")
+anchor_path = NodePath("../../Borgo/Lotto_StradaBorgo_0_1_1/Edificio")
+local_offset = Vector3(-6.1, 0, -1.7)
+body_color = Color(0.5,0.28,0.15,1)
+topics = PackedStringArray("Che lavoro fai?","Quanto costa affilare?","Parlami del borgo")
+[node name="Mira" type="StaticBody3D" parent="."]
+script = ExtResource("actor")
+profile = ExtResource("mira")
+anchor_path = NodePath("../../Borgo/Lotto_StradaBorgo_1_1_1/Edificio")
+local_offset = Vector3(-6.7, 0, 4.2)
+body_color = Color(0.38,0.53,0.37,1)
+topics = PackedStringArray("Che erbe coltivi?","Come va nel borgo?","Conosci Bruno?")
+[node name="Ada" type="StaticBody3D" parent="."]
+script = ExtResource("actor")
+profile = ExtResource("ada")
+anchor_path = NodePath("../../Borgo/Lotto_StradaBorgo_0_1_-1/Edificio")
+local_offset = Vector3(-3.65, 0, 5.6)
+body_color = Color(0.56,0.28,0.35,1)
+topics = PackedStringArray("Parlami della locanda","Chi vive nel borgo?","Dove sono le stalle?")
+[node name="Tullio" type="StaticBody3D" parent="."]
+script = ExtResource("actor")
+profile = ExtResource("tullio")
+anchor_path = NodePath("../../Borgo/Lotto_StradaBorgo_1_0_-1/Edificio")
+local_offset = Vector3(5.8, 0, 0.6)
+body_color = Color(0.32,0.42,0.56,1)
+topics = PackedStringArray("Come stanno gli animali?","Di cosa ti occupi?","Dove lavora Bruno?")

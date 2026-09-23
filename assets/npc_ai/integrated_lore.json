@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "notes": [
+    "Lore condivisa fra tutti gli NPC. PROVVISORIA: nomi delle citta', calendario, moneta e persone vengono dal concept",
+    "docs/concepts/four_factions_world_concept.md e dal borgo della scena integrata; vanno confermati o riscritti.",
+    "Una frase per voce, con nomi e numeri espliciti: il modello non deduce, ripete. Max 320 caratteri.",
+    "tags: parole chiave per la selezione. known_by: all | npc:<id> | trade:<mestiere>. priority 0-9.",
+    "always: entra sempre nel contesto (poche, corte). secret: non viene MAI inviata al modello."
+  ],
+  "world": {
+    "name": "Hearth — scena integrata",
+    "summary": "Un borgo con fucina, locanda, stalla e chiesa. I dialoghi non modificano inventario o missioni."
+  },
+  "entries": [
+    {
+      "id": "hearth_locanda",
+      "text": "La locanda di Ada e' l'unico posto dove dormire e bere a Hearth; la sera si riempie di boscaioli e mulattieri.",
+      "tags": [
+        "locanda",
+        "taverna",
+        "marta",
+        "dormire",
+        "bere",
+        "vino",
+        "letto"
+      ],
+      "known_by": [
+        "all"
+      ],
+      "priority": 7
+    },
+    {
+      "id": "hearth_bottega",
+      "text": "La bottega di Hearth vende sale, olio, corde, stoffa e attrezzi; i prezzi salgono quando i muli tardano.",
+      "tags": [
+        "bottega",
+        "negozio",
+        "comprare",
+        "sale",
+        "olio",
+        "corda",
+        "stoffa",
+        "attrezzi"
+      ],
+      "known_by": [
+        "all"
+      ],
+      "priority": 6
+    },
+    {
+      "id": "hearth_stalla",
+      "text": "La stalla di Hearth ospita i muli della cava e i cavalli dei viandanti; a ferrare le bestie ci pensa Bruno.",
+      "tags": [
+        "stalla",
+        "muli",
+        "mulo",
+        "cavalli",
+        "cavallo",
+        "ferrare"
+      ],
+      "known_by": [
+        "all"
+      ],
+      "priority": 5
+    },
+    {
+      "id": "persona_bruno",
+      "text": "Bruno e' il fabbro di Hearth: burbero e onesto, ha imparato dal padre Enrico e ha una figlia, Lena, che vuole fare il suo mestiere.",
+      "tags": [
+        "bruno",
+        "fabbro",
+        "enrico",
+        "lena",
+        "figlia"
+      ],
+      "known_by": [
+        "all"
+      ],
+      "priority": 4
+    },
+    {
+      "id": "fabbro_prezzi",
+      "text": "Prezzi della fucina di Hearth: affilare una lama cinque monete di rame, riparare una lama sbeccata da dieci a venti, ferrare un mulo otto, una zappa nuova trenta.",
+      "tags": [
+        "prezzi",
+        "prezzo",
+        "costa",
+        "affilare",
+        "riparare",
+        "ferrare",
+        "zappa",
+        "monete"
+      ],
+      "known_by": [
+        "trade:fabbro"
+      ],
+      "priority": 7
+    },
+    {
+      "id": "locanda_prezzi",
+      "text": "Prezzi della locanda di Ada: un pasto due monete di rame, un letto per la notte tre, una caraffa di vino una.",
+      "tags": [
+        "prezzi",
+        "prezzo",
+        "costa",
+        "pasto",
+        "letto",
+        "vino",
+        "notte"
+      ],
+      "known_by": [
+        "trade:locandiere",
+        "trade:locandiera"
+      ],
+      "priority": 7
+    },
+    {
+      "id": "integrated_mira",
+      "text": "Mira è erborista del borgo. Conosco le piante del giardino e le tengo separate da quelle che non riconosco.",
+      "known_by": [
+        "all"
+      ],
+      "tags": [
+        "mira",
+        "erborista"
+      ],
+      "priority": 6
+    },
+    {
+      "id": "integrated_ada",
+      "text": "Ada è locandiera del borgo. Gestisco la locanda; posso parlare dell’ospitalità, ma questa conversazione non prenota stanze e non vende pasti.",
+      "known_by": [
+        "all"
+      ],
+      "tags": [
+        "ada",
+        "locandiera"
+      ],
+      "priority": 6
+    },
+    {
+      "id": "integrated_tullio",
+      "text": "Tullio è stalliere del borgo. Mi occupo degli animali della stalla e del loro abbeveratoio; Bruno conosce il lavoro dei ferri.",
+      "known_by": [
+        "all"
+      ],
+      "tags": [
+        "tullio",
+        "stalliere"
+      ],
+      "priority": 6
+    }
+  ]
+}

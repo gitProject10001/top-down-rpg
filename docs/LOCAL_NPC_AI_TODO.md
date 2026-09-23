@@ -1,6 +1,10 @@
 # TODO futuro — NPC conversazionali con IA interamente locale
 
-**Stato: handoff pronto per Claude; implementazione non avviata da Codex.**
+**Stato: nucleo testuale di Claude revisionato e integrato; quattro NPC nel borgo.**
+
+Consegna del 23 settembre 2026: vedere [NPC_AI_INTEGRATION.md](NPC_AI_INTEGRATION.md).
+La consegna storica seguente resta come perimetro del laboratorio. Voce esclusa
+da questa integrazione; export su macchina pulita ancora da verificare.
 **Data: 20 settembre 2026.**
 
 Documento separato dallo sviluppo corrente di grafica, edifici e combattimento.

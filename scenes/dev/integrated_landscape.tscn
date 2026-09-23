@@ -1,5 +1,7 @@
 [gd_scene format=4]
 
+[ext_resource type="PackedScene" path="res://scenes/npc_ai/integrated_npcs.tscn" id="integrated_npcs"]
+
 [ext_resource type="PackedScene" path="res://scenes/effects/painterly_post.tscn" id="painterly_post"]
 [ext_resource type="Script" path="res://scripts/village/integrated_landscape.gd" id="1_wde1a"]
 [ext_resource type="Script" path="res://addons/house_builder/fortification.gd" id="2_1x667"]
@@ -7606,3 +7608,7 @@ mesh = SubResource("ArrayMesh_wfn3q")
 shape = SubResource("ConcavePolygonShape3D_tx5mu")
 
 [node name="PainterlyPost" parent="." instance=ExtResource("painterly_post")]
+
+[node name="ConversationalNPCs" parent="." instance=ExtResource("integrated_npcs")]
+
+[editable path="ConversationalNPCs"]

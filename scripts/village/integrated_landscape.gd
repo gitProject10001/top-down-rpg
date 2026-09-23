@@ -9,6 +9,8 @@ var _overview_size:=17.5
 var cooldown:=0.0
 var plans: Array=[]
 var interior_states: Dictionary={}
+var npc_dialogues: Node
+var _npc_hud_state: Dictionary={}
 var nearest_door: Node3D
 var art_direction = preload("res://scripts/village/anime_art_direction.gd").new()
 var _editor_helpers: Array[Node] = []
@@ -45,6 +47,13 @@ func _ready() -> void:
     connect_art_geometry(view)
     if layers: layers.regeneration_requested.connect(regenerate_art)
     art_direction.apply(not "--original-art" in OS.get_cmdline_user_args())
+    npc_dialogues=preload("res://addons/npc_ai/npc_dialogue_controller.gd").new()
+    npc_dialogues.name="NpcDialogues"
+    npc_dialogues.force_fallback="--npc-fallback" in OS.get_cmdline_user_args()
+    for arg in OS.get_cmdline_user_args():
+        if arg.begins_with("--npc-memory-root="): npc_dialogues.memory_root=arg.trim_prefix("--npc-memory-root=")
+    add_child(npc_dialogues)
+    npc_dialogues.configure(view,player,camera)
     if combat_encounter_enabled and not "--no-enemies" in OS.get_cmdline_user_args():
         combat_encounter=preload("res://scripts/combat/integrated_encounter.gd").new()
         combat_encounter.name="MeadowEncounter"
@@ -55,6 +64,7 @@ func _ready() -> void:
 WASD movimento · click combo · tieni premuto carica · destro parata · Shift schivata
 4 combattimento · R ricomincia · O panoramica · F7 stile · P filtro pittorico · 1 città / 2 guado / 3 lago / 5 borgo · E porta · F acqua"
     ui.add_child(label)
+    npc_dialogues.dialogue_changed.connect(func(opened: bool): label.visible=not opened; npc_hud_visibility(opened))
     if "--capture-integrated" in OS.get_cmdline_user_args():
         if "--river-view" in OS.get_cmdline_user_args():player.position=Vector3(3,1,21)
         if "--interior-view" in OS.get_cmdline_user_args():player.position=Vector3(-40,1,-18)
@@ -198,6 +208,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
         if event.keycode==KEY_F7:
             art_direction.apply(not art_direction.enabled)
             print("ART_DIRECTION ", "anime dipinto" if art_direction.enabled else "originale")
+        if event.keycode==KEY_E and is_instance_valid(npc_dialogues) and npc_dialogues.try_interact():
+            get_viewport().set_input_as_handled()
+            return
         if event.keycode==KEY_E and is_instance_valid(nearest_door):nearest_door.toggle(player.global_position)
         # F8 is Godot's Stop shortcut when launched through its debugger. O works
         # in both editor and standalone; retain F8 only for standalone sessions.
@@ -252,3 +265,16 @@ func local_patch(water: Node3D) -> void:
     water.wave_field.configure(water.boundary,water.obstacles)
     water.wave_field.bake_flow(water.flow_at)
     water._bind_simulation()
+
+func npc_hud_visibility(opened: bool) -> void:
+    var hud=get_node_or_null("/root/Hud")
+    if not hud: return
+    var fps=hud.get("_fps_lbl")
+    if opened:
+        _npc_hud_state={"suppressed":hud.get("_suppressed"),"fps":fps.visible if is_instance_valid(fps) else false}
+        hud.suppress(true)
+        if is_instance_valid(fps): fps.hide()
+    elif not _npc_hud_state.is_empty():
+        hud.suppress(_npc_hud_state.suppressed)
+        if is_instance_valid(fps): fps.visible=_npc_hud_state.fps
+        _npc_hud_state.clear()

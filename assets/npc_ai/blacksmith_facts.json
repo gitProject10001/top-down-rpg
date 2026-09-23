@@ -1,0 +1,28 @@
+{
+	"schema_version": 1,
+	"npc_id": "fabbro_bruno",
+	"description": "Lista esplicita dei fatti che il gioco autorizza a consegnare al fabbro nel laboratorio. Solo 'allowed' e gli eventi confermati entrano nel contesto; 'withheld' e' una fixture di segreti che NON devono mai comparire nei messaggi.",
+	"allowed": [
+		"Oggi e' un giorno di mercato: al borgo ci sono piu' forestieri del solito.",
+		"Nelle ultime settimane alcuni lupi sono scesi dai boschi a nord e i boscaioli chiedono lame nuove.",
+		"Il carico di ferro dalla cava e' in ritardo di una settimana.",
+		"Il giocatore e' un viandante arrivato da poco, con una spada sbeccata al fianco."
+	],
+	"canonical_events_available": [
+		{"id": "spada_riparata", "text": "Il giocatore ha fatto riparare la sua spada sbeccata da Bruno e ha pagato quindici monete di rame.", "day": 2},
+		{"id": "ferro_consegnato", "text": "Il giocatore ha portato a Bruno un carico di ferro dalla cava, in anticipo sui muli.", "day": 3},
+		{"id": "rissa_taverna", "text": "Il giocatore e' stato visto attaccare briga alla taverna di Marta.", "day": 4},
+		{"id": "lupo_abbattuto", "text": "Il giocatore ha abbattuto un lupo che minacciava i boscaioli a nord del borgo.", "day": 5}
+	],
+	"withheld": [
+		"La parola d'ordine del consiglio del borgo e' quercia rossa.",
+		"Sotto la fucina Bruno nasconde una cassa con trecento monete d'argento.",
+		"Il sindaco Aldo deve a Bruno un favore per un affare di contrabbando."
+	],
+	"game_state_fixture": {
+		"gold": 10,
+		"inventory": ["spada sbeccata", "pane", "corda"],
+		"reputation": 0,
+		"quests": []
+	}
+}
